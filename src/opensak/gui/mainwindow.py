@@ -208,6 +208,14 @@ class MainWindow(QMainWindow):
         act_found_update.triggered.connect(self._open_found_updater)
         tools_menu.addAction(act_found_update)
 
+        # ── GPS ───────────────────────────────────────────────────────────────
+        gps_menu = menubar.addMenu("&GPS")
+
+        self._act_gps_export = QAction("📤  &Send til GPS…", self)
+        self._act_gps_export.setShortcut(QKeySequence("Ctrl+G"))
+        self._act_gps_export.triggered.connect(self._open_gps_export)
+        gps_menu.addAction(self._act_gps_export)
+
         # ── Hjælp ─────────────────────────────────────────────────────────────
         help_menu = menubar.addMenu("&Hjælp")
 
@@ -229,6 +237,13 @@ class MainWindow(QMainWindow):
         refresh_act = QAction("⟳  Opdater", self)
         refresh_act.triggered.connect(self._refresh_cache_list)
         tb.addAction(refresh_act)
+
+        tb.addSeparator()
+
+        gps_act = QAction("📤  Send til GPS", self)
+        gps_act.setToolTip("Eksportér caches til GPS enhed (Ctrl+G)")
+        gps_act.triggered.connect(self._open_gps_export)
+        tb.addAction(gps_act)
 
         tb.addSeparator()
 
@@ -512,6 +527,17 @@ class MainWindow(QMainWindow):
         dlg = ColumnChooserDialog(self)
         if dlg.exec():
             self._cache_table.reload_columns()
+
+    def _open_gps_export(self) -> None:
+        from opensak.gui.dialogs.gps_dialog import GpsExportDialog
+        # Brug de aktuelt viste caches
+        caches = [
+            self._cache_table._model.cache_at(i)
+            for i in range(self._cache_table.row_count())
+        ]
+        caches = [c for c in caches if c is not None]
+        dlg = GpsExportDialog(self, caches=caches)
+        dlg.exec()
 
     def _open_found_updater(self) -> None:
         from opensak.gui.dialogs.found_dialog import FoundUpdaterDialog
