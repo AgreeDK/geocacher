@@ -10,29 +10,39 @@ from PySide6.QtWidgets import (
     QDialogButtonBox
 )
 from PySide6.QtCore import QSettings
+from opensak.lang import tr
 
 # Alle tilgængelige kolonner: (felt_id, visningsnavn, bredde, standard_synlig)
-ALL_COLUMNS = [
-    ("status",       "Status ikon",      22,  True),
-    ("gc_code",      "GC Kode",         80,  True),
-    ("name",         "Navn",            260,  True),
-    ("cache_type",   "Type",            130,  True),
-    ("difficulty",   "Sværhedsgrad",     50,  True),
-    ("terrain",      "Terræn",           50,  True),
-    ("container",    "Container",        80,  True),
-    ("country",      "Land",             80,  True),
-    ("state",        "Region",           120, False),
-    ("distance",     "Afstand",          75,  True),
-    ("found",        "Fundet",           55,  True),
-    ("placed_by",    "Udlagt af",        120, False),
-    ("hidden_date",  "Udlagt dato",      90,  False),
-    ("last_log",     "Seneste log",      90,  False),
-    ("log_count",    "Antal logs",       70,  False),
-    ("dnf",          "DNF",              45,  False),
-    ("premium_only", "Premium",          65,  False),
-    ("archived",     "Arkiveret",        70,  False),
-    ("favorite",     "Favorit ★",        60,  True),
+# Kolonnestruktur: (felt_id, tr_nøgle, bredde, standard_synlig)
+_ALL_COLUMNS_DEF = [
+    ("status",       "col_status_icon",  22,  True),
+    ("gc_code",      "col_gc_code",      80,  True),
+    ("name",         "col_name",        260,  True),
+    ("cache_type",   "col_type",        130,  True),
+    ("difficulty",   "col_difficulty",   50,  True),
+    ("terrain",      "col_terrain",      50,  True),
+    ("container",    "col_container",    80,  True),
+    ("country",      "col_country",      80,  True),
+    ("state",        "col_state",       120, False),
+    ("distance",     "col_distance",     75,  True),
+    ("found",        "col_found",        55,  True),
+    ("placed_by",    "col_placed_by",   120, False),
+    ("hidden_date",  "col_hidden_date",  90, False),
+    ("last_log",     "col_last_log",     90, False),
+    ("log_count",    "col_log_count",    70, False),
+    ("dnf",          "col_dnf",          45, False),
+    ("premium_only", "col_premium",      65, False),
+    ("archived",     "col_archived",     70, False),
+    ("favorite",     "col_favorite",     60,  True),
 ]
+
+def get_all_columns():
+    """Returner kolonner med oversatte navne."""
+    from opensak.lang import tr
+    return [(fid, tr(key), w, default) for fid, key, w, default in _ALL_COLUMNS_DEF]
+
+# Bagudkompatibel alias — bruges af column_dialog internt
+ALL_COLUMNS = property(lambda self: get_all_columns()) if False else None  # se get_all_columns()
 
 # Kolonner der altid skal være synlige
 ALWAYS_VISIBLE = {"gc_code", "name"}
@@ -45,7 +55,7 @@ def get_visible_columns() -> list[str]:
     if saved:
         return list(saved)
     # Standard: vis de kolonner der er markeret som standard
-    return [col[0] for col in ALL_COLUMNS if col[3]]
+    return [col[0] for col in get_all_columns() if col[3]]
 
 
 def set_visible_columns(col_ids: list[str]) -> None:
@@ -60,7 +70,7 @@ class ColumnChooserDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Vælg kolonner")
+        self.setWindowTitle(tr("column_dialog_title"))
         self.setMinimumSize(360, 460)
         self._visible = set(get_visible_columns())
         self._setup_ui()
@@ -68,13 +78,10 @@ class ColumnChooserDialog(QDialog):
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
 
-        layout.addWidget(QLabel(
-            "Vælg hvilke kolonner der skal vises i cachelisten.\n"
-            "GC Kode og Navn kan ikke skjules."
-        ))
+        layout.addWidget(QLabel(tr("column_dialog_hint")))
 
         self._list = QListWidget()
-        for col_id, col_name, _, _ in ALL_COLUMNS:
+        for col_id, col_name, _, _ in get_all_columns():
             item = QListWidgetItem(col_name)
             item.setData(Qt.ItemDataRole.UserRole, col_id)
             item.setCheckState(
@@ -90,11 +97,11 @@ class ColumnChooserDialog(QDialog):
 
         # Vælg alle / Fravælg alle
         btn_row = QHBoxLayout()
-        select_all = QPushButton("Vælg alle")
+        select_all = QPushButton(tr("column_select_all"))
         select_all.clicked.connect(self._select_all)
         btn_row.addWidget(select_all)
 
-        select_default = QPushButton("Standard")
+        select_default = QPushButton(tr("column_select_default"))
         select_default.clicked.connect(self._select_default)
         btn_row.addWidget(select_default)
         layout.addLayout(btn_row)
@@ -113,7 +120,7 @@ class ColumnChooserDialog(QDialog):
             item.setCheckState(Qt.CheckState.Checked)
 
     def _select_default(self) -> None:
-        defaults = {col[0] for col in ALL_COLUMNS if col[3]}
+        defaults = {col[0] for col in get_all_columns() if col[3]}
         for i in range(self._list.count()):
             item = self._list.item(i)
             col_id = item.data(Qt.ItemDataRole.UserRole)

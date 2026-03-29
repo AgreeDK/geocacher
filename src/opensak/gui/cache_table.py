@@ -15,31 +15,34 @@ from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QMenu
 from opensak.db.models import Cache
 from opensak.filters.engine import _haversine_km
 from opensak.gui.settings import get_settings
+from opensak.lang import tr
 
 
 # ── Alle mulige kolonner ──────────────────────────────────────────────────────
 
-COLUMN_DEFS = {
-    "status":       ("",               22),   # status ikon kolonne
-    "gc_code":      ("GC Kode",       80),
-    "name":         ("Navn",          260),
-    "cache_type":   ("Type",          130),
-    "difficulty":   ("Sværhedsgrad",   50),
-    "terrain":      ("Terræn",         50),
-    "container":    ("Container",      80),
-    "country":      ("Land",           80),
-    "state":        ("Region",        120),
-    "distance":     ("Afstand",        75),
-    "found":        ("Fundet",         55),
-    "placed_by":    ("Udlagt af",     120),
-    "hidden_date":  ("Udlagt dato",    90),
-    "last_log":     ("Seneste log",    90),
-    "log_count":    ("Antal logs",     70),
-    "dnf":          ("DNF",            45),
-    "premium_only": ("Premium",        65),
-    "archived":     ("Arkiveret",      70),
-    "favorite":     ("Favorit ★",      60),
-}
+def get_column_defs() -> dict:
+    """Returner kolonnenavne oversat til det aktive sprog."""
+    return {
+        "status":       ("",                          22),
+        "gc_code":      (tr("col_gc_code"),           80),
+        "name":         (tr("col_name"),             260),
+        "cache_type":   (tr("col_type"),             130),
+        "difficulty":   (tr("col_difficulty"),        50),
+        "terrain":      (tr("col_terrain"),           50),
+        "container":    (tr("col_container"),         80),
+        "country":      (tr("col_country"),           80),
+        "state":        (tr("col_state"),            120),
+        "distance":     (tr("col_distance"),          75),
+        "found":        (tr("col_found"),             55),
+        "placed_by":    (tr("col_placed_by"),        120),
+        "hidden_date":  (tr("col_hidden_date"),       90),
+        "last_log":     (tr("col_last_log"),          90),
+        "log_count":    (tr("col_log_count"),         70),
+        "dnf":          (tr("col_dnf"),               45),
+        "premium_only": (tr("col_premium"),           65),
+        "archived":     (tr("col_archived"),          70),
+        "favorite":     (tr("col_favorite"),          60),
+    }
 
 
 def _get_active_columns() -> list[str]:
@@ -93,7 +96,7 @@ class CacheTableModel(QAbstractTableModel):
         if orientation == Qt.Orientation.Horizontal:
             if role == Qt.ItemDataRole.DisplayRole:
                 col_id = self._columns[section]
-                return COLUMN_DEFS.get(col_id, (col_id, 80))[0]
+                return get_column_defs().get(col_id, (col_id, 80))[0]
             if role == Qt.ItemDataRole.TextAlignmentRole:
                 return Qt.AlignmentFlag.AlignCenter
         return None
@@ -261,7 +264,7 @@ class CacheTableView(QTableView):
         header = self.horizontalHeader()
         columns = self._model._columns
         for i, col_id in enumerate(columns):
-            width = COLUMN_DEFS.get(col_id, (col_id, 80))[1]
+            width = get_column_defs().get(col_id, (col_id, 80))[1]
             self.setColumnWidth(i, width)
             header.setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
         # Stretch navn-kolonnen hvis den findes
@@ -293,7 +296,7 @@ class CacheTableView(QTableView):
         menu = QMenu(self)
 
         # Åbn på geocaching.com
-        act_open = menu.addAction("🌐  Åbn på geocaching.com")
+        act_open = menu.addAction(tr("ctx_open_geocaching"))
         act_open.triggered.connect(
             lambda: webbrowser.open(f"https://coord.info/{cache.gc_code}")
         )
@@ -303,7 +306,7 @@ class CacheTableView(QTableView):
             from opensak.gui.settings import get_settings
             s = get_settings()
             map_name = "OpenStreetMap" if s.map_provider == "osm" else "Google Maps"
-            act_maps = menu.addAction(f"🗺️  Åbn i {map_name}")
+            act_maps = menu.addAction(tr("ctx_open_maps", map_name=map_name))
             lat, lon = cache.latitude, cache.longitude
             act_maps.triggered.connect(
                 lambda checked=False, la=lat, lo=lon: webbrowser.open(
@@ -314,13 +317,13 @@ class CacheTableView(QTableView):
         menu.addSeparator()
 
         # Kopiér GC kode
-        act_copy_gc = menu.addAction("📋  Kopiér GC kode")
+        act_copy_gc = menu.addAction(tr("ctx_copy_gc"))
         act_copy_gc.triggered.connect(lambda: self._copy_to_clipboard(cache.gc_code))
 
         # Kopiér koordinater
         if cache.latitude and cache.longitude:
             coords = f"{cache.latitude:.6f}, {cache.longitude:.6f}"
-            act_copy_coords = menu.addAction("📋  Kopiér koordinater")
+            act_copy_coords = menu.addAction(tr("ctx_copy_coords"))
             act_copy_coords.triggered.connect(
                 lambda: self._copy_to_clipboard(coords)
             )
@@ -329,10 +332,10 @@ class CacheTableView(QTableView):
 
         # Marker som fundet / ikke fundet
         if cache.found:
-            act_found = menu.addAction("☐  Marker som ikke fundet")
+            act_found = menu.addAction(tr("ctx_mark_not_found"))
             act_found.triggered.connect(lambda: self._toggle_found(cache, False))
         else:
-            act_found = menu.addAction("☑  Marker som fundet")
+            act_found = menu.addAction(tr("ctx_mark_found"))
             act_found.triggered.connect(lambda: self._toggle_found(cache, True))
 
         menu.exec(self.viewport().mapToGlobal(pos))
