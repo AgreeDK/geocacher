@@ -1,0 +1,245 @@
+"""
+models.py — SQLAlchemy ORM models for OpenSAK.
+
+Tables
+------
+Cache         — the main geocache record (mirrors GPX/Groundspeak schema)
+Waypoint      — additional waypoints linked to a cache (parking, stages, etc.)
+Log           — individual log entries (found it, didn't find it, etc.)
+Attribute     — cache attributes (dog-friendly, night cache, etc.)
+Trackable     — trackable items (Travel Bugs, geocoins) seen in a cache
+UserNote      — personal notes attached to a cache
+"""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+
+
+def _utcnow() -> datetime:
+    """Return current UTC time as a timezone-aware datetime (Python 3.12+ safe)."""
+    return datetime.now(timezone.utc)
+from typing import Optional, List
+
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+
+# ── Base ─────────────────────────────────────────────────────────────────────
+
+class Base(DeclarativeBase):
+    pass
+
+
+# ── Cache ────────────────────────────────────────────────────────────────────
+
+class Cache(Base):
+    """
+    One geocache.  The gc_code (e.g. GC12AB3) is the natural primary key
+    but we also keep a surrogate integer id for fast FK references.
+    """
+    __tablename__ = "caches"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+
+    # Identity
+    gc_code: Mapped[str] = mapped_column(String(16), unique=True, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(256), nullable=False)
+    cache_type: Mapped[str] = mapped_column(String(64), nullable=False)   # Traditional, Multi, Mystery …
+    container: Mapped[Optional[str]] = mapped_column(String(32))          # Nano, Micro, Small, Regular, Large, Other
+
+    # Coordinates
+    latitude: Mapped[float] = mapped_column(Float, nullable=False)
+    longitude: Mapped[float] = mapped_column(Float, nullable=False)
+
+    # Ratings
+    difficulty: Mapped[Optional[float]] = mapped_column(Float)   # 1.0 – 5.0
+    terrain: Mapped[Optional[float]] = mapped_column(Float)      # 1.0 – 5.0
+
+    # Owner
+    placed_by: Mapped[Optional[str]] = mapped_column(String(128))
+    owner_id: Mapped[Optional[str]] = mapped_column(String(64))
+
+    # Dates
+    hidden_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    last_updated: Mapped[Optional[datetime]] = mapped_column(DateTime)
+
+    # Status flags
+    available: Mapped[bool] = mapped_column(Boolean, default=True)
+    archived: Mapped[bool] = mapped_column(Boolean, default=False)
+    premium_only: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Cache content
+    short_description: Mapped[Optional[str]] = mapped_column(Text)
+    short_desc_html: Mapped[bool] = mapped_column(Boolean, default=False)
+    long_description: Mapped[Optional[str]] = mapped_column(Text)
+    long_desc_html: Mapped[bool] = mapped_column(Boolean, default=False)
+    encoded_hints: Mapped[Optional[str]] = mapped_column(Text)
+
+    # Country / state
+    country: Mapped[Optional[str]] = mapped_column(String(64))
+    state: Mapped[Optional[str]] = mapped_column(String(64))
+
+    # Personal data (per user)
+    found: Mapped[bool] = mapped_column(Boolean, default=False)
+    found_date: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    dnf: Mapped[bool] = mapped_column(Boolean, default=False)   # Did Not Find
+    favorite_point: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Metadata
+    imported_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
+    source_file: Mapped[Optional[str]] = mapped_column(String(512))  # which GPX this came from
+
+    # Relationships
+    waypoints: Mapped[List["Waypoint"]] = relationship(
+        "Waypoint", back_populates="cache", cascade="all, delete-orphan"
+    )
+    logs: Mapped[List["Log"]] = relationship(
+        "Log", back_populates="cache", cascade="all, delete-orphan",
+        order_by="Log.log_date.desc()"
+    )
+    attributes: Mapped[List["Attribute"]] = relationship(
+        "Attribute", back_populates="cache", cascade="all, delete-orphan"
+    )
+    trackables: Mapped[List["Trackable"]] = relationship(
+        "Trackable", back_populates="cache", cascade="all, delete-orphan"
+    )
+    user_note: Mapped[Optional["UserNote"]] = relationship(
+        "UserNote", back_populates="cache", cascade="all, delete-orphan",
+        uselist=False
+    )
+
+    def __repr__(self) -> str:
+        return f"<Cache {self.gc_code!r} {self.name!r}>"
+
+
+# ── Waypoint ─────────────────────────────────────────────────────────────────
+
+class Waypoint(Base):
+    """
+    Additional waypoints belonging to a cache — parking areas, trailheads,
+    multi-cache stages, final coordinates, etc.
+    """
+    __tablename__ = "waypoints"
+    __table_args__ = (
+        UniqueConstraint("cache_id", "prefix", name="uq_waypoint_cache_prefix"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    cache_id: Mapped[int] = mapped_column(ForeignKey("caches.id"), nullable=False, index=True)
+
+    prefix: Mapped[str] = mapped_column(String(8))       # PK, SB, S1, S2 …
+    wp_type: Mapped[str] = mapped_column(String(64))     # Parking Area, Trailhead, Stage …
+    name: Mapped[Optional[str]] = mapped_column(String(256))
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    comment: Mapped[Optional[str]] = mapped_column(Text)
+
+    latitude: Mapped[Optional[float]] = mapped_column(Float)   # None = coordinates not yet known
+    longitude: Mapped[Optional[float]] = mapped_column(Float)
+
+    # Relationships
+    cache: Mapped["Cache"] = relationship("Cache", back_populates="waypoints")
+
+    def __repr__(self) -> str:
+        return f"<Waypoint {self.prefix!r} for cache_id={self.cache_id}>"
+
+
+# ── Log ──────────────────────────────────────────────────────────────────────
+
+class Log(Base):
+    """A single log entry on a cache."""
+    __tablename__ = "logs"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    cache_id: Mapped[int] = mapped_column(ForeignKey("caches.id"), nullable=False, index=True)
+
+    log_id: Mapped[Optional[str]] = mapped_column(String(64), unique=True)  # gc.com log GUID
+    log_type: Mapped[str] = mapped_column(String(64))    # Found it, Didn't find it, Note …
+    log_date: Mapped[Optional[datetime]] = mapped_column(DateTime, index=True)
+    finder: Mapped[Optional[str]] = mapped_column(String(128))
+    finder_id: Mapped[Optional[str]] = mapped_column(String(64))
+    text: Mapped[Optional[str]] = mapped_column(Text)
+    text_encoded: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Relationships
+    cache: Mapped["Cache"] = relationship("Cache", back_populates="logs")
+
+    def __repr__(self) -> str:
+        return f"<Log {self.log_type!r} by {self.finder!r} on {self.log_date}>"
+
+
+# ── Attribute ─────────────────────────────────────────────────────────────────
+
+class Attribute(Base):
+    """
+    A single attribute tag on a cache (e.g. 'Dogs allowed', 'Night cache').
+    The attribute_id matches the Groundspeak attribute ID scheme.
+    """
+    __tablename__ = "attributes"
+    __table_args__ = (
+        UniqueConstraint("cache_id", "attribute_id", name="uq_attribute_cache"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    cache_id: Mapped[int] = mapped_column(ForeignKey("caches.id"), nullable=False, index=True)
+
+    attribute_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    name: Mapped[Optional[str]] = mapped_column(String(128))
+    is_on: Mapped[bool] = mapped_column(Boolean, default=True)  # True = yes, False = no
+
+    # Relationships
+    cache: Mapped["Cache"] = relationship("Cache", back_populates="attributes")
+
+    def __repr__(self) -> str:
+        flag = "+" if self.is_on else "-"
+        return f"<Attribute {flag}{self.name!r}>"
+
+
+# ── Trackable ─────────────────────────────────────────────────────────────────
+
+class Trackable(Base):
+    """A trackable item (Travel Bug, geocoin) recorded as present in a cache."""
+    __tablename__ = "trackables"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    cache_id: Mapped[int] = mapped_column(ForeignKey("caches.id"), nullable=False, index=True)
+
+    tracking_code: Mapped[Optional[str]] = mapped_column(String(64))
+    name: Mapped[Optional[str]] = mapped_column(String(256))
+    ref: Mapped[Optional[str]] = mapped_column(String(64))   # TB ref e.g. TB1234
+
+    # Relationships
+    cache: Mapped["Cache"] = relationship("Cache", back_populates="trackables")
+
+    def __repr__(self) -> str:
+        return f"<Trackable {self.ref!r} {self.name!r}>"
+
+
+# ── UserNote ──────────────────────────────────────────────────────────────────
+
+class UserNote(Base):
+    """Personal notes for a cache — one note per cache, owned by the local user."""
+    __tablename__ = "user_notes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    cache_id: Mapped[int] = mapped_column(ForeignKey("caches.id"), nullable=False, unique=True)
+
+    note: Mapped[Optional[str]] = mapped_column(Text)
+    corrected_lat: Mapped[Optional[float]] = mapped_column(Float)   # user-corrected coords
+    corrected_lon: Mapped[Optional[float]] = mapped_column(Float)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, onupdate=_utcnow)
+
+    # Relationships
+    cache: Mapped["Cache"] = relationship("Cache", back_populates="user_note")
+
+    def __repr__(self) -> str:
+        return f"<UserNote for cache_id={self.cache_id}>"

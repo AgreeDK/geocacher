@@ -1,0 +1,666 @@
+"""
+src/opensak/filters/engine.py — Filter & sort engine for OpenSAK.
+
+Usage
+-----
+    from opensak.filters.engine import FilterSet, SortSpec, apply_filters
+
+    fs = FilterSet()
+    fs.add(CacheTypeFilter(["Traditional Cache", "Multi-cache"]))
+    fs.add(DifficultyFilter(max_difficulty=3.0))
+    fs.add(NotFoundFilter())
+    fs.add(DistanceFilter(lat=55.67, lon=12.57, max_km=10.0))
+
+    sort = SortSpec("difficulty", ascending=True)
+
+    with get_session() as s:
+        results = apply_filters(s, fs, sort)
+"""
+
+from __future__ import annotations
+
+import json
+import math
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Optional
+
+from sqlalchemy.orm import Session
+
+from opensak.db.models import Cache
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Return great-circle distance in kilometres between two coordinates."""
+    R = 6371.0
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlam = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlam / 2) ** 2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+# ── Base filter ───────────────────────────────────────────────────────────────
+
+class BaseFilter(ABC):
+    """Abstract base for all filters."""
+
+    # Human-readable name used for serialisation and display
+    filter_type: str = "base"
+
+    @abstractmethod
+    def matches(self, cache: Cache) -> bool:
+        """Return True if *cache* passes this filter."""
+
+    def to_dict(self) -> dict:
+        """Serialise filter to a JSON-safe dict."""
+        return {"filter_type": self.filter_type}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BaseFilter":
+        """Deserialise from a dict (override in subclasses)."""
+        return cls()
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__}>"
+
+
+# ── Concrete filters ──────────────────────────────────────────────────────────
+
+class CacheTypeFilter(BaseFilter):
+    """Keep only caches whose type is in *types*."""
+    filter_type = "cache_type"
+
+    def __init__(self, types: list[str]):
+        self.types = [t.strip() for t in types]
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.cache_type in self.types
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "types": self.types}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "CacheTypeFilter":
+        return cls(data["types"])
+
+    def __repr__(self) -> str:
+        return f"<CacheTypeFilter types={self.types}>"
+
+
+class ContainerFilter(BaseFilter):
+    """Keep only caches whose container size is in *sizes*."""
+    filter_type = "container"
+
+    def __init__(self, sizes: list[str]):
+        self.sizes = [s.strip() for s in sizes]
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.container in self.sizes
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "sizes": self.sizes}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ContainerFilter":
+        return cls(data["sizes"])
+
+
+class DifficultyFilter(BaseFilter):
+    """Keep caches within a difficulty range (1.0–5.0)."""
+    filter_type = "difficulty"
+
+    def __init__(self, min_difficulty: float = 1.0, max_difficulty: float = 5.0):
+        self.min_difficulty = min_difficulty
+        self.max_difficulty = max_difficulty
+
+    def matches(self, cache: Cache) -> bool:
+        if cache.difficulty is None:
+            return True  # unknown difficulty passes by default
+        return self.min_difficulty <= cache.difficulty <= self.max_difficulty
+
+    def to_dict(self) -> dict:
+        return {
+            "filter_type": self.filter_type,
+            "min_difficulty": self.min_difficulty,
+            "max_difficulty": self.max_difficulty,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "DifficultyFilter":
+        return cls(data.get("min_difficulty", 1.0), data.get("max_difficulty", 5.0))
+
+
+class TerrainFilter(BaseFilter):
+    """Keep caches within a terrain range (1.0–5.0)."""
+    filter_type = "terrain"
+
+    def __init__(self, min_terrain: float = 1.0, max_terrain: float = 5.0):
+        self.min_terrain = min_terrain
+        self.max_terrain = max_terrain
+
+    def matches(self, cache: Cache) -> bool:
+        if cache.terrain is None:
+            return True
+        return self.min_terrain <= cache.terrain <= self.max_terrain
+
+    def to_dict(self) -> dict:
+        return {
+            "filter_type": self.filter_type,
+            "min_terrain": self.min_terrain,
+            "max_terrain": self.max_terrain,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "TerrainFilter":
+        return cls(data.get("min_terrain", 1.0), data.get("max_terrain", 5.0))
+
+
+class FoundFilter(BaseFilter):
+    """Keep only caches the user HAS found."""
+    filter_type = "found"
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.found is True
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "FoundFilter":
+        return cls()
+
+
+class NotFoundFilter(BaseFilter):
+    """Keep only caches the user has NOT found."""
+    filter_type = "not_found"
+
+    def matches(self, cache: Cache) -> bool:
+        return not cache.found
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "NotFoundFilter":
+        return cls()
+
+
+class AvailableFilter(BaseFilter):
+    """Keep only caches that are currently available (not archived/disabled)."""
+    filter_type = "available"
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.available is True and cache.archived is False
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "AvailableFilter":
+        return cls()
+
+
+class ArchivedFilter(BaseFilter):
+    """Keep only archived caches."""
+    filter_type = "archived"
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.archived is True
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ArchivedFilter":
+        return cls()
+
+
+class CountryFilter(BaseFilter):
+    """Keep caches in any of *countries*."""
+    filter_type = "country"
+
+    def __init__(self, countries: list[str]):
+        self.countries = [c.strip() for c in countries]
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.country in self.countries
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "countries": self.countries}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "CountryFilter":
+        return cls(data["countries"])
+
+
+class StateFilter(BaseFilter):
+    """Keep caches in any of *states*."""
+    filter_type = "state"
+
+    def __init__(self, states: list[str]):
+        self.states = [s.strip() for s in states]
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.state in self.states
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "states": self.states}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "StateFilter":
+        return cls(data["states"])
+
+
+class NameFilter(BaseFilter):
+    """Keep caches whose name contains *text* (case-insensitive)."""
+    filter_type = "name"
+
+    def __init__(self, text: str):
+        self.text = text.lower()
+
+    def matches(self, cache: Cache) -> bool:
+        return self.text in (cache.name or "").lower()
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "text": self.text}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "NameFilter":
+        return cls(data["text"])
+
+
+class GcCodeFilter(BaseFilter):
+    """Keep caches whose GC code contains *text* (case-insensitive)."""
+    filter_type = "gc_code"
+
+    def __init__(self, text: str):
+        self.text = text.upper()
+
+    def matches(self, cache: Cache) -> bool:
+        return self.text in (cache.gc_code or "").upper()
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "text": self.text}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "GcCodeFilter":
+        return cls(data["text"])
+
+
+class PlacedByFilter(BaseFilter):
+    """Keep caches placed by owners whose name contains *text* (case-insensitive)."""
+    filter_type = "placed_by"
+
+    def __init__(self, text: str):
+        self.text = text.lower()
+
+    def matches(self, cache: Cache) -> bool:
+        return self.text in (cache.placed_by or "").lower()
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "text": self.text}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "PlacedByFilter":
+        return cls(data["text"])
+
+
+class DistanceFilter(BaseFilter):
+    """
+    Keep caches within *max_km* kilometres of a reference coordinate.
+    Optionally also enforce a *min_km* to exclude very nearby caches.
+    """
+    filter_type = "distance"
+
+    def __init__(
+        self,
+        lat: float,
+        lon: float,
+        max_km: float,
+        min_km: float = 0.0,
+    ):
+        self.lat = lat
+        self.lon = lon
+        self.max_km = max_km
+        self.min_km = min_km
+
+    def matches(self, cache: Cache) -> bool:
+        if cache.latitude is None or cache.longitude is None:
+            return False
+        dist = _haversine_km(self.lat, self.lon, cache.latitude, cache.longitude)
+        return self.min_km <= dist <= self.max_km
+
+    def to_dict(self) -> dict:
+        return {
+            "filter_type": self.filter_type,
+            "lat": self.lat,
+            "lon": self.lon,
+            "max_km": self.max_km,
+            "min_km": self.min_km,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "DistanceFilter":
+        return cls(data["lat"], data["lon"], data["max_km"], data.get("min_km", 0.0))
+
+
+class AttributeFilter(BaseFilter):
+    """
+    Keep caches that have a specific attribute set to *is_on*.
+    Uses the Groundspeak attribute ID.
+    """
+    filter_type = "attribute"
+
+    def __init__(self, attribute_id: int, is_on: bool = True):
+        self.attribute_id = attribute_id
+        self.is_on = is_on
+
+    def matches(self, cache: Cache) -> bool:
+        for attr in cache.attributes:
+            if attr.attribute_id == self.attribute_id and attr.is_on == self.is_on:
+                return True
+        return False
+
+    def to_dict(self) -> dict:
+        return {
+            "filter_type": self.filter_type,
+            "attribute_id": self.attribute_id,
+            "is_on": self.is_on,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "AttributeFilter":
+        return cls(data["attribute_id"], data.get("is_on", True))
+
+
+class HasTrackableFilter(BaseFilter):
+    """Keep only caches that currently have at least one trackable."""
+    filter_type = "has_trackable"
+
+    def matches(self, cache: Cache) -> bool:
+        return len(cache.trackables) > 0
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "HasTrackableFilter":
+        return cls()
+
+
+class PremiumFilter(BaseFilter):
+    """Keep only premium-member caches."""
+    filter_type = "premium"
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.premium_only is True
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "PremiumFilter":
+        return cls()
+
+
+class NonPremiumFilter(BaseFilter):
+    """Keep only non-premium caches."""
+    filter_type = "non_premium"
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.premium_only is False
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "NonPremiumFilter":
+        return cls()
+
+
+# ── Filter registry (for deserialisation) ─────────────────────────────────────
+
+FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
+    "cache_type":    CacheTypeFilter,
+    "container":     ContainerFilter,
+    "difficulty":    DifficultyFilter,
+    "terrain":       TerrainFilter,
+    "found":         FoundFilter,
+    "not_found":     NotFoundFilter,
+    "available":     AvailableFilter,
+    "archived":      ArchivedFilter,
+    "country":       CountryFilter,
+    "state":         StateFilter,
+    "name":          NameFilter,
+    "gc_code":       GcCodeFilter,
+    "placed_by":     PlacedByFilter,
+    "distance":      DistanceFilter,
+    "attribute":     AttributeFilter,
+    "has_trackable": HasTrackableFilter,
+    "premium":       PremiumFilter,
+    "non_premium":   NonPremiumFilter,
+}
+
+
+# ── FilterSet — AND / OR composition ─────────────────────────────────────────
+
+class FilterSet:
+    """
+    A collection of filters combined with AND or OR logic.
+
+    AND (default): a cache must pass ALL filters to be included.
+    OR:            a cache must pass AT LEAST ONE filter.
+
+    FilterSets can be nested for complex expressions:
+        FilterSet(AND) containing:
+          - CacheTypeFilter(["Traditional"])
+          - FilterSet(OR) containing:
+              - DifficultyFilter(max=2.0)
+              - TerrainFilter(max=2.0)
+    """
+
+    def __init__(self, mode: str = "AND"):
+        if mode not in ("AND", "OR"):
+            raise ValueError(f"mode must be 'AND' or 'OR', got {mode!r}")
+        self.mode = mode
+        self._filters: list[BaseFilter | FilterSet] = []
+
+    def add(self, f: "BaseFilter | FilterSet") -> "FilterSet":
+        """Add a filter or nested FilterSet. Returns self for chaining."""
+        self._filters.append(f)
+        return self
+
+    def clear(self) -> None:
+        self._filters.clear()
+
+    def __len__(self) -> int:
+        return len(self._filters)
+
+    def matches(self, cache: Cache) -> bool:
+        if not self._filters:
+            return True  # empty filter set = show everything
+
+        if self.mode == "AND":
+            return all(f.matches(cache) for f in self._filters)
+        else:
+            return any(f.matches(cache) for f in self._filters)
+
+    def to_dict(self) -> dict:
+        return {
+            "mode": self.mode,
+            "filters": [f.to_dict() for f in self._filters],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "FilterSet":
+        fs = cls(mode=data.get("mode", "AND"))
+        for fdata in data.get("filters", []):
+            if "mode" in fdata:
+                # Nested FilterSet
+                fs.add(FilterSet.from_dict(fdata))
+            else:
+                ftype = fdata.get("filter_type")
+                if ftype in FILTER_REGISTRY:
+                    fs.add(FILTER_REGISTRY[ftype].from_dict(fdata))
+        return fs
+
+    def __repr__(self) -> str:
+        return f"<FilterSet mode={self.mode} filters={self._filters}>"
+
+
+# ── Sort spec ─────────────────────────────────────────────────────────────────
+
+# Valid sort fields and how to extract the sort key from a Cache object
+SORT_FIELDS: dict[str, Any] = {
+    "name":        lambda c: (c.name or "").lower(),
+    "gc_code":     lambda c: c.gc_code or "",
+    "cache_type":  lambda c: c.cache_type or "",
+    "difficulty":  lambda c: c.difficulty or 0.0,
+    "terrain":     lambda c: c.terrain or 0.0,
+    "hidden_date": lambda c: c.hidden_date or 0,
+    "country":     lambda c: (c.country or "").lower(),
+    "state":       lambda c: (c.state or "").lower(),
+    "placed_by":   lambda c: (c.placed_by or "").lower(),
+    "container":   lambda c: (c.container or "").lower(),
+    "found":       lambda c: int(c.found),
+    "archived":    lambda c: int(c.archived),
+}
+
+
+@dataclass
+class SortSpec:
+    """Defines a sort operation on the result list."""
+    field: str = "name"
+    ascending: bool = True
+
+    def __post_init__(self):
+        if self.field not in SORT_FIELDS:
+            raise ValueError(
+                f"Unknown sort field {self.field!r}. "
+                f"Valid fields: {list(SORT_FIELDS.keys())}"
+            )
+
+    def to_dict(self) -> dict:
+        return {"field": self.field, "ascending": self.ascending}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "SortSpec":
+        return cls(field=data.get("field", "name"), ascending=data.get("ascending", True))
+
+
+# ── Distance annotation helper ────────────────────────────────────────────────
+
+def annotate_distances(
+    caches: list[Cache],
+    lat: float,
+    lon: float,
+) -> dict[int, float]:
+    """
+    Return a dict mapping cache.id → distance_km from (lat, lon).
+    Useful for displaying distances in the UI without filtering.
+    """
+    return {
+        c.id: _haversine_km(lat, lon, c.latitude, c.longitude)
+        for c in caches
+        if c.latitude is not None and c.longitude is not None
+    }
+
+
+# ── Main apply function ───────────────────────────────────────────────────────
+
+def apply_filters(
+    session: Session,
+    filterset: Optional[FilterSet] = None,
+    sort: Optional[SortSpec] = None,
+    limit: Optional[int] = None,
+    distance_from: Optional[tuple[float, float]] = None,
+) -> list[Cache]:
+    """
+    Load caches from DB, apply *filterset*, sort, and return a list.
+
+    Parameters
+    ----------
+    session      : Active SQLAlchemy session
+    filterset    : FilterSet to apply (None = return all)
+    sort         : SortSpec (None = sort by name ascending)
+    limit        : Maximum number of results to return
+    distance_from: Optional (lat, lon) tuple — if given, results are sorted
+                   by distance when sort.field == 'distance'
+
+    Returns
+    -------
+    List of Cache objects that match all filters, in sorted order.
+    """
+    # Load all caches with their relationships (attributes needed for AttributeFilter)
+    from sqlalchemy.orm import joinedload
+    query = session.query(Cache).options(
+        joinedload(Cache.attributes),
+        joinedload(Cache.trackables),
+        joinedload(Cache.logs),
+        joinedload(Cache.waypoints),
+        joinedload(Cache.user_note),
+    )
+    all_caches = query.all()
+
+    # Apply filters
+    if filterset:
+        results = [c for c in all_caches if filterset.matches(c)]
+    else:
+        results = list(all_caches)
+
+    # Sort
+    if sort is None:
+        sort = SortSpec("name", ascending=True)
+
+    if sort.field == "distance" and distance_from:
+        lat, lon = distance_from
+        results.sort(
+            key=lambda c: _haversine_km(lat, lon, c.latitude or 0, c.longitude or 0),
+            reverse=not sort.ascending,
+        )
+    elif sort.field in SORT_FIELDS:
+        results.sort(key=SORT_FIELDS[sort.field], reverse=not sort.ascending)
+
+    if limit:
+        results = results[:limit]
+
+    return results
+
+
+# ── Saved filter profiles ─────────────────────────────────────────────────────
+
+class FilterProfile:
+    """
+    A named, saveable filter configuration stored as JSON.
+
+    Profiles are saved to ~/.local/share/opensak/filters/
+    """
+
+    def __init__(self, name: str, filterset: FilterSet, sort: Optional[SortSpec] = None):
+        self.name = name
+        self.filterset = filterset
+        self.sort = sort or SortSpec()
+
+    def save(self, profiles_dir: Optional[Path] = None) -> Path:
+        """Save this profile to disk as JSON. Returns the saved file path."""
+        if profiles_dir is None:
+            from opensak.config import get_app_data_dir
+            profiles_dir = get_app_data_dir() / "filters"
+        profiles_dir.mkdir(parents=True, exist_ok=True)
+
+        safe_name = "".join(c if c.isalnum() or c in "-_ " else "_" for c in self.name)
+        path = profiles_dir / f"{safe_name}.json"
+
+        data = {
+            "name": self.name,
+            "filterset": self.filterset.to_dict(),
+            "sort": self.sort.to_dict(),
+        }
+        path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        return path
+
+    @classmethod
+    def load(cls, path: Path) -> "FilterProfile":
+        """Load a profile from a JSON file."""
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return cls(
+            name=data["name"],
+            filterset=FilterSet.from_dict(data["filterset"]),
+            sort=SortSpec.from_dict(data.get("sort", {})),
+        )
+
+    @classmethod
+    def list_profiles(cls, profiles_dir: Optional[Path] = None) -> list[Path]:
+        """Return a list of all saved profile paths."""
+        if profiles_dir is None:
+            from opensak.config import get_app_data_dir
+            profiles_dir = get_app_data_dir() / "filters"
+        if not profiles_dir.exists():
+            return []
+        return sorted(profiles_dir.glob("*.json"))
+
+    def __repr__(self) -> str:
+        return f"<FilterProfile {self.name!r}>"
