@@ -9,6 +9,18 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 
 ---
 
+> **⚠️ Hobby Project Notice**
+>
+> This project is developed in my spare time as a personal hobby project.
+> Bug reports and suggestions are welcome via GitHub Issues, but responses
+> and updates are not guaranteed. Development happens when time and interest allow.
+>
+> Pull requests are welcome, though they may not always be reviewed or merged.
+>
+> The software is provided as-is, without warranty or guaranteed support.
+
+---
+
 ## Features
 
 ### Import & Database
