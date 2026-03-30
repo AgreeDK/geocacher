@@ -46,7 +46,7 @@ def main():
         "Exec=OpenSAK",
         "Icon=opensak",
         "Type=Application",
-        "Categories=Utility;GPS;",
+        "Categories=Utility;Science;",
         "Terminal=false",
         "",
     ])
