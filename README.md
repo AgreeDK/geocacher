@@ -82,7 +82,59 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 
 ## Installation
 
-### Linux (Ubuntu / Linux Mint / Debian)
+### 🐧 Linux — Automatic installer (recommended)
+
+The easiest way to install OpenSAK on Linux. The script installs all dependencies,
+downloads OpenSAK, and creates a shortcut in your application menu automatically.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AgreeDK/OpenSAK/main/scripts/install-opensak.sh | bash
+```
+
+The installer will:
+- Check and install required system packages (`python3`, `git`, `libxcb-cursor0` etc.)
+- Clone the repository to `~/opensak`
+- Set up a Python virtual environment
+- Create an entry in your application menu
+- Optionally create a desktop shortcut
+- Offer to start OpenSAK immediately when done
+
+> **Manual install:** If you prefer to install manually or the script does not work
+> on your distribution, see the [manual Linux instructions](#linux-manual) below.
+
+---
+
+### 🪟 Windows — Standalone installer (recommended)
+
+> **Note:** A pre-built Windows `.exe` is not yet available. It will appear here once
+> the first release is published. Until then, please use the manual install method below.
+
+When available, download the latest **OpenSAK-Windows.zip** from the
+[Releases page](https://github.com/AgreeDK/OpenSAK/releases), unzip it, and
+double-click `OpenSAK.exe` — no Python or Git installation required.
+
+---
+
+### 🍎 macOS — App bundle (recommended)
+
+> **Note:** A pre-built macOS `.dmg` is not yet available. It will appear here once
+> the first release is published. Until then, please use the manual install method below.
+
+When available, download the latest **OpenSAK-macOS.dmg** from the
+[Releases page](https://github.com/AgreeDK/OpenSAK/releases), open it, and drag
+OpenSAK to your Applications folder.
+
+> On first launch, macOS may block the app because it is not signed with an Apple
+> Developer certificate. Right-click → Open to bypass this warning.
+
+---
+
+### Manual installation (all platforms)
+
+Use this method if the automatic installer does not work, or if you prefer
+to install from source.
+
+#### Linux (manual) <a name="linux-manual"></a>
 
 ```bash
 sudo apt update
@@ -99,7 +151,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-### Windows
+#### Windows (manual)
 
 Install **Python 3.10+** from [python.org](https://www.python.org/downloads/) — make sure to check **"Add Python to PATH"**
 
@@ -115,7 +167,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-### macOS
+#### macOS (manual)
 
 > ⚠️ macOS is not yet fully tested. Feedback is very welcome!
 
@@ -194,6 +246,23 @@ Currently supported: **Danish (da)**, **English (en)**
 
 ## Updating to the Latest Version
 
+### If you used the automatic Linux installer
+
+```bash
+cd ~/opensak
+git pull origin main
+source .venv/bin/activate
+pip install -r requirements.txt
+python run.py
+```
+
+### If you downloaded a release (.exe / .dmg / AppImage)
+
+Download the latest version from the [Releases page](https://github.com/AgreeDK/OpenSAK/releases)
+and replace your existing installation.
+
+### If you installed manually from source
+
 ```bash
 cd ~/opensak
 source .venv/bin/activate      # Linux/macOS
@@ -221,6 +290,8 @@ Please use [GitHub Issues](https://github.com/AgreeDK/opensak/issues) and includ
 opensak/
 ├── run.py                          # Entry point
 ├── requirements.txt
+├── scripts/
+│   └── install-opensak.sh          # Linux automatic installer
 ├── src/opensak/
 │   ├── app.py                      # Startup + migration
 │   ├── config.py                   # Paths + language preference
@@ -266,10 +337,10 @@ opensak/
 - [ ] HTML/PDF reports and statistics
 - [ ] GPS export — improve auto-detection on all Linux distros
 - [ ] Favourite points (requires Geocaching.com API)
-- [ ] Windows installer (.exe)
-- [ ] Linux AppImage
+- [x] Windows installer (.exe) — built automatically via GitHub Actions
+- [x] Linux AppImage — built automatically via GitHub Actions
+- [x] GitHub Actions CI/CD pipeline
 - [ ] More languages (German, Swedish, …)
-- [ ] GitHub Actions CI/CD pipeline
 
 ---
 
