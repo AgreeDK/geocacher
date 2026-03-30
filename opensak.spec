@@ -22,6 +22,8 @@ IS_LINUX   = sys.platform.startswith("linux")
 # Saml alle data-filer der skal med i pakken
 # ------------------------------------------------------------
 datas = [
+    # Sprogfiler skal med eksplicit da de indlæses dynamisk (ikke via import)
+    ('src/opensak/lang/*.py', 'opensak/lang'),
     # Eventuelle ikoner, assets osv. tilføjes her
     # ('src/opensak/assets', 'opensak/assets'),
 ]
