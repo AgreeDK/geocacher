@@ -16,6 +16,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.1.0] - 2026-03-30
+
+### Tilføjet
+- GitHub Actions CI/CD pipeline — bygger automatisk til Windows, Linux og macOS
+- Linux AppImage — én fil, ingen installation nødvendig
+- Linux installationsscript (scripts/install-opensak.sh)
+- Windows .exe bygges automatisk ved release
+- macOS .dmg bygges automatisk ved release
+
 ## [0.3.0] — 2026
 
 ### Added
