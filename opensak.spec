@@ -46,19 +46,6 @@ hiddenimports = [
     'alembic.operations',
 ]
 
-# ------------------------------------------------------------
-# På Linux ekskluderes QtWebEngine fra pakken —
-# den er tæt koblet til systemets OpenGL og virker ikke
-# pålideligt i AppImage. Systemets PySide6 bruges i stedet.
-# ------------------------------------------------------------
-if IS_LINUX:
-    excludes_webengine = [
-        'PySide6.QtWebEngineCore',
-        'PySide6.QtWebEngineWidgets',
-        'PySide6.QtWebEngineQuick',
-    ]
-else:
-    excludes_webengine = []
 
 # ------------------------------------------------------------
 # Analysis — PyInstaller finder alle imports
@@ -74,7 +61,7 @@ a = Analysis(
     runtime_hooks=[],
     excludes=[
         'tkinter',
-    ] + excludes_webengine,
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
