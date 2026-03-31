@@ -55,7 +55,7 @@ STRINGS: dict[str, str] = {
 
     # File menu
     "action_db_manager":            "&Gérer les bases de données…",
-    "action_import":                "&Importer GPX / PQ zip…",
+    "action_import":                "&Importer GPX / zip de PQ…",
     "action_quit":                  "&Quitter",
 
     # Waypoint menu
@@ -101,7 +101,7 @@ STRINGS: dict[str, str] = {
     "wp_delete_msg":                "Êtes-vous sûr de vouloir supprimer :\n{gc_code} — {name}?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
-    "import_dialog_title":          "Importer GPX / PQ Zip",
+    "import_dialog_title":          "Importer GPX / Zip de PQ",
     "import_drop_hint":             "Déposer un GPX ou un fichier ZIP ici",
     "import_browse":                "Parcourir…",
     "import_start":                 "Démarrer l'import",
@@ -310,7 +310,7 @@ STRINGS: dict[str, str] = {
     "filter_attr_col_name":         "Attribut",
     "filter_yes":                   "Oui",
     "filter_no":                    "Non",
-    "filter_none_short":            "N'importe lequel",
+    "filter_none_short":            "Tous",
     "filter_save_title":            "Enregistrer le filtre",
     "filter_profile_name_label":    "Nom du profil de filtre:",
     "filter_saved_title":           "Enregistré",

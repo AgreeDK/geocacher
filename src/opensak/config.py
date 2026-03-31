@@ -73,7 +73,7 @@ def get_language() -> str:
     if prefs_file.exists():
         try:
             data = json.loads(prefs_file.read_text(encoding="utf-8"))
-            return data.get("language", "da")
+            return data.get("language", "en")
         except (json.JSONDecodeError, OSError):
             pass
     return "da"
