@@ -8,6 +8,8 @@ on:
   push:
     tags:
       - "v*"
+    branches:
+      - main
   workflow_dispatch:
 
 env:
@@ -235,16 +237,23 @@ jobs:
             dist/OpenSAK.app \
           || (cd dist && zip -r ../OpenSAK-macOS-Universal.zip OpenSAK.app && echo "Fallback ZIP lavet")
 
-      - name: Tjek output
+      - name: Tjek output og komprimer til ZIP
         run: |
           echo "=== Producerede filer ==="
           ls -lh OpenSAK-macOS-Universal.dmg OpenSAK-macOS-Universal.zip 2>/dev/null || true
+          # Komprimer .dmg til zip — GitHub Release har 2GB grænse pr. fil
+          if [ -f OpenSAK-macOS-Universal.dmg ]; then
+            echo "Komprimerer .dmg til .zip..."
+            zip -9 OpenSAK-macOS-Universal.dmg.zip OpenSAK-macOS-Universal.dmg
+            ls -lh OpenSAK-macOS-Universal.dmg.zip
+            rm OpenSAK-macOS-Universal.dmg
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
           name: OpenSAK-macOS
           path: |
-            OpenSAK-macOS-Universal.dmg
+            OpenSAK-macOS-Universal.dmg.zip
             OpenSAK-macOS-Universal.zip
           retention-days: 7
 
@@ -293,7 +302,7 @@ jobs:
             |----------|-----|------------|
             | 🪟 Windows | `OpenSAK-Windows.zip` | Udpak og dobbeltklik på `OpenSAK.exe` |
             | 🐧 Linux | `OpenSAK-Linux-x86_64.AppImage` | Se instruktioner nedenfor |
-            | 🍎 macOS | `OpenSAK-macOS-Universal.dmg` | Åbn og træk OpenSAK til Programmer — virker på **både Intel og Apple Silicon** |
+            | 🍎 macOS | `OpenSAK-macOS-Universal.dmg.zip` | Udpak zip, åbn .dmg og træk OpenSAK til Programmer — virker på **både Intel og Apple Silicon** |
 
             ### Linux
 
@@ -312,9 +321,10 @@ jobs:
 
             ### macOS
 
-            1. Download `OpenSAK-macOS-Universal.dmg`
-            2. Åbn filen og træk OpenSAK til mappen Programmer
-            3. Første gang: højreklik → Åbn (krævet da appen ikke er signeret med Apple-certifikat)
+            1. Download `OpenSAK-macOS-Universal.dmg.zip`
+            2. Udpak zip-filen
+            3. Åbn .dmg og træk OpenSAK til mappen Programmer
+            4. Første gang: højreklik → Åbn (krævet da appen ikke er signeret med Apple-certifikat)
 
             ---
             Se [CHANGELOG.md](https://github.com/AgreeDK/OpenSAK/blob/main/CHANGELOG.md) for detaljer.
