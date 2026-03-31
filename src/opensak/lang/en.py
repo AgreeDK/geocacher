@@ -159,6 +159,7 @@ STRINGS: dict[str, str] = {
     "settings_map_label":           "Map app:",
     "settings_map_google":          "Google Maps",
     "settings_map_osm":             "OpenStreetMap",
+    "settings_coord_format_label":  "Coordinate format:",
     "settings_group_language":      "Language",
     "settings_language_label":      "Language:",
     "settings_language_hint":       "Change takes effect on next restart",
@@ -328,6 +329,7 @@ STRINGS: dict[str, str] = {
     "detail_coords":                "Coordinates",
     "detail_gc_tooltip":            "Click to open on geocaching.com",
     "detail_coords_tooltip":        "Click to open in Google Maps",
+    "detail_coord_converter_tooltip": "Open coordinate converter",
     "detail_tab_desc":              "Description",
     "detail_tab_hint":              "Hint",
     "detail_tab_logs":              "Logs",
@@ -374,6 +376,7 @@ STRINGS: dict[str, str] = {
     "ctx_open_maps":        "🗺️  Open in {map_name}",
     "ctx_copy_gc":          "📋  Copy GC code",
     "ctx_copy_coords":      "📋  Copy coordinates",
+    "ctx_coord_converter":  "⇄  Coordinate converter…",
     "ctx_mark_found":       "☑  Mark as found",
     "ctx_mark_not_found":   "☐  Mark as not found",
 
@@ -413,5 +416,15 @@ STRINGS: dict[str, str] = {
 
     # ── Filter dialog — GC code placeholder ──────────────────────────────────
     "filter_gc_placeholder":        "e.g. GC123",
+
+    # ── Coordinate converter dialog ───────────────────────────────────────────
+    "coord_conv_title":             "Coordinate Converter",
+    "coord_conv_input_group":       "Enter coordinates",
+    "coord_conv_input_hint":        "Type in any format: DMM, DMS or DD — conversion happens automatically",
+    "coord_conv_placeholder":       "e.g. N55 47.250 E012 25.000",
+    "coord_conv_output_group":      "All formats",
+    "coord_conv_copy_btn":          "Copy",
+    "coord_conv_open_in":           "Open in:",
+    "coord_conv_parse_error":       "Unknown coordinate format — try e.g. N55 47.250 E012 25.000",
 
 }

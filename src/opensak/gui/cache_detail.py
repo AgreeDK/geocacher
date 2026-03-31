@@ -15,6 +15,8 @@ from PySide6.QtGui import QFont
 
 from opensak.db.models import Cache
 from opensak.lang import tr
+from opensak.coords import format_coords
+from opensak.gui.settings import get_settings
 
 
 class CacheDetailPanel(QWidget):
@@ -74,6 +76,15 @@ class CacheDetailPanel(QWidget):
             col.addWidget(cap)
             col.addWidget(lbl)
             meta_layout.addLayout(col)
+
+        # Koordinatkonverter knap
+        self._conv_btn = QPushButton("⇄")
+        self._conv_btn.setToolTip(tr("detail_coord_converter_tooltip"))
+        self._conv_btn.setMaximumWidth(30)
+        self._conv_btn.setMaximumHeight(30)
+        self._conv_btn.setEnabled(False)
+        self._conv_btn.clicked.connect(self._open_coord_converter)
+        meta_layout.addWidget(self._conv_btn)
 
         meta_layout.addStretch()
         layout.addWidget(meta_frame)
@@ -162,7 +173,6 @@ class CacheDetailPanel(QWidget):
     def _open_in_maps(self, event=None) -> None:
         """Åbn koordinater i kortapp i standard browseren."""
         if hasattr(self, '_current_lat') and self._current_lat is not None:
-            from opensak.gui.settings import get_settings
             url = get_settings().get_maps_url(self._current_lat, self._current_lon)
             webbrowser.open(url)
 
@@ -171,6 +181,18 @@ class CacheDetailPanel(QWidget):
         if hasattr(self, '_current_gc_code') and self._current_gc_code:
             url = f"https://coord.info/{self._current_gc_code}"
             webbrowser.open(url)
+
+    def _open_coord_converter(self) -> None:
+        """Åbn koordinatkonverter popup med den aktuelle cache's koordinater."""
+        if self._current_lat is not None:
+            from opensak.gui.dialogs.coord_converter_dialog import CoordConverterDialog
+            dlg = CoordConverterDialog(self._current_lat, self._current_lon, parent=self)
+            dlg.exec()
+
+    def _format_coords(self, lat: float, lon: float) -> str:
+        """Formater koordinater i det format brugeren har valgt i settings."""
+        fmt = get_settings().coord_format
+        return format_coords(lat, lon, fmt)
 
     def clear(self) -> None:
         self._current_gc_code = None
@@ -198,6 +220,7 @@ class CacheDetailPanel(QWidget):
         self._decode_btn.setText(tr("detail_decode_btn"))
         self._log_search.setText("")
         self._cached_logs = []
+        self._conv_btn.setEnabled(False)
 
     def show_cache(self, cache: Cache) -> None:
         """Populate the panel with data from *cache*."""
@@ -228,17 +251,21 @@ class CacheDetailPanel(QWidget):
             + (f" / {cache.state}" if cache.state else "")
         )
         if cache.latitude and cache.longitude:
-            self._coords_lbl.setText(f"{cache.latitude:.5f}, {cache.longitude:.5f}")
+            self._coords_lbl.setText(
+                self._format_coords(cache.latitude, cache.longitude)
+            )
             self._coords_lbl.setStyleSheet(
                 "color: #1565c0; text-decoration: underline; font-weight: bold;"
             )
             self._current_lat = cache.latitude
             self._current_lon = cache.longitude
+            self._conv_btn.setEnabled(True)
         else:
             self._coords_lbl.setText("—")
             self._coords_lbl.setStyleSheet("")
             self._current_lat = None
             self._current_lon = None
+            self._conv_btn.setEnabled(False)
 
         # Placed by / date
         parts = []

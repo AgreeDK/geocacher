@@ -15,6 +15,7 @@ from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QMenu
 from opensak.db.models import Cache
 from opensak.filters.engine import _haversine_km
 from opensak.gui.settings import get_settings
+from opensak.coords import format_coords
 from opensak.lang import tr
 
 
@@ -320,12 +321,20 @@ class CacheTableView(QTableView):
         act_copy_gc = menu.addAction(tr("ctx_copy_gc"))
         act_copy_gc.triggered.connect(lambda: self._copy_to_clipboard(cache.gc_code))
 
-        # Kopiér koordinater
+        # Kopiér koordinater — i det valgte format
         if cache.latitude and cache.longitude:
-            coords = f"{cache.latitude:.6f}, {cache.longitude:.6f}"
+            fmt = get_settings().coord_format
+            coords = format_coords(cache.latitude, cache.longitude, fmt)
             act_copy_coords = menu.addAction(tr("ctx_copy_coords"))
             act_copy_coords.triggered.connect(
                 lambda: self._copy_to_clipboard(coords)
+            )
+
+            # Åbn koordinatkonverter
+            act_converter = menu.addAction(tr("ctx_coord_converter"))
+            lat, lon = cache.latitude, cache.longitude
+            act_converter.triggered.connect(
+                lambda checked=False, la=lat, lo=lon: self._open_converter(la, lo)
             )
 
         menu.addSeparator()
@@ -339,6 +348,12 @@ class CacheTableView(QTableView):
             act_found.triggered.connect(lambda: self._toggle_found(cache, True))
 
         menu.exec(self.viewport().mapToGlobal(pos))
+
+    def _open_converter(self, lat: float, lon: float) -> None:
+        """Åbn koordinatkonverter popup."""
+        from opensak.gui.dialogs.coord_converter_dialog import CoordConverterDialog
+        dlg = CoordConverterDialog(lat, lon, parent=self)
+        dlg.exec()
 
     def _copy_to_clipboard(self, text: str) -> None:
         from PySide6.QtWidgets import QApplication

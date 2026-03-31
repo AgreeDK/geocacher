@@ -12,13 +12,14 @@ from PySide6.QtWidgets import (
 )
 from opensak.gui.settings import get_settings
 from opensak.lang import tr, AVAILABLE_LANGUAGES, current_language
+from opensak.coords import FORMATS, FORMAT_DMM, FORMAT_DMS, FORMAT_DD
 
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle(tr("settings_dialog_title"))
-        self.setMinimumWidth(400)
+        self.setMinimumWidth(420)
         self._setup_ui()
         self._load()
 
@@ -66,6 +67,17 @@ class SettingsDialog(QDialog):
         map_row.addStretch()
         disp_layout.addLayout(map_row)
 
+        # Koordinatformat
+        coord_row = QHBoxLayout()
+        coord_row.addWidget(QLabel(tr("settings_coord_format_label")))
+        self._coord_format = QComboBox()
+        self._coord_format.addItem("DMM  —  N55 47.250 E012 25.000", FORMAT_DMM)
+        self._coord_format.addItem("DMS  —  N55° 47' 15\" E012° 25' 00\"", FORMAT_DMS)
+        self._coord_format.addItem("DD   —  55.78750, 12.41667", FORMAT_DD)
+        coord_row.addWidget(self._coord_format)
+        coord_row.addStretch()
+        disp_layout.addLayout(coord_row)
+
         layout.addWidget(disp_group)
 
         # ── Sprog ─────────────────────────────────────────────────────────────
@@ -107,7 +119,9 @@ class SettingsDialog(QDialog):
         idx = self._map_provider.findData(s.map_provider)
         self._map_provider.setCurrentIndex(idx if idx >= 0 else 0)
 
-        # Sæt sprog-combo til det aktuelle sprog
+        idx = self._coord_format.findData(s.coord_format)
+        self._coord_format.setCurrentIndex(idx if idx >= 0 else 0)
+
         lang_idx = self._lang_combo.findData(current_language())
         self._lang_combo.setCurrentIndex(lang_idx if lang_idx >= 0 else 0)
 
@@ -119,6 +133,7 @@ class SettingsDialog(QDialog):
         s.show_archived = self._archived_cb.isChecked()
         s.show_found    = self._found_cb.isChecked()
         s.map_provider  = self._map_provider.currentData()
+        s.coord_format  = self._coord_format.currentData()
         s.sync()
 
         # Gem sprog hvis det er ændret

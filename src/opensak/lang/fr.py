@@ -159,6 +159,7 @@ STRINGS: dict[str, str] = {
     "settings_map_label":           "Application de carte:",
     "settings_map_google":          "Google Maps",
     "settings_map_osm":             "OpenStreetMap",
+    "settings_coord_format_label":  "Format de coordonnées:",
     "settings_group_language":      "Langue",
     "settings_language_label":      "Langue:",
     "settings_language_hint":       "Les changements prendront effet au prochain démarrage",
@@ -328,6 +329,7 @@ STRINGS: dict[str, str] = {
     "detail_coords":                "Coordonnées",
     "detail_gc_tooltip":            "Cliquez pour ouvrir sur geocaching.com",
     "detail_coords_tooltip":        "Cliquez pour ouvrir dans Google Maps",
+    "detail_coord_converter_tooltip": "Ouvrir le convertisseur de coordonnées",
     "detail_tab_desc":              "Description",
     "detail_tab_hint":              "Indice",
     "detail_tab_logs":              "Logs",
@@ -374,6 +376,7 @@ STRINGS: dict[str, str] = {
     "ctx_open_maps":        "🗺️  Ouvrir dans {map_name}",
     "ctx_copy_gc":          "📋  Copier le code GC",
     "ctx_copy_coords":      "📋  Copier les coordonnées",
+    "ctx_coord_converter":  "⇄  Convertisseur de coordonnées…",
     "ctx_mark_found":       "☑  Marquer comme trouvée",
     "ctx_mark_not_found":   "☐  Marquer comme non trouvée",
 
@@ -413,5 +416,15 @@ STRINGS: dict[str, str] = {
 
     # ── Fenêtre de filtre — espace réservé du code GC ─────────────────────────
     "filter_gc_placeholder":        "ex. GC123",
+
+    # ── Convertisseur de coordonnées ──────────────────────────────────────────
+    "coord_conv_title":             "Convertisseur de coordonnées",
+    "coord_conv_input_group":       "Entrer les coordonnées",
+    "coord_conv_input_hint":        "Saisissez dans n'importe quel format : DMM, DMS ou DD — la conversion est automatique",
+    "coord_conv_placeholder":       "ex. N55 47.250 E012 25.000",
+    "coord_conv_output_group":      "Tous les formats",
+    "coord_conv_copy_btn":          "Copier",
+    "coord_conv_open_in":           "Ouvrir dans:",
+    "coord_conv_parse_error":       "Format de coordonnées inconnu — essayez ex. N55 47.250 E012 25.000",
 
 }

@@ -159,6 +159,7 @@ STRINGS: dict[str, str] = {
     "settings_map_label":           "Kortapp:",
     "settings_map_google":          "Google Maps",
     "settings_map_osm":             "OpenStreetMap",
+    "settings_coord_format_label":  "Koordinatformat:",
     "settings_group_language":      "Sprog / Language",
     "settings_language_label":      "Sprog:",
     "settings_language_hint":       "Ændring træder i kraft ved næste opstart",
@@ -328,6 +329,7 @@ STRINGS: dict[str, str] = {
     "detail_coords":                "Koordinater",
     "detail_gc_tooltip":            "Klik for at åbne på geocaching.com",
     "detail_coords_tooltip":        "Klik for at åbne i Google Maps",
+    "detail_coord_converter_tooltip": "Åbn koordinatkonverter",
     "detail_tab_desc":              "Beskrivelse",
     "detail_tab_hint":              "Hint",
     "detail_tab_logs":              "Logs",
@@ -374,6 +376,7 @@ STRINGS: dict[str, str] = {
     "ctx_open_maps":        "🗺️  Åbn i {map_name}",
     "ctx_copy_gc":          "📋  Kopiér GC kode",
     "ctx_copy_coords":      "📋  Kopiér koordinater",
+    "ctx_coord_converter":  "⇄  Koordinatkonverter…",
     "ctx_mark_found":       "☑  Marker som fundet",
     "ctx_mark_not_found":   "☐  Marker som ikke fundet",
 
@@ -413,5 +416,15 @@ STRINGS: dict[str, str] = {
 
     # ── Filter dialog — GC kode placeholder ──────────────────────────────────
     "filter_gc_placeholder":        "f.eks. GC123",
+
+    # ── Koordinatkonverter dialog ─────────────────────────────────────────────
+    "coord_conv_title":             "Koordinatkonverter",
+    "coord_conv_input_group":       "Indtast koordinater",
+    "coord_conv_input_hint":        "Skriv i et vilkårligt format: DMM, DMS eller DD — konverteringen sker automatisk",
+    "coord_conv_placeholder":       "f.eks. N55 47.250 E012 25.000",
+    "coord_conv_output_group":      "Alle formater",
+    "coord_conv_copy_btn":          "Kopiér",
+    "coord_conv_open_in":           "Åbn i:",
+    "coord_conv_parse_error":       "Ukendt koordinatformat — prøv f.eks. N55 47.250 E012 25.000",
 
 }

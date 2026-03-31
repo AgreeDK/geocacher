@@ -56,6 +56,17 @@ class AppSettings:
     def use_miles(self, value: bool) -> None:
         self._s.setValue("display/use_miles", value)
 
+    # ── Koordinatformat ───────────────────────────────────────────────────────
+
+    @property
+    def coord_format(self) -> str:
+        """Coordinate display format: 'dmm' (default), 'dms', or 'dd'."""
+        return self._s.value("display/coord_format", "dmm")
+
+    @coord_format.setter
+    def coord_format(self, value: str) -> None:
+        self._s.setValue("display/coord_format", value)
+
     # ── Kort udbyder ──────────────────────────────────────────────────────────
 
     @property
