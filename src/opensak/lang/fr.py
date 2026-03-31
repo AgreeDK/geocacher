@@ -1,0 +1,380 @@
+"""
+src/opensak/lang/fr.py — Fichier de langue en français pour OpenSAK.
+
+Toutes les chaînes d'interface utilisateur dans un seul endroit.
+Pour ajouter une nouvelle langue : copiez ce fichier, renommez-le (par exemple de.py), puis traduisez les valeurs.
+Les clés (côté gauche) ne doivent JAMAIS être modifiées — elles sont utilisées dans le code.
+"""
+
+STRINGS: dict[str, str] = {
+
+    # ── General ───────────────────────────────────────────────────────────────
+    "app_name":                     "OpenSAK",
+    "ok":                           "OK",
+    "cancel":                       "Annuler",
+    "close":                        "Fermer",
+    "yes":                          "Oui",
+    "no":                           "Non",
+    "save":                         "Enregistrer",
+    "delete":                       "Supprimer",
+    "add":                          "Ajouter",
+    "edit":                         "Modifier",
+    "error":                        "Erreur",
+    "warning":                      "Avertissement",
+    "info":                         "Information",
+    "confirm":                      "Confirmer",
+    "search":                       "Rechercher",
+    "status_ready":                 "Prêt",
+    "restart_required":             "Redémarrage requis",
+    "restart_message":              "Le changement de langue prendra effet au prochain démarrage d'OpenSAK.",
+
+    # ── Main window — title bar ───────────────────────────────────────────────
+    "window_title":                 "OpenSAK",
+    "window_title_with_db":         "OpenSAK — {db_name}",
+
+    # ── Quick filter bar ──────────────────────────────────────────────────────
+    "search_label":                 "Recherche:",
+    "search_placeholder":           "Nom ou code GC…",
+    "show_label":                   "Show:",
+    "quick_all":                    "Toutes les caches",
+    "quick_not_found":              "Not found",
+    "quick_found":                  "Found",
+    "quick_available":              "Available (not found)",
+    "quick_traditional_easy":       "Traditional — easy (D≤2, T≤2)",
+    "quick_archived":               "Archived",
+    "count_caches":                 "{count} caches",
+    "count_cache_single":           "1 cache",
+    "filter_active_label":          "🔍 Filter active",
+
+    # ── Menu bar ──────────────────────────────────────────────────────────────
+    "menu_file":                    "&Fichier",
+    "menu_waypoint":                "&Waypoint",
+    "menu_view":                    "&Vue",
+    "menu_tools":                   "&Outils",
+    "menu_help":                    "&Aide",
+
+    # File menu
+    "action_db_manager":            "&Gérer les bases de données…",
+    "action_import":                "&Importer GPX / PQ zip…",
+    "action_quit":                  "&Quitter",
+
+    # Waypoint menu
+    "action_wp_add":                "&Ajouter une cache…",
+    "action_wp_edit":               "&Modifier une cache…",
+    "action_wp_delete":             "&Supprimer une cache…",
+
+    # View menu
+    "action_refresh":               "&Rafraîchir la liste",
+    "action_filter":                "🔍  &Définir le filtre…",
+    "action_clear_filter":          "❌  &Effacer le filtre",
+    "action_columns":               "&Choisir les colonnes…",
+
+    # Tools menu
+    "action_settings":              "&Paramètres…",
+    "action_found_update":          "⟳  Mettre à jour les caches trouvées depuis la base de données de référence…",
+    "action_gps_export":            "📤  Envoyer au GPS…",
+
+    # Help menu
+    "action_about":                 "A propos d'&OpenSAK…",
+
+    # ── Toolbar ───────────────────────────────────────────────────────────────
+    "toolbar_import":               "Importer",
+    "toolbar_filter":               "Filtre",
+    "toolbar_clear_filter":         "Effacer le filtre",
+    "toolbar_gps":                  "Envoyer au GPS",
+    "toolbar_refresh":              "Rafraîchir",
+
+    # ── Status bar ────────────────────────────────────────────────────────────
+    "status_filter_reset":          "Filtre effacé",
+    "status_filter_result":         "Filtre: {count} caches",
+    "status_cache_added":           "Cache {gc_code} ajoutée",
+    "status_cache_updated":         "Cache {gc_code} mise à jour",
+    "status_cache_deleted":         "Cache {gc_code} supprimée",
+    "status_db_name":               "Base de données: {db_name}",
+
+    # ── Waypoint dialog ───────────────────────────────────────────────────────
+    "wp_dialog_title_add":          "Ajouter une cache",
+    "wp_dialog_title_edit":         "Modifier une cache",
+    "wp_already_exists_title":      "Existe déjà",
+    "wp_already_exists_msg":        "{gc_code} existe déjà dans la base de données.",
+    "wp_delete_title":              "Supprimer la cache",
+    "wp_delete_msg":                "Êtes-vous sûr de vouloir supprimer :\n{gc_code} — {name}?",
+
+    # ── Import dialog ─────────────────────────────────────────────────────────
+    "import_dialog_title":          "Importer GPX / PQ Zip",
+    "import_drop_hint":             "Déposer un GPX ou un fichier ZIP ici",
+    "import_browse":                "Parcourir…",
+    "import_start":                 "Démarrer l'import",
+    "import_running":               "Importation en cours…",
+    "import_done":                  "Importation terminée: {count} caches importées",
+    "import_error":                 "L'importation a échoué: {error}",
+
+    # ── Filter dialog ─────────────────────────────────────────────────────────
+    "filter_dialog_title":          "Définir le filtre",
+    "filter_tab_general":           "Général",
+    "filter_tab_dates":             "Dates",
+    "filter_tab_attributes":        "Attributs",
+    "filter_apply":                 "Appliquer le filtre",
+    "filter_reset":                 "Réinitialiser",
+    "filter_save_profile":          "Enregistrer le profil…",
+    "filter_load_profile":          "Charger le profil…",
+
+    # ── GPS dialog ────────────────────────────────────────────────────────────
+    "gps_dialog_title":             "Envoyer au GPS",
+    "gps_caches_ready":             "<b>{count} caches</b> prêtes pour l'export (caches actuellement filtrées/visibles)",
+    "gps_dest_group":               "Destination",
+    "gps_rb_device":                "Envoyer directement au GPS:",
+    "gps_rb_file":                  "Enregistrer comme fichier GPX:",
+    "gps_scan_btn":                 "🔍 Balayage",
+    "gps_scan_scanning":            "⏳",
+    "gps_devices_found":            "✓ {count} appareil(s) Garmin trouvé(s)",
+    "gps_no_device":                "(Aucun GPS trouvé)",
+    "gps_no_device_hint":           "Aucun appareil Garmin trouvé — connectez votre GPS et cliquez sur Balayage à nouveau, ou utilisez 'Enregistrer comme fichier GPX'",
+    "gps_browse":                   "Parcourir…",
+    "gps_file_placeholder":         "Choisir un emplacement…",
+    "gps_opt_group":                "Options",
+    "gps_filename_label":           "Fichier:",
+    "gps_max_label":                "Max de caches:",
+    "gps_max_all":                  "Tout",
+    "gps_max_hint":                 "(0 = tout)",
+    "gps_delete_cb":                "Supprimer les fichiers GPX existants sur le GPS avant l'envoi",
+    "gps_export_btn":               "📤  Envoyer au GPS",
+    "gps_exporting":                "Exportation de {count} caches…",
+    "gps_deleting":                 "🗑️  Suppression des fichiers GPX existants du GPS…",
+    "gps_confirm_delete_title":     "Confirmer la suppression",
+    "gps_confirm_delete_msg":       "<b>{count} fichier(s) GPX</b> seront supprimés du GPS avant l'envoi.\n\nÊtes-vous sûr?",
+    "gps_confirm_no_files_msg":     "Aucun fichier GPX existant trouvé sur le GPS.\nVoulez-vous continuer l'envoi?",
+    "gps_delete_file_list":         "Fichiers à supprimer:\n{files}",
+    "gps_no_dest":                  "Sélectionnez une destination en premier.",
+
+    # ── Settings dialog ───────────────────────────────────────────────────────
+    "settings_dialog_title":        "Paramètres",
+    "settings_group_location":      "Coordonnées de base",
+    "settings_lat_label":           "Latitude:",
+    "settings_lon_label":           "Longitude:",
+    "settings_group_display":       "Affichage",
+    "settings_use_miles":           "Afficher les distances en miles (au lieu de km)",
+    "settings_show_archived":       "Afficher les caches archivées",
+    "settings_show_found":          "Afficher les caches trouvées",
+    "settings_map_label":           "Application de carte:",
+    "settings_map_google":          "Google Maps",
+    "settings_map_osm":             "OpenStreetMap",
+    "settings_group_language":      "Langue",
+    "settings_language_label":      "Langue:",
+    "settings_language_hint":       "Les changements prendront effet au prochain démarrage",
+
+    # ── Database dialog ───────────────────────────────────────────────────────
+    "db_dialog_title":              "Gérer les bases de données",
+    "db_add":                       "Créer une nouvelle…",
+    "db_open":                      "Ouvrir une existante…",
+    "db_delete":                    "Supprimer",
+    "db_activate":                  "Activer",
+    "db_active_marker":             "(active)",
+    "db_delete_confirm_title":      "Supprimer la base de données",
+    "db_delete_confirm_msg":        "Êtes-vous sûr de vouloir supprimer la base de données '{name}'?\nLe fichier sera supprimé de manière permanente.",
+    "db_cannot_delete_active":      "La base de données active ne peut pas être supprimée.\nVeuillez basculer vers une autre base de données en premier.",
+
+    # ── Found updater dialog ──────────────────────────────────────────────────
+    "found_dialog_title":           "Mettre à jour les caches trouvées à partir de la base de données de référence",
+    "found_start":                  "Démarrer la mise à jour",
+    "found_running":                "Mise à jour en cours…",
+    "found_done":                   "{count} caches marquées comme trouvées",
+
+    # ── Column chooser dialog ─────────────────────────────────────────────────
+    "column_dialog_title":          "Choisir les colonnes",
+    "column_available":             "Colonnes disponibles",
+    "column_visible":               "Colonnes visibles",
+
+    # ── About dialog ──────────────────────────────────────────────────────────
+    "about_title":                  "À propos d'OpenSAK",
+    "about_text":
+        "<h3>OpenSAK 1.1.0</h3>"
+        "<p>Un outil open source de gestion de géocaching "
+        "pour Linux et Windows.</p>"
+        "<p>Développé avec Python et PySide6.</p>"
+        "<p><a href='https://github.com/AgreeDK/opensak'>"
+        "github.com/AgreeDK/opensak</a></p>",
+    # ── Waypoint dialog — validation ──────────────────────────────────────────
+    "wp_tab_basic":                 "Basique",
+    "wp_tab_details":               "Détails",
+    "wp_tab_status":                "Statut",
+    "wp_val_gc_required":           "Le code GC est requis.",
+    "wp_val_gc_invalid":            "Le code GC doit commencer par 'GC'.",
+    "wp_val_name_required":         "Le nom est requis.",
+
+    # ── Import dialog ─────────────────────────────────────────────────────────
+    "import_select_file_label":     "Sélectionnez un fichier GPX ou une archive ZIP de Pocket Query :",
+    "import_no_file":               "(aucun fichier sélectionné)",
+    "import_browse_title":          "Sélectionnez un fichier GPX ou ZIP",
+    "import_file_filter":           "Fichiers de géocaching (*.gpx *.zip);;Fichiers GPX (*.gpx);;Fichiers ZIP (*.zip)",
+    "import_running_file":          "Importation de {name}…",
+    "import_log_placeholder":       "Le résultat de l'importation sera affiché ici…",
+    "import_again":                 "Importer à nouveau",
+
+    # ── GPS dialog ────────────────────────────────────────────────────────────
+    "gps_delete_cb_tooltip":        "Supprimer tous les fichiers .gpx du dossier Garmin/GPX sur l'appareil\navant le téléchargement du nouveau fichier. S'applique uniquement au téléchargement GPS direct.",
+    "gps_log_placeholder":          "Le statut sera affiché ici…",
+
+    # ── Found dialog ──────────────────────────────────────────────────────────
+    "found_ref_group":              "Base de données de référence (Mes Trouvailles)",
+    "found_rb_known":               "Sélectionner dans les bases de données connues :",
+    "found_rb_file":                "Sélectionnez un fichier .db :",
+    "found_no_file":                "(aucun fichier sélectionné)",
+    "found_log_placeholder":        "Le résultat sera affiché ici après la mise à jour…",
+    "found_update_btn":             "⟳  Mettre à jour les trouvailles",
+    "found_select_ref_first":       "Veuillez sélectionner une base de données de référence en premier.",
+    "found_same_db_error":          "La base de données de référence ne peut pas être la même que la base de données active.",
+    "found_running_file":           "Mise à jour à partir de : {name}…",
+    "found_browse_title":           "Sélectionner la base de données de référence",
+
+    # ── Database dialog ───────────────────────────────────────────────────────
+    "db_new_title":                 "Nouvelle base de données",
+    "db_name_label":                "Nom:",
+    "db_default_path":              "(Emplacement par défaut)",
+    "db_name_required":             "Veuillez entrer un nom pour la base de données.",
+    "db_browse_title":              "Sélectionner l'emplacement",
+    "db_file_filter":               "Base de données SQLite (*.db)",
+    "db_list_label":                "Bases de données:",
+    "db_details_group":             "Détails",
+    "db_path_label":                "Chemin:",
+    "db_size_label":                "Taille:",
+    "db_modified_label":            "Modifié:",
+    "db_switch_btn":                "⟵  Basculer vers celle-ci",
+    "db_new_btn":                   "＋  Nouvelle base de données…",
+    "db_open_btn":                  "📂  Ouvrir une base de données existante…",
+    "db_copy_btn":                  "⎘  Copier…",
+    "db_rename_btn":                "✎  Renommer…",
+    "db_remove_btn":                "✕  Retirer de la liste",
+    "db_delete_btn":                "🗑  Supprimer définitivement…",
+    "db_not_found":                 "Non trouvé",
+    "db_file_not_found":            "Fichier non trouvé",
+    "db_switched_title":            "Base de données changée",
+    "db_switched_msg":              "La base de données active est maintenant:\n{name}",
+    "db_created_title":             "Base de données créée",
+    "db_created_msg":               "'{name}' a été créée.\n\nUtilisez 'Basculer vers celle-ci' pour l'activer.",
+    "db_opened_title":              "Base de données ouverte",
+    "db_opened_msg":                "'{name}' a été ajoutée à la liste.",
+    "db_copied_title":              "Copie créée",
+    "db_copied_msg":                "'{new_name}' a été créée comme copie de '{orig_name}'.",
+    "db_remove_title":              "Retirer de la liste",
+    "db_remove_msg":                "Retirer '{name}' de la liste?\n\nLe fichier ne sera PAS supprimé.",
+    "db_delete_confirm_msg":        "Êtes-vous sûr de vouloir supprimer définitivement '{name}'?\n\nLe fichier {path} sera supprimé et ne pourra pas être récupéré!",
+    "db_copy_title":                "Copier la base de données",
+    "db_copy_name_label":           "Nom de la copie:",
+    "db_copy_suffix":               "copy",
+    "db_rename_title":              "Renommer la base de données",
+    "db_rename_label":              "Nouveau nom:",
+    "db_open_browse_title":         "Ouvrir la base de données",
+
+    # ── Column dialog ─────────────────────────────────────────────────────────
+    "column_dialog_hint":           "Sélectionnez les colonnes à afficher dans la liste de caches.\nLe code GC et le nom ne peuvent pas être masqués.",
+    "column_select_all":            "Tout sélectionner",
+    "column_select_default":        "Par défaut",
+
+    # ── Filter dialog ─────────────────────────────────────────────────────────
+    "filter_saved_label":           "Filtre enregistré:",
+    "filter_none":                  "(Aucun)",
+    "filter_save_btn":              "💾  Enregistrer",
+    "filter_delete_profile_tooltip":"Supprimer le profil sélectionné",
+    "filter_apply_btn":             "⚡  Appliquer",
+    "filter_reset_all_btn":         "↺  Réinitialiser tout",
+    "filter_reset_tab_btn":         "↺  Réinitialiser l'onglet",
+    "filter_name_label":            "Nom de la cache:",
+    "filter_contains_placeholder":  "Texte contenant…",
+    "filter_gc_label":              "Code GC:",
+    "filter_placed_by_label":       "Placé par:",
+    "filter_cache_type_group":      "Type de cache",
+    "filter_container_group":       "Taille du conteneur",
+    "filter_dt_group":              "Difficulté / Terrain",
+    "filter_difficulty_label":      "Difficulté:",
+    "filter_terrain_label":         "Terrain:",
+    "filter_from":                  "De:",
+    "filter_to":                    "À:",
+    "filter_found_group":           "Status de la découverte",
+    "filter_avail_group":           "Disponibilité",
+    "filter_available":             "Disponible",
+    "filter_unavailable":           "Temporairement indisponible",
+    "filter_distance_group":        "Distance du point central",
+    "filter_enable":                "Activer",
+    "filter_max":                   "Max:",
+    "filter_premium_group":         "Premium",
+    "filter_premium_only":          "Premium seulement",
+    "filter_not_premium":           "Non premium",
+    "filter_trackables_group":      "Trackables",
+    "filter_has_trackables":        "A des trackables",
+    "filter_no_trackables":         "Pas de trackables",
+    "filter_hidden_date_group":     "Date de la cache",
+    "filter_log_date_group":        "Date du dernier log",
+    "filter_caches_with":           "Caches qui ont:",
+    "filter_all_selected":          "TOUS les attributs sélectionnés",
+    "filter_attr_col_name":         "Attribut",
+    "filter_yes":                   "Oui",
+    "filter_no":                    "Non",
+    "filter_none_short":            "N'importe lequel",
+    "filter_save_title":            "Enregistrer le filtre",
+    "filter_profile_name_label":    "Nom du profil de filtre:",
+    "filter_saved_title":           "Enregistré",
+    "filter_saved_msg":             "Le filtre '{name}' a été enregistré.",
+    "filter_delete_title":          "Supprimer le profil",
+    "filter_delete_msg":            "Supprimer le profil de filtre '{name}'?",
+    "filter_load_error":            "Impossible de charger le profil:\n{error}",
+    # ── Cache detail panel ────────────────────────────────────────────────────
+    "detail_select_cache":          "Sélectionnez une cache dans la liste",
+    "detail_gc_code":               "Code GC",
+    "detail_type":                  "Type",
+    "detail_dt":                    "D / T",
+    "detail_container":             "Conteneur",
+    "detail_country":               "Pays",
+    "detail_coords":                "Coordonnées",
+    "detail_gc_tooltip":            "Cliquez pour ouvrir sur geocaching.com",
+    "detail_coords_tooltip":        "Cliquez pour ouvrir dans Google Maps",
+    "detail_tab_desc":              "Description",
+    "detail_tab_hint":              "Indice",
+    "detail_tab_logs":              "Logs",
+    "detail_tab_logs_count":        "Logs ({count})",
+    "detail_decode_btn":            "🔓  Decoder l'indice (ROT13)",
+    "detail_hide_hint_btn":         "🔒  Masquer l'indice",
+    "detail_log_search_placeholder":"Rechercher dans les logs…",
+    "detail_archived_mark":         " [ARCHIVÉE]",
+    "detail_placed_by":             "Placée par: {name}",
+    "detail_no_description":        "(Aucune description)",
+    "detail_no_hint":               "(Aucun indice)",
+    "detail_no_logs":               "(Aucun log)",
+    "detail_no_logs_match":         "(Aucun log ne correspond à '{text}')",
+
+    # ── Toolbar extras ────────────────────────────────────────────────────────
+    "toolbar_fit_all":              "Afficher tout",
+    "toolbar_home":                 "Base",
+    "toolbar_fit_all_tooltip":      "Zoomer la carte sur toutes les caches",
+    "toolbar_home_tooltip":         "Aller aux coordonnées de base",
+
+    # ── Cache table columns ───────────────────────────────────────────────────
+    "col_status_icon":  "Icone de statut",
+    "col_gc_code":      "Code GC",
+    "col_name":         "Nom",
+    "col_type":         "Type",
+    "col_difficulty":   "D",
+    "col_terrain":      "T",
+    "col_container":    "Conteneur",
+    "col_country":      "Pays",
+    "col_state":        "Région",
+    "col_distance":     "Distance",
+    "col_found":        "Trouvée",
+    "col_placed_by":    "Placée par",
+    "col_hidden_date":  "Date de parution",
+    "col_last_log":     "Dernier log",
+    "col_log_count":    "Nombre de logs",
+    "col_dnf":          "DNF",
+    "col_premium":      "Premium",
+    "col_archived":     "Archivée",
+    "col_favorite":     "Favori ★",
+
+    # ── Right-click context menu ──────────────────────────────────────────────
+    "ctx_open_geocaching":  "🌐  Ouvrir sur geocaching.com",
+    "ctx_open_maps":        "🗺️  Ouvrir dans {map_name}",
+    "ctx_copy_gc":          "📋  Copier le code GC",
+    "ctx_copy_coords":      "📋  Copier les coordonnées",
+    "ctx_mark_found":       "☑  Marquer comme trouvée",
+    "ctx_mark_not_found":   "☐  Marquer comme non trouvée",
+
+}

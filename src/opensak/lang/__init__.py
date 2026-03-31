@@ -21,6 +21,7 @@ from pathlib import Path
 AVAILABLE_LANGUAGES: dict[str, str] = {
     "da": "Dansk",
     "en": "English",
+    "fr": "Français",
 }
 
 # ── Aktiv oversættelses-dict ──────────────────────────────────────────────────
