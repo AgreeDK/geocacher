@@ -1,9 +1,7 @@
 """
 config.py — Application configuration and path management.
-
 All paths use pathlib.Path so they work identically on Linux and Windows.
 """
-
 from pathlib import Path
 import os
 
@@ -11,9 +9,8 @@ import os
 def get_app_data_dir() -> Path:
     """
     Return the platform-appropriate directory for storing app data.
-
     - Linux:   ~/.local/share/opensak
-    - Windows: %APPDATA%\\opensak   (ready for later)
+    - Windows: %APPDATA%\\opensak
     - macOS:   ~/Library/Application Support/opensak
     """
     if os.name == "nt":
@@ -50,13 +47,13 @@ def get_log_path() -> Path:
     return get_app_data_dir() / "opensak.log"
 
 
-# ── Sprog / Language ──────────────────────────────────────────────────────────
+# ── Language / Preferences ────────────────────────────────────────────────────
 
 _PREFS_FILE = None
 
 
 def _get_prefs_file() -> Path:
-    """Returner stien til præference-filen (JSON)."""
+    """Return the path to the preferences file (JSON)."""
     global _PREFS_FILE
     if _PREFS_FILE is None:
         _PREFS_FILE = get_app_data_dir() / "preferences.json"
@@ -65,8 +62,9 @@ def _get_prefs_file() -> Path:
 
 def get_language() -> str:
     """
-    Returner den gemte sprogkode.
-    Standard: 'da' (dansk).
+    Return the saved language code.
+    Default: 'en' (English) for new installations.
+    Once the user selects a language it is saved and restored on next startup.
     """
     import json
     prefs_file = _get_prefs_file()
@@ -76,14 +74,14 @@ def get_language() -> str:
             return data.get("language", "en")
         except (json.JSONDecodeError, OSError):
             pass
-    return "da"
+    return "en"
 
 
 def set_language(lang_code: str) -> None:
-    """Gem sprogkoden til disk."""
+    """Save the language code to disk."""
     import json
     prefs_file = _get_prefs_file()
-    # Læs eksisterende præferencer (for ikke at overskrive andre indstillinger)
+    # Read existing preferences (to avoid overwriting other settings)
     data: dict = {}
     if prefs_file.exists():
         try:

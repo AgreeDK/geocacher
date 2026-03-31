@@ -279,6 +279,75 @@ python run.py
 
 ---
 
+## Uninstalling OpenSAK
+
+OpenSAK does not have an installer or uninstaller. To remove it completely,
+delete the following files and folders manually.
+
+> **Tip:** Your geocaching databases are stored inside the data folder below.
+> If you want to keep your data for a future reinstall, back up that folder
+> before deleting it.
+
+### 🐧 Linux
+
+**Application data** (databases, imports, preferences, log file):
+```bash
+rm -rf ~/.local/share/opensak/
+```
+
+> If you have set a custom `XDG_DATA_HOME` environment variable, replace
+> `~/.local/share` with that path.
+
+**Program files** (if installed via the automatic installer or git clone):
+```bash
+rm -rf ~/opensak/
+```
+
+**Application menu shortcut** (if created by the automatic installer):
+```bash
+rm -f ~/.local/share/applications/opensak.desktop
+```
+
+**Desktop shortcut** (if you created one):
+```bash
+rm -f ~/Desktop/opensak.desktop
+```
+
+---
+
+### 🪟 Windows
+
+**Application data** (databases, imports, preferences, log file):
+
+Open File Explorer and delete this folder:
+```
+C:\Users\<YourName>\AppData\Roaming\opensak\
+```
+
+Or run this in Command Prompt:
+```cmd
+rmdir /s /q "%APPDATA%\opensak"
+```
+
+**Program files:**
+
+Delete the folder where you placed `OpenSAK.exe` or extracted the ZIP file.
+
+---
+
+### 🍎 macOS
+
+**Application data** (databases, imports, preferences, log file):
+```bash
+rm -rf ~/Library/Application\ Support/opensak/
+```
+
+**Program files:**
+
+Drag the OpenSAK app from your Applications folder to the Trash.
+
+---
+
 ## Reporting Bugs
 
 Please use [GitHub Issues](https://github.com/AgreeDK/opensak/issues) and include:
