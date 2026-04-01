@@ -171,6 +171,14 @@ class FilterDialog(QDialog):
         self.setWindowTitle(tr("filter_dialog_title"))
         self.setMinimumSize(620, 740)
         self._attr_boxes: dict[int, TriStateBox] = {}
+        # Sæt startsstørrelse til 80% af skærmen (min 620x830)
+        from PySide6.QtWidgets import QApplication
+        screen = QApplication.primaryScreen()
+        if screen:
+            rect = screen.availableGeometry()
+            w = max(620, int(rect.width()  * 0.80))
+            h = max(830, int(rect.height() * 0.80))
+            self.resize(w, h)
         self._setup_ui()
         if current_filterset:
             self._load_filterset(current_filterset)
@@ -237,9 +245,17 @@ class FilterDialog(QDialog):
         layout.addLayout(btn_row)
 
     def _build_general_tab(self) -> QWidget:
-        """Generelt filter fane."""
-        widget = QWidget()
-        layout = QFormLayout(widget)
+        """Generelt filter fane — indpakket i QScrollArea så indhold ikke klemmes."""
+        outer = QWidget()
+        outer_layout = QVBoxLayout(outer)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        inner = QWidget()
+        layout = QFormLayout(inner)
         layout.setSpacing(8)
         layout.setContentsMargins(10, 10, 10, 10)
 
@@ -388,7 +404,9 @@ class FilterDialog(QDialog):
         tb_layout.addStretch()
         layout.addRow(tb_group)
 
-        return widget
+        scroll.setWidget(inner)
+        outer_layout.addWidget(scroll)
+        return outer
 
     def _build_dates_tab(self) -> QWidget:
         """Datoer filter fane."""
