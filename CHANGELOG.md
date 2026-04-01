@@ -12,6 +12,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.3.4] — 2026
+### Added
+- **fix problem with import of large GSAK export**
+  -
+
 ## [1.3.3] — 2026
 ### Added
 - **fix of DT filter not displaying correctlyCorrected Coordinate**
