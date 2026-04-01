@@ -180,6 +180,20 @@ class MainWindow(QMainWindow):
         act_projection.triggered.connect(self._open_projection)
         gc_tools_menu.addAction(act_projection)
 
+        gc_tools_menu.addSeparator()
+
+        act_checksum = QAction(tr("action_checksum"), self)
+        act_checksum.triggered.connect(self._open_checksum)
+        gc_tools_menu.addAction(act_checksum)
+
+        act_midpoint = QAction(tr("action_midpoint"), self)
+        act_midpoint.triggered.connect(self._open_midpoint)
+        gc_tools_menu.addAction(act_midpoint)
+
+        act_dist_bearing = QAction(tr("action_dist_bearing"), self)
+        act_dist_bearing.triggered.connect(self._open_dist_bearing)
+        gc_tools_menu.addAction(act_dist_bearing)
+
         # ── Hjælp ─────────────────────────────────────────────────────────────
         help_menu = menubar.addMenu(tr("menu_help"))
 
@@ -587,6 +601,36 @@ class MainWindow(QMainWindow):
             dlg = ProjectionDialog(cache.latitude, cache.longitude, parent=self)
         else:
             dlg = ProjectionDialog(parent=self)
+        dlg.exec()
+
+    def _open_checksum(self) -> None:
+        """Åbn tjeksum-beregner — præ-udfyld med valgt cache hvis mulig."""
+        from opensak.gui.dialogs.checksum_dialog import ChecksumDialog
+        cache = self._cache_table.selected_cache()
+        if cache and cache.latitude and cache.longitude:
+            dlg = ChecksumDialog(cache.latitude, cache.longitude, parent=self)
+        else:
+            dlg = ChecksumDialog(parent=self)
+        dlg.exec()
+
+    def _open_midpoint(self) -> None:
+        """Åbn midtpunkt-beregner — præ-udfyld punkt A med valgt cache hvis mulig."""
+        from opensak.gui.dialogs.midpoint_dialog import MidpointDialog
+        cache = self._cache_table.selected_cache()
+        if cache and cache.latitude and cache.longitude:
+            dlg = MidpointDialog(cache.latitude, cache.longitude, parent=self)
+        else:
+            dlg = MidpointDialog(parent=self)
+        dlg.exec()
+
+    def _open_dist_bearing(self) -> None:
+        """Åbn afstand & retning — præ-udfyld punkt A med valgt cache hvis mulig."""
+        from opensak.gui.dialogs.distance_bearing_dialog import DistanceBearingDialog
+        cache = self._cache_table.selected_cache()
+        if cache and cache.latitude and cache.longitude:
+            dlg = DistanceBearingDialog(cache.latitude, cache.longitude, parent=self)
+        else:
+            dlg = DistanceBearingDialog(parent=self)
         dlg.exec()
 
     def _show_about(self) -> None:

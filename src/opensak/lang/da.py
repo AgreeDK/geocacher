@@ -81,6 +81,9 @@ STRINGS: dict[str, str] = {
     "menu_gc_tools":                "&Værktøjer",
     "action_coord_converter":       "⇄  &Koordinatkonverter…",
     "action_projection":            "📐  &Koordinatprojektion…",
+    "action_checksum":              "🔢  &Tjeksum-beregner…",
+    "action_midpoint":              "⊕  &Midtpunkt…",
+    "action_dist_bearing":          "📏  &Afstand && Retning…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
     "toolbar_import":               "Importer",
@@ -443,5 +446,33 @@ STRINGS: dict[str, str] = {
     "proj_unit_m":                  "meter",
     "proj_unit_ft":                 "fod",
     "proj_result_group":            "Beregnet koordinat",
+
+    # ── Tjeksum dialog ────────────────────────────────────────────────────────
+    "chk_title":                    "Tjeksum-beregner",
+    "chk_input_group":              "Koordinat",
+    "chk_input_hint":               "Skriv eller indsæt et koordinat — alle cifre summeres automatisk",
+    "chk_input_placeholder":        "f.eks. N55 47.250 E012 25.000",
+    "chk_result_group":             "Resultater",
+    "chk_total_label":              "Total sum:",
+    "chk_ns_label":                 "N/S del:",
+    "chk_ew_label":                 "E/W del:",
+    "chk_digits_label":             "Cifre:",
+
+    # ── Midtpunkt dialog ──────────────────────────────────────────────────────
+    "mid_title":                    "Midtpunkt",
+    "mid_point_a":                  "Koordinat A",
+    "mid_point_b":                  "Koordinat B",
+    "mid_placeholder":              "f.eks. N55 47.250 E012 25.000",
+    "mid_result_group":             "Midtpunkt",
+
+    # ── Afstand & retning dialog ──────────────────────────────────────────────
+    "dist_title":                   "Afstand & Retning",
+    "dist_point_a":                 "Koordinat A (fra)",
+    "dist_point_b":                 "Koordinat B (til)",
+    "dist_placeholder":             "f.eks. N55 47.250 E012 25.000",
+    "dist_result_group":            "Resultater",
+    "dist_distance_label":          "Afstand:",
+    "dist_bearing_fwd":             "Retning A → B:",
+    "dist_bearing_rev":             "Retning B → A:",
 
 }

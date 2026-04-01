@@ -81,6 +81,9 @@ STRINGS: dict[str, str] = {
     "menu_gc_tools":                "&Outils géo",
     "action_coord_converter":       "⇄  &Convertisseur de coordonnées…",
     "action_projection":            "📐  &Projection de coordonnées…",
+    "action_checksum":              "🔢  &Somme des chiffres…",
+    "action_midpoint":              "⊕  &Point médian…",
+    "action_dist_bearing":          "📏  &Distance && Cap…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
     "toolbar_import":               "Importer",
@@ -443,5 +446,33 @@ STRINGS: dict[str, str] = {
     "proj_unit_m":                  "mètres",
     "proj_unit_ft":                 "pieds",
     "proj_result_group":            "Coordonnée projetée",
+
+    # ── Calculateur de somme de chiffres ──────────────────────────────────────
+    "chk_title":                    "Somme des chiffres",
+    "chk_input_group":              "Coordonnée",
+    "chk_input_hint":               "Saisissez ou collez une coordonnée — tous les chiffres sont additionnés automatiquement",
+    "chk_input_placeholder":        "ex. N55 47.250 E012 25.000",
+    "chk_result_group":             "Résultats",
+    "chk_total_label":              "Somme totale:",
+    "chk_ns_label":                 "Partie N/S:",
+    "chk_ew_label":                 "Partie E/W:",
+    "chk_digits_label":             "Chiffres:",
+
+    # ── Calculateur de point médian ───────────────────────────────────────────
+    "mid_title":                    "Point médian",
+    "mid_point_a":                  "Coordonnée A",
+    "mid_point_b":                  "Coordonnée B",
+    "mid_placeholder":              "ex. N55 47.250 E012 25.000",
+    "mid_result_group":             "Point médian",
+
+    # ── Distance & cap ────────────────────────────────────────────────────────
+    "dist_title":                   "Distance & Cap",
+    "dist_point_a":                 "Coordonnée A (de)",
+    "dist_point_b":                 "Coordonnée B (vers)",
+    "dist_placeholder":             "ex. N55 47.250 E012 25.000",
+    "dist_result_group":            "Résultats",
+    "dist_distance_label":          "Distance:",
+    "dist_bearing_fwd":             "Cap A → B:",
+    "dist_bearing_rev":             "Cap B → A:",
 
 }

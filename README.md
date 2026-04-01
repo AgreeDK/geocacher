@@ -46,13 +46,22 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 ### Right-click Menu
 - 🌐 Open on geocaching.com
 - 🗺️ Open in map app (Google Maps / OpenStreetMap)
-- 📋 Copy GC code / coordinates
+- 📋 Copy GC code / coordinates (in your chosen format)
 - ☑ Mark as found / not found
+- ⇄ Open coordinate converter directly from the cache list
 
 ### GPS Export
 - 📤 **Send to Garmin GPS** — auto-detects USB-mounted Garmin devices
 - 🗑️ **Optional: delete existing GPX files** on device before upload
 - 💾 **Save as GPX file** — export to any location
+
+### Geocaching Tools
+- **⇄ Coordinate Converter** — convert between DD, DMM and DMS formats with one click
+- **📐 Coordinate Projection** — calculate a new coordinate from bearing and distance
+- **🔢 Digit Checksum** — sum all digits in a coordinate (N/S and E/W separately)
+- **⊕ Midpoint** — find the great-circle midpoint between two coordinates
+- **📏 Distance & Bearing** — distance and azimuth between two coordinates
+- All tools open pre-filled with the currently selected cache's coordinates
 
 ### Language Support
 - 🌍 **Danish and English** built in
@@ -205,7 +214,8 @@ python run.py
 ### 3. Set your home location
 1. Go to **Tools → Settings**
 2. Enter your home coordinates (latitude / longitude)
-3. Choose your preferred map app (Google Maps or OpenStreetMap)
+3. Choose your preferred **coordinate format** (DMM, DMS or DD)
+4. Choose your preferred map app (Google Maps or OpenStreetMap)
 
 ### 4. Filter and find caches
 - **Quick filter** — dropdown at the top of the window
@@ -389,15 +399,21 @@ opensak/
 │       ├── cache_detail.py
 │       ├── map_widget.py
 │       ├── settings.py
+│       ├── coords.py                       # Coordinate format conversion (DD/DMM/DMS)
 │       └── dialogs/
-│           ├── filter_dialog.py    # Advanced filter (3 tabs)
+│           ├── filter_dialog.py            # Advanced filter (3 tabs)
 │           ├── import_dialog.py
 │           ├── waypoint_dialog.py
 │           ├── column_dialog.py
 │           ├── database_dialog.py
 │           ├── found_dialog.py
 │           ├── gps_dialog.py
-│           └── settings_dialog.py
+│           ├── settings_dialog.py
+│           ├── coord_converter_dialog.py   # Geocaching tool: coordinate converter
+│           ├── projection_dialog.py        # Geocaching tool: coordinate projection
+│           ├── checksum_dialog.py          # Geocaching tool: digit checksum
+│           ├── midpoint_dialog.py          # Geocaching tool: midpoint calculator
+│           └── distance_bearing_dialog.py  # Geocaching tool: distance & bearing
 └── tests/
     ├── test_db.py                  # 13 tests
     ├── test_importer.py            # 11 tests
@@ -411,12 +427,14 @@ opensak/
 - [ ] HTML/PDF reports and statistics
 - [ ] GPS export — improve auto-detection on all Linux distros
 - [ ] Favourite points (requires Geocaching.com API)
+- [ ] More languages (German, Swedish, …)
+- [x] Geocaching Tools menu — coordinate converter, projection, checksum, midpoint, distance & bearing
+- [x] Coordinate format preference (DMM / DMS / DD)
 - [x] Windows installer (.exe) — built automatically via GitHub Actions
 - [x] Linux AppImage — built automatically via GitHub Actions
 - [x] macOS installer (.dmg) — arm64 and x86_64, built automatically via GitHub Actions
 - [x] GitHub Actions CI/CD pipeline
 - [x] French language — contributed by @theyoungstone
-- [ ] More languages (German, Swedish, …)
 
 ---
 

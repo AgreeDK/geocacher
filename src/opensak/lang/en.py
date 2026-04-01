@@ -81,6 +81,9 @@ STRINGS: dict[str, str] = {
     "menu_gc_tools":                "&Tools",
     "action_coord_converter":       "⇄  &Coordinate Converter…",
     "action_projection":            "📐  &Coordinate Projection…",
+    "action_checksum":              "🔢  &Digit Checksum…",
+    "action_midpoint":              "⊕  &Midpoint…",
+    "action_dist_bearing":          "📏  &Distance && Bearing…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
     "toolbar_import":               "Import",
@@ -443,5 +446,33 @@ STRINGS: dict[str, str] = {
     "proj_unit_m":                  "metres",
     "proj_unit_ft":                 "feet",
     "proj_result_group":            "Projected coordinate",
+
+    # ── Checksum dialog ───────────────────────────────────────────────────────
+    "chk_title":                    "Digit Checksum",
+    "chk_input_group":              "Coordinate",
+    "chk_input_hint":               "Type or paste a coordinate — all digits are summed automatically",
+    "chk_input_placeholder":        "e.g. N55 47.250 E012 25.000",
+    "chk_result_group":             "Results",
+    "chk_total_label":              "Total sum:",
+    "chk_ns_label":                 "N/S part:",
+    "chk_ew_label":                 "E/W part:",
+    "chk_digits_label":             "Digits:",
+
+    # ── Midpoint dialog ───────────────────────────────────────────────────────
+    "mid_title":                    "Midpoint",
+    "mid_point_a":                  "Coordinate A",
+    "mid_point_b":                  "Coordinate B",
+    "mid_placeholder":              "e.g. N55 47.250 E012 25.000",
+    "mid_result_group":             "Midpoint",
+
+    # ── Distance & bearing dialog ─────────────────────────────────────────────
+    "dist_title":                   "Distance & Bearing",
+    "dist_point_a":                 "Coordinate A (from)",
+    "dist_point_b":                 "Coordinate B (to)",
+    "dist_placeholder":             "e.g. N55 47.250 E012 25.000",
+    "dist_result_group":            "Results",
+    "dist_distance_label":          "Distance:",
+    "dist_bearing_fwd":             "Bearing A → B:",
+    "dist_bearing_rev":             "Bearing B → A:",
 
 }

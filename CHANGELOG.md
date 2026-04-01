@@ -9,7 +9,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Improved GPS auto-detection on all Linux distros
 - More languages (German, Swedish, …)
 - Favourite points (requires Geocaching.com API)
-- Coordinate format options (e.g. N XX° XX.XXX E XXX° XX.XXX)
+
+---
+
+## [1.3.0] — 2026
+### Added
+- **Geocaching Tools menu** — new dedicated menu in the menu bar with five geocaching utilities:
+  - **⇄ Coordinate Converter** (`Ctrl+K`) — convert between DD, DMM and DMS; open result in map
+  - **📐 Coordinate Projection** (`Ctrl+P`) — project a new coordinate from start point, bearing and distance
+  - **🔢 Digit Checksum** — sum all digits in a coordinate; shows N/S and E/W parts separately
+  - **⊕ Midpoint** — calculate the great-circle midpoint between two coordinates
+  - **📏 Distance & Bearing** — distance and azimuth (both directions) between two coordinates
+- **Coordinate format preference** in Settings — choose between DMM (default, geocaching standard), DMS and DD
+- **Coordinate converter button** (⇄) in the cache detail panel next to coordinates
+- All tools pre-fill with the currently selected cache's coordinates where applicable
 
 ---
 
