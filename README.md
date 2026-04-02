@@ -26,8 +26,16 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 ### Import & Database
 - 📥 **Import** GPX files and Pocket Query ZIP files from Geocaching.com
 - 🗄️ **Multiple databases** — keep regions separate (e.g. Zealand, Bornholm, Cyprus)
-- 📍 **Centre point per database** — distances calculated from your chosen home location
+- 📍 **Home points** — save multiple named home points (Home, Cottage, Hotel…) and switch instantly from the toolbar
 - ✅ **Update finds** from a reference database (e.g. your "My Finds" PQ)
+
+### Trip Planning
+- 🗺️ **Trip Planner** (`Ctrl+T`) — plan a geocaching trip in two modes:
+  - **Radius** — find caches within a set distance from your active home point; sort by distance, difficulty, terrain, date or name
+  - **Route A→B→…** — find caches along a multi-point route (up to 10 waypoints); caches sorted in driving order along the route
+- Route points can be typed in any coordinate format or picked from your saved home points
+- **Preview on map** — open selected trip caches on an interactive map with one click
+- Export trip caches directly to GPS or as a GPX file
 
 ### View & Navigation
 - 🗺️ **Interactive map** with OpenStreetMap and colour-coded cache pins with clustering
@@ -41,6 +49,7 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 - 📋 **Cache details** — description, hints and logs
 - 🔓 **ROT13 hint decoding** — one click to decode / re-hide the hint
 - 🔍 **Search in logs** — real-time search with match highlighting
+- 📍 **Corrected coordinates** — store solved puzzle coordinates per cache; used in GPS export and shown on map
 - ✏️ **Add / edit / delete** caches manually
 
 ### Right-click Menu
@@ -48,6 +57,7 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 - 🗺️ Open in map app (Google Maps / OpenStreetMap)
 - 📋 Copy GC code / coordinates (in your chosen format)
 - ☑ Mark as found / not found
+- 📍 Add / edit / clear corrected coordinates
 - ⇄ Open coordinate converter directly from the cache list
 
 ### GPS Export
@@ -64,7 +74,7 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 - All tools open pre-filled with the currently selected cache's coordinates
 
 ### Language Support
-- 🌍 **Danish and English** built in
+- 🌍 **Danish, English and French** built in
 - 🔧 **Easy to add new languages** — copy one file, translate, done
 
 ---
@@ -212,16 +222,24 @@ python run.py
 3. Select your `.zip` file and click **Import**
 
 ### 3. Set your home location
-1. Go to **Tools → Settings**
-2. Enter your home coordinates (latitude / longitude)
-3. Choose your preferred **coordinate format** (DMM, DMS or DD)
-4. Choose your preferred map app (Google Maps or OpenStreetMap)
+1. Go to **Settings → Settings**
+2. Add one or more named home points (e.g. Home, Cottage, Hotel)
+3. Coordinates can be entered in any format (DMM, DMS or DD)
+4. Activate the home point you want to use — or switch from the toolbar dropdown
+5. Choose your preferred **coordinate format** and map app
 
 ### 4. Filter and find caches
 - **Quick filter** — dropdown at the top of the window
-- **Advanced filter** — click 🔍 **Filter** in the toolbar (Ctrl+F)
+- **Advanced filter** — click 🔍 **Filter** in the toolbar (`Ctrl+F`)
   - General, Dates and ~70 Groundspeak attributes
   - Save filter profiles for reuse
+
+### 5. Plan a trip
+1. Click **🗺️ Trip Planner** in the toolbar (`Ctrl+T`)
+2. Choose **Radius** to find caches near your home point, or **Route** to find caches along a drive
+3. Adjust criteria — the preview updates live
+4. Click **🗺️ Show on map** to visualise the selection
+5. Export to GPS or save as GPX file
 
 ---
 
@@ -231,13 +249,13 @@ python run.py
 2. Create a new database called "My Finds" in OpenSAK
 3. Import the My Finds ZIP file into that database
 4. Switch back to the database you want to update
-5. Go to **Tools → Update finds from reference database**
+5. Go to **Settings → Update finds from reference database**
 
 ---
 
 ## Changing the Language
 
-1. Go to **Tools → Settings**
+1. Go to **Settings → Settings**
 2. Select your language in the **Language** section
 3. Restart OpenSAK — the new language takes effect on next startup
 
@@ -251,6 +269,7 @@ Currently supported: **Danish (da)**, **English (en)**, **French (fr)**
    AVAILABLE_LANGUAGES = {
        "da": "Dansk",
        "en": "English",
+       "fr": "Français",
        "de": "Deutsch",   # ← add this line
    }
    ```
@@ -300,61 +319,26 @@ delete the following files and folders manually.
 
 ### 🐧 Linux
 
-**Application data** (databases, imports, preferences, log file):
 ```bash
 rm -rf ~/.local/share/opensak/
-```
-
-> If you have set a custom `XDG_DATA_HOME` environment variable, replace
-> `~/.local/share` with that path.
-
-**Program files** (if installed via the automatic installer or git clone):
-```bash
 rm -rf ~/opensak/
-```
-
-**Application menu shortcut** (if created by the automatic installer):
-```bash
 rm -f ~/.local/share/applications/opensak.desktop
-```
-
-**Desktop shortcut** (if you created one):
-```bash
 rm -f ~/Desktop/opensak.desktop
 ```
 
----
-
 ### 🪟 Windows
 
-**Application data** (databases, imports, preferences, log file):
-
-Open File Explorer and delete this folder:
-```
-C:\Users\<YourName>\AppData\Roaming\opensak\
-```
-
-Or run this in Command Prompt:
 ```cmd
 rmdir /s /q "%APPDATA%\opensak"
 ```
-
-**Program files:**
-
-Delete the folder where you placed `OpenSAK.exe` or extracted the ZIP file.
-
----
+Then delete the folder where you placed `OpenSAK.exe`.
 
 ### 🍎 macOS
 
-**Application data** (databases, imports, preferences, log file):
 ```bash
 rm -rf ~/Library/Application\ Support/opensak/
 ```
-
-**Program files:**
-
-Drag the OpenSAK app from your Applications folder to the Trash.
+Then drag the OpenSAK app from Applications to Trash.
 
 ---
 
@@ -399,7 +383,7 @@ opensak/
 │       ├── cache_detail.py
 │       ├── map_widget.py
 │       ├── settings.py
-│       ├── coords.py                       # Coordinate format conversion (DD/DMM/DMS)
+│       ├── coords.py               # Coordinate format conversion (DD/DMM/DMS)
 │       └── dialogs/
 │           ├── filter_dialog.py            # Advanced filter (3 tabs)
 │           ├── import_dialog.py
@@ -407,8 +391,10 @@ opensak/
 │           ├── column_dialog.py
 │           ├── database_dialog.py
 │           ├── found_dialog.py
-│           ├── gps_dialog.py
+│           ├── gps_dialog.py               # GPS export + delete
+│           ├── trip_dialog.py              # Trip planner (radius + route)
 │           ├── settings_dialog.py
+│           ├── corrected_coords_dialog.py  # Corrected coordinates
 │           ├── coord_converter_dialog.py   # Geocaching tool: coordinate converter
 │           ├── projection_dialog.py        # Geocaching tool: coordinate projection
 │           ├── checksum_dialog.py          # Geocaching tool: digit checksum
@@ -428,13 +414,16 @@ opensak/
 - [ ] GPS export — improve auto-detection on all Linux distros
 - [ ] Favourite points (requires Geocaching.com API)
 - [ ] More languages (German, Swedish, …)
+- [x] **Trip Planner** — radius and multi-point route corridor with map preview
+- [x] **Home points list** — named locations with toolbar quick-switch
+- [x] **Corrected coordinates** — store and use solved puzzle coordinates
 - [x] Geocaching Tools menu — coordinate converter, projection, checksum, midpoint, distance & bearing
 - [x] Coordinate format preference (DMM / DMS / DD)
+- [x] French language — contributed by @theyoungstone
 - [x] Windows installer (.exe) — built automatically via GitHub Actions
 - [x] Linux AppImage — built automatically via GitHub Actions
 - [x] macOS installer (.dmg) — arm64 and x86_64, built automatically via GitHub Actions
 - [x] GitHub Actions CI/CD pipeline
-- [x] French language — contributed by @theyoungstone
 
 ---
 
