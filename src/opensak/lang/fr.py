@@ -50,7 +50,7 @@ STRINGS: dict[str, str] = {
     "menu_file":                    "&Fichier",
     "menu_waypoint":                "&Waypoint",
     "menu_view":                    "&Vue",
-    "menu_tools":                   "&Outils",
+    "menu_tools":                   "&Paramètres",
     "menu_help":                    "&Aide",
 
     # File menu
@@ -570,5 +570,102 @@ STRINGS: dict[str, str] = {
     "attr_stroller":           "Accessible en poussette",
     "attr_fuel":               "Carburant à proximité",
     "attr_food":               "Nourriture à proximité",
+
+
+    # ── Planificateur de sortie ───────────────────────────────────────────────
+    "trip_dialog_title":            "Planificateur de sortie",
+    "trip_source_label":            "Travail avec {count} caches de la vue actuelle",
+    "trip_criteria_group":          "Critères",
+    "trip_count_label":             "Nombre de caches pour la sortie :",
+    "trip_radius_label":            "Rayon maximal depuis le point central :",
+    "trip_radius_all":              "Sans limite",
+    "trip_unit_km":                 "km",
+    "trip_unit_mi":                 "mi",
+    "trip_sort_label":              "Trier par :",
+    "trip_sort_distance":           "Distance (plus proche en premier)",
+    "trip_sort_difficulty":         "Difficulté (plus facile en premier)",
+    "trip_sort_terrain":            "Terrain (plus facile en premier)",
+    "trip_sort_hidden_date":        "Date de pose (plus récente en premier)",
+    "trip_sort_name":               "Nom (A–Z)",
+    "trip_cb_not_found":            "Uniquement les caches non trouvées",
+    "trip_cb_available":            "Uniquement disponibles (non archivées)",
+    "trip_preview_group":           "Aperçu",
+    "trip_result_label":            "{count} caches sélectionnées pour la sortie",
+    "trip_col_gc":                  "Code GC",
+    "trip_col_name":                "Nom",
+    "trip_col_type":                "Type",
+    "trip_col_dist":                "Distance",
+    "trip_btn_export_gps":          "📤  Envoyer vers GPS…",
+    "trip_btn_export_file":         "💾  Enregistrer en GPX…",
+    "trip_save_dialog_title":       "Enregistrer la sortie en GPX",
+    "trip_export_done_title":       "Export terminé",
+
+    # Toolbar & menu
+    "action_trip_planner":          "🗺️  &Planificateur de sortie…",
+    "toolbar_trip":                 "Planificateur",
+    "toolbar_trip_tooltip":         "Planifier une sortie geocaching",
+    "toolbar_home":                 "Accueil",
+    "toolbar_home_tooltip":         "Centrer la carte sur le point de départ",
+
+
+    "trip_center_info":                        "📍 Le rayon est calculé depuis votre point central (défini dans les Paramètres). Mettez le rayon à 0 pour voir toutes les caches sans filtre de distance.",
+    "trip_found_hint":                         "Nécessite que vous ayez exécuté \"Mettre à jour les trouvailles\" (menu Outils) pour que les caches trouvées soient correctement marquées.",
+    "trip_no_center_warning":                  "⚠️  Le point central n'est pas défini — allez dans Paramètres et saisissez votre point de départ, ou mettez le rayon à 0.",
+
+
+    # ── Hjemmepunkter i indstillinger ────────────────────────────────────────
+    "settings_hp_col_name":                    "Nom",
+    "settings_hp_col_lat":                     "Latitude",
+    "settings_hp_col_lon":                     "Longitude",
+    "settings_hp_activate":                    "★ Activer",
+    "settings_hp_edit":                        "Modifier",
+    "settings_hp_delete":                      "Supprimer",
+    "settings_hp_add_group":                   "Ajouter / modifier un point",
+    "settings_hp_name_label":                  "Nom :",
+    "settings_hp_name_placeholder":            "ex. Domicile, Résidence…",
+    "settings_hp_coord_label":                 "Coordonnée :",
+    "settings_hp_coord_placeholder":           "ex. N55 47.250 E012 25.000",
+    "settings_hp_coord_error":                 "✗  Format de coordonnée inconnu",
+    "settings_hp_add_btn":                     "Enregistrer le point",
+    "settings_hp_delete_title":                "Supprimer le point de départ",
+    "settings_hp_delete_msg":                  "Êtes-vous sûr de vouloir supprimer \"{name}\" ?",
+    "settings_hp_name_required":               "Veuillez saisir un nom pour le point.",
+    "settings_hp_coord_required":              "Veuillez saisir des coordonnées.",
+    "settings_hp_coord_invalid":               "Format de coordonnée invalide — essayez ex. N55 47.250 E012 25.000",
+    "toolbar_home_combo_tooltip":              "Changer le point de départ actif",
+    "toolbar_home_no_points":                  "(Aucun point de départ)",
+    "status_home_changed":                     "Point de départ : {name}",
+
+
+    # ── Turplanlægger — rute-fane ──────────────────────────────────────────
+    "trip_tab_radius":                         "📍 Rayon",
+    "trip_tab_route":                          "🗺️ Itinéraire A→B→…",
+    "trip_corridor_label":                     "Largeur du couloir (distance max depuis l'itinéraire) :",
+    "trip_route_points_group":                 "Points d'itinéraire (max {max})",
+    "trip_route_add_group":                    "Ajouter un point",
+    "trip_route_point_name":                   "Nom :",
+    "trip_route_name_placeholder":             "ex. Hôtel, Aire de repos…",
+    "trip_route_coord_label":                  "Coordonnée :",
+    "trip_route_coord_placeholder":            "ex. N55 47.250 E012 25.000",
+    "trip_route_add_btn":                      "Ajouter le point",
+    "trip_route_from_home":                    "Depuis les points de départ…",
+    "trip_route_from_home_tooltip":            "Ajouter un point de départ enregistré comme point d'itinéraire",
+    "trip_route_btn_up":                       "Monter",
+    "trip_route_btn_down":                     "Descendre",
+    "trip_route_btn_del":                      "Supprimer le point",
+    "trip_route_btn_clear":                    "Tout effacer",
+    "trip_route_info":                         "📍 Les caches sont triées dans l'ordre de conduite le long de l'itinéraire. La largeur du couloir définit la distance de recherche depuis l'itinéraire.",
+    "trip_route_no_points_yet":                "Ajoutez au moins un point d'itinéraire pour voir les caches.",
+    "trip_route_max_reached":                  "Vous pouvez avoir au maximum {max} points d'itinéraire.",
+    "trip_route_no_home_points":               "Aucun point de départ enregistré — ajoutez-en dans les Paramètres.",
+    "trip_route_pick_home_title":              "Sélectionner un point de départ",
+    "trip_route_pick_home_label":              "Sélectionnez le point de départ à ajouter comme point d'itinéraire :",
+
+
+    # ── Turplanlægger — kortvisning ──────────────────────────────────────────
+    "trip_btn_preview_map":                    "🗺️  Afficher sur la carte",
+    "trip_btn_preview_map_tooltip":            "Ouvrir les caches sélectionnées sur une carte interactive",
+    "trip_map_preview_title":                  "Planificateur — Aperçu carte",
+    "trip_map_preview_info":                   "{count} caches affichées — le planificateur reste ouvert",
 
 }

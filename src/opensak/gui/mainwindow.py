@@ -36,6 +36,7 @@ class MainWindow(QMainWindow):
         self._setup_statusbar()
         self._restore_state()
         self._update_title()
+        self._reload_home_combo()
         # Load caches after UI is ready
         QTimer.singleShot(100, self._refresh_cache_list)
 
@@ -167,6 +168,11 @@ class MainWindow(QMainWindow):
         self._act_gps_export.triggered.connect(self._open_gps_export)
         gps_menu.addAction(self._act_gps_export)
 
+        self._act_trip_planner = QAction(tr("action_trip_planner"), self)
+        self._act_trip_planner.setShortcut(QKeySequence("Ctrl+T"))
+        self._act_trip_planner.triggered.connect(self._open_trip_planner)
+        gps_menu.addAction(self._act_trip_planner)
+
         # ── Geocaching Værktøjer ──────────────────────────────────────────────
         gc_tools_menu = menubar.addMenu(tr("menu_gc_tools"))
 
@@ -284,6 +290,14 @@ class MainWindow(QMainWindow):
 
         tb.addSeparator()
 
+        # Turplanlægger
+        trip_act = QAction(f"🗺️  {tr('toolbar_trip')}", self)
+        trip_act.setToolTip(tr("toolbar_trip_tooltip") + " (Ctrl+T)")
+        trip_act.triggered.connect(self._open_trip_planner)
+        tb.addAction(trip_act)
+
+        tb.addSeparator()
+
         # Filter
         self._act_filter = QAction(f"🔍  {tr('toolbar_filter')}", self)
         self._act_filter.setShortcut("Ctrl+F")
@@ -300,8 +314,18 @@ class MainWindow(QMainWindow):
 
         tb.addSeparator()
 
-        # Hjem
-        home_act = QAction(f"⌂  {tr('toolbar_home')}", self)
+        # Hjem-dropdown
+        from PySide6.QtWidgets import QComboBox, QWidgetAction
+        self._home_combo = QComboBox()
+        self._home_combo.setMinimumWidth(130)
+        self._home_combo.setMaximumWidth(180)
+        self._home_combo.setToolTip(tr("toolbar_home_combo_tooltip"))
+        self._home_combo.currentIndexChanged.connect(self._on_home_changed)
+        home_combo_action = QWidgetAction(self)
+        home_combo_action.setDefaultWidget(self._home_combo)
+        tb.addAction(home_combo_action)
+
+        home_act = QAction("⌂", self)
         home_act.setToolTip(tr("toolbar_home_tooltip"))
         home_act.triggered.connect(lambda: self._map_widget.pan_to_home())
         tb.addAction(home_act)
@@ -452,8 +476,44 @@ class MainWindow(QMainWindow):
         from opensak.gui.dialogs.settings_dialog import SettingsDialog
         dlg = SettingsDialog(self)
         if dlg.exec():
+            self._reload_home_combo()
             self._map_widget.update_home()
             self._refresh_cache_list()
+
+    def _reload_home_combo(self) -> None:
+        """Genindlæs hjemmepunkts-dropdown fra settings."""
+        s = get_settings()
+        points = s.home_points
+        active = s.active_home_name
+        self._home_combo.blockSignals(True)
+        self._home_combo.clear()
+        if not points:
+            self._home_combo.addItem(tr("toolbar_home_no_points"), None)
+        else:
+            for p in points:
+                label = f"★ {p.name}" if p.name == active else p.name
+                self._home_combo.addItem(label, p.name)
+            # Sæt aktiv
+            for i in range(self._home_combo.count()):
+                if self._home_combo.itemData(i) == active:
+                    self._home_combo.setCurrentIndex(i)
+                    break
+        self._home_combo.blockSignals(False)
+
+    def _on_home_changed(self, index: int) -> None:
+        """Skift aktivt hjemmepunkt fra dropdown."""
+        name = self._home_combo.itemData(index)
+        if not name:
+            return
+        s = get_settings()
+        for p in s.home_points:
+            if p.name == name:
+                s.set_active_home(p)
+                self._map_widget.update_home()
+                self._statusbar.showMessage(
+                    tr("status_home_changed", name=p.name), 3000
+                )
+                break
 
     def _add_waypoint(self) -> None:
         from opensak.gui.dialogs.waypoint_dialog import WaypointDialog
@@ -575,6 +635,16 @@ class MainWindow(QMainWindow):
         ]
         caches = [c for c in caches if c is not None]
         dlg = GpsExportDialog(self, caches=caches)
+        dlg.exec()
+
+    def _open_trip_planner(self) -> None:
+        from opensak.gui.dialogs.trip_dialog import TripPlannerDialog
+        caches = [
+            self._cache_table._model.cache_at(i)
+            for i in range(self._cache_table.row_count())
+        ]
+        caches = [c for c in caches if c is not None]
+        dlg = TripPlannerDialog(self, caches=caches)
         dlg.exec()
 
     def _open_found_updater(self) -> None:

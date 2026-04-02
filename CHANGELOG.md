@@ -11,32 +11,53 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Favourite points (requires Geocaching.com API)
 
 ---
+
+## [1.4.0] — 2026
+### Added
+- **Trip Planner** (`Ctrl+T`) — new dialog to plan a geocaching trip:
+  - **Radius tab** — select caches within a set distance from the active home point; sort by distance, difficulty, terrain, date or name
+  - **Route tab (A→B→…)** — find caches along a multi-point route (up to 10 waypoints); caches sorted in driving order along the route
+  - Route points can be typed in any coordinate format (DMM, DMS, DD) with live validation, or picked directly from saved home points
+  - Route points can be reordered with ▲/▼ buttons or drag-and-drop
+  - Common filters: max cache count, not-found only, available only
+  - **🗺️ Show on map** — opens a non-blocking map popup showing selected caches on an interactive OSM map
+  - Export selected caches directly to GPS device or GPX file
+- **Home points list** — replace single home coordinate with a named list (e.g. Home, Cottage, Hotel):
+  - Add, edit, activate and delete points from Settings
+  - Accepts any coordinate format (DMM, DMS, DD) with live validation; displays in your chosen format
+  - Active point marked with ★ in the list
+  - **Quick-switch dropdown** in the toolbar — switch active home point instantly without opening Settings
+  - Distance column and trip planner update immediately when home point changes
+
+### Fixed
+- Settings menu renamed from "Tools" / "Funktioner" to "Settings" / "Indstillinger" to avoid duplicate "Tools" entry in menu bar
+
+---
+
 ## [1.3.5] — 2026
 ### Added
-- ** corrected attributes in filter dialog **
-  -
+- **Corrected attributes in filter dialog**
 
 ## [1.3.4] — 2026
-### Added
-- **fix problem with import of large GSAK export**
-  -
+### Fixed
+- Import of large GSAK exports
 
 ## [1.3.3] — 2026
-### Added
-- **fix of DT filter not displaying correctlyCorrected Coordinate**
-  - ** resize and move of windows
+### Fixed
+- D/T filter not displaying correctly
+- Resize and move of windows
 
 ## [1.3.2] — 2026
-### Added
-- **fix of DT filter not displaying correctlyCorrected Coordinate**
-  - 
+### Fixed
+- D/T filter not displaying correctly
+- Corrected Coordinate display
 
 ## [1.3.1] — 2026
 ### Added
-- **Corrected Coordinate** — new option to add corrected coordinate to caches:
-  - add corrected coordinate to the cache
-  - show the corrected waypoint on maps
-  - use corrested coordinate in GPS upload
+- **Corrected Coordinates** — new option to add corrected coordinates to caches:
+  - Add corrected coordinate to a cache
+  - Show corrected waypoint on map
+  - Use corrected coordinate in GPS upload
 
 ---
 

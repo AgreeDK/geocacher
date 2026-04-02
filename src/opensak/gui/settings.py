@@ -7,7 +7,29 @@ Settings are stored in:
 """
 
 from __future__ import annotations
+import json
 from PySide6.QtCore import QSettings
+
+
+# ── Hjemmepunkt dataklasse ────────────────────────────────────────────────────
+
+class HomePoint:
+    """Et navngivet hjemmepunkt."""
+
+    def __init__(self, name: str, lat: float, lon: float):
+        self.name = name
+        self.lat  = lat
+        self.lon  = lon
+
+    def to_dict(self) -> dict:
+        return {"name": self.name, "lat": self.lat, "lon": self.lon}
+
+    @staticmethod
+    def from_dict(d: dict) -> "HomePoint":
+        return HomePoint(d["name"], float(d["lat"]), float(d["lon"]))
+
+    def __repr__(self) -> str:
+        return f"HomePoint({self.name!r}, {self.lat}, {self.lon})"
 
 
 class AppSettings:
@@ -45,6 +67,68 @@ class AppSettings:
     @home_lon.setter
     def home_lon(self, value: float) -> None:
         self._s.setValue(self._db_key("home_lon"), value)
+
+    # ── Globale hjemmepunkter (liste) ─────────────────────────────────────────
+
+    @property
+    def home_points(self) -> list[HomePoint]:
+        """Global liste af navngivne hjemmepunkter."""
+        raw = self._s.value("homepoints/list", None)
+        if not raw:
+            return []
+        try:
+            data = json.loads(raw)
+            return [HomePoint.from_dict(d) for d in data]
+        except Exception:
+            return []
+
+    @home_points.setter
+    def home_points(self, points: list[HomePoint]) -> None:
+        self._s.setValue(
+            "homepoints/list",
+            json.dumps([p.to_dict() for p in points])
+        )
+
+    @property
+    def active_home_name(self) -> str:
+        """Navn på det aktive hjemmepunkt (globalt)."""
+        return self._s.value("homepoints/active_name", "")
+
+    @active_home_name.setter
+    def active_home_name(self, value: str) -> None:
+        self._s.setValue("homepoints/active_name", value)
+
+    def set_active_home(self, point: HomePoint) -> None:
+        """Sæt aktivt hjemmepunkt — opdaterer både global navn og per-db koordinater."""
+        self.active_home_name = point.name
+        self.home_lat = point.lat
+        self.home_lon = point.lon
+        self._s.sync()
+
+    def get_active_home(self) -> HomePoint | None:
+        """Returner det aktive hjemmepunkt fra listen, eller None."""
+        name = self.active_home_name
+        for p in self.home_points:
+            if p.name == name:
+                return p
+        return None
+
+    def add_or_update_home_point(self, point: HomePoint) -> None:
+        """Tilføj nyt hjemmepunkt eller opdatér eksisterende med samme navn."""
+        points = self.home_points
+        for i, p in enumerate(points):
+            if p.name == point.name:
+                points[i] = point
+                self.home_points = points
+                return
+        points.append(point)
+        self.home_points = points
+
+    def remove_home_point(self, name: str) -> None:
+        """Fjern hjemmepunkt med det givne navn."""
+        self.home_points = [p for p in self.home_points if p.name != name]
+        if self.active_home_name == name:
+            self.active_home_name = ""
 
     # ── Units ─────────────────────────────────────────────────────────────────
 

@@ -50,7 +50,7 @@ STRINGS: dict[str, str] = {
     "menu_file":                    "&Fil",
     "menu_waypoint":                "&Waypoint",
     "menu_view":                    "&Vis",
-    "menu_tools":                   "F&unktioner",
+    "menu_tools":                   "&Indstillinger",
     "menu_help":                    "&Hjælp",
 
     # Fil-menu
@@ -570,5 +570,102 @@ STRINGS: dict[str, str] = {
     "attr_stroller":           "Barnevognsvenlig",
     "attr_fuel":               "Benzin i nærheden",
     "attr_food":               "Mad i nærheden",
+
+
+    # ── Turplanlægger dialog ──────────────────────────────────────────────────
+    "trip_dialog_title":            "Turplanlægger",
+    "trip_source_label":            "Arbejder med {count} caches fra den aktuelle visning",
+    "trip_criteria_group":          "Kriterier",
+    "trip_count_label":             "Antal caches på turen:",
+    "trip_radius_label":            "Maksimal radius fra centerpunkt:",
+    "trip_radius_all":              "Ingen grænse",
+    "trip_unit_km":                 "km",
+    "trip_unit_mi":                 "mi",
+    "trip_sort_label":              "Sortér efter:",
+    "trip_sort_distance":           "Afstand (nærmeste først)",
+    "trip_sort_difficulty":         "Sværhedsgrad (lettest først)",
+    "trip_sort_terrain":            "Terræn (lettest først)",
+    "trip_sort_hidden_date":        "Udgivelsesdato (nyeste først)",
+    "trip_sort_name":               "Navn (A–Z)",
+    "trip_cb_not_found":            "Kun caches jeg ikke har fundet",
+    "trip_cb_available":            "Kun tilgængelige (ikke arkiverede)",
+    "trip_preview_group":           "Forhåndsvisning",
+    "trip_result_label":            "{count} caches valgt til turen",
+    "trip_col_gc":                  "GC kode",
+    "trip_col_name":                "Navn",
+    "trip_col_type":                "Type",
+    "trip_col_dist":                "Afstand",
+    "trip_btn_export_gps":          "📤  Send til GPS…",
+    "trip_btn_export_file":         "💾  Gem som GPX fil…",
+    "trip_save_dialog_title":       "Gem tur som GPX",
+    "trip_export_done_title":       "Eksport færdig",
+
+    # Toolbar & menu
+    "action_trip_planner":          "🗺️  &Turplanlægger…",
+    "toolbar_trip":                 "Turplanlægger",
+    "toolbar_trip_tooltip":         "Planlæg en geocaching-tur",
+    "toolbar_home":                 "Hjem",
+    "toolbar_home_tooltip":         "Vis hjemmepunkt på kort",
+
+
+    "trip_center_info":                        "📍 Radius beregnes fra dit centerpunkt (sat under Indstillinger). Sæt radius til 0 for at se alle caches uden afstandsfilter.",
+    "trip_found_hint":                         "Kræver at du har kørt \"Opdater fund\" (Funktioner-menuen) for at funde caches er markeret korrekt.",
+    "trip_no_center_warning":                  "⚠️  Centerpunkt er ikke sat — gå til Indstillinger og angiv dit hjemmepunkt, eller sæt radius til 0.",
+
+
+    # ── Hjemmepunkter i indstillinger ────────────────────────────────────────
+    "settings_hp_col_name":                    "Navn",
+    "settings_hp_col_lat":                     "Breddegrad",
+    "settings_hp_col_lon":                     "Længdegrad",
+    "settings_hp_activate":                    "★ Aktivér",
+    "settings_hp_edit":                        "Rediger",
+    "settings_hp_delete":                      "Slet",
+    "settings_hp_add_group":                   "Tilføj / rediger punkt",
+    "settings_hp_name_label":                  "Navn:",
+    "settings_hp_name_placeholder":            "f.eks. Hjem, Sommerhus…",
+    "settings_hp_coord_label":                 "Koordinat:",
+    "settings_hp_coord_placeholder":           "f.eks. N55 47.250 E012 25.000",
+    "settings_hp_coord_error":                 "✗  Ukendt koordinatformat",
+    "settings_hp_add_btn":                     "Gem punkt",
+    "settings_hp_delete_title":                "Slet hjemmepunkt",
+    "settings_hp_delete_msg":                  "Er du sikker på at du vil slette \"{name}\"?",
+    "settings_hp_name_required":               "Angiv et navn til punktet.",
+    "settings_hp_coord_required":              "Angiv koordinater.",
+    "settings_hp_coord_invalid":               "Ugyldigt koordinatformat — prøv f.eks. N55 47.250 E012 25.000",
+    "toolbar_home_combo_tooltip":              "Skift aktivt hjemmepunkt",
+    "toolbar_home_no_points":                  "(Ingen hjemmepunkter)",
+    "status_home_changed":                     "Hjemmepunkt: {name}",
+
+
+    # ── Turplanlægger — rute-fane ──────────────────────────────────────────
+    "trip_tab_radius":                         "📍 Radius",
+    "trip_tab_route":                          "🗺️ Rute A→B→…",
+    "trip_corridor_label":                     "Korridor-bredde (max afstand fra ruten):",
+    "trip_route_points_group":                 "Rutepunkter (max {max})",
+    "trip_route_add_group":                    "Tilføj punkt",
+    "trip_route_point_name":                   "Navn:",
+    "trip_route_name_placeholder":             "f.eks. Hotel, Rasteplads…",
+    "trip_route_coord_label":                  "Koordinat:",
+    "trip_route_coord_placeholder":            "f.eks. N55 47.250 E012 25.000",
+    "trip_route_add_btn":                      "Tilføj punkt",
+    "trip_route_from_home":                    "Fra hjemmepunkter…",
+    "trip_route_from_home_tooltip":            "Tilføj et gemt hjemmepunkt som rutepunkt",
+    "trip_route_btn_up":                       "Flyt op",
+    "trip_route_btn_down":                     "Flyt ned",
+    "trip_route_btn_del":                      "Slet punkt",
+    "trip_route_btn_clear":                    "Ryd alle",
+    "trip_route_info":                         "📍 Caches sorteres i kørerækkefølge langs ruten. Korridor-bredden angiver hvor langt fra ruten der søges.",
+    "trip_route_no_points_yet":                "Tilføj mindst ét rutepunkt for at se caches.",
+    "trip_route_max_reached":                  "Du kan højst have {max} rutepunkter.",
+    "trip_route_no_home_points":               "Ingen hjemmepunkter gemt endnu — tilføj dem under Indstillinger.",
+    "trip_route_pick_home_title":              "Vælg hjemmepunkt",
+    "trip_route_pick_home_label":              "Vælg hvilket hjemmepunkt der skal tilføjes som rutepunkt:",
+
+
+    # ── Turplanlægger — kortvisning ──────────────────────────────────────────
+    "trip_btn_preview_map":                    "🗺️  Vis på kort",
+    "trip_btn_preview_map_tooltip":            "Åbn de valgte caches på et interaktivt kort",
+    "trip_map_preview_title":                  "Turplanlægger — Kortvisning",
+    "trip_map_preview_info":                   "{count} caches vist — turplanlæggeren forbliver åben",
 
 }

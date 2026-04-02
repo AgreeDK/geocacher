@@ -50,7 +50,7 @@ STRINGS: dict[str, str] = {
     "menu_file":                    "&File",
     "menu_waypoint":                "&Waypoint",
     "menu_view":                    "&View",
-    "menu_tools":                   "&Tools",
+    "menu_tools":                   "&Settings",
     "menu_help":                    "&Help",
 
     # File menu
@@ -570,5 +570,102 @@ STRINGS: dict[str, str] = {
     "attr_stroller":           "Stroller accessible",
     "attr_fuel":               "Fuel nearby",
     "attr_food":               "Food nearby",
+
+
+    # ── Trip planner dialog ───────────────────────────────────────────────────
+    "trip_dialog_title":            "Trip Planner",
+    "trip_source_label":            "Working with {count} caches from the current view",
+    "trip_criteria_group":          "Criteria",
+    "trip_count_label":             "Number of caches on the trip:",
+    "trip_radius_label":            "Maximum radius from centre point:",
+    "trip_radius_all":              "No limit",
+    "trip_unit_km":                 "km",
+    "trip_unit_mi":                 "mi",
+    "trip_sort_label":              "Sort by:",
+    "trip_sort_distance":           "Distance (nearest first)",
+    "trip_sort_difficulty":         "Difficulty (easiest first)",
+    "trip_sort_terrain":            "Terrain (easiest first)",
+    "trip_sort_hidden_date":        "Placed date (newest first)",
+    "trip_sort_name":               "Name (A–Z)",
+    "trip_cb_not_found":            "Only caches I have not found",
+    "trip_cb_available":            "Only available (not archived)",
+    "trip_preview_group":           "Preview",
+    "trip_result_label":            "{count} caches selected for the trip",
+    "trip_col_gc":                  "GC code",
+    "trip_col_name":                "Name",
+    "trip_col_type":                "Type",
+    "trip_col_dist":                "Distance",
+    "trip_btn_export_gps":          "📤  Send to GPS…",
+    "trip_btn_export_file":         "💾  Save as GPX file…",
+    "trip_save_dialog_title":       "Save trip as GPX",
+    "trip_export_done_title":       "Export complete",
+
+    # Toolbar & menu
+    "action_trip_planner":          "🗺️  &Trip Planner…",
+    "toolbar_trip":                 "Trip Planner",
+    "toolbar_trip_tooltip":         "Plan a geocaching trip",
+    "toolbar_home":                 "Home",
+    "toolbar_home_tooltip":         "Pan map to home point",
+
+
+    "trip_center_info":                        "📍 Radius is calculated from your centre point (set under Settings). Set radius to 0 to see all caches without distance filtering.",
+    "trip_found_hint":                         "Requires that you have run \"Update finds\" (Tools menu) for found caches to be marked correctly.",
+    "trip_no_center_warning":                  "⚠️  Centre point is not set — go to Settings and enter your home point, or set radius to 0.",
+
+
+    # ── Hjemmepunkter i indstillinger ────────────────────────────────────────
+    "settings_hp_col_name":                    "Name",
+    "settings_hp_col_lat":                     "Latitude",
+    "settings_hp_col_lon":                     "Longitude",
+    "settings_hp_activate":                    "★ Activate",
+    "settings_hp_edit":                        "Edit",
+    "settings_hp_delete":                      "Delete",
+    "settings_hp_add_group":                   "Add / edit point",
+    "settings_hp_name_label":                  "Name:",
+    "settings_hp_name_placeholder":            "e.g. Home, Cottage…",
+    "settings_hp_coord_label":                 "Coordinate:",
+    "settings_hp_coord_placeholder":           "e.g. N55 47.250 E012 25.000",
+    "settings_hp_coord_error":                 "✗  Unknown coordinate format",
+    "settings_hp_add_btn":                     "Save point",
+    "settings_hp_delete_title":                "Delete home point",
+    "settings_hp_delete_msg":                  "Are you sure you want to delete \"{name}\"?",
+    "settings_hp_name_required":               "Please enter a name for the point.",
+    "settings_hp_coord_required":              "Please enter coordinates.",
+    "settings_hp_coord_invalid":               "Invalid coordinate format — try e.g. N55 47.250 E012 25.000",
+    "toolbar_home_combo_tooltip":              "Switch active home point",
+    "toolbar_home_no_points":                  "(No home points)",
+    "status_home_changed":                     "Home point: {name}",
+
+
+    # ── Turplanlægger — rute-fane ──────────────────────────────────────────
+    "trip_tab_radius":                         "📍 Radius",
+    "trip_tab_route":                          "🗺️ Route A→B→…",
+    "trip_corridor_label":                     "Corridor width (max distance from route):",
+    "trip_route_points_group":                 "Route points (max {max})",
+    "trip_route_add_group":                    "Add point",
+    "trip_route_point_name":                   "Name:",
+    "trip_route_name_placeholder":             "e.g. Hotel, Rest stop…",
+    "trip_route_coord_label":                  "Coordinate:",
+    "trip_route_coord_placeholder":            "e.g. N55 47.250 E012 25.000",
+    "trip_route_add_btn":                      "Add point",
+    "trip_route_from_home":                    "From home points…",
+    "trip_route_from_home_tooltip":            "Add a saved home point as a route point",
+    "trip_route_btn_up":                       "Move up",
+    "trip_route_btn_down":                     "Move down",
+    "trip_route_btn_del":                      "Delete point",
+    "trip_route_btn_clear":                    "Clear all",
+    "trip_route_info":                         "📍 Caches are sorted in driving order along the route. The corridor width sets how far from the route to search.",
+    "trip_route_no_points_yet":                "Add at least one route point to see caches.",
+    "trip_route_max_reached":                  "You can have at most {max} route points.",
+    "trip_route_no_home_points":               "No home points saved yet — add them in Settings.",
+    "trip_route_pick_home_title":              "Select home point",
+    "trip_route_pick_home_label":              "Select which home point to add as a route point:",
+
+
+    # ── Turplanlægger — kortvisning ──────────────────────────────────────────
+    "trip_btn_preview_map":                    "🗺️  Show on map",
+    "trip_btn_preview_map_tooltip":            "Open selected caches on an interactive map",
+    "trip_map_preview_title":                  "Trip Planner — Map Preview",
+    "trip_map_preview_info":                   "{count} caches shown — trip planner remains open",
 
 }
