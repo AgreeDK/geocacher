@@ -35,7 +35,7 @@ import urllib.request
 from pathlib import Path
 from typing import Optional, List
 from enum import IntEnum
-from utils.utils import validate_gc_code
+from opensak.utils.utils import validate_gc_code
 
 logger = logging.getLogger(__name__)
 
