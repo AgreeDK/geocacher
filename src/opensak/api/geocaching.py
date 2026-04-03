@@ -70,6 +70,8 @@ def get_token_file() -> Path:
     return get_app_data_dir() / "gc_token.json"
 
 
+# ── PKCE hjælpefunktioner ──────────────────────────────────────────────────────
+
 def _generate_pkce() -> tuple[str, str]:
     """
     Generer PKCE code_verifier og code_challenge.
@@ -80,6 +82,8 @@ def _generate_pkce() -> tuple[str, str]:
     code_challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("ascii")
     return code_verifier, code_challenge
 
+
+# ── Token håndtering ──────────────────────────────────────────────────────────
 
 def _save_token(token_data: dict) -> None:
     """Gem token til disk og opdater cache. Sæt filrettigheder til 600."""
