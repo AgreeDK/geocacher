@@ -33,7 +33,9 @@ import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
+from enum import IntEnum
+from opensak.utils.utils import validate_gc_code
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +52,17 @@ GC_REDIRECT_PORT = 7654
 GC_REDIRECT_URI = f"http://localhost:{GC_REDIRECT_PORT}/callback"
 GC_SCOPES       = "*"   # Fuld adgang — justeres evt. ved godkendelse
 
+# Cache log types
+class LogType(IntEnum):
+    FOUND = 2
+    DNF = 3
+    NOTE = 4
+    ARCHIVE = 5
+
+
+# ── Token håndtering med cache ────────────────────────────────────────────────
+
+_cached_token: Optional[dict] = None  # In-memory cache for token
 
 def get_token_file() -> Path:
     """Returnerer stien til token-filen i app data-mappen."""
@@ -73,7 +86,9 @@ def _generate_pkce() -> tuple[str, str]:
 # ── Token håndtering ──────────────────────────────────────────────────────────
 
 def _save_token(token_data: dict) -> None:
-    """Gem token til disk. Sæt filrettigheder til 600 (kun ejer kan læse)."""
+    """Gem token til disk og opdater cache. Sæt filrettigheder til 600."""
+    global _cached_token
+    _cached_token = token_data
     token_file = get_token_file()
     token_file.write_text(json.dumps(token_data, indent=2), encoding="utf-8")
     try:
@@ -84,17 +99,24 @@ def _save_token(token_data: dict) -> None:
 
 def _load_token() -> Optional[dict]:
     """Indlæs token fra disk. Returnerer None hvis filen ikke eksisterer."""
+    global _cached_token
+    if _cached_token is not None:
+        return _cached_token
+
     token_file = get_token_file()
     if not token_file.exists():
         return None
     try:
-        return json.loads(token_file.read_text(encoding="utf-8"))
+        _cached_token = json.loads(token_file.read_text(encoding="utf-8"))
+        return _cached_token
     except (json.JSONDecodeError, OSError):
         return None
 
 
 def _delete_token() -> None:
-    """Slet token-filen (log ud)."""
+    """Slet token-filen (log ud) og ryd cache."""
+    global _cached_token
+    _cached_token = None
     token_file = get_token_file()
     if token_file.exists():
         token_file.unlink()
@@ -372,7 +394,13 @@ def get_cache_details(gc_code: str) -> Optional[dict]:
     """
     if not GC_CLIENT_ID:
         return None
-
+    
+    try:
+        validate_gc_code(gc_code)  # Valider formatet på gc_code inden API-kald
+    except ValueError as exc:
+        logger.warning(f"Invalid gc_code: {gc_code} — {exc}")
+        return None
+    
     return _api_get(
         f"/geocaches/{gc_code}",
         params={
@@ -399,6 +427,12 @@ def get_trackables_in_cache(gc_code: str) -> Optional[list]:
         Hvert element har typisk: referenceCode, name, trackableType, owner
     """
     if not GC_CLIENT_ID:
+        return None
+    
+    try:
+        validate_gc_code(gc_code)  # Valider formatet på gc_code inden API-kald
+    except ValueError as exc:
+        logger.warning(f"Invalid gc_code: {gc_code} — {exc}")
         return None
 
     result = _api_get(
@@ -431,38 +465,64 @@ def get_user_profile() -> Optional[dict]:
     )
 
 
-def get_user_finds(username: str, max_results: int = 200) -> Optional[list]:
+def _get_user_logs(
+    username: str,
+    log_types: Optional[List[LogType]] = None,
+    max_results: int = 200,
+) -> Optional[list]:
     """
-    Hent brugerens fund-historik fra Geocaching.com API.
-
-    Bruges til at opdatere "fundet" status i OpenSAK-databasen
-    uden at brugeren selv skal importere en My Finds PQ.
+    Fetch logs for a user from Geocaching API.
 
     Args:
-        username:    Geocaching.com brugernavn
-        max_results: Maksimalt antal fund at hente (default 200)
+        username: Geocaching username
+        log_types: list of LogType enums (e.g., [LogType.FOUND, LogType.DNF])
+        max_results: maximum number of logs (max 200)
 
     Returns:
-        Liste af log dicts med: referenceCode, geocacheCode, loggedDate, logType
+        List of log dictionaries
     """
+
     if not GC_CLIENT_ID:
         return None
 
-    result = _api_get(
-        f"/users/{username}/geocachelogs",
-        params={
-            "fields": "referenceCode,geocacheCode,loggedDate,logType,text",
-            "types":  "2",   # Type 2 = Found It
-            "limit":  min(max_results, 200),
-        },
-    )
+    params = {
+        "fields": "referenceCode,geocacheCode,loggedDate,logType,text",
+        "limit": min(max_results, 200),
+    }
+
+    if log_types:
+        # Convert IntEnum values to comma-separated string
+        params["types"] = ",".join(str(t.value) for t in log_types)
+
+    result = _api_get(f"/users/{username}/geocachelogs", params=params)
 
     if result is None:
         return None
 
     if isinstance(result, list):
         return result
+
     return result.get("data", [])
+
+
+def get_user_finds(username: str, max_results):
+    return _get_user_logs(username, [LogType.FOUND], max_results)
+
+
+def get_user_dnfs(username: str, max_results):
+    return _get_user_logs(username, [LogType.DNF], max_results)
+
+
+def get_user_notes(username: str, max_results):
+    return _get_user_logs(username, [LogType.NOTE], max_results)
+
+
+def get_user_archives(username: str, max_results):
+    return _get_user_logs(username, [LogType.ARCHIVE], max_results)
+
+
+def get_user_activity(username: str, max_results):
+    return _get_user_logs(username, list(LogType), max_results)
 
 
 def get_favorite_points() -> Optional[dict]:

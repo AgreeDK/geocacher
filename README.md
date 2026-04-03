@@ -74,7 +74,7 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 - All tools open pre-filled with the currently selected cache's coordinates
 
 ### Language Support
-- 🌍 **Danish, English and French** built in
+- 🌍 **Danish, English, French and Portuguese** built in
 - 🔧 **Easy to add new languages** — copy one file, translate, done
 
 ---

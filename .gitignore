@@ -34,5 +34,8 @@ Thumbs.db
 *.db
 *.log
 
+# OAuth tokens
+gc_token.json
+
 # Alembic (will add later)
 # alembic/versions/
