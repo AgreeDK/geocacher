@@ -277,7 +277,7 @@ What it checks:
 2. Select your language in the **Language** section
 3. Restart OpenSAK — the new language takes effect on next startup
 
-Currently supported: **Danish (da)**, **English (en)**, **French (fr)**
+Currently supported: **Danish (da)**, **English (en)**, **French (fr)**, **Portuguese (pt)**
 
 ### Adding a New Language
 1. Copy `src/opensak/lang/en.py` to e.g. `src/opensak/lang/de.py`
@@ -384,6 +384,7 @@ opensak/
 │   │   ├── __init__.py             # i18n engine (tr() function)
 │   │   ├── da.py                   # Danish
 │   │   ├── en.py                   # English
+│   │   ├── pt.py                   # Portuguese (contributed by @Fabio-A-Sa)
 │   │   └── fr.py                   # French (contributed by @theyoungstone)
 │   ├── db/
 │   │   ├── models.py               # SQLAlchemy ORM models
@@ -393,6 +394,10 @@ opensak/
 │   ├── importer/                   # GPX + PQ ZIP importer
 │   ├── filters/
 │   │   └── engine.py               # 18 filter types, AND/OR, profiles
+│   ├── utils/
+│   │   ├── run_cli.py              # The primary entry point, launches the GUI/CLI
+│   │   ├── run_test.py             # Wrapper to verify the app integrity
+│   │   └── doctor.py               # Performs system health checks
 │   ├── gps/
 │   │   └── garmin.py               # Garmin detection + GPX generator
 │   └── gui/
@@ -421,6 +426,7 @@ opensak/
 └── tests/
     ├── test_db.py                  # 13 tests
     ├── test_importer.py            # 11 tests
+    ├── test_languages.py           # 3 tests
     └── test_filters.py             # 39 tests
 ```
 

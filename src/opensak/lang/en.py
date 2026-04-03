@@ -1,9 +1,9 @@
 """
 src/opensak/lang/en.py — English language file for OpenSAK.
 
-All UI strings in one place.
-To add a new language: copy this file, rename it (e.g. de.py), translate the values.
-Keys (left side) must NEVER be changed — they are used in the code.
+All UI strings collected in one place.
+Copy this file from 'en.py' to a new file (e.g., en.py) and translate the values.
+The keys (left side) must NEVER be changed — they are used in the code.
 """
 
 STRINGS: dict[str, str] = {
@@ -199,7 +199,7 @@ STRINGS: dict[str, str] = {
     "about_text":
         "<h3>OpenSAK {version}</h3>"
         "<p>An open source geocaching management tool "
-        "for Linux and Windows.</p>"
+        "for Linux, Mac and Windows.</p>"
         "<p>Built with Python and PySide6.</p>"
         "<p><a href='https://github.com/AgreeDK/opensak'>"
         "github.com/AgreeDK/opensak</a></p>",

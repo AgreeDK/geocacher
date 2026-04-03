@@ -2,7 +2,7 @@
 src/opensak/lang/da.py — Dansk sprogfil for OpenSAK.
 
 Alle UI-strenge samlet ét sted.
-Kopiér denne fil til en ny fil (fx en.py) og oversæt værdierne.
+Kopiér denne fil fra 'en.py' til en ny fil (f.eks. da.py) og oversæt værdierne.
 Nøglerne (venstre side) må ALDRIG ændres — de bruges i koden.
 """
 
@@ -199,7 +199,7 @@ STRINGS: dict[str, str] = {
     "about_text":
         "<h3>OpenSAK {version}</h3>"
         "<p>Et open source geocaching-styringsværktøj "
-        "til Linux og Windows.</p>"
+        "til Linux, Mac og Windows.</p>"
         "<p>Bygget med Python og PySide6.</p>"
         "<p><a href='https://github.com/AgreeDK/opensak'>"
         "github.com/AgreeDK/opensak</a></p>",

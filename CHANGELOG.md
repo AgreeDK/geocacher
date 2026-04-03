@@ -12,6 +12,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.1] — 2026
+### Added
+- **Portuguese** (`Ctrl+T`) — Fabio have added Portugues and tests for translation completeness
+
+---
+
 ## [1.4.0] — 2026
 ### Added
 - **Trip Planner** (`Ctrl+T`) — new dialog to plan a geocaching trip:
