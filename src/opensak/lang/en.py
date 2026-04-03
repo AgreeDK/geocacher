@@ -199,7 +199,7 @@ STRINGS: dict[str, str] = {
     "about_text":
         "<h3>OpenSAK {version}</h3>"
         "<p>An open source geocaching management tool "
-        "for Linux and Windows.</p>"
+        "for Linux, Mac and Windows.</p>"
         "<p>Built with Python and PySide6.</p>"
         "<p><a href='https://github.com/AgreeDK/opensak'>"
         "github.com/AgreeDK/opensak</a></p>",

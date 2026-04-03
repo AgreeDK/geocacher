@@ -13,7 +13,6 @@ Tilføj nyt sprog:
 
 from __future__ import annotations
 from typing import Optional
-import json
 from pathlib import Path
 
 # ── Tilgængelige sprog ────────────────────────────────────────────────────────
@@ -22,6 +21,7 @@ AVAILABLE_LANGUAGES: dict[str, str] = {
     "da": "Dansk",
     "en": "English",
     "fr": "Français",
+    "pt": "Português",
 }
 
 # ── Aktiv oversættelses-dict ──────────────────────────────────────────────────

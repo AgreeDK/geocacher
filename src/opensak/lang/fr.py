@@ -2,7 +2,7 @@
 src/opensak/lang/fr.py — Fichier de langue en français pour OpenSAK.
 
 Toutes les chaînes d'interface utilisateur dans un seul endroit.
-Pour ajouter une nouvelle langue : copiez ce fichier, renommez-le (par exemple de.py), puis traduisez les valeurs.
+Pour ajouter une nouvelle langue : copiez en.py fichier, renommez-le (par exemple de.py), puis traduisez les valeurs.
 Les clés (côté gauche) ne doivent JAMAIS être modifiées — elles sont utilisées dans le code.
 """
 
@@ -199,7 +199,7 @@ STRINGS: dict[str, str] = {
     "about_text":
         "<h3>OpenSAK {version}</h3>"
         "<p>Un outil open source de gestion de géocaching "
-        "pour Linux et Windows.</p>"
+        "pour Linux, Mac et Windows.</p>"
         "<p>Développé avec Python et PySide6.</p>"
         "<p><a href='https://github.com/AgreeDK/opensak'>"
         "github.com/AgreeDK/opensak</a></p>",
