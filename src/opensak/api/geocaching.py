@@ -33,7 +33,8 @@ import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
+from enum import IntEnum
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +51,12 @@ GC_REDIRECT_PORT = 7654
 GC_REDIRECT_URI = f"http://localhost:{GC_REDIRECT_PORT}/callback"
 GC_SCOPES       = "*"   # Fuld adgang — justeres evt. ved godkendelse
 
+# 
+class LogType(IntEnum):
+    FOUND = 2
+    DNF = 3
+    NOTE = 4
+    ARCHIVE = 5
 
 def get_token_file() -> Path:
     """Returnerer stien til token-filen i app data-mappen."""
@@ -430,39 +437,64 @@ def get_user_profile() -> Optional[dict]:
         params={"fields": "referenceCode,username,avatarUrl,findCount,hideCount,membershipLevelId"},
     )
 
-
-def get_user_finds(username: str, max_results: int = 200) -> Optional[list]:
+def _get_user_logs(
+    username: str,
+    log_types: Optional[List[LogType]] = None,
+    max_results: int = 200,
+) -> Optional[list]:
     """
-    Hent brugerens fund-historik fra Geocaching.com API.
-
-    Bruges til at opdatere "fundet" status i OpenSAK-databasen
-    uden at brugeren selv skal importere en My Finds PQ.
+    Fetch logs for a user from Geocaching API.
 
     Args:
-        username:    Geocaching.com brugernavn
-        max_results: Maksimalt antal fund at hente (default 200)
+        username: Geocaching username
+        log_types: list of LogType enums (e.g., [LogType.FOUND, LogType.DNF])
+        max_results: maximum number of logs (max 200)
 
     Returns:
-        Liste af log dicts med: referenceCode, geocacheCode, loggedDate, logType
+        List of log dictionaries
     """
+
     if not GC_CLIENT_ID:
         return None
 
-    result = _api_get(
-        f"/users/{username}/geocachelogs",
-        params={
-            "fields": "referenceCode,geocacheCode,loggedDate,logType,text",
-            "types":  "2",   # Type 2 = Found It
-            "limit":  min(max_results, 200),
-        },
-    )
+    params = {
+        "fields": "referenceCode,geocacheCode,loggedDate,logType,text",
+        "limit": min(max_results, 200),
+    }
+
+    if log_types:
+        # Convert IntEnum values to comma-separated string
+        params["types"] = ",".join(str(t.value) for t in log_types)
+
+    result = _api_get(f"/users/{username}/geocachelogs", params=params)
 
     if result is None:
         return None
 
     if isinstance(result, list):
         return result
+
     return result.get("data", [])
+
+
+def get_user_finds(username: str, max_results):
+    return _get_user_logs(username, [LogType.FOUND], max_results)
+
+
+def get_user_dnfs(username: str, max_results):
+    return _get_user_logs(username, [LogType.DNF], max_results)
+
+
+def get_user_notes(username: str, max_results):
+    return _get_user_logs(username, [LogType.NOTE], max_results)
+
+
+def get_user_archives(username: str, max_results):
+    return _get_user_logs(username, [LogType.ARCHIVE], max_results)
+
+
+def get_user_activity(username: str, max_results):
+    return _get_user_logs(username, list(LogType), max_results)
 
 
 def get_favorite_points() -> Optional[dict]:
