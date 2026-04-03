@@ -12,6 +12,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.3] — 2026
+### Added
+- ** Security * better security and other minor fixes
+
 ## [1.4.2] — 2026
 ### Added
 - **Close issue #2 ** support GPX namespace groundspeak/cache/1/0 (My Finds PQ)
