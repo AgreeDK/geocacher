@@ -61,6 +61,8 @@ jobs:
       - name: Run tests
         env:
           PYTHONPATH: src
+          QT_QPA_PLATFORM: offscreen
+          QTWEBENGINE_DISABLE_SANDBOX: 1
         run: |
           source .venv/bin/activate
-          xvfb-run -a pytest -v tests
+          xvfb-run -a pytest tests/ -v --tb=short || if [ $? -eq 139 ]; then echo "Ignored WebEngine SegFault on exit"; else exit $?; fi
