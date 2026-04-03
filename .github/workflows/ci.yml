@@ -1,279 +1,35 @@
-name: Build and release OpenSAK
-
-# Runs on version tags e.g. v1.0.0
-# Create release: git tag v1.0.0 && git push origin v1.0.0
-# Manual trigger: GitHub → Actions → Run workflow
+name: CI
 
 on:
   push:
-    tags:
-      - "v*"
-    branches:
-      - main
-  workflow_dispatch:
-
-env:
-  PYTHON_VERSION: "3.11"
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-
-  # ============================================================
-  # Windows .exe
-  # ============================================================
-  build-windows:
-    name: "Build Windows .exe"
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller pytest pytest-cov
-      - name: Run tests
-        run: pytest tests/ -v --tb=short
-      - name: Build .exe
-        run: pyinstaller opensak.spec --clean --noconfirm
-        env:
-          PYTHONPATH: src
-      - name: Create ZIP
-        shell: powershell
-        run: Compress-Archive -Path dist/OpenSAK -DestinationPath dist/OpenSAK-Windows.zip
-      - uses: actions/upload-artifact@v4
-        with:
-          name: OpenSAK-Windows
-          path: dist/OpenSAK-Windows.zip
-          retention-days: 7
-
-  # ============================================================
-  # Linux AppImage
-  # ============================================================
-  build-linux:
-    name: "Build Linux AppImage"
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install system packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxcb-cursor0 libxcb-xinerama0 libxkbcommon-x11-0 libglib2.0-0 libegl1 libgl1-mesa-dev libdbus-1-3 xvfb libfuse2 imagemagick
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller pytest pytest-cov
-      - name: Run tests
-        run: xvfb-run -a pytest tests/ -v --tb=short
-        env:
-          PYTHONPATH: src
-      - name: Build Linux binary
-        run: xvfb-run -a pyinstaller opensak.spec --clean --noconfirm
-        env:
-          PYTHONPATH: src
-      - name: Download appimagetool
-        run: |
-          wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
-          chmod +x appimagetool
-      - name: Build AppDir
-        run: python3 scripts/make_appdir.py
-      - name: Build AppImage
-        run: ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir OpenSAK-Linux-x86_64.AppImage
-        env:
-          ARCH: x86_64
-      - name: Verify output and create fallback tar.gz
-        run: |
-          if [ -f OpenSAK-Linux-x86_64.AppImage ]; then
-            echo "AppImage OK"
-            ls -lh OpenSAK-Linux-x86_64.AppImage
-            chmod +x OpenSAK-Linux-x86_64.AppImage
-          else
-            echo "AppImage failed - creating tar.gz fallback"
-            tar -czf OpenSAK-Linux-x86_64.tar.gz -C dist OpenSAK/
-          fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: OpenSAK-Linux
-          path: |
-            OpenSAK-Linux-x86_64.AppImage
-            OpenSAK-Linux-x86_64.tar.gz
-          retention-days: 7
-
-  # ============================================================
-  # macOS arm64 (Apple Silicon — M1/M2/M3/M4)
-  # ============================================================
-  build-macos-arm64:
-    name: "Build macOS arm64 (Apple Silicon)"
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller pytest pytest-cov
-      - name: Run tests
-        run: pytest tests/ -v --tb=short
-        env:
-          PYTHONPATH: src
-        continue-on-error: true
-      - name: Build macOS .app (arm64)
-        run: pyinstaller opensak.spec --clean --noconfirm
-        env:
-          PYTHONPATH: src
-      - name: Create .dmg (arm64)
-        run: |
-          brew install create-dmg
-          create-dmg \
-            --volname "OpenSAK" \
-            --window-size 500 300 \
-            --icon-size 100 \
-            --app-drop-link 350 150 \
-            OpenSAK-macOS-arm64.dmg \
-            dist/OpenSAK.app \
-          || (cd dist && zip -r ../OpenSAK-macOS-arm64.zip OpenSAK.app && echo "Fallback ZIP created")
-      - uses: actions/upload-artifact@v4
-        with:
-          name: OpenSAK-macOS-arm64
-          path: |
-            OpenSAK-macOS-arm64.dmg
-            OpenSAK-macOS-arm64.zip
-          retention-days: 7
-
-  # ============================================================
-  # macOS x86_64 (Intel)
-  # ============================================================
-  build-macos-x86:
-    name: "Build macOS x86_64 (Intel)"
-    runs-on: macos-15-intel
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller pytest pytest-cov
-      - name: Run tests
-        run: pytest tests/ -v --tb=short
-        env:
-          PYTHONPATH: src
-        continue-on-error: true
-      - name: Build macOS .app (x86_64)
-        run: pyinstaller opensak.spec --clean --noconfirm
-        env:
-          PYTHONPATH: src
-      - name: Create .dmg (x86_64)
-        run: |
-          brew install create-dmg
-          create-dmg \
-            --volname "OpenSAK" \
-            --window-size 500 300 \
-            --icon-size 100 \
-            --app-drop-link 350 150 \
-            OpenSAK-macOS-x86_64.dmg \
-            dist/OpenSAK.app \
-          || (cd dist && zip -r ../OpenSAK-macOS-x86_64.zip OpenSAK.app && echo "Fallback ZIP created")
-      - uses: actions/upload-artifact@v4
-        with:
-          name: OpenSAK-macOS-x86_64
-          path: |
-            OpenSAK-macOS-x86_64.dmg
-            OpenSAK-macOS-x86_64.zip
-          retention-days: 7
-
-  # ============================================================
-  # Create GitHub Release
-  # ============================================================
-  create-release:
-    name: "Create GitHub Release"
+  test:
     runs-on: ubuntu-latest
-    needs: [build-windows, build-linux, build-macos-arm64, build-macos-x86]
-    if: startsWith(github.ref, 'refs/tags/')
-    permissions:
-      contents: write
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          name: OpenSAK-Windows
-          path: release-files/
-      - uses: actions/download-artifact@v4
-        with:
-          name: OpenSAK-Linux
-          path: release-files/
-      - uses: actions/download-artifact@v4
-        with:
-          name: OpenSAK-macOS-arm64
-          path: release-files/
-      - uses: actions/download-artifact@v4
-        with:
-          name: OpenSAK-macOS-x86_64
-          path: release-files/
-      - name: List release files
-        run: ls -lh release-files/
-      - name: Extract version from tag
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.version.outputs.VERSION }}
-          name: "OpenSAK ${{ steps.version.outputs.VERSION }}"
-          draft: false
-          prerelease: ${{ contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
-          body: |
-            ## OpenSAK ${{ steps.version.outputs.VERSION }}
+          python-version: ${{ matrix.python-version }}
 
-            ### Download
+      - name: Install dependencies
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
 
-            | Platform | File | Instructions |
-            |----------|------|--------------|
-            | 🪟 Windows | `OpenSAK-Windows.zip` | Unzip and double-click `OpenSAK.exe` |
-            | 🐧 Linux | `OpenSAK-Linux-x86_64.AppImage` | See instructions below |
-            | 🍎 macOS Apple Silicon (M1/M2/M3/M4) | `OpenSAK-macOS-arm64.dmg` | Open and drag OpenSAK to Applications |
-            | 🍎 macOS Intel | `OpenSAK-macOS-x86_64.dmg` | Open and drag OpenSAK to Applications |
-
-            > **Not sure which Mac you have?** Click the Apple menu () → "About This Mac".
-            > If it says "Apple M1/M2/M3/M4" choose **arm64**. If it says "Intel" choose **x86_64**.
-
-            ### Linux
-
-            ```bash
-            chmod +x OpenSAK-Linux-x86_64.AppImage
-            ./OpenSAK-Linux-x86_64.AppImage
-            ```
-
-            Or right-click → Properties → Allow executing as program, then double-click.
-
-            ### Windows
-
-            1. Download `OpenSAK-Windows.zip`
-            2. Right-click → Extract All
-            3. Open the extracted folder and double-click `OpenSAK.exe`
-
-            ### macOS
-
-            1. Download the correct .dmg for your Mac (arm64 or x86_64)
-            2. Open the .dmg and drag OpenSAK to your Applications folder
-            3. First launch: right-click → Open (required as the app is not signed with an Apple certificate)
-
-            ---
-            See [CHANGELOG.md](https://github.com/AgreeDK/OpenSAK/blob/main/CHANGELOG.md) for details.
-          files: release-files/**/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tests
+        run: |
+          source .venv/bin/activate
+          pytest -v tests
