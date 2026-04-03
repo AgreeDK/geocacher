@@ -1,9 +1,9 @@
 """
 src/opensak/lang/pt.py — Portuguese language file for OpenSAK.
 
-All UI strings in one place.
-To add a new language: copy en.py file, rename it (e.g. pt.py), translate the values.
-Keys (left side) must NEVER be changed — they are used in the code.
+Todas as strings da UI reunidas num só lugar.
+Copie este ficheiro a partir do 'en.py' para um novo ficheiro (ex: pt.py) e traduza os valores.
+As chaves (lado esquerdo) NUNCA devem ser alteradas — são utilizadas no código.
 """
 
 STRINGS: dict[str, str] = {

@@ -1,9 +1,9 @@
 """
 src/opensak/lang/en.py — English language file for OpenSAK.
 
-All UI strings in one place.
-To add a new language: copy this file, rename it (e.g. de.py), translate the values.
-Keys (left side) must NEVER be changed — they are used in the code.
+All UI strings collected in one place.
+Copy this file from 'en.py' to a new file (e.g., en.py) and translate the values.
+The keys (left side) must NEVER be changed — they are used in the code.
 """
 
 STRINGS: dict[str, str] = {

@@ -68,10 +68,17 @@ Want to translate OpenSAK into a new language, or update an existing one? It onl
        "de": "Deutsch",   # ← add this line
    }
    ```
-4. Test by selecting the new language in **Tools → Settings** and restarting
-5. Submit your translation — see below for how
 
-The language files contain around 220 strings. A rough machine translation that a native speaker then reviews is a perfectly good starting point.
+4. Test by selecting the new language in **Tools → Settings** and restarting
+5. Verify the integrity of labels, values, and missing content by running:
+
+```bash
+opensak-test # or pytest tests
+```
+
+6. Submit your translation — see below for how
+
+The language files contain around 570 strings. A rough machine translation that a native speaker then reviews is a perfectly good starting point.
 
 ---
 
@@ -139,10 +146,10 @@ git push origin main
 ## Running the Tests
 
 ```bash
-pytest -v tests/
+opensak-test # or pytest -v tests/
 ```
 
-The test suite covers the database layer, importer and filter engine (63 tests total). New features should include tests where practical.
+The test suite covers the database layer, importer, filter engine, and language completeness (72 tests total). New features should include tests where practical.
 
 ---
 

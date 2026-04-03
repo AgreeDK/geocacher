@@ -1,8 +1,8 @@
 """
 src/opensak/lang/fr.py — Fichier de langue en français pour OpenSAK.
 
-Toutes les chaînes d'interface utilisateur dans un seul endroit.
-Pour ajouter une nouvelle langue : copiez en.py fichier, renommez-le (par exemple de.py), puis traduisez les valeurs.
+Toutes les chaînes de l'interface utilisateur réunies en un seul endroit.
+Copiez ce fichier à partir de 'en.py' vers un nouveau fichier (par ex. fr.py) et traduisez les valeurs.
 Les clés (côté gauche) ne doivent JAMAIS être modifiées — elles sont utilisées dans le code.
 """
 

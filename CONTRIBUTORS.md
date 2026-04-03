@@ -17,6 +17,7 @@ Thank you to everyone who has contributed to OpenSAK! 🎉
 | Name | GitHub | Contribution |
 |------|--------|--------------|
 | Pierre LEJEUNE | [@theyoungstone](https://github.com/theyoungstone) | French translation (`lang/fr.py`) |
+| FabioSaGeo | [@Fabio-A-Sa](https://github.com/Fabio-A-Sa) | CI, API improvements, Testing coverage and Portuguese translation |
 
 ---
 

@@ -31,4 +31,5 @@ pythonpath = ["src"]
 
 [project.scripts]
 opensak = "opensak.utils.run_cli:main"
+opensak-test = "opensak.utils.run_test:run"
 opensak-doctor = "opensak.utils.doctor:run"
