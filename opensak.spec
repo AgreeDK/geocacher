@@ -89,6 +89,11 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    # Eksplicit ingen admin-rettigheder — forhindrer UAC-prompt på Windows
+    uac_admin=False,
+    uac_uiaccess=False,
+    # Windows manifest: asInvoker + DPI-awareness + kompatibilitet
+    manifest='opensak.manifest',
     # icon='src/opensak/assets/opensak.ico',  # Tilføj ikon når det findes
 )
 
