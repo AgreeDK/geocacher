@@ -27,14 +27,32 @@ jobs:
           source .venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest
+          # Essential for GUI testing in CI
+          pip install pytest pytest-qt pytest-xvfb 
 
       - name: Install Qt dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgl1-mesa-glx libxkbcommon-x11-0 libdbus-1-3 libxkbcommon-icccm4 libxkbcommon-util0 libxkbcommon0 libxkbcommon-private0 xvfb
+          # Using corrected package names for Ubuntu 22.04/24.04
+          sudo apt-get install -y \
+            libegl1 \
+            libgl1-mesa-dev \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-keysyms1 \
+            libxcb-shape0 \
+            libxcb-xfixes0 \
+            libxcb-xinerama0 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xkb1 \
+            libxkbcommon-x11-0 \
+            libdbus-1-3 \
+            xvfb
 
       - name: Run tests
+        env:
+          PYTHONPATH: src
         run: |
           source .venv/bin/activate
-          pytest -v tests
+          xvfb-run -a pytest -v tests
