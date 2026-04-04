@@ -4,12 +4,9 @@
 #
 # Build locally:
 #   pyinstaller opensak.spec
-
 import sys
 from pathlib import Path
-
 block_cipher = None
-
 # Platform-specific icon
 if sys.platform == "win32":
     ICON = str(Path("assets/icons/opensak.ico"))
@@ -17,17 +14,15 @@ elif sys.platform == "darwin":
     ICON = str(Path("assets/icons/opensak.icns"))
 else:
     ICON = str(Path("assets/icons/opensak.png"))
-
 a = Analysis(
     ["run.py"],
     pathex=["."],
     binaries=[],
     datas=[
-        ("src/opensak/gui/map_widget.html", "opensak/gui/"),
-        ("assets/icons/opensak.png",        "assets/icons/"),
-        ("assets/icons/opensak.ico",        "assets/icons/"),
-        ("assets/icons/opensak.icns",       "assets/icons/"),
-        ("locales/",                         "locales/"),
+        ("assets/icons/opensak.png",  "assets/icons/"),
+        ("assets/icons/opensak.ico",  "assets/icons/"),
+        ("assets/icons/opensak.icns", "assets/icons/"),
+        ("locales/",                   "locales/"),
     ],
     hiddenimports=[
         "PySide6.QtWebEngineWidgets",
@@ -43,9 +38,7 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
-
 pyz = PYZ(a.pure, a.zlib_data, cipher=block_cipher)
-
 exe = EXE(
     pyz,
     a.scripts,
@@ -64,7 +57,6 @@ exe = EXE(
     entitlements_file=None,
     icon=ICON,
 )
-
 coll = COLLECT(
     exe,
     a.binaries,
@@ -75,7 +67,6 @@ coll = COLLECT(
     upx_exclude=[],
     name="opensak",
 )
-
 # macOS .app bundle
 if sys.platform == "darwin":
     app = BUNDLE(
