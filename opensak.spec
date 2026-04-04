@@ -5,7 +5,9 @@
 #   pyinstaller opensak.spec
 import sys
 from pathlib import Path
+
 block_cipher = None
+
 # Platform-specific icon
 if sys.platform == "win32":
     ICON = str(Path("assets/icons/opensak.ico"))
@@ -13,6 +15,7 @@ elif sys.platform == "darwin":
     ICON = str(Path("assets/icons/opensak.icns"))
 else:
     ICON = str(Path("assets/icons/opensak.png"))
+
 a = Analysis(
     ["run.py"],
     pathex=["."],
@@ -32,12 +35,11 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
-    win_no_prefer_redirects=False,
-    win_private_assemblies=False,
-    cipher=block_cipher,
     noarchive=False,
 )
-pyz = PYZ(a.pure, a.zlib_data, cipher=block_cipher)
+
+pyz = PYZ(a.pure)
+
 exe = EXE(
     pyz,
     a.scripts,
@@ -56,16 +58,17 @@ exe = EXE(
     entitlements_file=None,
     icon=ICON,
 )
+
 coll = COLLECT(
     exe,
     a.binaries,
-    a.zipfiles,
     a.datas,
     strip=False,
     upx=True,
     upx_exclude=[],
     name="opensak",
 )
+
 # macOS .app bundle
 if sys.platform == "darwin":
     app = BUNDLE(
