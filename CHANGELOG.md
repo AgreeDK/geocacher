@@ -12,6 +12,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.6] — 2026-04-04
+### Added
+- **Icons** app Icons added
+
+---
+
 ## [1.4.5] — 2026-04-04
 ### Added
 - **Fixed** import result dialog now uses i18n strings (fixes #7)
