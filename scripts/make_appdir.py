@@ -23,10 +23,10 @@ def main():
     os.makedirs("AppDir/usr/share/icons/hicolor/256x256/apps", exist_ok=True)
 
     # Kopiér den byggede binær
-    if not os.path.exists("dist/OpenSAK"):
-        print("FEJL: dist/OpenSAK ikke fundet")
+    if not os.path.exists("dist/opensak"):
+        print("FEJL: dist/opensak ikke fundet")
         sys.exit(1)
-    shutil.copytree("dist/OpenSAK", "AppDir/usr/bin", dirs_exist_ok=True)
+    shutil.copytree("dist/opensak", "AppDir/usr/bin", dirs_exist_ok=True)
     print("Binær kopieret til AppDir/usr/bin/")
 
     # -----------------------------------------------------------
@@ -54,30 +54,37 @@ def main():
     if removed:
         print(f"Fjernet {len(removed)} konfliktuerende libs: {', '.join(removed)}")
 
-    # Lav ikon
-    icon_path = "AppDir/usr/share/icons/hicolor/256x256/apps/opensak.png"
-    result = subprocess.run([
-        "convert", "-size", "256x256", "xc:#2a6496",
-        "-fill", "white", "-pointsize", "48", "-gravity", "center",
-        "-annotate", "0", "OpenSAK", icon_path
-    ])
-    if result.returncode != 0:
-        png1x1 = base64.b64decode(
-            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-        )
-        open(icon_path, "wb").write(png1x1)
-        print("Ikon: bruger fallback PNG")
-    else:
-        print("Ikon genereret")
+    # Brug det rigtige ikon fra assets hvis det findes
+    icon_src = "assets/icons/opensak.png"
+    icon_dst = "AppDir/usr/share/icons/hicolor/256x256/apps/opensak.png"
 
-    shutil.copy(icon_path, "AppDir/opensak.png")
+    if os.path.exists(icon_src):
+        shutil.copy(icon_src, icon_dst)
+        print("Ikon kopieret fra assets/icons/opensak.png")
+    else:
+        # Fallback: generer med ImageMagick
+        result = subprocess.run([
+            "convert", "-size", "256x256", "xc:#1a2332",
+            "-fill", "white", "-pointsize", "48", "-gravity", "center",
+            "-annotate", "0", "OpenSAK", icon_dst
+        ])
+        if result.returncode != 0:
+            png1x1 = base64.b64decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+            )
+            open(icon_dst, "wb").write(png1x1)
+            print("Ikon: bruger fallback PNG")
+        else:
+            print("Ikon genereret med ImageMagick")
+
+    shutil.copy(icon_dst, "AppDir/opensak.png")
 
     # Lav .desktop fil
     desktop = "\n".join([
         "[Desktop Entry]",
         "Name=OpenSAK",
         "Comment=Open Source geocaching management tool",
-        "Exec=OpenSAK",
+        "Exec=opensak",
         "Icon=opensak",
         "Type=Application",
         "Categories=Utility;Science;",
@@ -105,7 +112,7 @@ def main():
         "",
         "# Filtrer harmloese systemadvarsler fra stderr",
         "# (xapp-gtk3-module, gvfs, atk-bridge - ikke relateret til OpenSAK)",
-        'exec "${HERE}/usr/bin/OpenSAK" "$@" 2> >(grep -vE "xapp-gtk3-module|libgvfscommon|libgvfsdbus|atk-bridge|g_task_set_static_name" >&2)',
+        'exec "${HERE}/usr/bin/opensak" "$@" 2> >(grep -vE "xapp-gtk3-module|libgvfscommon|libgvfsdbus|atk-bridge|g_task_set_static_name" >&2)',
         "",
     ]
     open("AppDir/AppRun", "w").write("\n".join(apprun_lines))
