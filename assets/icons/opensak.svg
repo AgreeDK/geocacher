@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Outer circle background -->
+  <circle cx="256" cy="256" r="246" fill="#1a2332"/>
+
+  <!-- Subtle decorative rings -->
+  <circle cx="256" cy="256" r="230" fill="none" stroke="#2d4060" stroke-width="2"/>
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#2d4060" stroke-width="1"/>
+
+  <!-- Tick marks (cardinal) -->
+  <line x1="256" y1="32" x2="256" y2="56" stroke="#3a5070" stroke-width="3" stroke-linecap="round"/>
+  <line x1="256" y1="456" x2="256" y2="480" stroke="#3a5070" stroke-width="3" stroke-linecap="round"/>
+  <line x1="32" y1="256" x2="56" y2="256" stroke="#3a5070" stroke-width="3" stroke-linecap="round"/>
+  <line x1="456" y1="256" x2="480" y2="256" stroke="#3a5070" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Tick marks (intercardinal) -->
+  <line x1="430" y1="82" x2="414" y2="98" stroke="#2d4060" stroke-width="2" stroke-linecap="round"/>
+  <line x1="82" y1="82" x2="98" y2="98" stroke="#2d4060" stroke-width="2" stroke-linecap="round"/>
+  <line x1="430" y1="430" x2="414" y2="414" stroke="#2d4060" stroke-width="2" stroke-linecap="round"/>
+  <line x1="82" y1="430" x2="98" y2="414" stroke="#2d4060" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Compass North arrow (bright green) -->
+  <polygon points="256,48 278,158 256,140 234,158" fill="#2ecc71"/>
+  <!-- Compass South arrow (muted) -->
+  <polygon points="256,464 278,354 256,372 234,354" fill="#3a5572"/>
+  <!-- Compass East arrow (muted) -->
+  <polygon points="464,256 354,234 372,256 354,278" fill="#3a5572"/>
+  <!-- Compass West arrow (muted) -->
+  <polygon points="48,256 158,234 140,256 158,278" fill="#3a5572"/>
+
+  <!-- N label -->
+  <text x="256" y="44" text-anchor="middle" dominant-baseline="auto"
+        font-family="Arial, sans-serif" font-size="28" font-weight="700"
+        fill="#2ecc71">N</text>
+
+  <!-- Inner circle (backing for pin) -->
+  <circle cx="256" cy="256" r="108" fill="#243448"/>
+  <circle cx="256" cy="256" r="100" fill="#1e2d3e"/>
+
+  <!-- Geocache MAP PIN shape -->
+  <!-- The teardrop/pin body -->
+  <path d="M256,164
+           C220,164 192,192 192,228
+           C192,272 256,328 256,328
+           C256,328 320,272 320,228
+           C320,192 292,164 256,164 Z"
+        fill="#2ecc71"/>
+
+  <!-- Pin inner circle (the "hole") -->
+  <circle cx="256" cy="224" r="36" fill="#1a2332"/>
+
+  <!-- Small dot in center of hole -->
+  <circle cx="256" cy="224" r="12" fill="#2ecc71"/>
+
+  <!-- Subtle border on outer circle -->
+  <circle cx="256" cy="256" r="246" fill="none" stroke="#2a3f58" stroke-width="4"/>
+</svg>

@@ -4,7 +4,7 @@ app.py — Application entry point for OpenSAK.
 
 import sys
 from pathlib import Path
-
+from opensak.gui.icon import get_app_icon
 
 def _migrate_legacy_db() -> None:
     """
@@ -94,6 +94,7 @@ def main() -> None:
     from PySide6.QtCore import Qt
 
     app = QApplication(sys.argv)
+    app.setWindowIcon(get_app_icon())
     app.setApplicationName("OpenSAK")
     app.setApplicationVersion("0.1.0")
     app.setOrganizationName("OpenSAK Project")
