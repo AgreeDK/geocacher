@@ -12,6 +12,35 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.3] — 2026-04-06
+### Fixed
+- **"Fix: Logs not displayed on cache page, close issue #18 "**
+  - Strict file type validation for imports, pull request 27 by Fabio-A-Sa
+
+### Files changed
+A       .github/ISSUE_TEMPLATE/bug_report.yml
+A       .github/ISSUE_TEMPLATE/feature_request.yml
+A       .github/ISSUE_TEMPLATE/improvement.yml
+M       .gitignore
+M       CHANGELOG.md
+M       src/opensak/__init__.py
+M       src/opensak/api/geocaching.py
+M       src/opensak/gui/dialogs/import_dialog.py
+M       src/opensak/gui/mainwindow.py
+M       src/opensak/lang/cs.py
+M       src/opensak/lang/da.py
+M       src/opensak/lang/en.py
+M       src/opensak/lang/fr.py
+M       src/opensak/lang/pt.py
+M       src/opensak/utils/doctor.py
+M       src/opensak/utils/run_cli.py
+M       src/opensak/utils/run_test.py
+A       src/opensak/utils/types.py
+M       src/opensak/utils/utils.py
+M       tests/test_languages.py
+
+---
+
 ## [1.6.2] — 2026-04-06
 ### Fixed
 - **"Fix: remove duplicate key and translate missing French strings in fr.py"**
