@@ -39,6 +39,3 @@ gc_token.json
 
 # Alembic (will add later)
 # alembic/versions/
-compare_langs.py
-results_after.txt
-results.txt
