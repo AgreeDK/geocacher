@@ -1,0 +1,23 @@
+name: Improvement
+description: Suggest an enhancement to an existing feature or optimization.
+labels: ["improvement"]
+body:
+  - type: textarea
+    id: current
+    attributes:
+      label: Current State
+      placeholder: Describe how the feature currently works.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Improvement
+      placeholder: How can we make this better, faster, or more efficient?
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Expected Benefits
+      placeholder: Why is this change necessary?
