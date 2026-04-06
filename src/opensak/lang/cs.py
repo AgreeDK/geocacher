@@ -123,6 +123,8 @@ STRINGS: dict[str, str] = {
     "import_skipped":               "Přeskočené:",
     "import_errors_header":         "Chyby ({count}):",
     "import_failed":                "✗ Import selhal:",
+    "import_again":                 "Importovat znovu",
+    "import_select_file_label":     "Vyberte soubor GPX nebo Pocket Query ZIP:",
     "import_no_file":               "Žádný soubor nevybrán",
     "import_browse_title":          "Vyberte soubor GPX nebo ZIP",
     "import_file_filter":           "Soubory GPX a ZIP (*.gpx *.zip);;Všechny soubory (*)",
