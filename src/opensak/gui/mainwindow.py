@@ -435,30 +435,53 @@ class MainWindow(QMainWindow):
 
         return fs
 
+    # ── Helpers ───────────────────────────────────────────────────────────────
+
+    def _load_full_cache(self, gc_code: str):
+        """
+        Indlæs en enkelt cache fra DB med alle relationer eager-loaded.
+
+        apply_filters() bruger noload() på logs/waypoints/user_note for
+        performance ved store databaser. Denne hjælper bruges når brugeren
+        vælger en cache, så detaljepanelet altid får komplette data.
+        """
+        from opensak.db.models import Cache as CacheModel
+        from sqlalchemy.orm import joinedload
+        with get_session() as session:
+            return session.query(CacheModel).options(
+                joinedload(CacheModel.logs),
+                joinedload(CacheModel.attributes),
+                joinedload(CacheModel.waypoints),
+                joinedload(CacheModel.user_note),
+            ).filter_by(gc_code=gc_code).first()
+
     # ── Slots ─────────────────────────────────────────────────────────────────
 
     def _on_cache_selected(self, cache: Cache) -> None:
-        self._detail_panel.show_cache(cache)
-        self._map_widget.pan_to_cache(cache.gc_code)
+        """Kaldes når brugeren klikker på en cache i tabellen."""
+        # Genindlæs cachen med alle relationer (logs, waypoints osv.)
+        # da apply_filters() bruger noload() på disse for performance.
+        full = self._load_full_cache(cache.gc_code)
+        if not full:
+            return
+        self._detail_panel.show_cache(full)
+        self._map_widget.pan_to_cache(full.gc_code)
         self._act_wp_edit.setEnabled(True)
         self._act_wp_delete.setEnabled(True)
-        if cache.latitude and cache.longitude:
+        if full.latitude and full.longitude:
             self._statusbar.showMessage(
-                f"{cache.gc_code} — {cache.name} "
-                f"({cache.latitude:.5f}, {cache.longitude:.5f})"
+                f"{full.gc_code} — {full.name} "
+                f"({full.latitude:.5f}, {full.longitude:.5f})"
             )
 
     def _on_map_cache_selected(self, gc_code: str) -> None:
-        """Called when a pin is clicked on the map."""
-        from opensak.db.database import get_session
-        from opensak.db.models import Cache as CacheModel
-        with get_session() as session:
-            cache = session.query(CacheModel).filter_by(gc_code=gc_code).first()
-            if cache:
-                self._detail_panel.show_cache(cache)
-                self._statusbar.showMessage(
-                    f"{cache.gc_code} — {cache.name}"
-                )
+        """Kaldes når brugeren klikker på en pin på kortet."""
+        full = self._load_full_cache(gc_code)
+        if full:
+            self._detail_panel.show_cache(full)
+            self._statusbar.showMessage(
+                f"{full.gc_code} — {full.name}"
+            )
 
     def _on_search_changed(self, text: str) -> None:
         QTimer.singleShot(300, self._refresh_cache_list)
