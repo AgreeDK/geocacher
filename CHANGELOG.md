@@ -12,6 +12,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.1] — 2026-04-06
+### Fixed
+- **GPX import: large files no longer freeze** — debug code removed
+---
+
 ## [1.6.0] — 2026-04-06
 ### Fixed
 - **GPX import: large files no longer freeze** — complete rewrite of import engine:

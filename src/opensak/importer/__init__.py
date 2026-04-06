@@ -16,23 +16,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
-import logging
 import time
 from lxml import etree
 from sqlalchemy.orm import Session
 
 from opensak.db.models import Attribute, Cache, Log, Trackable, UserNote, Waypoint
 
-# ── Debug logger ──────────────────────────────────────────────────────────────
-_log = logging.getLogger("opensak.importer")
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s %(levelname)s %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("/tmp/opensak_import.log", mode="w", encoding="utf-8"),
-    ]
-)
 
 # ── XML namespace map used by Groundspeak Pocket Queries ─────────────────────
 # Primary namespace map — uses /1/0/1 (newer PQ files)
@@ -426,7 +415,6 @@ def _insert_extra_wpts(session: Session, extra_wpts: list, commit_every: int = 5
     Committer til disk for hver commit_every caches.
     """
     t0 = time.time()
-    _log.debug(f"_insert_extra_wpts: {len(extra_wpts)} waypoints")
 
     # Hent alle gc_codes på én gang og byg suffix→cache_id dict i RAM
     all_caches = session.query(Cache.id, Cache.gc_code).all()
@@ -434,7 +422,6 @@ def _insert_extra_wpts(session: Session, extra_wpts: list, commit_every: int = 5
     for cache_id, gc_code in all_caches:
         if gc_code and len(gc_code) > 2:
             suffix_to_cache_id[gc_code[2:]] = cache_id
-    _log.debug(f"Lookup bygget: {len(suffix_to_cache_id)} caches ({time.time()-t0:.1f}s)")
 
     # Grupper waypoints per suffix
     wpts_by_suffix: dict[str, list] = {}
@@ -469,11 +456,9 @@ def _insert_extra_wpts(session: Session, extra_wpts: list, commit_every: int = 5
             t1 = time.time()
             session.commit()
             session.expunge_all()
-            _log.debug(f"  waypoint commit {batch}/{len(wpts_by_suffix)} ({count} wpts, {time.time()-t1:.1f}s)")
-
+    
     t1 = time.time()
     session.commit()
-    _log.debug(f"_insert_extra_wpts færdig: {count} wpts på {time.time()-t0:.1f}s total")
     return count
 
 
@@ -735,14 +720,8 @@ def import_gpx(
                     if extra is not None:
                         extra_wpts.append(extra)
                     else:
-                        # Hverken cache eller extra waypoint — log hvad det er
-                        raw_name = _text(wpt_el, "gpx:name", NS) or _text(wpt_el, "gpx:n", NS) or "?"
-                        raw_type = _text(wpt_el, "gpx:type", NS) or "no-type"
-                        _log.debug(f"SKIP (ukendt wpt): name={raw_name!r} type={raw_type!r}")
                         result.skipped += 1
-                except Exception as ex:
-                    raw_name = _text(wpt_el, "gpx:name", NS) or "?"
-                    _log.debug(f"SKIP (parse-fejl i extra_wpt): name={raw_name!r} fejl={ex}")
+                except Exception:
                     result.skipped += 1
                 continue
 
@@ -765,14 +744,11 @@ def import_gpx(
                 result.skipped += 1
 
         # Commit resterende caches
-        _log.debug(f"Cache-loop færdig: {result.created} nye, {result.updated} opdateret, {result.skipped} sprunget over")
-        _log.debug("Final cache-commit starter...")
         t1 = time.time()
         if progress_cb:
             progress_cb(-(result.created + result.updated))  # signal: gemmer til disk
         db_session.commit()
         db_session.expunge_all()
-        _log.debug(f"Final cache-commit OK ({time.time()-t1:.1f}s)")
 
         # Deduplikér extra waypoints
         seen: set = set()
@@ -782,14 +758,11 @@ def import_gpx(
             if key not in seen:
                 seen.add(key)
                 unique_wpts.append(wp)
-        _log.debug(f"Deduplikeret waypoints: {len(extra_wpts)} → {len(unique_wpts)} unikke")
 
         # Link waypoints til deres parent caches
         if unique_wpts:
-            _log.debug("_insert_extra_wpts starter...")
-            result.waypoints += _insert_extra_wpts(db_session, unique_wpts)
-            _log.debug(f"_insert_extra_wpts færdig: {result.waypoints} waypoints")
-
+                result.waypoints += _insert_extra_wpts(db_session, unique_wpts)
+    
         # Parse og link companion waypoints fil
         if wpts_path and wpts_path.exists():
             try:
