@@ -144,6 +144,24 @@ def zip_file(tmp_path, gpx_file, wpts_file) -> Path:
     return z
 
 
+@pytest.fixture
+def multi_gpx_zip(tmp_path) -> Path:
+    z = tmp_path / "multi_pq.zip"
+    
+    # Content for a second unique GPX
+    second_gpx = SAMPLE_GPX.replace("GC12345", "GCABCDE").replace("GC99999", "GCFGHIJ")
+    
+    gpx1 = tmp_path / "first.gpx"
+    gpx1.write_text(SAMPLE_GPX, encoding="utf-8")
+    
+    gpx2 = tmp_path / "second.gpx"
+    gpx2.write_text(second_gpx, encoding="utf-8")
+
+    with zipfile.ZipFile(z, "w") as zf:
+        zf.write(gpx1, "first.gpx")
+        zf.write(gpx2, "second.gpx")
+    return z
+
 # ── Basic import tests ────────────────────────────────────────────────────────
 
 def test_import_gpx_returns_result(tmp_db, gpx_file):
@@ -256,6 +274,30 @@ def test_import_zip_invalid(tmp_db, tmp_path):
     with get_session() as s:
         result = import_zip(bad, s)
     assert len(result.errors) > 0
+
+
+def test_import_zip_multiple_files(tmp_db, multi_gpx_zip):
+    """Verify that a zip with multiple GPX files imports all records."""
+
+    # Clean DB first
+    with get_session() as s:
+        s.query(Log).delete()
+        s.query(Waypoint).delete()
+        s.query(Cache).delete()
+        s.commit()
+        
+    result = import_zip(multi_gpx_zip)
+
+    # Each SAMPLE_GPX has 2 caches. 2 files * 2 caches = 4
+    assert result.total == 4
+    assert result.created == 4
+    assert result.errors == []
+
+    with get_session() as s:
+        assert s.query(Cache).count() == 4
+        # Verify codes from both files exist
+        assert s.query(Cache).filter_by(gc_code="GC12345").first() is not None
+        assert s.query(Cache).filter_by(gc_code="GCABCDE").first() is not None
 
 
 # ── Upsert / duplicate handling ───────────────────────────────────────────────
