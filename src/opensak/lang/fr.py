@@ -123,8 +123,6 @@ STRINGS: dict[str, str] = {
     "import_skipped":               "Ignorées :",
     "import_errors_header":         "Erreurs ({count}) :",
     "import_failed":                "✗ Échec de l'importation :",
-    "import_again":                 "Importer à nouveau",
-    "import_select_file_label":     "Sélectionner un fichier GPX ou ZIP Pocket Query :",
     "import_no_file":               "Aucun fichier sélectionné",
     "import_browse_title":          "Sélectionner un fichier GPX ou ZIP",
     "import_file_filter":           "Fichiers GPX et ZIP (*.gpx *.zip);;Tous les fichiers (*)",
