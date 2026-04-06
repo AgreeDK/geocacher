@@ -35,7 +35,8 @@ def _make_engine(db_path: Path) -> Engine:
         url,
         echo=False,          # set True to log all SQL (useful for debugging)
         future=True,
-        connect_args={"check_same_thread": False},
+        connect_args={"check_same_thread": False, "timeout": 30}
+        ,
     )
     return engine
 
