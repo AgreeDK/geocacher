@@ -678,7 +678,7 @@ def import_gpx(
     session: Session | None = None,
     wpts_path: Optional[Path] = None,
     progress_cb=None,
-    batch_size: int = 500
+    batch_size: int = 200
 ) -> ImportResult:
     """
     Import a single GPX file into the database using streaming for high performance.
