@@ -1,8 +1,8 @@
 """
-src/opensak/lang/en.py — English language file for OpenSAK.
+src/opensak/lang/cs.py — Czech language file for OpenSAK.
 
 All UI strings collected in one place.
-Copy this file from 'en.py' to a new file (e.g., en.py) and translate the values.
+Copy this file from 'cs.py' to a new file (e.g., sk.py) and translate the values.
 The keys (left side) must NEVER be changed — they are used in the code.
 """
 
@@ -123,6 +123,8 @@ STRINGS: dict[str, str] = {
     "import_skipped":               "Přeskočené:",
     "import_errors_header":         "Chyby ({count}):",
     "import_failed":                "✗ Import selhal:",
+    "import_again":                 "Importovat znovu",
+    "import_select_file_label":     "Vyberte soubor GPX nebo Pocket Query ZIP:",
     "import_no_file":               "Žádný soubor nevybrán",
     "import_browse_title":          "Vyberte soubor GPX nebo ZIP",
     "import_file_filter":           "Soubory GPX a ZIP (*.gpx *.zip);;Všechny soubory (*)",
