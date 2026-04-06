@@ -129,6 +129,9 @@ STRINGS: dict[str, str] = {
     "import_browse_title":          "Vælg GPX eller ZIP fil",
     "import_file_filter":           "GPX og ZIP filer (*.gpx *.zip);;Alle filer (*)",
     "import_running_file":          "Importerer {name}…",
+    "import_progress":              "Behandler caches: {count}…",
+    "import_saving":               "Gemmer til database…",
+    "import_table_loaded":         "✓ {count} caches indlæst — klik på en cache for at se kortet",
     "import_log_placeholder":       "Import-resultat vises her…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
@@ -231,6 +234,9 @@ STRINGS: dict[str, str] = {
     "import_browse_title":          "Vælg GPX eller ZIP fil",
     "import_file_filter":           "Geocaching filer (*.gpx *.zip);;GPX filer (*.gpx);;ZIP filer (*.zip)",
     "import_running_file":          "Importerer {name}…",
+    "import_progress":              "Behandler caches: {count}…",
+    "import_saving":               "Gemmer til database…",
+    "import_table_loaded":         "✓ {count} caches indlæst — klik på en cache for at se kortet",
     "import_log_placeholder":       "Importresultat vises her…",
     "import_again":                 "Importer igen",
 

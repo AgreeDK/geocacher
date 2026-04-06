@@ -469,8 +469,24 @@ class MainWindow(QMainWindow):
     def _open_import_dialog(self) -> None:
         from opensak.gui.dialogs.import_dialog import ImportDialog
         dlg = ImportDialog(self)
-        dlg.import_completed.connect(self._refresh_cache_list)
+        # Efter import: reload kun tabellen — ikke kortet (for mange pins ved store DB'er)
+        dlg.import_completed.connect(self._refresh_table_only)
         dlg.exec()
+
+    def _refresh_table_only(self) -> None:
+        """Reload cache-tabellen uden at opdatere kortet. Bruges efter import."""
+        fs = self._build_current_filterset()
+        with get_session() as session:
+            caches = apply_filters(session, fs, SortSpec("name"))
+        self._cache_table.load_caches(caches)
+        count = self._cache_table.row_count()
+        if count == 1:
+            self._count_lbl.setText(tr("count_cache_single"))
+        else:
+            self._count_lbl.setText(tr("count_caches", count=count))
+        self._statusbar.showMessage(
+            tr("import_table_loaded", count=count), 5000
+        )
 
     def _open_settings(self) -> None:
         from opensak.gui.dialogs.settings_dialog import SettingsDialog

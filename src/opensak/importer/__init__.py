@@ -16,10 +16,23 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 
+import logging
+import time
 from lxml import etree
 from sqlalchemy.orm import Session
 
 from opensak.db.models import Attribute, Cache, Log, Trackable, UserNote, Waypoint
+
+# ── Debug logger ──────────────────────────────────────────────────────────────
+_log = logging.getLogger("opensak.importer")
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("/tmp/opensak_import.log", mode="w", encoding="utf-8"),
+    ]
+)
 
 # ── XML namespace map used by Groundspeak Pocket Queries ─────────────────────
 # Primary namespace map — uses /1/0/1 (newer PQ files)
@@ -370,7 +383,17 @@ def _parse_extra_wpt(wpt_el) -> Optional[dict]:
         suffix = raw_name[2:]
         wp_type_fallback = "Waypoint"
     else:
-        return None
+        # Ukendt prefix-format — tjek om type-feltet angiver et gyldigt waypoint-type
+        # Eksempler: 'JJ28J63' type='Waypoint|Final Location'
+        # Suffix er altid de sidste 6 tegn (Groundspeak standard)
+        type_raw_check = _text(wpt_el, "gpx:type", NS) or ""
+        if "|" in type_raw_check and type_raw_check.startswith("Waypoint"):
+            # Acceptér som waypoint med generisk prefix
+            prefix = raw_name[:2].upper()
+            suffix = raw_name[-6:] if len(raw_name) >= 6 else raw_name
+            wp_type_fallback = type_raw_check.split("|")[-1].strip()
+        else:
+            return None
 
     type_raw = _text(wpt_el, "gpx:type", NS) or ""
     if "|" in type_raw:
@@ -396,46 +419,61 @@ def _parse_extra_wpt(wpt_el) -> Optional[dict]:
     }
 
 
-def _insert_extra_wpts(session: Session, extra_wpts: list) -> int:
-    """Insert/update extra waypoints by matching suffix to parent cache gc_code."""
-    suffixes = {wp["suffix"] for wp in extra_wpts}
-    count = 0
+def _insert_extra_wpts(session: Session, extra_wpts: list, commit_every: int = 500) -> int:
+    """Insert/update extra waypoints.
 
-    for suffix in suffixes:
-        cache = (
-            session.query(Cache)
-            .filter(Cache.gc_code.like(f"%{suffix}"))
-            .first()
-        )
-        if cache is None:
+    Bygger ét suffix→cache_id lookup i RAM for at undgå 11.000 LIKE-queries.
+    Committer til disk for hver commit_every caches.
+    """
+    t0 = time.time()
+    _log.debug(f"_insert_extra_wpts: {len(extra_wpts)} waypoints")
+
+    # Hent alle gc_codes på én gang og byg suffix→cache_id dict i RAM
+    all_caches = session.query(Cache.id, Cache.gc_code).all()
+    suffix_to_cache_id: dict[str, int] = {}
+    for cache_id, gc_code in all_caches:
+        if gc_code and len(gc_code) > 2:
+            suffix_to_cache_id[gc_code[2:]] = cache_id
+    _log.debug(f"Lookup bygget: {len(suffix_to_cache_id)} caches ({time.time()-t0:.1f}s)")
+
+    # Grupper waypoints per suffix
+    wpts_by_suffix: dict[str, list] = {}
+    for wp in extra_wpts:
+        wpts_by_suffix.setdefault(wp["suffix"], []).append(wp)
+
+    count = 0
+    batch = 0
+
+    for suffix, wps in wpts_by_suffix.items():
+        cache_id = suffix_to_cache_id.get(suffix)
+        if cache_id is None:
             continue
 
-        for wp in (w for w in extra_wpts if w["suffix"] == suffix):
-            existing = (
-                session.query(Waypoint)
-                .filter_by(cache_id=cache.id, prefix=wp["prefix"])
-                .first()
-            )
-            if existing:
-                existing.wp_type     = wp["wp_type"]
-                existing.name        = wp["name"]
-                existing.description = wp["description"]
-                existing.comment     = wp["comment"]
-                existing.latitude    = wp["latitude"]
-                existing.longitude   = wp["longitude"]
-            else:
-                session.add(Waypoint(
-                    cache=cache,
-                    prefix=wp["prefix"],
-                    wp_type=wp["wp_type"],
-                    name=wp["name"],
-                    description=wp["description"],
-                    comment=wp["comment"],
-                    latitude=wp["latitude"],
-                    longitude=wp["longitude"],
-                ))
+        session.query(Waypoint).filter_by(cache_id=cache_id).delete(synchronize_session="fetch")
+
+        for wp in wps:
+            session.add(Waypoint(
+                cache_id=cache_id,
+                prefix=wp["prefix"],
+                wp_type=wp["wp_type"],
+                name=wp["name"],
+                description=wp["description"],
+                comment=wp["comment"],
+                latitude=wp["latitude"],
+                longitude=wp["longitude"],
+            ))
             count += 1
 
+        batch += 1
+        if batch % commit_every == 0:
+            t1 = time.time()
+            session.commit()
+            session.expunge_all()
+            _log.debug(f"  waypoint commit {batch}/{len(wpts_by_suffix)} ({count} wpts, {time.time()-t1:.1f}s)")
+
+    t1 = time.time()
+    session.commit()
+    _log.debug(f"_insert_extra_wpts færdig: {count} wpts på {time.time()-t0:.1f}s total")
     return count
 
 
@@ -515,6 +553,7 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
         session.query(Log).filter_by(cache_id=cache.id).delete()
         session.query(Attribute).filter_by(cache_id=cache.id).delete()
         session.query(Trackable).filter_by(cache_id=cache.id).delete()
+        session.query(Waypoint).filter_by(cache_id=cache.id).delete()
 
     # Scalar fields
     for field in (
@@ -543,10 +582,18 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
     # GSAK bruger dummy log_id '-2' for autogenererede noter (Certitude m.fl.).
     # Disse er ikke unikke på tværs af caches, så vi genererer et unikt ID
     # baseret på cache GC-kode + log indeks når log_id er en kendt dummy-værdi.
-    DUMMY_LOG_IDS = {"-2", "0", None, ""}
+    # GSAK bruger negative tal som dummy log IDs (-2, -3 osv.) samt "0" og tom streng.
+    # Alle negative log IDs og kendte dummy-værdier får genereret et unikt ID.
+    DUMMY_LOG_IDS = {"0", None, ""}
     for idx, lg in enumerate(data.get("logs", [])):
         raw_id = lg["log_id"]
-        if raw_id in DUMMY_LOG_IDS:
+        is_dummy = raw_id in DUMMY_LOG_IDS
+        if not is_dummy and raw_id is not None:
+            try:
+                is_dummy = int(raw_id) < 0
+            except (ValueError, TypeError):
+                pass
+        if is_dummy:
             log_id = f"gen_{data['gc_code']}_{idx}"
         else:
             log_id = raw_id
@@ -642,18 +689,18 @@ class ImportResult:
 
 def import_gpx(
     gpx_path: Path,
-    session: Session,
+    session: Session | None = None,
     wpts_path: Optional[Path] = None,
+    progress_cb=None,
 ) -> ImportResult:
     """
     Import a single GPX file into the database.
 
-    Parameters
-    ----------
-    gpx_path  : Path to the main .gpx file
-    session   : Active SQLAlchemy session
-    wpts_path : Optional path to companion -wpts.gpx file
+    Bruger batch-commits for at undgå RAM-overbelastning ved store filer.
+    session-parameteren ignoreres (bibeholdt for bagudkompatibilitet).
     """
+    from opensak.db.database import make_session
+
     result = ImportResult()
     source = gpx_path.name
 
@@ -665,62 +712,104 @@ def import_gpx(
         return result
 
     root = tree.getroot()
-    # Determine namespace (some files use default ns, some explicit)
     ns_uri = root.nsmap.get(None, "http://www.topografix.com/GPX/1/0")
     wpt_tag = f"{{{ns_uri}}}wpt"
 
     extra_wpts: list = []
+    BATCH_SIZE = 200  # commit til disk hver N caches
+    batch_count = 0
+    db_session = make_session()
 
-    for wpt_el in root.iter(wpt_tag):
-        try:
-            data = _parse_wpt(wpt_el)
-        except Exception as e:
-            result.errors.append(f"Parse error: {e}")
-            result.skipped += 1
-            continue
-
-        if data is None:
-            # Try as extra waypoint (parking, stage, etc.)
+    try:
+        for wpt_el in root.iter(wpt_tag):
             try:
-                extra = _parse_extra_wpt(wpt_el)
-                if extra is not None:
-                    extra_wpts.append(extra)
-                else:
-                    result.skipped += 1
-            except Exception:
+                data = _parse_wpt(wpt_el)
+            except Exception as e:
+                result.errors.append(f"Parse error: {e}")
                 result.skipped += 1
-            continue
+                continue
 
-        try:
-            _, created = _upsert_cache(session, data, source)
-            if created:
-                result.created += 1
-            else:
-                result.updated += 1
-        except Exception as e:
-            result.errors.append(f"DB error for {data.get('gc_code', '?')}: {e}")
-            result.skipped += 1
+            if data is None:
+                try:
+                    extra = _parse_extra_wpt(wpt_el)
+                    if extra is not None:
+                        extra_wpts.append(extra)
+                    else:
+                        # Hverken cache eller extra waypoint — log hvad det er
+                        raw_name = _text(wpt_el, "gpx:name", NS) or _text(wpt_el, "gpx:n", NS) or "?"
+                        raw_type = _text(wpt_el, "gpx:type", NS) or "no-type"
+                        _log.debug(f"SKIP (ukendt wpt): name={raw_name!r} type={raw_type!r}")
+                        result.skipped += 1
+                except Exception as ex:
+                    raw_name = _text(wpt_el, "gpx:name", NS) or "?"
+                    _log.debug(f"SKIP (parse-fejl i extra_wpt): name={raw_name!r} fejl={ex}")
+                    result.skipped += 1
+                continue
 
-    # Flush so child records get cache_id before waypoint linking
-    session.flush()
+            try:
+                _, created = _upsert_cache(db_session, data, source)
+                if created:
+                    result.created += 1
+                else:
+                    result.updated += 1
+                batch_count += 1
+                if progress_cb:
+                    progress_cb(result.created + result.updated)
+                if batch_count % BATCH_SIZE == 0:
+                    # Commit batch til disk og ryd session for at spare RAM
+                    db_session.commit()
+                    db_session.expunge_all()
+            except Exception as e:
+                db_session.rollback()
+                result.errors.append(f"DB error for {data.get('gc_code', '?')}: {e}")
+                result.skipped += 1
 
-    # Link collected extra waypoints to their parent caches
-    if extra_wpts:
-        result.waypoints += _insert_extra_wpts(session, extra_wpts)
+        # Commit resterende caches
+        _log.debug(f"Cache-loop færdig: {result.created} nye, {result.updated} opdateret, {result.skipped} sprunget over")
+        _log.debug("Final cache-commit starter...")
+        t1 = time.time()
+        if progress_cb:
+            progress_cb(-(result.created + result.updated))  # signal: gemmer til disk
+        db_session.commit()
+        db_session.expunge_all()
+        _log.debug(f"Final cache-commit OK ({time.time()-t1:.1f}s)")
 
-    # Parse and link companion waypoints file
-    if wpts_path and wpts_path.exists():
-        try:
-            wpts_tree = etree.parse(str(wpts_path))
-            extra = _parse_extra_waypoints(wpts_tree)
-            result.waypoints = _link_extra_waypoints(session, extra)
-        except Exception as e:
-            result.errors.append(f"Waypoints file error: {e}")
+        # Deduplikér extra waypoints
+        seen: set = set()
+        unique_wpts: list = []
+        for wp in extra_wpts:
+            key = (wp["suffix"], wp["prefix"], wp["name"])
+            if key not in seen:
+                seen.add(key)
+                unique_wpts.append(wp)
+        _log.debug(f"Deduplikeret waypoints: {len(extra_wpts)} → {len(unique_wpts)} unikke")
+
+        # Link waypoints til deres parent caches
+        if unique_wpts:
+            _log.debug("_insert_extra_wpts starter...")
+            result.waypoints += _insert_extra_wpts(db_session, unique_wpts)
+            _log.debug(f"_insert_extra_wpts færdig: {result.waypoints} waypoints")
+
+        # Parse og link companion waypoints fil
+        if wpts_path and wpts_path.exists():
+            try:
+                wpts_tree = etree.parse(str(wpts_path))
+                extra = _parse_extra_waypoints(wpts_tree)
+                result.waypoints = _link_extra_waypoints(db_session, extra)
+                db_session.commit()
+            except Exception as e:
+                result.errors.append(f"Waypoints file error: {e}")
+
+    except Exception:
+        db_session.rollback()
+        raise
+    finally:
+        db_session.close()
 
     return result
 
 
-def import_zip(zip_path: Path, session: Session) -> ImportResult:
+def import_zip(zip_path: Path, session: Session, progress_cb=None) -> ImportResult:
     """
     Import a Pocket Query .zip file.
 
@@ -752,7 +841,8 @@ def import_zip(zip_path: Path, session: Session) -> ImportResult:
         gpx_path  = gpx_files[0]
         wpts_path = wpts_files[0] if wpts_files else None
 
-        result = import_gpx(gpx_path, session, wpts_path=wpts_path)
+        result = import_gpx(gpx_path, session, wpts_path=wpts_path,
+                             progress_cb=progress_cb)
 
     return result
 

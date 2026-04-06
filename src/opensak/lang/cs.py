@@ -128,7 +128,10 @@ STRINGS: dict[str, str] = {
     "import_no_file":               "Žádný soubor nevybrán",
     "import_browse_title":          "Vyberte soubor GPX nebo ZIP",
     "import_file_filter":           "Soubory GPX a ZIP (*.gpx *.zip);;Všechny soubory (*)",
-    "import_running_file":          "Importuji {name}…",
+    "import_running_file":          "Importing {name}…",
+    "import_progress":              "Processing caches: {count}…",
+    "import_saving":               "Ukládání do databáze…",
+    "import_table_loaded":         "✓ {count} keší načteno — kliknutím zobrazíte mapu",
     "import_log_placeholder":       "Výsledky importu se zobrazí zde…",
     
     # ── Filter dialog ─────────────────────────────────────────────────────────
@@ -230,7 +233,7 @@ STRINGS: dict[str, str] = {
     "import_no_file":               "(žádný soubor nevybrán)",
     "import_browse_title":          "Vyberte GPX nebo ZIP soubor",
     "import_file_filter":           "Geocachingové soubory (*.gpx *.zip);;GPX soubory (*.gpx);;ZIP soubory (*.zip)",
-    "import_running_file":          "Importuji {name}…",
+    "import_running_file":          "Importing {name}…",
     "import_log_placeholder":       "Výsledek importu se zobrazí zde…",
     "import_again":                 "Importovat znovu",
 

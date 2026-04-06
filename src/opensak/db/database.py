@@ -56,6 +56,7 @@ def _enable_wal_and_fk(dbapi_connection, _connection_record) -> None:
 
 _engine: Engine | None = None
 _SessionLocal: sessionmaker | None = None
+_migrated_paths: set = set()  # undgår at køre migrationer to gange på samme DB
 
 
 def init_db(db_path: Path | None = None) -> Engine:
@@ -101,8 +102,10 @@ def init_db(db_path: Path | None = None) -> Engine:
     # Create all tables that don't exist yet (safe to call multiple times)
     Base.metadata.create_all(_engine)
 
-    # Kør schema-migrationer for eksisterende databaser
-    _run_migrations(_engine)
+    # Kør schema-migrationer for eksisterende databaser (kun én gang per DB-sti)
+    if db_path not in _migrated_paths:
+        _run_migrations(_engine)
+        _migrated_paths.add(db_path)
 
     return _engine
 
@@ -201,6 +204,13 @@ def get_session() -> Generator[Session, None, None]:
         raise
     finally:
         session.close()
+
+
+def make_session():
+    """Return a bare Session — caller handles commit/rollback/close."""
+    if _SessionLocal is None:
+        raise RuntimeError("Database not initialised — call init_db() first.")
+    return _SessionLocal()
 
 
 # ── Health-check helper ───────────────────────────────────────────────────────

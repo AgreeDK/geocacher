@@ -12,6 +12,34 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.6.0] — 2026-04-06
+### Fixed
+- **GPX import: large files no longer freeze** — complete rewrite of import engine:
+  - Caches are now committed to database in batches of 200 instead of one giant transaction
+  - Waypoint lookup uses a single in-memory dict instead of 11,000 individual LIKE queries (3 min → 3 sec)
+  - `apply_filters()` no longer eager-loads logs/waypoints/user_note for all caches — loaded on-demand when a cache is selected
+  - Table reload after import skips map update — map updates lazily when a cache is clicked
+  - Successfully tested with 53,415 caches and 19,644 waypoints from a full GSAK export
+- **GPX import: 0 skipped waypoints** — extra waypoints with unknown prefix formats (e.g. `JJ28J63`, `Q14N2QD`) are now correctly parsed using the `Waypoint|type` field
+- **GPX import: duplicate waypoints** — GSAK exports sometimes include each waypoint twice; duplicates are now deduplicated before insert
+- **GPX import: UNIQUE constraint on logs** — all negative GSAK dummy log IDs (−2, −3, …) are now treated as dummy and given a generated unique ID
+- **Database migration** message no longer repeats on startup
+
+### Changed
+- Live progress counter shown in import dialog during large imports
+- Import dialog shows "Saving to database…" during final commit phase
+- After import, status bar shows cache count and prompts user to click a cache to view map
+
+### Files changed
+- `src/opensak/importer/__init__.py`
+- `src/opensak/filters/engine.py`
+- `src/opensak/db/database.py`
+- `src/opensak/gui/dialogs/import_dialog.py`
+- `src/opensak/gui/mainwindow.py`
+- `src/opensak/lang/da.py`, `en.py`, `fr.py`, `pt.py`, `cs.py`
+
+---
+
 ## [1.5.2] — 2026-04-05
 ### Fixed
 - **Coordinate parser** now accepts the geocaching.com copy-paste format `N 34° 58.088' E 034° 03.281'` (DMM with degree sign and apostrophe) — no manual editing required (fixes #9)

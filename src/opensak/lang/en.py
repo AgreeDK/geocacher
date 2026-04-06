@@ -129,6 +129,9 @@ STRINGS: dict[str, str] = {
     "import_browse_title":          "Select GPX or ZIP file",
     "import_file_filter":           "GPX and ZIP files (*.gpx *.zip);;All files (*)",
     "import_running_file":          "Importing {name}…",
+    "import_progress":              "Processing caches: {count}…",
+    "import_saving":               "Saving to database…",
+    "import_table_loaded":         "✓ {count} caches loaded — click a cache to view on map",
     "import_log_placeholder":       "Import results will appear here…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────

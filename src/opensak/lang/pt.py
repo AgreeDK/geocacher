@@ -128,7 +128,10 @@ STRINGS: dict[str, str] = {
     "import_no_file":               "Nenhum ficheiro selecionado",
     "import_browse_title":          "Selecionar ficheiro GPX ou ZIP",
     "import_file_filter":           "Ficheiros GPX e ZIP (*.gpx *.zip);;Todos os ficheiros (*)",
-    "import_running_file":          "A importar {name}…",
+    "import_running_file":          "Importing {name}…",
+    "import_progress":              "Processing caches: {count}…",
+    "import_saving":               "A guardar na base de dados…",
+    "import_table_loaded":         "✓ {count} caches carregadas — clique num cache para ver o mapa",
     "import_log_placeholder":       "Os resultados da importação aparecerão aqui…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
@@ -230,7 +233,7 @@ STRINGS: dict[str, str] = {
     "import_no_file":               "(nenhum ficheiro selecionado)",
     "import_browse_title":          "Selecionar ficheiro GPX ou ZIP",
     "import_file_filter":           "Ficheiros Geocaching (*.gpx *.zip);;Ficheiros GPX (*.gpx);;Ficheiros ZIP (*.zip)",
-    "import_running_file":          "A importar {name}…",
+    "import_running_file":          "Importing {name}…",
     "import_log_placeholder":       "O resultado da importação será mostrado aqui…",
     "import_again":                 "Importar novamente",
 
