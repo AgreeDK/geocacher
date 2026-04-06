@@ -128,7 +128,7 @@ STRINGS: dict[str, str] = {
     "import_no_file":               "Aucun fichier sélectionné",
     "import_browse_title":          "Sélectionner un fichier GPX ou ZIP",
     "import_file_filter":           "Fichiers GPX et ZIP (*.gpx *.zip);;Tous les fichiers (*)",
-    "import_running_file":          "Importaion de  {name}…",
+    "import_running_file":          "Importation de  {name}…",
     "import_progress":              "Nombre de caches traitée: {count}…",
     "import_saving":                "Enregistrement dans la base de données…",
     "import_table_loaded":          "✓ {count} caches chargées — cliquez sur un cache pour voir la carte",
@@ -233,7 +233,7 @@ STRINGS: dict[str, str] = {
     "import_no_file":               "(aucun fichier sélectionné)",
     "import_browse_title":          "Sélectionnez un fichier GPX ou ZIP",
     "import_file_filter":           "Fichiers de géocaching (*.gpx *.zip);;Fichiers GPX (*.gpx);;Fichiers ZIP (*.zip)",
-    "import_running_file":          "Importaion de {name}…",
+    "import_running_file":          "Importation de {name}…",
     "import_log_placeholder":       "Le résultat de l'importation sera affiché ici…",
     "import_again":                 "Importer à nouveau",
 
