@@ -197,7 +197,6 @@ STRINGS: dict[str, str] = {
     "db_activate":                  "Activer",
     "db_active_marker":             "(active)",
     "db_delete_confirm_title":      "Supprimer la base de données",
-    "db_delete_confirm_msg":        "Êtes-vous sûr de vouloir supprimer la base de données '{name}'?\nLe fichier sera supprimé de manière permanente.",
     "db_cannot_delete_active":      "La base de données active ne peut pas être supprimée.\nVeuillez basculer vers une autre base de données en premier.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
@@ -227,14 +226,6 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "Le code GC est requis.",
     "wp_val_gc_invalid":            "Le code GC doit commencer par 'GC'.",
     "wp_val_name_required":         "Le nom est requis.",
-
-    # ── Import dialog ─────────────────────────────────────────────────────────
-    "import_select_file_label":     "Sélectionnez un fichier GPX ou une archive ZIP de Pocket Query :",
-    "import_no_file":               "(aucun fichier sélectionné)",
-    "import_browse_title":          "Sélectionnez un fichier GPX ou ZIP",
-    "import_file_filter":           "Fichiers de géocaching (*.gpx *.zip);;Fichiers GPX (*.gpx);;Fichiers ZIP (*.zip)",
-    "import_log_placeholder":       "Le résultat de l'importation sera affiché ici…",
-    "import_again":                 "Importer à nouveau",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_delete_cb_tooltip":        "Supprimer tous les fichiers .gpx du dossier Garmin/GPX sur l'appareil\navant le téléchargement du nouveau fichier. S'applique uniquement au téléchargement GPS direct.",
@@ -374,9 +365,7 @@ STRINGS: dict[str, str] = {
 
     # ── Toolbar extras ────────────────────────────────────────────────────────
     "toolbar_fit_all":              "Afficher tout",
-    "toolbar_home":                 "Base",
     "toolbar_fit_all_tooltip":      "Zoomer la carte sur toutes les caches",
-    "toolbar_home_tooltip":         "Aller aux coordonnées de base",
 
     # ── Cache table columns ───────────────────────────────────────────────────
     "col_status_icon":  "Icone de statut",

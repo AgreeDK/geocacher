@@ -197,7 +197,6 @@ STRINGS: dict[str, str] = {
     "db_activate":                  "Aktiver",
     "db_active_marker":             "(aktiv)",
     "db_delete_confirm_title":      "Slet database",
-    "db_delete_confirm_msg":        "Er du sikker på at du vil slette databasen '{name}'?\nFilen slettes permanent.",
     "db_cannot_delete_active":      "Den aktive database kan ikke slettes.\nSkift til en anden database først.",
 
     # ── Fund-opdater dialog ───────────────────────────────────────────────────
@@ -227,18 +226,6 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "GC Kode er påkrævet.",
     "wp_val_gc_invalid":            "GC Kode skal starte med 'GC'.",
     "wp_val_name_required":         "Navn er påkrævet.",
-
-    # ── Import dialog ─────────────────────────────────────────────────────────
-    "import_select_file_label":     "Vælg en GPX fil eller Pocket Query ZIP fil:",
-    "import_no_file":               "(ingen fil valgt)",
-    "import_browse_title":          "Vælg GPX eller ZIP fil",
-    "import_file_filter":           "Geocaching filer (*.gpx *.zip);;GPX filer (*.gpx);;ZIP filer (*.zip)",
-    "import_running_file":          "Importerer {name}…",
-    "import_progress":              "Behandler caches: {count}…",
-    "import_saving":               "Gemmer til database…",
-    "import_table_loaded":         "✓ {count} caches indlæst — klik på en cache for at se kortet",
-    "import_log_placeholder":       "Importresultat vises her…",
-    "import_again":                 "Importer igen",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_delete_cb_tooltip":        "Sletter alle .gpx filer i Garmin/GPX mappen på enheden\ninden den nye fil uploades. Virker kun ved direkte GPS-upload.",
@@ -378,9 +365,7 @@ STRINGS: dict[str, str] = {
 
     # ── Toolbar ekstra ────────────────────────────────────────────────────────
     "toolbar_fit_all":              "Vis alle",
-    "toolbar_home":                 "Hjem",
     "toolbar_fit_all_tooltip":      "Zoom kortet til alle caches",
-    "toolbar_home_tooltip":         "Gå til hjemkoordinat",
 
     # ── Cache tabel kolonner ──────────────────────────────────────────────────
     "col_status_icon":  "Status ikon",

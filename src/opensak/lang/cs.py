@@ -197,7 +197,6 @@ STRINGS: dict[str, str] = {
     "db_activate":                  "Aktivovat",
     "db_active_marker":             "(aktivní)",
     "db_delete_confirm_title":      "Smazat databázi",
-    "db_delete_confirm_msg":        "Opravdu chcete smazat databázi '{name}'?\\nSoubor bude trvale smazán.",
     "db_cannot_delete_active":      "Aktivní databázi nelze smazat.\\nNejprve přepněte na jinou databázi.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
@@ -227,15 +226,6 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "GC kód je povinný.",
     "wp_val_gc_invalid":            "GC kód musí začínat 'GC'.",
     "wp_val_name_required":         "Název je povinný.",
-
-    # ── Import dialog ─────────────────────────────────────────────────────────
-    "import_select_file_label":     "Vyberte GPX soubor nebo ZIP soubor Pocket Query:",
-    "import_no_file":               "(žádný soubor nevybrán)",
-    "import_browse_title":          "Vyberte GPX nebo ZIP soubor",
-    "import_file_filter":           "Geocachingové soubory (*.gpx *.zip);;GPX soubory (*.gpx);;ZIP soubory (*.zip)",
-    "import_running_file":          "Importing {name}…",
-    "import_log_placeholder":       "Výsledek importu se zobrazí zde…",
-    "import_again":                 "Importovat znovu",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_delete_cb_tooltip":        "Smaže všechny .gpx soubory ve složce Garmin/GPX na zařízení\\npřed nahráním nového souboru. Platí pouze pro přímé nahrávání do GPS.",
@@ -376,9 +366,7 @@ STRINGS: dict[str, str] = {
 
     # ── Toolbar extras ────────────────────────────────────────────────────────
     "toolbar_fit_all":              "Zobrazit vše",
-    "toolbar_home":                 "Domů",
     "toolbar_fit_all_tooltip":      "Přiblížit mapu na všechny keše",
-    "toolbar_home_tooltip":         "Přejít na domácí souřadnice",
 
     # ── Cache table columns ───────────────────────────────────────────────────
     "col_status_icon":  "Ikona stavu",

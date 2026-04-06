@@ -197,7 +197,6 @@ STRINGS: dict[str, str] = {
     "db_activate":                  "Activate",
     "db_active_marker":             "(active)",
     "db_delete_confirm_title":      "Delete database",
-    "db_delete_confirm_msg":        "Are you sure you want to delete the database '{name}'?\nThe file will be permanently deleted.",
     "db_cannot_delete_active":      "The active database cannot be deleted.\nSwitch to another database first.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
@@ -227,15 +226,6 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "GC Code is required.",
     "wp_val_gc_invalid":            "GC Code must start with 'GC'.",
     "wp_val_name_required":         "Name is required.",
-
-    # ── Import dialog ─────────────────────────────────────────────────────────
-    "import_select_file_label":     "Select a GPX file or Pocket Query ZIP file:",
-    "import_no_file":               "(no file selected)",
-    "import_browse_title":          "Select GPX or ZIP file",
-    "import_file_filter":           "Geocaching files (*.gpx *.zip);;GPX files (*.gpx);;ZIP files (*.zip)",
-    "import_running_file":          "Importing {name}…",
-    "import_log_placeholder":       "Import result will be shown here…",
-    "import_again":                 "Import again",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_delete_cb_tooltip":        "Deletes all .gpx files in the Garmin/GPX folder on the device\nbefore uploading the new file. Only applies to direct GPS upload.",
@@ -375,9 +365,7 @@ STRINGS: dict[str, str] = {
 
     # ── Toolbar extras ────────────────────────────────────────────────────────
     "toolbar_fit_all":              "Fit all",
-    "toolbar_home":                 "Home",
     "toolbar_fit_all_tooltip":      "Zoom map to all caches",
-    "toolbar_home_tooltip":         "Go to home coordinates",
 
     # ── Cache table columns ───────────────────────────────────────────────────
     "col_status_icon":  "Status icon",
