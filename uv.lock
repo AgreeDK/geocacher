@@ -448,7 +448,7 @@ wheels = [
 
 [[package]]
 name = "opensak"
-version = "0.2.0"
+version = "1.7.0"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },

@@ -42,12 +42,11 @@ Please keep pull requests focused — one feature or fix per PR makes review muc
 ```bash
 git clone https://github.com/AgreeDK/opensak.git
 cd opensak
-python3 -m venv .venv
-source .venv/bin/activate          # Linux / macOS
-# .venv\Scripts\activate           # Windows
-pip install -r requirements.txt
-pytest -v tests/                   # run tests
-python run.py                      # start the application
+
+uv sync                            # puts venv in the same page with project specifications
+
+uv run py.test                     # run tests
+uv run run.py                      # start the application
 ```
 
 ---
