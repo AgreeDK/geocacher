@@ -36,10 +36,8 @@ class NewDatabaseDialog(QDialog):
         form.addRow(tr("db_name_label"), self._name_edit)
 
         layout.addLayout(form)
-        layout.addWidget(QLabel(
-            "<small style='color:gray'>Databasen gemmes automatisk i app-mappen.<br>"
-            "Du kan ændre placeringen nedenfor (valgfrit).</small>"
-        ))
+        info_text = tr("db_new_info").replace("\n", "<br>")
+        layout.addWidget(QLabel(f"<small style='color:gray'>{info_text}</small>"))
 
         path_row = QHBoxLayout()
         self._path_edit = QLineEdit()

@@ -250,6 +250,7 @@ STRINGS: dict[str, str] = {
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "New database",
     "db_name_label":                "Name:",
+    "db_new_info":                  "The database is saved automatically in the app folder.\nYou can change the location below (optional).",
     "db_default_path":              "(default location)",
     "db_name_required":             "Please enter a name for the database.",
     "db_browse_title":              "Select location",
