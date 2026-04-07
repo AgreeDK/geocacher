@@ -2,6 +2,7 @@
 
 A modern, cross-platform geocaching management tool for **Linux**, **Windows** and **macOS** — a free, open source successor to GSAK, built in Python.
 
+![UV](https://img.shields.io/badge/Package_Manager-UV-rgb(222,95,233))
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![PySide6](https://img.shields.io/badge/GUI-PySide6-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
@@ -167,11 +168,7 @@ cd ~
 git clone https://github.com/AgreeDK/opensak.git
 cd opensak
 
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-opensak # or python run.py
+uv run run.py
 ```
 
 #### Windows (manual)
@@ -184,10 +181,8 @@ Install **Git** from [git-scm.com](https://git-scm.com/download/win)
 cd $env:USERPROFILE
 git clone https://github.com/AgreeDK/opensak.git
 cd opensak
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-opensak # or python run.py
+
+uv run run.py
 ```
 
 #### macOS (manual)
@@ -201,10 +196,8 @@ brew install python git
 cd ~
 git clone https://github.com/AgreeDK/opensak.git
 cd opensak
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-opensak # or python run.py
+
+uv run run.py
 ```
 
 #### Diagnostics (opensak-doctor)
