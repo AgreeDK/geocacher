@@ -23,6 +23,7 @@ AVAILABLE_LANGUAGES: dict[str, str] = {
     "fr": "Français",
     "pt": "Português",
     "cs": "Čeština",
+    "se": "Svenska",
 }
 
 # ── Aktiv oversættelses-dict ──────────────────────────────────────────────────
