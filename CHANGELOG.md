@@ -12,7 +12,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [1.6.4] — 2026-04-06
+## [1.6.5] — 2026-04-07
+### Fixed
+- **"Fix: hardcoded dansih text in DB dialog close issue #28 "**
+
+---
+
+## [1.6.4] — 2026-04-07
 ### Fixed
 - **"Fix: import of GPX file from gc.com with duplicated logs close issue #19 "**
 
