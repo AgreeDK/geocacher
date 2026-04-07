@@ -242,10 +242,10 @@ STRINGS: dict[str, str] = {
     "found_same_db_error":          "Referensdatabasen kan inte vara samma som den aktiva.",
     "found_running_file":           "Updaterar från: {name}…",
     "found_browse_title":           "Välj referensdatabas",
-    "found_info":                    "Denna funktion flaggar cacher som <b>hittade</b> i den activa databasen,\nbaserat på GC coderna från en referens databass (t.e.x. 'Mina hittade').\n\nTypisk arbetsordning:\n1. Importera 'Mina hittade' Pocket Query till en separat database\n2. Byt till databasen som du vill uppdatera (t.e.x. 'Uppland')\n3. Välj 'Min hittade' som referens och klicka Uppdatera",
-    "found_active_db":                "Activ databas (uppdatera):",
-    "found_completed":                "✓ Uppdatering färdig!",
-    "found_errors":                   "Fel:",
+    "found_info":                   "Denna funktion flaggar cacher som <b>hittade</b> i den activa databasen,\nbaserat på GC coderna från en referens databass (t.e.x. 'Mina hittade').\n\nTypisk arbetsordning:\n1. Importera 'Mina hittade' Pocket Query till en separat database\n2. Byt till databasen som du vill uppdatera (t.e.x. 'Uppland')\n3. Välj 'Min hittade' som referens och klicka Uppdatera",
+    "found_active_db":               "Activ databas (uppdatera):",
+    "found_completed":               "✓ Uppdatering färdig!",
+    "found_errors":                  "Fel:",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Ny databas",
@@ -378,7 +378,7 @@ STRINGS: dict[str, str] = {
     "col_container":    "Behållare",
     "col_country":      "Land",
     "col_state":        "Region",
-    "col_distance":     "Avstång",
+    "col_distance":     "Avstånd",
     "col_found":        "Hittad",
     "col_placed_by":    "Utlagd av",
     "col_hidden_date":  "Gömd datum",
