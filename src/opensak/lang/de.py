@@ -233,7 +233,7 @@ STRINGS: dict[str, str] = {
 
     # ── Found dialog ──────────────────────────────────────────────────────────
     "found_ref_group":              "Referenz-Datenbank (Meine Funde)",
-    "found_rb_known":               "AUs bekannten Datenbanken wählen:",
+    "found_rb_known":               "Aus bekannten Datenbanken wählen:",
     "found_rb_file":                "Wähle eine .db-Datei:",
     "found_no_file":                "(keine Datei gewählt)",
     "found_log_placeholder":        "Ergebniss wird nach dem Aktualisieren hier angezeigt…",
@@ -438,7 +438,7 @@ STRINGS: dict[str, str] = {
     # ── Coordinate converter dialog ───────────────────────────────────────────
     "coord_conv_title":             "Koordinaten-Konverter",
     "coord_conv_input_group":       "Koordinaten eingeben",
-    "coord_conv_input_hint":        "Formatunabhängig eingebn: DMM, DMS oder DD — Automatische Konvertierung",
+    "coord_conv_input_hint":        "Formatunabhängig eingeben: DMM, DMS oder DD — Automatische Konvertierung",
     "coord_conv_placeholder":       "z.B. N55 47.250 E012 25.000",
     "coord_conv_output_group":      "Alle Formate",
     "coord_conv_copy_btn":          "Kopieren",
@@ -676,7 +676,7 @@ STRINGS: dict[str, str] = {
     "trip_btn_preview_map":                    "🗺️  Zeige auf der Karte",
     "trip_btn_preview_map_tooltip":            "Öffne ausgewählte Caches auf einer interaktiven Karte",
     "trip_map_preview_title":                  "Ausflugsplaner — Kartenvorschau",
-    "trip_map_preview_info":                   "{count} Caches angezeigt — AUsflugsplaner bleibt offen",
+    "trip_map_preview_info":                   "{count} Caches angezeigt — Ausflugsplaner bleibt offen",
 
     # Trip planner — save to database
     "trip_btn_save_db":                        "🗄️  Speichere auf der Datenbank…",
@@ -700,7 +700,7 @@ STRINGS: dict[str, str] = {
     "gc_status_waiting":            "Auf Browser warten...",
     "gc_status_fetching":           "Profil abrufen...",
     "gc_status_error":              "Fehler beim Abrufen des Profils",
-    "gc_login_btn":                 "Mit Geocaching.com einloogen",
+    "gc_login_btn":                 "Mit Geocaching.com einloggen",
     "gc_login_waiting":             "Auf Login warten...",
     "gc_logout_btn":                "Ausloggen",
     "gc_refresh_btn":               "Aktualisieren",
