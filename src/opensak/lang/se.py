@@ -179,7 +179,7 @@ STRINGS: dict[str, str] = {
     "settings_lon_label":           "Longitud:",
     "settings_group_display":       "Visa",
     "settings_use_miles":           "Visa avstånd i miles (i stället för km)",
-    "settings_show_archived":       "Visa archiverade cacher",
+    "settings_show_archived":       "Visa arkiverade cacher",
     "settings_show_found":          "Visa hittade cacher",
     "settings_map_label":           "Kart app:",
     "settings_map_google":          "Google Maps",
