@@ -12,6 +12,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.8.1] — 2026-04-08
+### Fixed
+- **""Fix: Typo in Swedish translation corrected""**
+
+---
+
 ## [1.8.0] — 2026-04-08
 ### Fixed
 - **""Add: German language (de) to AVAILABLE_LANGUAGES""**
