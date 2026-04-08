@@ -167,8 +167,8 @@ STRINGS: dict[str, str] = {
     "gps_exporting":                "Exportiere {count} Caches…",
     "gps_deleting":                 "🗑️  Lösche existierende GPX-Dateien auf dem GPS-Gerät…",
     "gps_confirm_delete_title":     "Löschen bestätigen",
-    "gps_confirm_delete_msg":       "<b>{count} GPX-Dateien</b> werden vor dem Upload auf dem GPS-Gerät gelöscht.\n\Bist du sicher?",
-    "gps_confirm_no_files_msg":     "Keine GPX-Dateien auf dem Gerät gefunden.\Möchtest du mit dem Upload fortfahren?",
+    "gps_confirm_delete_msg":       "<b>{count} GPX-Dateien</b> werden vor dem Upload auf dem GPS-Gerät gelöscht.\nBist du sicher?",
+    "gps_confirm_no_files_msg":     "Keine GPX-Dateien auf dem Gerät gefunden.\nMöchtest du mit dem Upload fortfahren?",
     "gps_delete_file_list":         "Zu löschende Dateien:\n{files}",
     "gps_no_dest":                  "Bitte wähle zuerst ein Ziel.",
 
@@ -197,7 +197,7 @@ STRINGS: dict[str, str] = {
     "db_activate":                  "Aktivieren",
     "db_active_marker":             "(aktiv)",
     "db_delete_confirm_title":      "Datenbank löschen",
-    "db_cannot_delete_active":      "Die aktive Datenbank kann nicht gelöscht werden.\Wechsle erst die Datenbank.",
+    "db_cannot_delete_active":      "Die aktive Datenbank kann nicht gelöscht werden.\nWechsle erst die Datenbank.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
     "found_dialog_title":           "Funde von Referenz-Datenbank aktualisieren",

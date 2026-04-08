@@ -12,6 +12,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.8.0] — 2026-04-08
+### Fixed
+- **""Add: German language (de) to AVAILABLE_LANGUAGES""**
+---
+
 ## [1.7.0] — 2026-04-07
 ### Fixed
 - **""Add: Swedish language (se) to AVAILABLE_LANGUAGES""**
