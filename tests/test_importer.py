@@ -11,7 +11,7 @@ from pathlib import Path
 from datetime import timezone  # kept for potential future use
 
 from opensak.db.database import init_db, get_session
-from opensak.db.models import Cache, Waypoint, Log, Attribute, Trackable
+from opensak.db.models import Cache
 from opensak.importer import import_gpx, import_zip
 
 # ── Synthetic GPX matching real Groundspeak/PQ format ────────────────────────
@@ -283,27 +283,18 @@ def test_import_zip_invalid(tmp_db, tmp_path):
 
 def test_import_zip_multiple_files(tmp_db, multi_gpx_zip):
     """Verify that a zip with multiple GPX files imports all records."""
-
-    # Clean DB first — must delete all child tables before Cache, because SQLite
-    # reuses row IDs when a table is emptied; leftover orphan rows in Attribute
-    # or Trackable would cause UNIQUE constraint failures on the next import.
     with get_session() as s:
-        s.query(Log).delete()
-        s.query(Waypoint).delete()
-        s.query(Attribute).delete()
-        s.query(Cache).delete()
-        s.commit()
-        
-    result = import_zip(multi_gpx_zip, s)
+        for cache in s.query(Cache).all():
+            s.delete(cache)
 
-    # Each SAMPLE_GPX has 2 caches. 2 files * 2 caches = 4
+    result = import_zip(multi_gpx_zip)
+
     assert result.total == 4
     assert result.created == 4
     assert result.errors == []
 
     with get_session() as s:
         assert s.query(Cache).count() == 4
-        # Verify codes from both files exist
         assert s.query(Cache).filter_by(gc_code="GC12345").first() is not None
         assert s.query(Cache).filter_by(gc_code="GCABCDE").first() is not None
 
