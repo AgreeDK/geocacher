@@ -17,14 +17,6 @@ from opensak.db.models import Cache, Waypoint, Log, Attribute, Trackable, UserNo
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
-@pytest.fixture(scope="module")
-def tmp_db(tmp_path_factory):
-    """Create a fresh in-memory-style SQLite DB in a temp directory for tests."""
-    db_path = tmp_path_factory.mktemp("data") / "test_opensak.db"
-    init_db(db_path=db_path)
-    return db_path
-
-
 @pytest.fixture
 def sample_cache() -> Cache:
     """Return a Cache instance (not yet added to any session)."""
