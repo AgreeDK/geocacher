@@ -377,6 +377,7 @@ STRINGS: dict[str, str] = {
     "col_container":    "Container",
     "col_country":      "Country",
     "col_state":        "Region",
+    "col_county":       "County",
     "col_distance":     "Distance",
     "col_found":        "Found",
     "col_placed_by":    "Placed by",

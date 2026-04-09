@@ -378,6 +378,7 @@ STRINGS: dict[str, str] = {
     "col_container":    "Schránka",
     "col_country":      "Země",
     "col_state":        "Oblast",
+    "col_county":       "Okres",
     "col_distance":     "Vzdálenost",
     "col_found":        "Nalezeno",
     "col_placed_by":    "Umístil",

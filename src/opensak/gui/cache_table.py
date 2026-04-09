@@ -33,6 +33,7 @@ def get_column_defs() -> dict:
         "container":    (tr("col_container"),         80),
         "country":      (tr("col_country"),           80),
         "state":        (tr("col_state"),            120),
+        "county":       (tr("col_county"),           100),
         "distance":     (tr("col_distance"),          75),
         "found":        (tr("col_found"),             55),
         "placed_by":    (tr("col_placed_by"),        120),
@@ -190,6 +191,8 @@ class CacheTableModel(QAbstractTableModel):
             return cache.country or ""
         if col == "state":
             return cache.state or ""
+        if col == "county":
+            return cache.county or ""
         if col == "distance":
             dist = self._distances.get(cache.id)
             if dist is None:
