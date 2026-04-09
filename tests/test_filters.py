@@ -17,7 +17,7 @@ from opensak.filters.engine import (
     # All filter classes
     CacheTypeFilter, ContainerFilter, DifficultyFilter, TerrainFilter,
     FoundFilter, NotFoundFilter, AvailableFilter, ArchivedFilter,
-    CountryFilter, StateFilter, NameFilter, GcCodeFilter, PlacedByFilter,
+    CountryFilter, StateFilter, CountyFilter, NameFilter, GcCodeFilter, PlacedByFilter,
     DistanceFilter, AttributeFilter, HasTrackableFilter,
     PremiumFilter, NonPremiumFilter,
     # Helpers
@@ -44,7 +44,8 @@ def seed_data(tmp_db):
             latitude=55.6761, longitude=12.5683,
             difficulty=1.5, terrain=1.5,
             placed_by="OwnerA", country="Denmark", state="Zealand",
-            available=True, archived=False, found=False, premium_only=False,
+            county="Copenhagen", available=True, archived=False, found=False,
+            premium_only=False,
         ),
         Cache(
             gc_code="GC00002", name="Hard Mystery",
@@ -52,7 +53,8 @@ def seed_data(tmp_db):
             latitude=55.6800, longitude=12.5700,
             difficulty=5.0, terrain=4.0,
             placed_by="OwnerB", country="Denmark", state="Zealand",
-            available=True, archived=False, found=True, premium_only=False,
+            county="Copenhagen", available=True, archived=False, found=True,
+            premium_only=False,
         ),
         Cache(
             gc_code="GC00003", name="Medium Multi",
@@ -60,7 +62,8 @@ def seed_data(tmp_db):
             latitude=56.1629, longitude=10.2039,
             difficulty=3.0, terrain=3.0,
             placed_by="OwnerA", country="Denmark", state="Region Midtjylland",
-            available=True, archived=False, found=False, premium_only=True,
+            county="Aarhus", available=True, archived=False, found=False,
+            premium_only=True,
         ),
         Cache(
             gc_code="GC00004", name="Archived Cache",
@@ -68,7 +71,8 @@ def seed_data(tmp_db):
             latitude=57.0480, longitude=9.9187,
             difficulty=2.0, terrain=2.0,
             placed_by="OwnerC", country="Denmark", state="Region Nordjylland",
-            available=False, archived=True, found=False, premium_only=False,
+            county="Aalborg", available=False, archived=True, found=False,
+            premium_only=False,
         ),
         Cache(
             gc_code="GC00005", name="German Traditional",
@@ -76,7 +80,8 @@ def seed_data(tmp_db):
             latitude=52.5200, longitude=13.4050,
             difficulty=1.0, terrain=1.0,
             placed_by="OwnerD", country="Germany", state="Berlin",
-            available=True, archived=False, found=False, premium_only=False,
+            county="Mitte", available=True, archived=False, found=False,
+            premium_only=False,
         ),
         Cache(
             gc_code="GC00006", name="Letterbox Cache",
@@ -84,7 +89,8 @@ def seed_data(tmp_db):
             latitude=55.4000, longitude=10.3833,
             difficulty=2.5, terrain=2.5,
             placed_by="OwnerB", country="Denmark", state="Region Syddanmark",
-            available=True, archived=False, found=False, premium_only=False,
+            county="Odense", available=True, archived=False, found=False,
+            premium_only=False,
         ),
     ]
 
@@ -209,6 +215,15 @@ def test_country_filter(tmp_db):
 def test_state_filter(tmp_db):
     with get_session() as s:
         results = apply_filters(s, FilterSet().add(StateFilter(["Zealand"])))
+    codes = {c.gc_code for c in results}
+    assert "GC00001" in codes
+    assert "GC00002" in codes
+    assert "GC00003" not in codes
+
+
+def test_county_filter(tmp_db):
+    with get_session() as s:
+        results = apply_filters(s, FilterSet().add(CountyFilter(["Copenhagen"])))
     codes = {c.gc_code for c in results}
     assert "GC00001" in codes
     assert "GC00002" in codes
@@ -395,6 +410,7 @@ def test_filter_serialisation_roundtrip():
         ArchivedFilter(),
         CountryFilter(["Denmark"]),
         StateFilter(["Zealand"]),
+        CountyFilter(["Copenhagen"]),
         NameFilter("traditional"),
         GcCodeFilter("GC123"),
         PlacedByFilter("owner"),

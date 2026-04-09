@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/bin/python -m pytest tests/ -x --tb=short -q)",
+      "Bash(.venv/bin/python -m pytest tests/test_importer.py -v --tb=short)",
+      "Bash(.venv/bin/python -m pytest tests/ -v --tb=short)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)"
+    ]
+  }
+}

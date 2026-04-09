@@ -243,6 +243,24 @@ class StateFilter(BaseFilter):
         return cls(data["states"])
 
 
+class CountyFilter(BaseFilter):
+    """Keep caches in any of *counties*."""
+    filter_type = "county"
+
+    def __init__(self, counties: list[str]):
+        self.counties = [c.strip() for c in counties]
+
+    def matches(self, cache: Cache) -> bool:
+        return cache.county in self.counties
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "counties": self.counties}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "CountyFilter":
+        return cls(data["counties"])
+
+
 class NameFilter(BaseFilter):
     """Keep caches whose name contains *text* (case-insensitive)."""
     filter_type = "name"
@@ -414,6 +432,7 @@ FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
     "archived":      ArchivedFilter,
     "country":       CountryFilter,
     "state":         StateFilter,
+    "county":        CountyFilter,
     "name":          NameFilter,
     "gc_code":       GcCodeFilter,
     "placed_by":     PlacedByFilter,
@@ -503,6 +522,7 @@ SORT_FIELDS: dict[str, Any] = {
     "hidden_date": lambda c: c.hidden_date or 0,
     "country":     lambda c: (c.country or "").lower(),
     "state":       lambda c: (c.state or "").lower(),
+    "county":      lambda c: (c.county or "").lower(),
     "placed_by":   lambda c: (c.placed_by or "").lower(),
     "container":   lambda c: (c.container or "").lower(),
     "found":       lambda c: int(c.found),

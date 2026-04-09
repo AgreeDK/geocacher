@@ -47,6 +47,7 @@ SAMPLE_GPX = """\
       <groundspeak:terrain>3.0</groundspeak:terrain>
       <groundspeak:country>Denmark</groundspeak:country>
       <groundspeak:state>Zealand</groundspeak:state>
+      <groundspeak:county>Copenhagen</groundspeak:county>
       <groundspeak:short_description html="False">A short description.</groundspeak:short_description>
       <groundspeak:long_description html="True">&lt;p&gt;A longer description.&lt;/p&gt;</groundspeak:long_description>
       <groundspeak:encoded_hints>Under a rock.</groundspeak:encoded_hints>
@@ -86,6 +87,7 @@ SAMPLE_GPX = """\
       <groundspeak:terrain>2.5</groundspeak:terrain>
       <groundspeak:country>Denmark</groundspeak:country>
       <groundspeak:state>Region Midtjylland</groundspeak:state>
+      <groundspeak:county>Aarhus</groundspeak:county>
       <groundspeak:short_description html="False"></groundspeak:short_description>
       <groundspeak:long_description html="False">Solve the puzzle first.</groundspeak:long_description>
       <groundspeak:encoded_hints>Check the tree.</groundspeak:encoded_hints>
@@ -169,6 +171,7 @@ def test_import_gpx_cache_fields(tmp_db, gpx_file):
         assert cache.placed_by == "TestOwner"
         assert cache.country == "Denmark"
         assert cache.state == "Zealand"
+        assert cache.county == "Copenhagen"
         assert cache.encoded_hints == "Under a rock."
         assert cache.available is True
         assert cache.archived is False

@@ -187,6 +187,7 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
     terrain      = _float(gs_cache, "gs:terrain",          active_ns)
     country      = _text(gs_cache, "gs:country",           active_ns)
     state        = _text(gs_cache, "gs:state",             active_ns)
+    county       = _text(gs_cache, "gs:county",            active_ns)
     short_desc   = _text(gs_cache, "gs:short_description", active_ns)
     long_desc    = _text(gs_cache, "gs:long_description",  active_ns)
     hints        = _text(gs_cache, "gs:encoded_hints",     active_ns)
@@ -263,6 +264,7 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
         "archived":          archived,
         "country":           country,
         "state":             state,
+        "county":            county,
         "short_description": short_desc,
         "short_desc_html":   short_html,
         "long_description":  long_desc,
@@ -545,7 +547,7 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
         "name", "cache_type", "container", "latitude", "longitude",
         "difficulty", "terrain", "placed_by", "owner_id",
         "hidden_date", "available", "archived",
-        "country", "state",
+        "country", "state", "county",
         "short_description", "short_desc_html",
         "long_description",  "long_desc_html",
         "encoded_hints",

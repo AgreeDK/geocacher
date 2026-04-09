@@ -85,9 +85,10 @@ class Cache(Base):
     long_desc_html: Mapped[bool] = mapped_column(Boolean, default=False)
     encoded_hints: Mapped[Optional[str]] = mapped_column(Text)
 
-    # Country / state
+    # Country / state / county
     country: Mapped[Optional[str]] = mapped_column(String(64))
     state: Mapped[Optional[str]] = mapped_column(String(64))
+    county: Mapped[Optional[str]] = mapped_column(String(64))
 
     # Personal data (per user)
     found: Mapped[bool] = mapped_column(Boolean, default=False)
