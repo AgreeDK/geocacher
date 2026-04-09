@@ -250,6 +250,7 @@ STRINGS: dict[str, str] = {
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Nová databáze",
     "db_name_label":                "Název:",
+    "db_new_info":                  "Databáze je automaticky uložena ve složce aplikace.\nNíže můžete umístění změnit (volitelné).",
     "db_default_path":              "(výchozí umístění)",
     "db_name_required":             "Zadejte prosím název databáze.",
     "db_browse_title":              "Vybrat umístění",

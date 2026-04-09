@@ -536,11 +536,15 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
         session.add(cache)
     else:
         cache = existing
-        # Clear old child records so they are rebuilt fresh
+        # Clear old child records so they are rebuilt fresh.
+        # flush() is required immediately after delete so SQLite sees the
+        # deletions before the new rows are added in the same batch —
+        # otherwise the UNIQUE constraint on logs.log_id will fire.
         session.query(Log).filter_by(cache_id=cache.id).delete()
         session.query(Attribute).filter_by(cache_id=cache.id).delete()
         session.query(Trackable).filter_by(cache_id=cache.id).delete()
         session.query(Waypoint).filter_by(cache_id=cache.id).delete()
+        session.flush()
 
     # Scalar fields
     for field in (
@@ -571,7 +575,10 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
     # baseret på cache GC-kode + log indeks når log_id er en kendt dummy-værdi.
     # GSAK bruger negative tal som dummy log IDs (-2, -3 osv.) samt "0" og tom streng.
     # Alle negative log IDs og kendte dummy-værdier får genereret et unikt ID.
+    # Nogle GPX filer fra geocaching.com indeholder duplikate logs med samme id —
+    # vi springer dubletter over så UNIQUE constraint ikke fyrer.
     DUMMY_LOG_IDS = {"0", None, ""}
+    seen_log_ids: set[str] = set()
     for idx, lg in enumerate(data.get("logs", [])):
         raw_id = lg["log_id"]
         is_dummy = raw_id in DUMMY_LOG_IDS
@@ -584,6 +591,9 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
             log_id = f"gen_{data['gc_code']}_{idx}"
         else:
             log_id = raw_id
+        if log_id in seen_log_ids:
+            continue
+        seen_log_ids.add(log_id)
         session.add(Log(
             cache=cache,
             log_id=log_id,

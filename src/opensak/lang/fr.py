@@ -250,6 +250,7 @@ STRINGS: dict[str, str] = {
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Nouvelle base de données",
     "db_name_label":                "Nom:",
+    "db_new_info":                  "La base de données est enregistrée automatiquement dans le dossier de l'application.\nVous pouvez modifier l'emplacement ci-dessous (facultatif).",
     "db_default_path":              "(Emplacement par défaut)",
     "db_name_required":             "Veuillez entrer un nom pour la base de données.",
     "db_browse_title":              "Sélectionner l'emplacement",

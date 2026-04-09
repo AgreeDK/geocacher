@@ -5,6 +5,7 @@ Supports corrected coordinates (user-solved mystery cache finals).
 """
 
 from __future__ import annotations
+import re
 import webbrowser
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -18,6 +19,20 @@ from opensak.db.models import Cache
 from opensak.lang import tr
 from opensak.coords import format_coords
 from opensak.gui.settings import get_settings
+
+
+
+def _sanitize_html(html: str) -> str:
+    """Fjern overflodige spaces i CSS farvevaerdier (issue #29).
+
+    GC.com cache-beskrivelser kan indeholde fx color=' #F5F5DC'
+    (space foer #) som faar QTextHtmlParser til at klage.
+    """
+    # "color:  #hex" -- reducer 2+ spaces til eet
+    html = re.sub(r'(color\s*:)\s{2,}(#)', r'\1 \2', html, flags=re.IGNORECASE)
+    # "color=' #hex'" eller 'color=" #hex"' -- fjern space(s) inde i quote
+    html = re.sub(r'(color\s*=\s*[\'"])\s+(#)', r'\1\2', html, flags=re.IGNORECASE)
+    return html
 
 
 class CacheDetailPanel(QWidget):
@@ -415,12 +430,12 @@ class CacheDetailPanel(QWidget):
         # Description
         if cache.long_description:
             if cache.long_desc_html:
-                self._desc_browser.setHtml(cache.long_description)
+                self._desc_browser.setHtml(_sanitize_html(cache.long_description))
             else:
                 self._desc_browser.setPlainText(cache.long_description)
         elif cache.short_description:
             if cache.short_desc_html:
-                self._desc_browser.setHtml(cache.short_description)
+                self._desc_browser.setHtml(_sanitize_html(cache.short_description))
             else:
                 self._desc_browser.setPlainText(cache.short_description)
         else:
