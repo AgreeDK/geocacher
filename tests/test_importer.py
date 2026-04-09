@@ -343,3 +343,91 @@ def test_import_corrupt_gpx(tmp_db, tmp_path):
     with get_session() as s:
         result = import_gpx(bad, s)
     assert len(result.errors) > 0
+
+
+def test_import_zip_empty(tmp_db, tmp_path):
+    """A zip with no GPX files should return an error."""
+    z = tmp_path / "empty.zip"
+    txt = tmp_path / "readme.txt"
+    txt.write_text("no gpx here")
+    with zipfile.ZipFile(z, "w") as zf:
+        zf.write(txt, "readme.txt")
+    result = import_zip(z)
+    assert result.total == 0
+    assert len(result.errors) > 0
+
+
+def test_import_zip_multiple_with_companion_wpts(tmp_db, tmp_path):
+    """Verify companion -wpts.gpx files are linked per GPX in a multi-file zip."""
+    with get_session() as s:
+        for cache in s.query(Cache).all():
+            s.delete(cache)
+
+    wpts_for_first = SAMPLE_WPTS_GPX  # links to GC12345 via suffix "2345"
+
+    second_gpx = (SAMPLE_GPX
+        .replace("GC12345", "GCABCDE")
+        .replace("GC99999", "GCFGHIJ")
+        .replace('id="111"', 'id="555"')
+        .replace('id="112"', 'id="666"'))
+
+    gpx1 = tmp_path / "first.gpx"
+    gpx1.write_text(SAMPLE_GPX, encoding="utf-8")
+    wpts1 = tmp_path / "first-wpts.gpx"
+    wpts1.write_text(wpts_for_first, encoding="utf-8")
+
+    gpx2 = tmp_path / "second.gpx"
+    gpx2.write_text(second_gpx, encoding="utf-8")
+
+    z = tmp_path / "multi_wpts.zip"
+    with zipfile.ZipFile(z, "w") as zf:
+        zf.write(gpx1, "first.gpx")
+        zf.write(wpts1, "first-wpts.gpx")
+        zf.write(gpx2, "second.gpx")
+
+    result = import_zip(z)
+
+    assert result.total == 4
+    assert result.waypoints >= 1
+    assert result.errors == []
+
+    with get_session() as s:
+        cache = s.query(Cache).filter_by(gc_code="GC12345").one()
+        assert len(cache.waypoints) >= 1
+        assert any(wp.prefix == "PK" for wp in cache.waypoints)
+
+
+def test_import_gpx_inline_extra_waypoints(tmp_db, tmp_path):
+    """Verify extra waypoints embedded in the main GPX are linked to their cache."""
+    with get_session() as s:
+        for cache in s.query(Cache).all():
+            s.delete(cache)
+
+    gpx_with_inline_wpt = SAMPLE_GPX.replace(
+        "</gpx>",
+        '  <wpt lat="55.6770" lon="12.5690">\n'
+        '    <n>PK12345</n>\n'
+        '    <desc>Parking Area</desc>\n'
+        '    <sym>Parking Area</sym>\n'
+        '    <type>Waypoint|Parking Area</type>\n'
+        '    <cmt>Street parking available.</cmt>\n'
+        '  </wpt>\n'
+        '</gpx>'
+    )
+
+    f = tmp_path / "inline_wpts.gpx"
+    f.write_text(gpx_with_inline_wpt, encoding="utf-8")
+
+    result = import_gpx(f)
+
+    assert result.total == 2
+    assert result.waypoints == 1
+    assert result.errors == []
+
+    with get_session() as s:
+        cache = s.query(Cache).filter_by(gc_code="GC12345").one()
+        assert len(cache.waypoints) == 1
+        wp = cache.waypoints[0]
+        assert wp.prefix == "PK"
+        assert wp.wp_type == "Parking Area"
+        assert wp.comment == "Street parking available."
