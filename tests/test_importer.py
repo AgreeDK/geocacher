@@ -148,8 +148,13 @@ def zip_file(tmp_path, gpx_file, wpts_file) -> Path:
 def multi_gpx_zip(tmp_path) -> Path:
     z = tmp_path / "multi_pq.zip"
     
-    # Content for a second unique GPX
-    second_gpx = SAMPLE_GPX.replace("GC12345", "GCABCDE").replace("GC99999", "GCFGHIJ")
+    # Content for a second unique GPX — log IDs must also differ because
+    # logs.log_id has a global UNIQUE constraint across all caches.
+    second_gpx = (SAMPLE_GPX
+        .replace("GC12345", "GCABCDE")
+        .replace("GC99999", "GCFGHIJ")
+        .replace('id="111"', 'id="333"')
+        .replace('id="112"', 'id="444"'))
     
     gpx1 = tmp_path / "first.gpx"
     gpx1.write_text(SAMPLE_GPX, encoding="utf-8")
@@ -279,14 +284,17 @@ def test_import_zip_invalid(tmp_db, tmp_path):
 def test_import_zip_multiple_files(tmp_db, multi_gpx_zip):
     """Verify that a zip with multiple GPX files imports all records."""
 
-    # Clean DB first
+    # Clean DB first — must delete all child tables before Cache, because SQLite
+    # reuses row IDs when a table is emptied; leftover orphan rows in Attribute
+    # or Trackable would cause UNIQUE constraint failures on the next import.
     with get_session() as s:
         s.query(Log).delete()
         s.query(Waypoint).delete()
+        s.query(Attribute).delete()
         s.query(Cache).delete()
         s.commit()
         
-    result = import_zip(multi_gpx_zip)
+    result = import_zip(multi_gpx_zip, s)
 
     # Each SAMPLE_GPX has 2 caches. 2 files * 2 caches = 4
     assert result.total == 4

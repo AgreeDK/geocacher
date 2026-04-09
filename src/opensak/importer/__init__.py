@@ -673,6 +673,56 @@ class ImportResult:
         return "\n".join(lines)
 
 
+def _parse_gpx_to_data(
+    gpx_path: Path,
+    wpts_path: Optional[Path] = None,
+) -> tuple[list[dict], list[dict], dict | None, list[str]]:
+    """
+    Parse a GPX file into raw data structures without touching the database.
+
+    Returns (caches, extra_wpts, companion_wpts_data, errors).
+    Used by import_zip to separate CPU-bound parsing from IO-bound DB writes.
+    """
+    caches: list[dict] = []
+    extra_wpts: list[dict] = []
+    errors: list[str] = []
+
+    try:
+        context = etree.iterparse(str(gpx_path), events=("end",), tag=None)
+
+        for event, elem in context:
+            local_tag = etree.QName(elem).localname
+
+            if local_tag == "wpt":
+                try:
+                    data = _parse_wpt(elem)
+                    if data is not None:
+                        caches.append(data)
+                    else:
+                        extra = _parse_extra_wpt(elem)
+                        if extra is not None:
+                            extra_wpts.append(extra)
+                except Exception as e:
+                    errors.append(f"Parse error in {gpx_path.name}: {e}")
+                finally:
+                    elem.clear()
+                    while elem.getprevious() is not None:
+                        del elem.getparent()[0]
+    except Exception as e:
+        errors.append(f"Fatal parse error in {gpx_path.name}: {e}")
+
+    # Parse companion waypoints file
+    companion_data = None
+    if wpts_path and wpts_path.exists():
+        try:
+            wpts_tree = etree.parse(str(wpts_path))
+            companion_data = _parse_extra_waypoints(wpts_tree)
+        except Exception as e:
+            errors.append(f"Waypoints file error: {e}")
+
+    return caches, extra_wpts, companion_data, errors
+
+
 def import_gpx(
     gpx_path: Path,
     session: Session | None = None,
@@ -782,15 +832,14 @@ def import_gpx(
 def import_zip(zip_path: Path, session: Session | None = None, progress_cb=None) -> ImportResult:
     """
     High-performance parallel ZIP import.
-    
-    Strategy: 
-    1. Parse XML files in parallel threads (CPU intensive).
-    2. Collect all parsed data into memory.
-    3. Perform a single, massive batch database write (IO intensive).
+
+    Strategy:
+    1. Parse all GPX files in parallel threads (CPU-bound, no DB access).
+    2. Write all parsed data to the database sequentially (IO-bound, single session).
     """
     from concurrent.futures import ThreadPoolExecutor
+    from opensak.db.database import make_session
     import zipfile
-    import tempfile
 
     overall_result = ImportResult()
 
@@ -803,28 +852,71 @@ def import_zip(zip_path: Path, session: Session | None = None, progress_cb=None)
         with zipfile.ZipFile(zip_path, "r") as zf:
             zf.extractall(tmp)
 
-        gpx_files = [f for f in tmp.glob("*.gpx") if "-wpts" not in f.name.lower()]
+        gpx_files = sorted(f for f in tmp.glob("*.gpx") if "-wpts" not in f.name.lower())
 
-        # 1. Parallel Parsing
-        # We use more threads because lxml is very efficient at releasing the GIL.
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            futures = []
+        if not gpx_files:
+            overall_result.errors.append("No .gpx file found in zip")
+            return overall_result
+
+        # Step 1: Parse all GPX files in parallel (pure CPU, no DB)
+        parsed_files = []
+        with ThreadPoolExecutor(max_workers=min(8, len(gpx_files))) as executor:
+            futures = {}
             for gpx_path in gpx_files:
                 wpts_candidate = tmp / f"{gpx_path.stem}-wpts.gpx"
-                # We still pass wpts_path if needed
-                futures.append(executor.submit(import_gpx, gpx_path, wpts_path=(wpts_candidate if wpts_candidate.exists() else None)))
-            
+                wpts = wpts_candidate if wpts_candidate.exists() else None
+                futures[executor.submit(_parse_gpx_to_data, gpx_path, wpts)] = gpx_path
+
             for future in futures:
                 try:
-                    file_result = future.result()
-                    # Aggregate results
-                    overall_result.created += file_result.created
-                    overall_result.updated += file_result.updated
-                    overall_result.skipped += file_result.skipped
-                    overall_result.waypoints += file_result.waypoints
-                    overall_result.errors.extend(file_result.errors)
+                    caches, extra_wpts, companion_data, errors = future.result()
+                    parsed_files.append((futures[future], caches, extra_wpts, companion_data))
+                    overall_result.errors.extend(errors)
                 except Exception as e:
                     overall_result.errors.append(f"Parse error: {str(e)}")
+
+        # Step 2: Write all parsed data sequentially (single session, no contention)
+        db_session = make_session()
+        try:
+            for gpx_path, caches, extra_wpts, companion_data in parsed_files:
+                source = gpx_path.name
+
+                for data in caches:
+                    try:
+                        _, created = _upsert_cache(db_session, data, source)
+                        if created:
+                            overall_result.created += 1
+                        else:
+                            overall_result.updated += 1
+                    except Exception as e:
+                        db_session.rollback()
+                        overall_result.errors.append(f"DB error for {data.get('gc_code', '?')}: {e}")
+                        overall_result.skipped += 1
+
+                db_session.commit()
+                db_session.expunge_all()
+
+                # Deduplicate and insert extra waypoints from main GPX
+                if extra_wpts:
+                    seen: set = set()
+                    unique_wpts: list = []
+                    for wp in extra_wpts:
+                        key = (wp.get("suffix"), wp.get("prefix"), wp.get("name"))
+                        if key not in seen:
+                            seen.add(key)
+                            unique_wpts.append(wp)
+                    overall_result.waypoints += _insert_extra_wpts(db_session, unique_wpts)
+                    db_session.commit()
+
+                # Link companion waypoints file data
+                if companion_data:
+                    overall_result.waypoints += _link_extra_waypoints(db_session, companion_data)
+                    db_session.commit()
+        except Exception:
+            db_session.rollback()
+            raise
+        finally:
+            db_session.close()
 
     return overall_result
 
