@@ -16,6 +16,7 @@ from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from opensak.db.models import Cache
+from opensak.utils.types import GcCode
 
 
 # ── Tile request interceptor (sætter Referer header for OSM tiles) ───────────
@@ -46,7 +47,7 @@ class MapBridge(QObject):
     cache_clicked = Signal(str)   # gc_code
 
     @Slot(str)
-    def on_cache_clicked(self, gc_code: str) -> None:
+    def on_cache_clicked(self, gc_code: GcCode) -> None:
         """Kaldes fra JavaScript når en pin klikkes."""
         self.cache_clicked.emit(gc_code)
 
@@ -352,7 +353,7 @@ class MapWidget(QWidget):
         if data:
             self._run_js("fitAllMarkers()")
 
-    def pan_to_cache(self, gc_code: str) -> None:
+    def pan_to_cache(self, gc_code: GcCode) -> None:
         """Centrér kortet på en bestemt cache."""
         if self._ready:
             safe = gc_code.replace("'", "\\'")

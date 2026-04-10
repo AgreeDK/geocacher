@@ -17,6 +17,7 @@ from opensak.filters.engine import _haversine_km
 from opensak.gui.settings import get_settings
 from opensak.coords import format_coords
 from opensak.lang import tr
+from opensak.utils.types import GcCode
 
 
 # ── Alle mulige kolonner ──────────────────────────────────────────────────────
@@ -52,7 +53,7 @@ def _get_active_columns() -> list[str]:
     return get_visible_columns()
 
 
-def _gc_sort_key(gc_code: str) -> str:
+def _gc_sort_key(gc_code: GcCode) -> str:
     """Return a zero-padded sort key so GC codes sort numerically.
 
     GC codes are alphanumeric (base-31), so pure alphabetical sorting gives

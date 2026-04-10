@@ -7,9 +7,9 @@ Maps file system paths to the internal ImportType Enum for secure file processin
 
 import re
 from pathlib import Path
-from opensak.utils.types import ImportType
+from opensak.utils.types import GcCode, ImportType
 
-def validate_gc_code(gc_code: str) -> None:
+def validate_gc_code(gc_code: GcCode) -> None:
     """Validate geocache code format (GC prefix, 3-7 chars, restricted letters)."""
     if not re.match(r'^GC[0-9A-NP-RT-Z]{1,7}$', gc_code.upper()):
         raise ValueError(

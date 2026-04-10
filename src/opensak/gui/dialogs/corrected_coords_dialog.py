@@ -18,6 +18,7 @@ from PySide6.QtGui import QFont
 from opensak.lang import tr
 from opensak.coords import format_coords, parse_coords
 from opensak.gui.settings import get_settings
+from opensak.utils.types import GcCode
 
 
 class CorrectedCoordsDialog(QDialog):
@@ -28,7 +29,7 @@ class CorrectedCoordsDialog(QDialog):
 
     def __init__(
         self,
-        gc_code: str,
+        gc_code: GcCode,
         current_lat: Optional[float] = None,
         current_lon: Optional[float] = None,
         parent=None,
