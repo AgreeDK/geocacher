@@ -22,8 +22,7 @@ from PySide6.QtGui import QFont
 from opensak.coords import format_coords, parse_coords, FORMAT_DMM, FORMAT_DMS, FORMAT_DD
 from opensak.gui.settings import get_settings
 from opensak.lang import tr
-
-_EARTH_RADIUS_M = 6_371_000.0   # WGS-84 mean radius in metres
+from opensak.utils.constants import EARTH_RADIUS_M
 
 
 def _project(lat_deg: float, lon_deg: float,
@@ -35,7 +34,7 @@ def _project(lat_deg: float, lon_deg: float,
     lat = math.radians(lat_deg)
     lon = math.radians(lon_deg)
     brng = math.radians(bearing_deg)
-    d_r = distance_m / _EARTH_RADIUS_M
+    d_r = distance_m / EARTH_RADIUS_M
 
     lat2 = math.asin(
         math.sin(lat) * math.cos(d_r)

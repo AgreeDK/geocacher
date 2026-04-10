@@ -23,8 +23,7 @@ from PySide6.QtGui import QFont
 from opensak.coords import format_coords, parse_coords, FORMAT_DMM
 from opensak.gui.settings import get_settings
 from opensak.lang import tr
-
-_EARTH_RADIUS_M = 6_371_000.0
+from opensak.utils.constants import EARTH_RADIUS_M
 
 
 def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -34,7 +33,7 @@ def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     dlat = lat2r - lat1r
     dlon = lon2r - lon1r
     a = math.sin(dlat / 2) ** 2 + math.cos(lat1r) * math.cos(lat2r) * math.sin(dlon / 2) ** 2
-    return 2 * _EARTH_RADIUS_M * math.asin(math.sqrt(a))
+    return 2 * EARTH_RADIUS_M * math.asin(math.sqrt(a))
 
 
 def _bearing(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

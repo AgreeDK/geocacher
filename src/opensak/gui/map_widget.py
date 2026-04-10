@@ -28,23 +28,11 @@ class TileInterceptor(QWebEngineUrlRequestInterceptor):
 
 # ── Cache type → Leaflet marker farve ────────────────────────────────────────
 
-CACHE_COLOURS = {
-    "Traditional Cache":  "#2e7d32",   # mørkegrøn
-    "Multi-cache":        "#e65100",   # orange
-    "Unknown Cache":      "#1565c0",   # blå (Mystery)
-    "Letterbox Hybrid":   "#6a1b9a",   # lilla
-    "Wherigo Cache":      "#00838f",   # teal
-    "Event Cache":        "#ad1457",   # pink
-    "Mega-Event Cache":   "#ad1457",
-    "Giga-Event Cache":   "#ad1457",
-    "Earthcache":         "#558b2f",   # olivengrøn
-    "Virtual Cache":      "#f57f17",   # gul
-}
-DEFAULT_COLOUR = "#757575"   # grå for ukendte typer
+from opensak.utils.constants import CACHE_COLOURS, DEFAULT_CACHE_COLOUR
 
 
 def _cache_colour(cache_type: str) -> str:
-    return CACHE_COLOURS.get(cache_type, DEFAULT_COLOUR)
+    return CACHE_COLOURS.get(cache_type, DEFAULT_CACHE_COLOUR)
 
 
 # ── Python ↔ JavaScript bro ───────────────────────────────────────────────────

@@ -6,6 +6,7 @@ Supports corrected coordinates (user-solved mystery cache finals).
 
 from __future__ import annotations
 import webbrowser
+from opensak.utils.constants import LOG_COLOURS
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
@@ -454,12 +455,7 @@ class CacheDetailPanel(QWidget):
             self._log_browser.setPlainText(tr("detail_no_logs"))
             return
 
-        colours = {
-            "Found it":          "#2e7d32",
-            "Didn't find it":    "#c62828",
-            "Write note":        "#1565c0",
-            "Owner Maintenance": "#6a1b9a",
-        }
+        colours = LOG_COLOURS
 
         filtered = logs
         if filter_text:

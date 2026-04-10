@@ -23,28 +23,7 @@ from opensak.gui.settings import get_settings
 
 # ── Konstanter ────────────────────────────────────────────────────────────────
 
-CACHE_TYPES = [
-    "Traditional Cache",
-    "Multi-cache",
-    "Unknown Cache",
-    "Letterbox Hybrid",
-    "Wherigo Cache",
-    "Event Cache",
-    "Mega-Event Cache",
-    "Earthcache",
-    "Virtual Cache",
-    "Webcam Cache",
-]
-
-CONTAINER_SIZES = [
-    "Nano",
-    "Micro",
-    "Small",
-    "Regular",
-    "Large",
-    "Other",
-    "Not chosen",
-]
+from opensak.utils.constants import CACHE_TYPES, CONTAINER_SIZES
 
 
 class WaypointDialog(QDialog):
