@@ -175,7 +175,14 @@ function makeHomeIcon() {
 
 function loadCaches(cachesJson) {
     var caches = JSON.parse(cachesJson);
-    clusterGroup.clearLayers();
+
+    // Recreate the cluster group to avoid stale internal state from clearLayers()
+    map.removeLayer(clusterGroup);
+    clusterGroup = L.markerClusterGroup({
+        maxClusterRadius: 40,
+        showCoverageOnHover: false
+    });
+    map.addLayer(clusterGroup);
     markers = {};
 
     caches.forEach(function(c) {
@@ -220,14 +227,22 @@ function setHomeLocation(lat, lon) {
 
 function panToCache(gcCode) {
     var marker = markers[gcCode];
-    if (marker) {
-        // Unspiderfy cluster if needed
+    if (!marker) return;
+    try {
         clusterGroup.zoomToShowLayer(marker, function() {
-            map.panTo(marker.getLatLng());
-            marker.openPopup();
+            try {
+                map.panTo(marker.getLatLng());
+                if (marker._icon) {
+                    marker.openPopup();
+                }
+            } catch (e) {
+                // marker may have been invalidated during animation
+            }
         });
-        selectMarker(gcCode);
+    } catch (e) {
+        map.panTo(marker.getLatLng());
     }
+    selectMarker(gcCode);
 }
 
 function selectMarker(gcCode) {
@@ -244,7 +259,14 @@ function selectMarker(gcCode) {
 
 function fitAllMarkers() {
     if (Object.keys(markers).length > 0) {
-        map.fitBounds(clusterGroup.getBounds(), {padding: [30, 30]});
+        try {
+            var bounds = clusterGroup.getBounds();
+            if (bounds && bounds.isValid()) {
+                map.fitBounds(bounds, {padding: [30, 30]});
+            }
+        } catch (e) {
+            // cluster not yet ready — skip fit
+        }
     }
 }
 
