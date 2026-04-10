@@ -10,6 +10,8 @@ from __future__ import annotations
 import json
 from PySide6.QtCore import QSettings
 
+from opensak.utils.types import CoordFormat
+
 
 # ── Hjemmepunkt dataklasse ────────────────────────────────────────────────────
 
@@ -143,13 +145,17 @@ class AppSettings:
     # ── Koordinatformat ───────────────────────────────────────────────────────
 
     @property
-    def coord_format(self) -> str:
-        """Coordinate display format: 'dmm' (default), 'dms', or 'dd'."""
-        return self._s.value("display/coord_format", "dmm")
+    def coord_format(self) -> CoordFormat:
+        """Coordinate display format — defaults to DMM."""
+        raw = self._s.value("display/coord_format", CoordFormat.DMM.value)
+        try:
+            return CoordFormat(raw)
+        except ValueError:
+            return CoordFormat.DMM
 
     @coord_format.setter
-    def coord_format(self, value: str) -> None:
-        self._s.setValue("display/coord_format", value)
+    def coord_format(self, value: CoordFormat) -> None:
+        self._s.setValue("display/coord_format", CoordFormat(value).value)
 
     # ── Kort udbyder ──────────────────────────────────────────────────────────
 

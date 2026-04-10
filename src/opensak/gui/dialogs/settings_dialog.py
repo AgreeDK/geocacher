@@ -15,7 +15,8 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QPixmap, QFont
 from opensak.gui.settings import get_settings, HomePoint
 from opensak.lang import tr, AVAILABLE_LANGUAGES, current_language
-from opensak.coords import FORMATS, FORMAT_DMM, FORMAT_DMS, FORMAT_DD, format_coords
+from opensak.coords import FORMATS, format_coords
+from opensak.utils.types import CoordFormat
 
 
 # ── Baggrundstråd til OAuth + API-kald ───────────────────────────────────────
@@ -208,9 +209,9 @@ class SettingsDialog(QDialog):
         coord_fmt_row = QHBoxLayout()
         coord_fmt_row.addWidget(QLabel(tr("settings_coord_format_label")))
         self._coord_format = QComboBox()
-        self._coord_format.addItem("DMM  —  N55 47.250 E012 25.000", FORMAT_DMM)
-        self._coord_format.addItem("DMS  —  N55° 47' 15\" E012° 25' 00\"", FORMAT_DMS)
-        self._coord_format.addItem("DD   —  55.78750, 12.41667", FORMAT_DD)
+        self._coord_format.addItem("DMM  —  N55 47.250 E012 25.000", CoordFormat.DMM)
+        self._coord_format.addItem("DMS  —  N55° 47' 15\" E012° 25' 00\"", CoordFormat.DMS)
+        self._coord_format.addItem("DD   —  55.78750, 12.41667", CoordFormat.DD)
         coord_fmt_row.addWidget(self._coord_format)
         coord_fmt_row.addStretch()
         disp_layout.addLayout(coord_fmt_row)

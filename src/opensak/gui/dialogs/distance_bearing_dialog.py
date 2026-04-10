@@ -20,7 +20,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QFont
 
-from opensak.coords import format_coords, parse_coords, FORMAT_DMM
+from opensak.coords import format_coords, parse_coords
+from opensak.utils.types import CoordFormat
 from opensak.gui.settings import get_settings
 from opensak.lang import tr
 from opensak.utils.constants import EARTH_RADIUS_M
@@ -71,7 +72,7 @@ class DistanceBearingDialog(QDialog):
         )
         self._setup_ui()
         if lat is not None and lon is not None:
-            self._input_a.setText(format_coords(lat, lon, FORMAT_DMM))
+            self._input_a.setText(format_coords(lat, lon, CoordFormat.DMM))
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
