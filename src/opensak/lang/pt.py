@@ -598,7 +598,7 @@ STRINGS: dict[str, str] = {
     "trip_sort_difficulty":         "Dificuldade (mais fácil primeiro)",
     "trip_sort_terrain":            "Terreno (mais fácil primeiro)",
     "trip_sort_hidden_date":        "Data de colocação (mais recente primeiro)",
-    "trip_sort_name":               "Nome (A–Z)",
+    "trip_sort_name":               "Nome (A-Z)",
     "trip_cb_not_found":            "Apenas caches que não encontrei",
     "trip_cb_available":            "Apenas disponíveis (não arquivadas)",
     "trip_preview_group":           "Pré-visualização",
@@ -716,7 +716,7 @@ STRINGS: dict[str, str] = {
     "gc_find_count":                "{count} encontrados registados",
     "gc_info_group":                "Para que é utilizado o Geocaching.com?",
     "gc_info_favorites":            "Obtém pontos de favorito para as caches (não disponível via importação GPX)",
-    "gc_info_trackables":           "Mostra quais os Travel Bugs que estão atualmente numa cache",
+    "gc_info_trackables":           "Mostra quais são os Travel Bugs que estão atualmente numa cache",
     "gc_info_finds":                "Sincroniza automaticamente o seu histórico de encontrados",
     "gc_api_not_configured":        "⚠  O acesso à API está pendente de aprovação pelo Geocaching HQ. O início de sessão está desativado até que o acesso seja concedido.",
 }
