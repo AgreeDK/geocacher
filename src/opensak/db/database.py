@@ -173,6 +173,18 @@ def _run_migrations(engine: Engine) -> None:
             conn.commit()
             print("Migration: opdaterede waypoints unique constraint til (cache_id, prefix, name)")
 
+        # ── Migration 3: Add county column to caches ──────────────────────
+        existing_caches = [
+            row[1]
+            for row in conn.execute(text("PRAGMA table_info(caches)")).fetchall()
+        ]
+        if "county" not in existing_caches:
+            conn.execute(text(
+                "ALTER TABLE caches ADD COLUMN county VARCHAR(64)"
+            ))
+            conn.commit()
+            print("Migration: added caches.county")
+
 
 def get_engine() -> Engine:
     """Return the current engine, raising if init_db() hasn't been called."""

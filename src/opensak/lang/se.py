@@ -378,6 +378,7 @@ STRINGS: dict[str, str] = {
     "col_container":    "Behållare",
     "col_country":      "Land",
     "col_state":        "Region",
+    "col_county":       "Kommun",
     "col_distance":     "Avstånd",
     "col_found":        "Hittad",
     "col_placed_by":    "Utlagd av",

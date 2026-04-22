@@ -24,6 +24,7 @@ _ALL_COLUMNS_DEF = [
     ("container",    "col_container",    80,  True),
     ("country",      "col_country",      80,  True),
     ("state",        "col_state",       120, False),
+    ("county",       "col_county",      100, False),
     ("distance",     "col_distance",     75,  True),
     ("found",        "col_found",        55,  True),
     ("placed_by",    "col_placed_by",   120, False),
