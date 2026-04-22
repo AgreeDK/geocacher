@@ -174,7 +174,7 @@ STRINGS: dict[str, str] = {
 
     # ── Settings dialog ───────────────────────────────────────────────────────
     "settings_dialog_title":        "Configurações",
-    "settings_group_location":      "Coordenadas da casa",
+    "settings_group_location":      "Coordenadas de casa",
     "settings_lat_label":           "Latitude:",
     "settings_lon_label":           "Longitude:",
     "settings_group_display":       "Mostrar",
@@ -200,7 +200,7 @@ STRINGS: dict[str, str] = {
     "db_cannot_delete_active":      "A base de dados ativa não pode ser eliminada.\nMude para outra base de dados primeiro.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
-    "found_dialog_title":           "Atualizar encontrados a partir da base de dados de referência",
+    "found_dialog_title":           "Atualizar encontradas a partir da base de dados de referência",
     "found_start":                  "Iniciar atualização",
     "found_running":                "A atualizar…",
     "found_done":                   "{count} caches marcadas como encontradas",
@@ -237,12 +237,12 @@ STRINGS: dict[str, str] = {
     "found_rb_file":                "Selecionar um ficheiro .db:",
     "found_no_file":                "(nenhum ficheiro selecionado)",
     "found_log_placeholder":        "O resultado será mostrado aqui após a atualização…",
-    "found_update_btn":             "⟳  Atualizar encontrados",
+    "found_update_btn":             "⟳  Atualizar encontradas",
     "found_select_ref_first":       "Por favor, selecione primeiro uma base de dados de referência.",
     "found_same_db_error":          "A base de dados de referência não pode ser a mesma que a base de dados ativa.",
     "found_running_file":           "A atualizar de: {name}…",
     "found_browse_title":           "Selecionar base de dados de referência",
-    "found_info":                     "Esta função marca os caches como <b>encontrados</b> na base de dados ativa,\ncom base nos códigos GC de uma base de dados de referência (ex. 'As minhas descobertas').\n\nFluxo de trabalho típico:\n1. Importe a sua Pocket Query 'My Finds' para uma base de dados separada\n2. Mude para a base de dados que pretende atualizar (ex. 'Zelândia')\n3. Selecione 'As minhas descobertas' como referência e clique em Atualizar",
+    "found_info":                     "Esta função marca as caches como <b>encontradas</b> na base de dados ativa,\ncom base nos códigos GC de uma base de dados de referência (ex. 'As minhas descobertas').\n\nFluxo de trabalho típico:\n1. Importe a sua Pocket Query 'My Finds' para uma base de dados separada\n2. Mude para a base de dados que pretende atualizar (ex. 'Zelândia')\n3. Selecione 'As minhas descobertas' como referência e clique em Atualizar",
     "found_active_db":                "Base de dados ativa (a atualizar):",
     "found_completed":                "✓ Atualização concluída!",
     "found_errors":                   "Erros:",
@@ -279,7 +279,7 @@ STRINGS: dict[str, str] = {
     "db_copied_msg":                "'{new_name}' foi criada como uma cópia de '{orig_name}'.",
     "db_remove_title":              "Remover da lista",
     "db_remove_msg":                "Remover '{name}' da lista?\n\nO ficheiro NÃO será eliminado.",
-    "db_delete_confirm_msg":        "Tem a certeza de que deseja eliminar permanentemente '{name}'?\n\nO ficheiro {path} será apagado e não pode ser recuperado!",
+    "db_delete_confirm_msg":        "Tem a certeza de que deseja eliminar permanentemente '{name}'?\n\nO ficheiro {path} será apagado e não poderá ser recuperado!",
     "db_copy_title":                "Copiar base de dados",
     "db_copy_name_label":           "Nome da cópia:",
     "db_copy_suffix":               "copia",
@@ -389,7 +389,7 @@ STRINGS: dict[str, str] = {
     "col_dnf":          "DNF",
     "col_premium":      "Premium",
     "col_archived":     "Arquivada",
-    "col_favorite":     "Favorito ★",
+    "col_favorite":     "Favoritos ★",
 
     # ── Right-click context menu ──────────────────────────────────────────────
     "ctx_open_geocaching":  "🌐  Abrir em geocaching.com",
@@ -432,7 +432,7 @@ STRINGS: dict[str, str] = {
     "wp_cb_premium":                "Apenas para membros Premium",
     "wp_cb_found":                  "Encontrada por mim",
     "wp_cb_dnf":                    "DNF (Não Encontrada)",
-    "wp_cb_favorite":               "Favorito ★",
+    "wp_cb_favorite":               "Favoritos ★",
 
     # ── Filter dialog — GC code placeholder ──────────────────────────────────
     "filter_gc_placeholder":        "ex: GC123",
@@ -445,7 +445,7 @@ STRINGS: dict[str, str] = {
     "coord_conv_output_group":      "Todos os formatos",
     "coord_conv_copy_btn":          "Copiar",
     "coord_conv_open_in":           "Abrir em:",
-    "coord_conv_parse_error":       "Formato de coordenadas desconhecido — tente ex: N38 42.000 W009 08.000",
+    "coord_conv_parse_error":       "Formato de coordenadas desconhecido — tente por exemplo: N38 42.000 W009 08.000",
 
     # ── Coordinate projection dialog ──────────────────────────────────────────
     "proj_title":                   "Projeção de Coordenadas",
@@ -532,19 +532,19 @@ STRINGS: dict[str, str] = {
     "attr_winter":             "Disponível no inverno",
     "attr_stealth":            "Necessária discrição",
     "attr_needs_maintenance":  "Necessita de manutenção",
-    "attr_dangerous_animals":  "Gado / animais perigosos",
+    "attr_dangerous_animals":  "Animais perigosos",
     "attr_field_puzzle":       "Enigma de campo",
     "attr_nightcache":         "Cache noturna",
-    "attr_park_and_grab":      "Parar e apanhar",
+    "attr_park_and_grab":      "Estacionar e apanhar",
     "attr_abandoned_structure":"Estrutura abandonada",
     "attr_short_hike":         "Caminhada curta (< 1 km)",
     "attr_medium_hike":        "Caminhada média (1-10 km)",
     "attr_long_hike":          "Caminhada longa (> 10 km)",
     "attr_seasonal":           "Acesso sazonal",
     "attr_tourist":            "Recomendada para turistas",
-    "attr_private":            "Quintal (residência privada)",
-    "attr_teamwork":           "Trabalho em equipa necessário",
-    "attr_challenge":          "Cache desafio",
+    "attr_private":            "Residência privada",
+    "attr_teamwork":           "Trabalho de equipa necessário",
+    "attr_challenge":          "Cache challenge",
     "attr_power_trail":        "Power trail",
     "attr_bonus":              "Cache bónus",
     # Specials
@@ -553,16 +553,16 @@ STRINGS: dict[str, str] = {
     "attr_geotour":            "GeoTour",
     "attr_solution_checker":   "Verificador de solução do geocaching.com",
     # Equipment
-    "attr_fee":                "Taxa de acesso ou estacionamento",
+    "attr_fee":                "Taxa de acesso",
     "attr_rappelling":         "Equipamento de escalada necessário",
     "attr_boat":               "Barco necessário",
     "attr_scuba":              "Equipamento de mergulho necessário",
     "attr_flashlight":         "Lanterna necessária",
     "attr_uv":                 "Luz UV necessária",
     "attr_snowshoes":          "Pode exigir raquetes de neve",
-    "attr_ski":                "Pode exigir esquis de fundo",
+    "attr_ski":                "Pode exigir esquis",
     "attr_special_tool":       "Ferramenta especial necessária",
-    "attr_tree_climbing":      "Escalada em árvore necessária",
+    "attr_tree_climbing":      "Escalada de árvore necessária",
     # Hazards
     "attr_poisonous_plants":   "Plantas venenosas",
     "attr_ticks":              "Carraças",
