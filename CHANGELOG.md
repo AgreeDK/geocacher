@@ -7,8 +7,62 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased] — In development
 - HTML/PDF reports and statistics
 - Improved GPS auto-detection on all Linux distros
-- More languages (German, Swedish, …)
+- More languages (generated via Claude API, community proofread)
 - Favourite points (requires Geocaching.com API)
+- Multi-threading import performance (PR #30, planned for v1.10.0)
+- Main window layout redesign: full-width cache list on top, details + map below (issue #33)
+
+---
+
+## [1.9.0] — 2026-04-22
+### Added
+- **County column** in the cache table with full filter support (#41) — contributed by @Fabio-A-Sa
+  - New `county` field on the `Cache` model (database migration runs automatically on first launch)
+  - Available in the filter dialog and column chooser
+  - Translated into all seven languages
+- **FORMAT_DD / FORMAT_DMM / FORMAT_DMS** public aliases in `coords.py` for a cleaner test API
+
+### Fixed
+- **Coordinate preview** in the status bar now respects the user's configured coordinate format (DMM/DMS/DD) instead of always displaying raw decimal degrees (#45) — contributed by @Fabio-A-Sa
+- **Map widget** `Cannot use 'in' operator to search for '_leaflet_id' in undefined` error no longer occurs when interacting with the map (#47) — contributed by @Fabio-A-Sa
+  - `clusterGroup.clearLayers()` replaced with recreate-on-reload pattern to avoid stale internal state
+  - `panToCache()` now defensively handles markers invalidated during cluster animations
+
+### Changed
+- **Major internal refactor** — types and constants extracted into dedicated utility modules (#42) — contributed by @Fabio-A-Sa
+  - New `src/opensak/utils/constants.py` (cache colours, log colours, cache types, container sizes, attributes, earth radius, waypoint prefixes)
+  - Extended `src/opensak/utils/types.py` (`GcCode`, `CoordFormat`, `Coordinate`, `LogType`, `ImportType`)
+  - `EARTH_RADIUS_M`, `CACHE_TYPES`, `CONTAINER_SIZES` no longer duplicated across dialog files
+- **Python 3.10 support dropped** — OpenSAK now requires **Python 3.11 or newer**
+  - `StrEnum` (used in `CoordFormat`) was introduced in Python 3.11
+  - CI matrix updated to test only 3.11 and 3.12
+  - Bundled Python in Windows / Linux / macOS installers is unaffected
+- Swedish translations updated for the import dialog (#49) — contributed by @hansblom
+
+### Tests
+- **Test coverage nearly doubled: 89 → 173 tests** (#48) — contributed by @Fabio-A-Sa
+  - New `tests/test_coords.py` — 257 lines covering `format_coords()` and `parse_coords()` across DD, DMM, DMS formats, hemisphere variants, boundary values and malformed input
+  - New `tests/test_utils.py` — 134 lines covering GC code validation and import type detection
+  - New `test_county_filter` added to `tests/test_filters.py`
+
+### Files changed
+- `src/opensak/__init__.py` (version bump)
+- `pyproject.toml` (version bump, `requires-python = ">=3.11"`)
+- `src/opensak/coords.py` (FORMAT_* aliases, `format_coords` now honours user setting)
+- `src/opensak/db/database.py` (county migration)
+- `src/opensak/db/models.py` (county field)
+- `src/opensak/filters/engine.py` (county filter)
+- `src/opensak/gui/cache_table.py`, `mainwindow.py`, `map_widget.py`
+- `src/opensak/gui/dialogs/column_dialog.py`
+- `src/opensak/importer/__init__.py`
+- `src/opensak/utils/constants.py` (new), `types.py` (extended)
+- All seven language files (`cs`, `da`, `de`, `en`, `fr`, `pt`, `se`)
+- `tests/test_coords.py` (new), `tests/test_utils.py` (new), `tests/test_filters.py`, `tests/test_importer.py`
+- `.github/workflows/ci.yml` (dropped 3.10 from matrix)
+
+### Contributors
+- **@Fabio-A-Sa** — county column, coordinate format fix, map TypeError fix, refactor, test coverage
+- **@hansblom** — Swedish translation updates
 
 ---
 
