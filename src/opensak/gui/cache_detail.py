@@ -8,13 +8,15 @@ from __future__ import annotations
 import re
 import webbrowser
 from opensak.utils.constants import LOG_COLOURS
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QTextBrowser, QTabWidget, QFrame, QSizePolicy,
     QPushButton
 )
 from PySide6.QtGui import QFont
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWebEngineCore import QWebEnginePage
 
 from opensak.db.models import Cache
 from opensak.lang import tr
@@ -22,18 +24,20 @@ from opensak.coords import format_coords
 from opensak.gui.settings import get_settings
 
 
+class _DescWebPage(QWebEnginePage):
+    """Custom page der åbner links i systemets browser i stedet for i WebEngine."""
 
-def _sanitize_html(html: str) -> str:
-    """Fjern overflodige spaces i CSS farvevaerdier (issue #29).
-
-    GC.com cache-beskrivelser kan indeholde fx color=' #F5F5DC'
-    (space foer #) som faar QTextHtmlParser til at klage.
-    """
-    # "color:  #hex" -- reducer 2+ spaces til eet
-    html = re.sub(r'(color\s*:)\s{2,}(#)', r'\1 \2', html, flags=re.IGNORECASE)
-    # "color=' #hex'" eller 'color=" #hex"' -- fjern space(s) inde i quote
-    html = re.sub(r'(color\s*=\s*[\'"])\s+(#)', r'\1\2', html, flags=re.IGNORECASE)
-    return html
+    def acceptNavigationRequest(self, url: QUrl, nav_type, is_main_frame: bool) -> bool:
+        # Tillad den første load (about:blank eller data: URL med HTML indhold)
+        if nav_type == QWebEnginePage.NavigationType.NavigationTypeTyped:
+            return True
+        if nav_type == QWebEnginePage.NavigationType.NavigationTypeRedirect:
+            return True
+        # Alt andet (link-klik) sendes til systemets browser
+        if url.scheme() in ("http", "https"):
+            webbrowser.open(url.toString())
+            return False
+        return False
 
 
 class CacheDetailPanel(QWidget):
@@ -182,9 +186,11 @@ class CacheDetailPanel(QWidget):
         self._tabs = QTabWidget()
         self._tabs.setDocumentMode(True)
 
-        self._desc_browser = QTextBrowser()
-        self._desc_browser.setOpenExternalLinks(True)
-        self._tabs.addTab(self._desc_browser, tr("detail_tab_desc"))
+        # Beskrivelse — QWebEngineView så eksterne billeder og CJK-fonte virker
+        self._desc_view = QWebEngineView()
+        self._desc_page = _DescWebPage(self._desc_view)
+        self._desc_view.setPage(self._desc_page)
+        self._tabs.addTab(self._desc_view, tr("detail_tab_desc"))
 
         hint_widget = QWidget()
         hint_layout = QVBoxLayout(hint_widget)
@@ -236,63 +242,71 @@ class CacheDetailPanel(QWidget):
 
     def _filter_logs(self, text: str) -> None:
         """Filtrer logs baseret på søgetekst."""
-        if hasattr(self, '_cached_logs'):
-            self._render_log_html(self._cached_logs, filter_text=text.lower())
+        self._render_log_html(self._cached_logs, filter_text=text.lower())
 
     def _toggle_hint_decode(self) -> None:
         self._hint_decoded = not self._hint_decoded
         if self._hint_decoded:
             decoded = self._raw_hint.translate(
                 str.maketrans(
-                    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-                    'NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm'
+                    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+                    "NOPQRSTUVWXYZABCDEFGHIJKLMnopqrstuvwxyzabcdefghijklm"
                 )
-            ) if self._raw_hint else ""
+            )
             self._hint_browser.setPlainText(decoded)
-            self._decode_btn.setText(tr("detail_hide_hint_btn"))
+            self._decode_btn.setText(tr("detail_encode_btn"))
         else:
-            self._hint_browser.setPlainText(self._raw_hint or tr("detail_no_hint"))
+            self._hint_browser.setPlainText(self._raw_hint)
             self._decode_btn.setText(tr("detail_decode_btn"))
 
-    def _open_in_maps(self, event=None) -> None:
-        """Åbn koordinater i kortapp i standard browseren."""
-        if hasattr(self, '_current_lat') and self._current_lat is not None:
-            url = get_settings().get_maps_url(self._current_lat, self._current_lon)
-            webbrowser.open(url)
-
-    def _open_corrected_in_maps(self, event=None) -> None:
-        """Åbn korrigerede koordinater i kortapp."""
-        if self._corrected_lat is not None:
-            url = get_settings().get_maps_url(self._corrected_lat, self._corrected_lon)
-            webbrowser.open(url)
-
-    def _open_on_geocaching(self, event=None) -> None:
-        """Åbn cache-siden på geocaching.com i standard browseren."""
-        if hasattr(self, '_current_gc_code') and self._current_gc_code:
-            url = f"https://coord.info/{self._current_gc_code}"
-            webbrowser.open(url)
-
-    def _open_coord_converter(self) -> None:
-        """Åbn koordinatkonverter popup med den aktuelle cache's koordinater."""
-        if self._current_lat is not None:
-            from opensak.gui.dialogs.coord_converter_dialog import CoordConverterDialog
-            dlg = CoordConverterDialog(self._current_lat, self._current_lon, parent=self)
-            dlg.exec()
-
     def _format_coords(self, lat: float, lon: float) -> str:
-        """Formater koordinater i det format brugeren har valgt i settings."""
-        fmt = get_settings().coord_format
+        settings = get_settings()
+        fmt = settings.coord_format
         return format_coords(lat, lon, fmt)
 
+    def _open_on_geocaching(self, event) -> None:
+        if self._current_gc_code:
+            webbrowser.open(f"https://www.geocaching.com/geocache/{self._current_gc_code}")
+
+    def _open_in_maps(self, event) -> None:
+        if self._current_lat is None:
+            return
+        settings = get_settings()
+        app = settings.map_provider
+        lat, lon = self._current_lat, self._current_lon
+        if app == "googlemaps":
+            webbrowser.open(f"https://www.google.com/maps?q={lat},{lon}")
+        else:
+            webbrowser.open(f"https://www.openstreetmap.org/?mlat={lat}&mlon={lon}&zoom=15")
+
+    def _open_corrected_in_maps(self, event) -> None:
+        if self._corrected_lat is None:
+            return
+        settings = get_settings()
+        app = settings.map_provider
+        lat, lon = self._corrected_lat, self._corrected_lon
+        if app == "googlemaps":
+            webbrowser.open(f"https://www.google.com/maps?q={lat},{lon}")
+        else:
+            webbrowser.open(f"https://www.openstreetmap.org/?mlat={lat}&mlon={lon}&zoom=15")
+
+    def _open_coord_converter(self) -> None:
+        if self._current_lat is None:
+            return
+        from opensak.gui.dialogs.coord_converter_dialog import CoordConverterDialog
+        dlg = CoordConverterDialog(self._current_lat, self._current_lon, parent=self)
+        dlg.exec()
+
     def _edit_corrected_coords(self) -> None:
-        """Åbn dialog til at indtaste/redigere korrigerede koordinater."""
         if not self._current_gc_code:
             return
         from opensak.gui.dialogs.corrected_coords_dialog import CorrectedCoordsDialog
         dlg = CorrectedCoordsDialog(
             gc_code=self._current_gc_code,
-            current_lat=self._corrected_lat,
-            current_lon=self._corrected_lon,
+            orig_lat=self._current_lat,
+            orig_lon=self._current_lon,
+            corrected_lat=self._corrected_lat,
+            corrected_lon=self._corrected_lon,
             parent=self,
         )
         if dlg.exec():
@@ -300,15 +314,11 @@ class CacheDetailPanel(QWidget):
             self._save_corrected_coords(lat, lon)
 
     def _clear_corrected_coords(self) -> None:
-        """Slet korrigerede koordinater for den aktuelle cache."""
-        if not self._current_gc_code:
-            return
         self._save_corrected_coords(None, None)
 
     def _save_corrected_coords(self, lat, lon) -> None:
-        """Gem korrigerede koordinater i databasen og opdater UI."""
         from opensak.db.database import get_session
-        from opensak.db.models import UserNote, Cache as CacheModel
+        from opensak.db.models import Cache as CacheModel, UserNote
         with get_session() as session:
             cache_row = session.query(CacheModel).filter_by(
                 gc_code=self._current_gc_code
@@ -355,7 +365,7 @@ class CacheDetailPanel(QWidget):
         self._country_lbl.setText("—")
         self._coords_lbl.setText("—")
         self._placed_lbl.setText("")
-        self._desc_browser.setHtml("")
+        self._desc_view.setHtml("")
         self._hint_browser.setPlainText("")
         self._log_browser.setHtml("")
         self._raw_hint = ""
@@ -428,19 +438,27 @@ class CacheDetailPanel(QWidget):
             parts.append(f"Dato: {cache.hidden_date.strftime('%d.%m.%Y')}")
         self._placed_lbl.setText("   |   ".join(parts))
 
-        # Description
+        # Description — renderes via QWebEngineView så billeder og CJK-fonte virker
         if cache.long_description:
             if cache.long_desc_html:
-                self._desc_browser.setHtml(_sanitize_html(cache.long_description))
+                self._desc_view.setHtml(_wrap_html(cache.long_description))
             else:
-                self._desc_browser.setPlainText(cache.long_description)
+                self._desc_view.setHtml(_wrap_html(
+                    f"<pre style='white-space:pre-wrap;font-family:sans-serif'>"
+                    f"{cache.long_description}</pre>"
+                ))
         elif cache.short_description:
             if cache.short_desc_html:
-                self._desc_browser.setHtml(_sanitize_html(cache.short_description))
+                self._desc_view.setHtml(_wrap_html(cache.short_description))
             else:
-                self._desc_browser.setPlainText(cache.short_description)
+                self._desc_view.setHtml(_wrap_html(
+                    f"<pre style='white-space:pre-wrap;font-family:sans-serif'>"
+                    f"{cache.short_description}</pre>"
+                ))
         else:
-            self._desc_browser.setPlainText(tr("detail_no_description"))
+            self._desc_view.setHtml(_wrap_html(
+                f"<p style='color:gray'>{tr('detail_no_description')}</p>"
+            ))
 
         # Hint — gem rå hint og nulstil decode state
         self._raw_hint = cache.encoded_hints or ""
@@ -507,3 +525,27 @@ class CacheDetailPanel(QWidget):
             )
 
         self._log_browser.setHtml("".join(html))
+
+
+def _wrap_html(body: str) -> str:
+    """Pak beskrivelsens HTML ind i et komplet dokument med korrekt charset og font-fallback."""
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body {{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial,
+                 'Noto Sans CJK SC', 'WenQuanYi Micro Hei', sans-serif;
+    font-size: 13px;
+    margin: 8px;
+    padding: 0;
+  }}
+  img {{ max-width: 100%; height: auto; }}
+  a {{ color: #1565c0; }}
+</style>
+</head>
+<body>
+{body}
+</body>
+</html>"""
