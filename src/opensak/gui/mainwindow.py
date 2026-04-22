@@ -21,6 +21,7 @@ from opensak.filters.engine import (
 )
 from opensak.gui.cache_table import CacheTableView
 from opensak.gui.cache_detail import CacheDetailPanel
+from opensak.coords import format_coords
 from opensak.gui.settings import get_settings
 from opensak.lang import tr
 
@@ -469,9 +470,9 @@ class MainWindow(QMainWindow):
         self._act_wp_edit.setEnabled(True)
         self._act_wp_delete.setEnabled(True)
         if full.latitude and full.longitude:
+            coords = format_coords(full.latitude, full.longitude, get_settings().coord_format)
             self._statusbar.showMessage(
-                f"{full.gc_code} — {full.name} "
-                f"({full.latitude:.5f}, {full.longitude:.5f})"
+                f"{full.gc_code} — {full.name} ({coords})"
             )
 
     def _on_map_cache_selected(self, gc_code: str) -> None:
