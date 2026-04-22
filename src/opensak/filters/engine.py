@@ -207,6 +207,50 @@ class ArchivedFilter(BaseFilter):
         return cls()
 
 
+class AvailabilityFilter(BaseFilter):
+    """
+    Keep caches matching any combination of availability states.
+
+    This is the primary filter used by the filter dialog: the user can
+    independently toggle showing available, unavailable (disabled) and
+    archived caches.
+    """
+    filter_type = "availability"
+
+    def __init__(
+        self,
+        show_avail: bool = True,
+        show_unavail: bool = False,
+        show_archived: bool = False,
+    ):
+        self.show_avail    = show_avail
+        self.show_unavail  = show_unavail
+        self.show_archived = show_archived
+
+    def matches(self, cache: Cache) -> bool:
+        if cache.archived:
+            return self.show_archived
+        if cache.available:
+            return self.show_avail
+        return self.show_unavail
+
+    def to_dict(self) -> dict:
+        return {
+            "filter_type":   self.filter_type,
+            "show_avail":    self.show_avail,
+            "show_unavail":  self.show_unavail,
+            "show_archived": self.show_archived,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "AvailabilityFilter":
+        return cls(
+            show_avail    = data.get("show_avail",    True),
+            show_unavail  = data.get("show_unavail",  False),
+            show_archived = data.get("show_archived", False),
+        )
+
+
 class CountryFilter(BaseFilter):
     """Keep caches in any of *countries*."""
     filter_type = "country"
@@ -430,6 +474,7 @@ FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
     "not_found":     NotFoundFilter,
     "available":     AvailableFilter,
     "archived":      ArchivedFilter,
+    "availability":  AvailabilityFilter,
     "country":       CountryFilter,
     "state":         StateFilter,
     "county":        CountyFilter,

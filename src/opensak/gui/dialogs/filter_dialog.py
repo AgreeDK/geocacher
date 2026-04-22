@@ -30,7 +30,7 @@ from opensak.filters.engine import (
     CacheTypeFilter, ContainerFilter,
     DifficultyFilter, TerrainFilter,
     FoundFilter, NotFoundFilter,
-    AvailableFilter, ArchivedFilter,
+    AvailableFilter, ArchivedFilter, AvailabilityFilter,
     CountryFilter, NameFilter, GcCodeFilter,
     PlacedByFilter, DistanceFilter,
     AttributeFilter, HasTrackableFilter,
@@ -212,8 +212,10 @@ class FilterDialog(QDialog):
         profile_row.addWidget(QLabel(tr("filter_saved_label")))
         self._profile_combo = QComboBox()
         self._profile_combo.setMinimumWidth(180)
-        self._profile_combo.addItem(tr("filter_none"), None)
+        # Undgå at udløse _on_profile_selected mens vi fylder combo
+        self._profile_combo.blockSignals(True)
         self._load_profiles_into_combo()
+        self._profile_combo.blockSignals(False)
         self._profile_combo.currentIndexChanged.connect(self._on_profile_selected)
         profile_row.addWidget(self._profile_combo)
 
@@ -681,20 +683,20 @@ class FilterDialog(QDialog):
             fs.add(NotFoundFilter())
         # Begge valgt = vis alt = ingen filter
 
-        # Tilgængelighed
+        # Tilgængelighed — byg OR-gruppe af de valgte statusser.
+        # Brugeren kan vælge enhver kombination af: tilgængelig / utilgængelig / arkiveret.
+        # Hvis alle tre er valgt: ingen filter (vis alt).
         avail    = self._avail_cb.isChecked()
         unavail  = self._unavail_cb.isChecked()
         archived = self._archived_cb.isChecked()
-        if not archived:
-            from opensak.filters.engine import ArchivedFilter as AF
-            # Ekskludér arkiverede
-            class NotArchivedFilter(AF):
-                filter_type = "not_archived"
-                def matches(self, cache):
-                    return not cache.archived
-            fs.add(NotArchivedFilter())
-        if not avail and not unavail and not archived:
-            pass  # Vis intet — lad brugeren vide det er tomt
+
+        if not (avail and unavail and archived):
+            # Mindst én er fravalgt — tilføj filter
+            fs.add(AvailabilityFilter(
+                show_avail=avail,
+                show_unavail=unavail,
+                show_archived=archived,
+            ))
 
         # Afstand
         if self._dist_enabled.isChecked():
@@ -793,7 +795,7 @@ class FilterDialog(QDialog):
             return
         try:
             profile = FilterProfile.load(path)
-            self._reset_all()
+            # _load_filterset kalder selv _reset_all først
             self._load_filterset(profile.filterset)
         except Exception as e:
             QMessageBox.warning(self, tr("error"), tr("filter_load_error", error=e))
@@ -834,10 +836,96 @@ class FilterDialog(QDialog):
             self._load_profiles_into_combo()
 
     def _load_filterset(self, fs: FilterSet) -> None:
-        """Forsøg at udfylde UI felter fra et eksisterende FilterSet."""
-        # Simpel implementation — sæt bare basis felter
-        # (fuld deserialisering er kompleks for den inlinedef filters)
-        pass
+        """Udfyld UI felter fra et eksisterende FilterSet.
+
+        Itererer gennem filtrene og sætter de matchende widgets.
+        Ukendte/inline-definerede filtre ignoreres stille.
+        """
+        # Først: ryd UI så vi starter fra en kendt tilstand
+        self._reset_all()
+
+        # Saml filtre — hvis der er en nested OR-gruppe (fx attributter i OR-mode),
+        # flad den ud, men husk at attributmode skal sættes.
+        attr_mode_or_detected = False
+        flat_filters: list = []
+        for f in fs._filters:
+            if isinstance(f, FilterSet):
+                if f.mode == "OR":
+                    # Antag at OR-grupper kommer fra attributter
+                    attr_mode_or_detected = True
+                flat_filters.extend(f._filters)
+            else:
+                flat_filters.append(f)
+
+        if attr_mode_or_detected:
+            self._attr_mode_any.setChecked(True)
+        else:
+            self._attr_mode_all.setChecked(True)
+
+        for f in flat_filters:
+            ftype = getattr(f, "filter_type", None)
+
+            if ftype == "name":
+                self._name_filter.setText(getattr(f, "text", ""))
+            elif ftype == "gc_code":
+                self._gc_filter.setText(getattr(f, "text", ""))
+            elif ftype == "placed_by":
+                self._placed_filter.setText(getattr(f, "text", ""))
+            elif ftype == "cache_type":
+                types = getattr(f, "types", [])
+                for ct, cb in self._type_checks.items():
+                    cb.setChecked(ct in types)
+            elif ftype == "container":
+                sizes = getattr(f, "sizes", [])
+                for cs, cb in self._cont_checks.items():
+                    cb.setChecked(cs in sizes)
+            elif ftype == "difficulty":
+                self._diff_min.setValue(getattr(f, "min_difficulty", 1.0))
+                self._diff_max.setValue(getattr(f, "max_difficulty", 5.0))
+            elif ftype == "terrain":
+                self._terr_min.setValue(getattr(f, "min_terrain", 1.0))
+                self._terr_max.setValue(getattr(f, "max_terrain", 5.0))
+            elif ftype == "found":
+                self._found_cb.setChecked(True)
+                self._notfound_cb.setChecked(False)
+            elif ftype == "not_found":
+                self._found_cb.setChecked(False)
+                self._notfound_cb.setChecked(True)
+            elif ftype == "availability":
+                self._avail_cb.setChecked(getattr(f, "show_avail", True))
+                self._unavail_cb.setChecked(getattr(f, "show_unavail", False))
+                self._archived_cb.setChecked(getattr(f, "show_archived", False))
+            elif ftype == "available":
+                # Legacy / simpelt AvailableFilter
+                self._avail_cb.setChecked(True)
+                self._unavail_cb.setChecked(False)
+                self._archived_cb.setChecked(False)
+            elif ftype == "archived":
+                self._avail_cb.setChecked(False)
+                self._unavail_cb.setChecked(False)
+                self._archived_cb.setChecked(True)
+            elif ftype == "distance":
+                self._dist_enabled.setChecked(True)
+                self._dist_max.setValue(getattr(f, "max_km", 10.0))
+            elif ftype == "premium":
+                self._prem_yes.setChecked(True)
+                self._prem_no.setChecked(False)
+            elif ftype == "non_premium":
+                self._prem_yes.setChecked(False)
+                self._prem_no.setChecked(True)
+            elif ftype == "has_trackable":
+                self._tb_yes.setChecked(True)
+                self._tb_no.setChecked(False)
+            elif ftype == "attribute":
+                attr_id = getattr(f, "attribute_id", None)
+                is_on   = getattr(f, "is_on", True)
+                if attr_id in self._attr_boxes:
+                    ja_cb, nej_cb, _ingen = self._attr_boxes[attr_id]
+                    if is_on:
+                        ja_cb.setChecked(True)
+                    else:
+                        nej_cb.setChecked(True)
+            # Andre/inline filtre ignoreres stille (fx gammel hidden_date)
 
     # ── Apply ─────────────────────────────────────────────────────────────────
 
