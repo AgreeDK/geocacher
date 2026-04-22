@@ -19,11 +19,11 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QFont
 
-from opensak.coords import format_coords, parse_coords, FORMAT_DMM, FORMAT_DMS, FORMAT_DD
+from opensak.coords import format_coords, parse_coords
+from opensak.utils.types import CoordFormat
 from opensak.gui.settings import get_settings
 from opensak.lang import tr
-
-_EARTH_RADIUS_M = 6_371_000.0   # WGS-84 mean radius in metres
+from opensak.utils.constants import EARTH_RADIUS_M
 
 
 def _project(lat_deg: float, lon_deg: float,
@@ -35,7 +35,7 @@ def _project(lat_deg: float, lon_deg: float,
     lat = math.radians(lat_deg)
     lon = math.radians(lon_deg)
     brng = math.radians(bearing_deg)
-    d_r = distance_m / _EARTH_RADIUS_M
+    d_r = distance_m / EARTH_RADIUS_M
 
     lat2 = math.asin(
         math.sin(lat) * math.cos(d_r)
@@ -66,7 +66,7 @@ class ProjectionDialog(QDialog):
         self._result_lon: float | None = None
         self._setup_ui()
         if lat is not None and lon is not None:
-            self._start_input.setText(format_coords(lat, lon, FORMAT_DMM))
+            self._start_input.setText(format_coords(lat, lon, CoordFormat.DMM))
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -218,9 +218,9 @@ class ProjectionDialog(QDialog):
             self._clear_results()
 
     def _update_results(self, lat: float, lon: float) -> None:
-        self._dmm_row[1].setText(format_coords(lat, lon, FORMAT_DMM))
-        self._dms_row[1].setText(format_coords(lat, lon, FORMAT_DMS))
-        self._dd_row[1].setText(format_coords(lat, lon, FORMAT_DD))
+        self._dmm_row[1].setText(format_coords(lat, lon, CoordFormat.DMM))
+        self._dms_row[1].setText(format_coords(lat, lon, CoordFormat.DMS))
+        self._dd_row[1].setText(format_coords(lat, lon, CoordFormat.DD))
         for _, _, btn in (self._dmm_row, self._dms_row, self._dd_row):
             btn.setEnabled(True)
         self._osm_btn.setEnabled(True)

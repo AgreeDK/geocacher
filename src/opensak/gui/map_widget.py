@@ -16,6 +16,7 @@ from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from opensak.db.models import Cache
+from opensak.utils.types import GcCode
 
 
 # ── Tile request interceptor (sætter Referer header for OSM tiles) ───────────
@@ -28,23 +29,11 @@ class TileInterceptor(QWebEngineUrlRequestInterceptor):
 
 # ── Cache type → Leaflet marker farve ────────────────────────────────────────
 
-CACHE_COLOURS = {
-    "Traditional Cache":  "#2e7d32",   # mørkegrøn
-    "Multi-cache":        "#e65100",   # orange
-    "Unknown Cache":      "#1565c0",   # blå (Mystery)
-    "Letterbox Hybrid":   "#6a1b9a",   # lilla
-    "Wherigo Cache":      "#00838f",   # teal
-    "Event Cache":        "#ad1457",   # pink
-    "Mega-Event Cache":   "#ad1457",
-    "Giga-Event Cache":   "#ad1457",
-    "Earthcache":         "#558b2f",   # olivengrøn
-    "Virtual Cache":      "#f57f17",   # gul
-}
-DEFAULT_COLOUR = "#757575"   # grå for ukendte typer
+from opensak.utils.constants import CACHE_COLOURS, DEFAULT_CACHE_COLOUR
 
 
 def _cache_colour(cache_type: str) -> str:
-    return CACHE_COLOURS.get(cache_type, DEFAULT_COLOUR)
+    return CACHE_COLOURS.get(cache_type, DEFAULT_CACHE_COLOUR)
 
 
 # ── Python ↔ JavaScript bro ───────────────────────────────────────────────────
@@ -58,7 +47,7 @@ class MapBridge(QObject):
     cache_clicked = Signal(str)   # gc_code
 
     @Slot(str)
-    def on_cache_clicked(self, gc_code: str) -> None:
+    def on_cache_clicked(self, gc_code: GcCode) -> None:
         """Kaldes fra JavaScript når en pin klikkes."""
         self.cache_clicked.emit(gc_code)
 
@@ -386,7 +375,7 @@ class MapWidget(QWidget):
         if data:
             self._run_js("fitAllMarkers()")
 
-    def pan_to_cache(self, gc_code: str) -> None:
+    def pan_to_cache(self, gc_code: GcCode) -> None:
         """Centrér kortet på en bestemt cache."""
         if self._ready:
             safe = gc_code.replace("'", "\\'")

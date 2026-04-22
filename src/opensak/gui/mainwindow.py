@@ -24,6 +24,7 @@ from opensak.gui.cache_detail import CacheDetailPanel
 from opensak.coords import format_coords
 from opensak.gui.settings import get_settings
 from opensak.lang import tr
+from opensak.utils.types import GcCode
 
 
 class MainWindow(QMainWindow):
@@ -438,7 +439,7 @@ class MainWindow(QMainWindow):
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
-    def _load_full_cache(self, gc_code: str):
+    def _load_full_cache(self, gc_code: GcCode):
         """
         Indlæs en enkelt cache fra DB med alle relationer eager-loaded.
 
@@ -475,7 +476,7 @@ class MainWindow(QMainWindow):
                 f"{full.gc_code} — {full.name} ({coords})"
             )
 
-    def _on_map_cache_selected(self, gc_code: str) -> None:
+    def _on_map_cache_selected(self, gc_code: GcCode) -> None:
         """Kaldes når brugeren klikker på en pin på kortet."""
         full = self._load_full_cache(gc_code)
         if full:

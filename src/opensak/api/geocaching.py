@@ -35,7 +35,7 @@ import urllib.request
 from pathlib import Path
 from typing import Optional, List
 from enum import IntEnum
-from opensak.utils.types import LogType
+from opensak.utils.types import GcCode, LogType
 from opensak.utils.utils import validate_gc_code
 
 logger = logging.getLogger(__name__)
@@ -367,7 +367,7 @@ def _api_get(endpoint: str, params: Optional[dict] = None) -> Optional[dict]:
 
 # ── Offentlige API-funktioner ─────────────────────────────────────────────────
 
-def get_cache_details(gc_code: str) -> Optional[dict]:
+def get_cache_details(gc_code: GcCode) -> Optional[dict]:
     """
     Hent fulde cache-detaljer fra Geocaching.com API.
 
@@ -408,7 +408,7 @@ def get_cache_details(gc_code: str) -> Optional[dict]:
     )
 
 
-def get_trackables_in_cache(gc_code: str) -> Optional[list]:
+def get_trackables_in_cache(gc_code: GcCode) -> Optional[list]:
     """
     Hent liste af trackables (Travel Bugs m.fl.) der aktuelt er i en cache.
 

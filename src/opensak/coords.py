@@ -12,14 +12,12 @@ Parse also accepts the geocaching.com copy-paste format:
 
 from __future__ import annotations
 
-FORMAT_DD  = "dd"
-FORMAT_DMM = "dmm"
-FORMAT_DMS = "dms"
+from opensak.utils.types import Coordinate, CoordFormat
 
 FORMATS = {
-    FORMAT_DMM: "DMM  —  N55 47.250 E012 25.000",
-    FORMAT_DMS: "DMS  —  N55° 47' 15\" E012° 25' 00\"",
-    FORMAT_DD:  "DD   —  55.78750, 12.41667",
+    CoordFormat.DMM: "DMM  —  N55 47.250 E012 25.000",
+    CoordFormat.DMS: "DMS  —  N55° 47' 15\" E012° 25' 00\"",
+    CoordFormat.DD:  "DD   —  55.78750, 12.41667",
 }
 
 
@@ -59,18 +57,18 @@ def _dd_to_dd(lat: float, lon: float) -> str:
     return f"{lat:.5f}, {lon:.5f}"
 
 
-def format_coords(lat: float, lon: float, fmt: str) -> str:
+def format_coords(lat: float, lon: float, fmt: CoordFormat) -> str:
     """Return a coordinate string in the requested format."""
-    if fmt == FORMAT_DMS:
+    if fmt == CoordFormat.DMS:
         return _dd_to_dms(lat, lon)
-    if fmt == FORMAT_DD:
+    if fmt == CoordFormat.DD:
         return _dd_to_dd(lat, lon)
     return _dd_to_dmm(lat, lon)   # default: DMM
 
 
 # ── Parsing ───────────────────────────────────────────────────────────────────
 
-def parse_coords(text: str) -> tuple[float, float] | None:
+def parse_coords(text: str) -> Coordinate | None:
     """
     Try to parse a coordinate string in any supported format.
     Returns (lat, lon) as decimal degrees, or None if parsing fails.

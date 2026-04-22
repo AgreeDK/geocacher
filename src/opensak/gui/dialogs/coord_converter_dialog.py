@@ -16,10 +16,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QFont
 
-from opensak.coords import (
-    parse_coords, format_coords,
-    FORMAT_DD, FORMAT_DMM, FORMAT_DMS
-)
+from opensak.coords import parse_coords, format_coords
+from opensak.utils.types import CoordFormat
 from opensak.lang import tr
 
 
@@ -42,7 +40,7 @@ class CoordConverterDialog(QDialog):
         self._setup_ui()
         if lat is not None and lon is not None:
             # Pre-fill input with DMM (geocaching standard)
-            self._input.setText(format_coords(lat, lon, FORMAT_DMM))
+            self._input.setText(format_coords(lat, lon, CoordFormat.DMM))
             self._update_outputs(lat, lon)
 
     def _setup_ui(self) -> None:
@@ -148,9 +146,9 @@ class CoordConverterDialog(QDialog):
             self._clear_outputs()
 
     def _update_outputs(self, lat: float, lon: float) -> None:
-        dmm = format_coords(lat, lon, FORMAT_DMM)
-        dms = format_coords(lat, lon, FORMAT_DMS)
-        dd  = format_coords(lat, lon, FORMAT_DD)
+        dmm = format_coords(lat, lon, CoordFormat.DMM)
+        dms = format_coords(lat, lon, CoordFormat.DMS)
+        dd  = format_coords(lat, lon, CoordFormat.DD)
 
         self._dmm_row[1].setText(dmm)
         self._dms_row[1].setText(dms)

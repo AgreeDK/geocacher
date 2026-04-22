@@ -17,6 +17,7 @@ from sqlalchemy.orm import sessionmaker
 
 from opensak.db.database import get_session
 from opensak.db.models import Cache
+from opensak.utils.types import GcCode
 
 
 @dataclass
@@ -35,7 +36,7 @@ class UpdateResult:
         )
 
 
-def get_found_gc_codes(reference_db_path: Path) -> set[str]:
+def get_found_gc_codes(reference_db_path: Path) -> set[GcCode]:
     """
     Hent alle GC koder fra reference databasen.
     Returnerer et set af GC koder.

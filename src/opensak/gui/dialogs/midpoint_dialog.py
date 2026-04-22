@@ -19,7 +19,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QFont
 
-from opensak.coords import format_coords, parse_coords, FORMAT_DMM, FORMAT_DMS, FORMAT_DD
+from opensak.coords import format_coords, parse_coords
+from opensak.utils.types import CoordFormat
 from opensak.lang import tr
 
 
@@ -57,7 +58,7 @@ class MidpointDialog(QDialog):
         self._setup_ui()
         # Pre-fill point A with selected cache if available
         if lat is not None and lon is not None:
-            self._input_a.setText(format_coords(lat, lon, FORMAT_DMM))
+            self._input_a.setText(format_coords(lat, lon, CoordFormat.DMM))
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
@@ -166,9 +167,9 @@ class MidpointDialog(QDialog):
             lat_m, lon_m = _midpoint(res_a[0], res_a[1], res_b[0], res_b[1])
             self._result_lat = lat_m
             self._result_lon = lon_m
-            self._dmm_row[1].setText(format_coords(lat_m, lon_m, FORMAT_DMM))
-            self._dms_row[1].setText(format_coords(lat_m, lon_m, FORMAT_DMS))
-            self._dd_row[1].setText(format_coords(lat_m, lon_m, FORMAT_DD))
+            self._dmm_row[1].setText(format_coords(lat_m, lon_m, CoordFormat.DMM))
+            self._dms_row[1].setText(format_coords(lat_m, lon_m, CoordFormat.DMS))
+            self._dd_row[1].setText(format_coords(lat_m, lon_m, CoordFormat.DD))
             for _, _, btn in (self._dmm_row, self._dms_row, self._dd_row):
                 btn.setEnabled(True)
             self._osm_btn.setEnabled(True)

@@ -278,59 +278,8 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
 
 # ── Extra waypoint parser (GSAK single-file GPX) ─────────────────────────────
 
-_KNOWN_PREFIXES = {
-    # Groundspeak standard
-    "PK": "Parking Area",
-    "TH": "Trailhead",
-    "S1": "Stage", "S2": "Stage", "S3": "Stage", "S4": "Stage",
-    "S5": "Stage", "S6": "Stage", "S7": "Stage", "S8": "Stage", "S9": "Stage",
-    "FN": "Final Location",
-    "RF": "Reference Point",
-    "WP": "Waypoint",
-    "SB": "Stages of a Multicache",
-    "CM": "Custom",
-    "CP": "Custom",
-    "PP": "Physical Stage",
-    "VX": "Virtual Stage",
-    "QA": "Question to Answer",
-    # GSAK-specifikke og udvidede prefixes
-    "LC": "Listed Coordinates",
-    "LB": "Listed By",
-    "LA": "Listed Area",
-    "PA": "Parking Area",
-    "PG": "Parking",
-    "PT": "Point",
-    "PN": "Point",
-    "PB": "Point",
-    "RP": "Reference Point",
-    "ST": "Stage",
-    "SP": "Stage Point",
-    "AA": "Additional Waypoint",
-    "UL": "Additional Waypoint",
-    "TE": "Additional Waypoint",
-    "FK": "Additional Waypoint",
-    # Øvrige fra brugerfil
-    "BR": "Reference Point",
-    "UA": "Additional Waypoint",
-    "TW": "Additional Waypoint",
-    "TU": "Additional Waypoint",
-    "TO": "Additional Waypoint",
-    "SX": "Stage",
-    "SS": "Stage",
-    "SM": "Stage",
-    "SH": "Stage",
-    "SE": "Stage",
-}
-
-# Single-bogstavs prefixes (GSAK bruger T + suffix, V + suffix osv.)
-_KNOWN_SINGLE_PREFIXES = {
-    "T": "Trailhead",
-    "V": "Virtual Stage",
-    "P": "Parking Area",
-    "S": "Stage",
-    "F": "Final Location",
-    "R": "Reference Point",
-}
+from opensak.utils.constants import KNOWN_PREFIXES as _KNOWN_PREFIXES
+from opensak.utils.constants import KNOWN_SINGLE_PREFIXES as _KNOWN_SINGLE_PREFIXES
 
 
 def _parse_extra_wpt(wpt_el) -> Optional[dict]:
