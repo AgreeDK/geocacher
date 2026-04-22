@@ -380,6 +380,14 @@
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover td { background: rgba(255,255,255,0.02); }
 
+    .compare-footnote {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 1rem;
+      padding-left: 0.25rem;
+    }
+
     /* ── DOWNLOAD SECTION ── */
     .download-grid {
       display: grid;
@@ -633,7 +641,7 @@
         <tr>
           <td>Free</td>
           <td class="yes highlight-col">✓ Free</td>
-          <td class="no">✗ Paid</td>
+          <td class="yes">✓ Free*</td>
           <td class="no">✗ Paid</td>
           <td class="yes">✓ Free</td>
         </tr>
@@ -689,6 +697,7 @@
       </tbody>
     </table>
   </div>
+  <p class="compare-footnote">* GSAK became freeware in 2021 after active development ceased.</p>
 </section>
 
 <!-- DOWNLOAD -->
