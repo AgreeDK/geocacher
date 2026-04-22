@@ -42,7 +42,7 @@ def get_found_gc_codes(reference_db_path: Path) -> set[GcCode]:
     Returnerer et set af GC koder.
     """
     url = f"sqlite:///{reference_db_path}"
-    engine = create_engine(url, connect_args={"check_same_thread": False})
+    engine = create_engine(url, connect_args={"check_same_thread": False, "timeout": 30})
 
     try:
         with engine.connect() as conn:

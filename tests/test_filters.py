@@ -10,7 +10,7 @@ import pytest
 from pathlib import Path
 from datetime import datetime, timezone
 
-from opensak.db.database import init_db, get_session
+from opensak.db.database import get_session
 from opensak.db.models import Cache, Attribute, Trackable
 from opensak.filters.engine import (
     FilterSet, SortSpec, FilterProfile, apply_filters, annotate_distances,
@@ -26,13 +26,6 @@ from opensak.filters.engine import (
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
-
-@pytest.fixture(scope="module")
-def tmp_db(tmp_path_factory):
-    db_path = tmp_path_factory.mktemp("data") / "test_filters.db"
-    init_db(db_path=db_path)
-    return db_path
-
 
 @pytest.fixture(scope="module", autouse=True)
 def seed_data(tmp_db):
