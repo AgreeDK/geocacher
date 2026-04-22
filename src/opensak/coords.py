@@ -14,6 +14,11 @@ from __future__ import annotations
 
 from opensak.utils.types import Coordinate, CoordFormat
 
+# ── Public aliases (for backwards-compatible API) ────────────────────────────
+FORMAT_DD  = CoordFormat.DD
+FORMAT_DMM = CoordFormat.DMM
+FORMAT_DMS = CoordFormat.DMS
+
 FORMATS = {
     CoordFormat.DMM: "DMM  —  N55 47.250 E012 25.000",
     CoordFormat.DMS: "DMS  —  N55° 47' 15\" E012° 25' 00\"",
