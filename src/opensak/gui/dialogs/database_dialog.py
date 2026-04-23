@@ -227,7 +227,8 @@ class DatabaseManagerDialog(QDialog):
         self._btn_copy.setEnabled(db is not None and db.exists)
         self._btn_rename.setEnabled(db is not None)
         self._btn_remove.setEnabled(db is not None and not is_active)
-        self._btn_delete.setEnabled(db is not None and not is_active)
+        # Delete requires: something selected, not active, and file exists on disk
+        self._btn_delete.setEnabled(db is not None and not is_active and db.exists)
 
     def _switch_to_selected(self, *_) -> None:
         db = self._selected_db()
@@ -324,6 +325,16 @@ class DatabaseManagerDialog(QDialog):
         db = self._selected_db()
         if not db:
             return
+
+        # Safety guard: active database must never be deleted
+        if db == self._manager.active:
+            QMessageBox.warning(
+                self,
+                tr("db_delete_confirm_title"),
+                tr("db_delete_active_error", name=db.name),
+            )
+            return
+
         reply = QMessageBox.warning(
             self, tr("db_delete_confirm_title"),
             tr("db_delete_confirm_msg", name=db.name, path=db.path),
