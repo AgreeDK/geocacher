@@ -90,8 +90,16 @@ def _make_splash(app) -> "QSplashScreen":
 
 
 def main() -> None:
+    import os
     from PySide6.QtWidgets import QApplication
     from PySide6.QtCore import Qt
+
+    # Disable GPU acceleration for QtWebEngine — prevents black rendering
+    # on Windows systems where GPU/OpenGL drivers are incomplete or virtual.
+    # This affects map and description panels rendered via QWebEngineView.
+    os.environ.setdefault(
+        "QTWEBENGINE_CHROMIUM_FLAGS", "--disable-gpu --disable-software-rasterizer"
+    )
 
     app = QApplication(sys.argv)
     app.setWindowIcon(get_app_icon())

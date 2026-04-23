@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
 
         # ── Main splitter: cache list (top) | bottom panel (below) ───────────
         self._splitter = QSplitter(Qt.Orientation.Vertical)
+        self._splitter.setObjectName("main_splitter")
 
         # Top: cache list — fuld bredde
         self._cache_table = CacheTableView()
@@ -61,6 +62,7 @@ class MainWindow(QMainWindow):
 
         # Bottom: horisontal splitter — detaljer til venstre, kort til højre
         self._bottom_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self._bottom_splitter.setObjectName("bottom_splitter")
 
         self._detail_panel = CacheDetailPanel()
         self._bottom_splitter.addWidget(self._detail_panel)
@@ -353,10 +355,23 @@ class MainWindow(QMainWindow):
             self.restoreGeometry(s.window_geometry)
         if s.window_state:
             self.restoreState(s.window_state)
+
+        # Layout version guard: if saved splitter state was from an old
+        # 3-panel layout it will be incompatible with the current 2-widget
+        # vertical splitter. We check the widget count after restore —
+        # if it doesn't match we fall back to default sizes and clear the
+        # stored state so it won't cause problems on next launch either.
         if s.splitter_state:
             self._splitter.restoreState(s.splitter_state)
+            if self._splitter.count() != 2:
+                self._splitter.setSizes([380, 400])
+                s.splitter_state = None
+
         if getattr(s, "bottom_splitter_state", None):
             self._bottom_splitter.restoreState(s.bottom_splitter_state)
+            if self._bottom_splitter.count() != 2:
+                self._bottom_splitter.setSizes([560, 540])
+                s.bottom_splitter_state = None
 
     def _update_title(self) -> None:
         """Opdatér vinduestitel med aktiv database navn."""

@@ -14,6 +14,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.10.1] — 2026-04-23
+### Fixed
+- **Black description and map on Windows** (issue #57) — disabled GPU acceleration
+  for QtWebEngine (`--disable-gpu`) which caused silent black rendering on Windows
+  systems with incomplete or virtual GPU/OpenGL drivers.
+- **Incorrect 3-column layout on first launch** — splitter state is now validated
+  against the current layout on restore; incompatible saved state (from older versions)
+  is discarded and replaced with correct default sizes.
+
+---
+
 ## [1.10.0] — 2026-04-23
 ### Added
 - **GSAK field parity (issue #33)** — 11 nye felter på alle caches:
