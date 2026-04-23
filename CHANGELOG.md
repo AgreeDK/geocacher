@@ -14,6 +14,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.9.3] — 2026-04-23
+### Fixed
+
+### Multi-file import (#16)
+You can now select multiple GPX or Pocket Query ZIP files at once in the
+import dialog. Files are imported one by one in the background, and the
+file list shows live status for each file (⏳ waiting → 🔄 importing → ✅ done).
+The map and cache list update automatically when import is complete.
+
+### Bug fix
+- Map now refreshes automatically after import (previously required manual F5)
+
+---
+
 ## [1.9.2] — 2026-04-23
 ### Fixed
 - **Map → list sync** — clicking a pin on the map now highlights and scrolls
