@@ -124,15 +124,17 @@ STRINGS: dict[str, str] = {
     "import_errors_header":         "Fejl ({count}):",
     "import_failed":                "✗ Fejl under import:",
     "import_again":                 "Importer igen",
-    "import_select_file_label":     "Vælg en GPX-fil eller Pocket Query ZIP-fil:",
+        "import_select_files_label":  "Vælg en eller flere GPX- eller Pocket Query ZIP-filer:",
     "import_no_file":               "Ingen fil valgt",
     "import_browse_title":          "Vælg GPX eller ZIP fil",
+    "import_remove_selected":     "Fjern valgte",
     "import_file_filter":           "GPX og ZIP filer (*.gpx *.zip);;Alle filer (*)",
     "import_running_file":          "Importerer {name}…",
     "import_progress":              "Behandler caches: {count}…",
     "import_saving":               "Gemmer til database…",
     "import_table_loaded":         "✓ {count} caches indlæst — klik på en cache for at se kortet",
     "import_log_placeholder":       "Import-resultat vises her…",
+    "import_all_done":            "✓ Alle {count} filer er behandlet.",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Sæt filter",

@@ -1,5 +1,8 @@
 """
 src/opensak/gui/dialogs/import_dialog.py — GPX / PQ zip import dialog.
+
+Supports selecting and importing multiple files in one session.
+Files are imported sequentially in a background thread.
 """
 
 from __future__ import annotations
@@ -9,7 +12,8 @@ from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QFileDialog, QProgressBar,
-    QTextEdit, QDialogButtonBox
+    QTextEdit, QListWidget, QListWidgetItem,
+    QAbstractItemView
 )
 
 from opensak.gui.settings import get_settings
@@ -17,59 +21,65 @@ from opensak.lang import tr
 
 
 class ImportWorker(QThread):
-    """Runs the import in a background thread so the UI stays responsive."""
-    finished = Signal(object)   # emits ImportResult
-    error    = Signal(str)
-    progress = Signal(int)      # emits antal behandlede caches
+    """Imports a list of files sequentially in a background thread."""
+    file_started  = Signal(int, str)     # (index, filename)
+    file_finished = Signal(int, object)  # (index, ImportResult)
+    file_error    = Signal(int, str)     # (index, error message)
+    progress      = Signal(int)          # cache count within current file
+    all_done      = Signal()
 
-    def __init__(self, path: Path):
+    def __init__(self, paths: list[Path]):
         super().__init__()
-        self.path = path
+        self.paths = paths
 
     def run(self) -> None:
-        try:
-            from opensak.db.database import init_db, get_session
-            from opensak.importer import import_gpx, import_zip
-            from opensak.utils.utils import get_import_type, ImportType
+        from opensak.db.database import init_db, get_session
+        from opensak.importer import import_gpx, import_zip
+        from opensak.utils.utils import get_import_type, ImportType
 
-            import_type: ImportType = get_import_type(self.path)
+        init_db()
 
-            init_db()
-
-            with get_session() as session:
+        for i, path in enumerate(self.paths):
+            self.file_started.emit(i, path.name)
+            try:
+                import_type: ImportType = get_import_type(path)
                 importers = {
                     ImportType.GPX: import_gpx,
                     ImportType.ZIP: import_zip,
                 }
-
                 import_func = importers[import_type]
-                    
-                result = import_func(
-                    self.path, 
-                    session, 
-                    progress_cb=self.progress.emit
-                )
 
-            self.finished.emit(result)
-                
-        except ValueError as e:
-            self.error.emit(str(e))
-        except Exception:
-            import traceback
-            self.error.emit(traceback.format_exc())
+                with get_session() as session:
+                    result = import_func(
+                        path,
+                        session,
+                        progress_cb=self.progress.emit
+                    )
+
+                self.file_finished.emit(i, result)
+
+            except ValueError as e:
+                self.file_error.emit(i, str(e))
+            except Exception:
+                import traceback
+                self.file_error.emit(i, traceback.format_exc())
+
+        self.all_done.emit()
 
 
 class ImportDialog(QDialog):
-    """Dialog for importing GPX or PQ zip files."""
+    """Dialog for importing one or more GPX or PQ zip files."""
 
-    import_completed = Signal()   # emitted when import finishes successfully
+    import_completed = Signal()   # emitted when at least one file imported successfully
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle(tr("import_dialog_title"))
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(540)
+        self.setMinimumHeight(420)
         self._worker: ImportWorker | None = None
-        self._selected_path: Path | None = None
+        self._selected_paths: list[Path] = []
+        self._any_success = False
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -77,18 +87,40 @@ class ImportDialog(QDialog):
         layout.setSpacing(10)
 
         # ── File selection ────────────────────────────────────────────────────
-        file_lbl = QLabel(tr("import_select_file_label"))
+        file_lbl = QLabel(tr("import_select_files_label"))
         layout.addWidget(file_lbl)
 
-        file_row = QHBoxLayout()
-        self._path_lbl = QLabel(tr("import_no_file"))
-        self._path_lbl.setStyleSheet("color: gray;")
-        file_row.addWidget(self._path_lbl, stretch=1)
+        # File list widget
+        self._file_list = QListWidget()
+        self._file_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self._file_list.setMaximumHeight(130)
+        self._file_list.setAlternatingRowColors(True)
+        layout.addWidget(self._file_list)
+
+        # Browse + Remove + Import + Close row
+        btn_row = QHBoxLayout()
 
         self._browse_btn = QPushButton(tr("import_browse"))
         self._browse_btn.clicked.connect(self._browse)
-        file_row.addWidget(self._browse_btn)
-        layout.addLayout(file_row)
+        btn_row.addWidget(self._browse_btn)
+
+        self._remove_btn = QPushButton(tr("import_remove_selected"))
+        self._remove_btn.setEnabled(False)
+        self._remove_btn.clicked.connect(self._remove_selected)
+        btn_row.addWidget(self._remove_btn)
+
+        btn_row.addStretch()
+
+        self._import_btn = QPushButton(tr("import_start"))
+        self._import_btn.setEnabled(False)
+        self._import_btn.clicked.connect(self._start_import)
+        btn_row.addWidget(self._import_btn)
+
+        self._close_btn = QPushButton(tr("close"))
+        self._close_btn.clicked.connect(self.accept)
+        btn_row.addWidget(self._close_btn)
+
+        layout.addLayout(btn_row)
 
         # ── Progress ──────────────────────────────────────────────────────────
         self._progress = QProgressBar()
@@ -99,92 +131,144 @@ class ImportDialog(QDialog):
         # ── Result log ────────────────────────────────────────────────────────
         self._log = QTextEdit()
         self._log.setReadOnly(True)
-        self._log.setMaximumHeight(180)
         self._log.setPlaceholderText(tr("import_log_placeholder"))
         layout.addWidget(self._log)
 
-        # ── Buttons ───────────────────────────────────────────────────────────
-        btn_row = QHBoxLayout()
-        self._import_btn = QPushButton(tr("import_start"))
-        self._import_btn.setEnabled(False)
-        self._import_btn.clicked.connect(self._start_import)
-        btn_row.addWidget(self._import_btn)
+        # Connect selection change for remove button state
+        self._file_list.itemSelectionChanged.connect(self._on_selection_changed)
 
-        self._close_btn = QPushButton(tr("close"))
-        self._close_btn.clicked.connect(self.accept)
-        btn_row.addWidget(self._close_btn)
-        layout.addLayout(btn_row)
+    # ── File management ───────────────────────────────────────────────────────
 
     def _browse(self) -> None:
         settings = get_settings()
-        path, _ = QFileDialog.getOpenFileName(
+        paths, _ = QFileDialog.getOpenFileNames(
             self,
             tr("import_browse_title"),
             settings.last_import_dir,
             tr("import_file_filter")
         )
-        if path:
-            self._selected_path = Path(path)
-            self._path_lbl.setText(self._selected_path.name)
-            self._path_lbl.setStyleSheet("")
-            self._import_btn.setEnabled(True)
-            settings.last_import_dir = str(self._selected_path.parent)
+        if paths:
+            existing_names = {p.name for p in self._selected_paths}
+            for path_str in paths:
+                p = Path(path_str)
+                if p.name not in existing_names:
+                    self._selected_paths.append(p)
+                    item = QListWidgetItem(f"⏳  {p.name}")
+                    item.setToolTip(str(p))
+                    self._file_list.addItem(item)
+                    existing_names.add(p.name)
+
+            if self._selected_paths:
+                settings.last_import_dir = str(self._selected_paths[-1].parent)
+                self._import_btn.setEnabled(True)
+
+    def _remove_selected(self) -> None:
+        selected_rows = sorted(
+            [self._file_list.row(item) for item in self._file_list.selectedItems()],
+            reverse=True
+        )
+        for row in selected_rows:
+            self._file_list.takeItem(row)
+            del self._selected_paths[row]
+
+        self._import_btn.setEnabled(bool(self._selected_paths))
+        self._remove_btn.setEnabled(False)
+
+    def _on_selection_changed(self) -> None:
+        self._remove_btn.setEnabled(bool(self._file_list.selectedItems()))
+
+    # ── Import ────────────────────────────────────────────────────────────────
 
     def _start_import(self) -> None:
-        if not self._selected_path:
+        if not self._selected_paths:
             return
 
         self._import_btn.setEnabled(False)
         self._browse_btn.setEnabled(False)
+        self._remove_btn.setEnabled(False)
         self._progress.setVisible(True)
-        self._log.setPlainText(tr("import_running_file", name=self._selected_path.name))
+        self._any_success = False
+        self._log.clear()
 
-        self._worker = ImportWorker(self._selected_path)
-        self._worker.finished.connect(self._on_finished)
-        self._worker.error.connect(self._on_error)
+        # Reset all list item icons to waiting
+        for i in range(self._file_list.count()):
+            item = self._file_list.item(i)
+            item.setText(f"⏳  {self._selected_paths[i].name}")
+
+        self._worker = ImportWorker(list(self._selected_paths))
+        self._worker.file_started.connect(self._on_file_started)
+        self._worker.file_finished.connect(self._on_file_finished)
+        self._worker.file_error.connect(self._on_file_error)
         self._worker.progress.connect(self._on_progress)
+        self._worker.all_done.connect(self._on_all_done)
         self._worker.start()
 
-    def _on_progress(self, count: int) -> None:
-        """Opdater log med løbende tæller under import."""
-        if count < 0:
-            # Negativt tal = signal om at vi gemmer til disk
-            self._log.setPlainText(
-                tr("import_running_file", name=self._selected_path.name)
-                + f"\n\n  {tr('import_saving')}"
-            )
-        elif count % 100 == 0:
-            self._log.setPlainText(
-                tr("import_running_file", name=self._selected_path.name)
-                + f"\n\n  {tr('import_progress', count=count)}"
-            )
+    def _on_file_started(self, index: int, name: str) -> None:
+        item = self._file_list.item(index)
+        if item:
+            item.setText(f"🔄  {name}")
+        self._file_list.scrollToItem(self._file_list.item(index))
+        self._append_log(tr("import_running_file", name=name))
 
-    def _on_finished(self, result) -> None:
-        self._progress.setVisible(False)
-        self._browse_btn.setEnabled(True)
+    def _on_progress(self, count: int) -> None:
+        if count < 0:
+            self._replace_last_log_line(f"  {tr('import_saving')}")
+        elif count % 100 == 0 and count > 0:
+            self._replace_last_log_line(f"  {tr('import_progress', count=count)}")
+
+    def _on_file_finished(self, index: int, result) -> None:
+        path = self._selected_paths[index]
+        item = self._file_list.item(index)
+        if item:
+            item.setText(f"✅  {path.name}")
 
         lines = [
-            tr("import_complete", name=self._selected_path.name),
-            "",
+            tr("import_complete", name=path.name),
             f"  {tr('import_new_caches'):<20} {result.created}",
             f"  {tr('import_updated'):<20} {result.updated}",
             f"  {tr('import_waypoints'):<20} {result.waypoints}",
             f"  {tr('import_skipped'):<20} {result.skipped}",
         ]
         if result.errors:
-            lines.append(f"\n  {tr('import_errors_header', count=len(result.errors))}")
-            for e in result.errors[:10]:
+            lines.append(tr("import_errors_header", count=len(result.errors)))
+            for e in result.errors[:5]:
                 lines.append(f"    - {e}")
 
-        self._log.setPlainText("\n".join(lines))
+        self._append_log("\n".join(lines))
+
+        if result.created > 0 or result.updated > 0:
+            self._any_success = True
+
+    def _on_file_error(self, index: int, msg: str) -> None:
+        path = self._selected_paths[index]
+        item = self._file_list.item(index)
+        if item:
+            item.setText(f"❌  {path.name}")
+        self._append_log(f"{tr('import_failed')} {path.name}\n{msg}")
+
+    def _on_all_done(self) -> None:
+        self._progress.setVisible(False)
+        self._browse_btn.setEnabled(True)
         self._import_btn.setText(tr("import_again"))
         self._import_btn.setEnabled(True)
 
-        if result.created > 0 or result.updated > 0:
+        total = self._file_list.count()
+        self._append_log(tr("import_all_done", count=total))
+
+        if self._any_success:
             self.import_completed.emit()
 
-    def _on_error(self, msg: str) -> None:
-        self._progress.setVisible(False)
-        self._browse_btn.setEnabled(True)
-        self._import_btn.setEnabled(True)
-        self._log.setPlainText(f"{tr('import_failed')}\n{msg}")
+    # ── Log helpers ───────────────────────────────────────────────────────────
+
+    def _append_log(self, text: str) -> None:
+        current = self._log.toPlainText()
+        separator = "\n" + ("─" * 40) + "\n" if current else ""
+        self._log.setPlainText(current + separator + text)
+        self._log.verticalScrollBar().setValue(
+            self._log.verticalScrollBar().maximum()
+        )
+
+    def _replace_last_log_line(self, new_line: str) -> None:
+        text = self._log.toPlainText()
+        lines = text.rsplit("\n", 1)
+        self._log.setPlainText(lines[0] + "\n" + new_line)

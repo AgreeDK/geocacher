@@ -495,9 +495,16 @@ class MainWindow(QMainWindow):
     def _open_import_dialog(self) -> None:
         from opensak.gui.dialogs.import_dialog import ImportDialog
         dlg = ImportDialog(self)
-        # Efter import: reload kun tabellen — ikke kortet (for mange pins ved store DB'er)
-        dlg.import_completed.connect(self._refresh_table_only)
+        dlg.import_completed.connect(self._refresh_after_import)
         dlg.exec()
+
+    def _refresh_after_import(self) -> None:
+        """Reload both cache table and map after a successful import."""
+        self._refresh_cache_list()
+        count = self._cache_table.row_count()
+        self._statusbar.showMessage(
+            tr("import_table_loaded", count=count), 5000
+        )
 
     def _refresh_table_only(self) -> None:
         """Reload cache-tabellen uden at opdatere kortet. Bruges efter import."""

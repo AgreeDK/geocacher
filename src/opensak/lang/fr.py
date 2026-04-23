@@ -124,15 +124,17 @@ STRINGS: dict[str, str] = {
     "import_errors_header":         "Erreurs ({count}) :",
     "import_failed":                "✗ Échec de l'importation :",
     "import_again":                 "Importer à nouveau",
-    "import_select_file_label":     "Sélectionnez un fichier GPX ou un fichier ZIP de Pocket Query :",
+        "import_select_files_label":  "Sélectionnez un ou plusieurs fichiers GPX ou ZIP Pocket Query :",
     "import_no_file":               "Aucun fichier sélectionné",
     "import_browse_title":          "Sélectionner un fichier GPX ou ZIP",
+    "import_remove_selected":     "Supprimer la sélection",
     "import_file_filter":           "Fichiers GPX et ZIP (*.gpx *.zip);;Tous les fichiers (*)",
     "import_running_file":          "Importation de {name}…",
     "import_progress":              "Nombre de caches traitées : {count}…",
     "import_saving":               "Enregistrement dans la base de données…",
     "import_table_loaded":         "✓ {count} caches chargées — cliquez sur un cache pour voir la carte",
     "import_log_placeholder":       "Les résultats d'importation s'afficheront ici…",
+    "import_all_done":            "✓ Les {count} fichiers ont été traités.",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Définir le filtre",

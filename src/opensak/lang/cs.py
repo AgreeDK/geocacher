@@ -124,15 +124,17 @@ STRINGS: dict[str, str] = {
     "import_errors_header":         "Chyby ({count}):",
     "import_failed":                "✗ Import selhal:",
     "import_again":                 "Importovat znovu",
-    "import_select_file_label":     "Vyberte soubor GPX nebo Pocket Query ZIP:",
+        "import_select_files_label":  "Vyberte jeden nebo více souborů GPX nebo Pocket Query ZIP:",
     "import_no_file":               "Žádný soubor nevybrán",
     "import_browse_title":          "Vyberte soubor GPX nebo ZIP",
+    "import_remove_selected":     "Odebrat vybrané",
     "import_file_filter":           "Soubory GPX a ZIP (*.gpx *.zip);;Všechny soubory (*)",
     "import_running_file":          "Importing {name}…",
     "import_progress":              "Processing caches: {count}…",
     "import_saving":               "Ukládání do databáze…",
     "import_table_loaded":         "✓ {count} keší načteno — kliknutím zobrazíte mapu",
     "import_log_placeholder":       "Výsledky importu se zobrazí zde…",
+    "import_all_done":            "✓ Všech {count} souborů bylo zpracováno.",
     
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Nastavit filtr",
