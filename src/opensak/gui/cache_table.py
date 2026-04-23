@@ -46,6 +46,17 @@ def get_column_defs() -> dict:
         "archived":     (tr("col_archived"),          70),
         "favorite":     (tr("col_favorite"),          60),
         "corrected":    (tr("col_corrected"),         40),
+        # ── Issue #33: GSAK-compatible fields ─────────────────────────────
+        "found_date":      (tr("col_found_date"),      90),
+        "dnf_date":        (tr("col_dnf_date"),        90),
+        "first_to_find":   (tr("col_first_to_find"),   45),
+        "favorite_points": (tr("col_favorite_points"), 55),
+        "user_flag":       (tr("col_user_flag"),       45),
+        "user_sort":       (tr("col_user_sort"),       55),
+        "user_data_1":     (tr("col_user_data_1"),    100),
+        "user_data_2":     (tr("col_user_data_2"),    100),
+        "user_data_3":     (tr("col_user_data_3"),    100),
+        "user_data_4":     (tr("col_user_data_4"),    100),
     }
 
 
@@ -135,7 +146,8 @@ class CacheTableModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.TextAlignmentRole:
             if col in ("difficulty", "terrain", "distance", "found",
                        "dnf", "premium_only", "archived", "log_count",
-                       "corrected"):
+                       "corrected", "first_to_find", "user_flag",
+                       "user_sort", "favorite_points"):
                 return Qt.AlignmentFlag.AlignCenter
             return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
 
@@ -230,6 +242,27 @@ class CacheTableModel(QAbstractTableModel):
         if col == "corrected":
             note = cache.user_note
             return "📍" if (note and note.is_corrected) else ""
+        # ── Issue #33: GSAK-compatible fields ─────────────────────────────────
+        if col == "found_date":
+            return cache.found_date.strftime("%d.%m.%Y") if cache.found_date else ""
+        if col == "dnf_date":
+            return cache.dnf_date.strftime("%d.%m.%Y") if cache.dnf_date else ""
+        if col == "first_to_find":
+            return "FTF" if cache.first_to_find else ""
+        if col == "favorite_points":
+            return str(cache.favorite_points) if cache.favorite_points is not None else ""
+        if col == "user_flag":
+            return "🚩" if cache.user_flag else ""
+        if col == "user_sort":
+            return str(cache.user_sort) if cache.user_sort is not None else ""
+        if col == "user_data_1":
+            return cache.user_data_1 or ""
+        if col == "user_data_2":
+            return cache.user_data_2 or ""
+        if col == "user_data_3":
+            return cache.user_data_3 or ""
+        if col == "user_data_4":
+            return cache.user_data_4 or ""
         return ""
 
     def sort(self, column: int, order=Qt.SortOrder.AscendingOrder) -> None:
@@ -263,6 +296,22 @@ class CacheTableModel(QAbstractTableModel):
             self._caches.sort(
                 key=lambda c: c.hidden_date or datetime.min, reverse=reverse
             )
+        elif col == "found_date":
+            self._caches.sort(
+                key=lambda c: c.found_date or datetime.min, reverse=reverse
+            )
+        elif col == "dnf_date":
+            self._caches.sort(
+                key=lambda c: c.dnf_date or datetime.min, reverse=reverse
+            )
+        elif col == "first_to_find":
+            self._caches.sort(key=lambda c: int(c.first_to_find or False), reverse=reverse)
+        elif col == "user_flag":
+            self._caches.sort(key=lambda c: int(c.user_flag or False), reverse=reverse)
+        elif col == "user_sort":
+            self._caches.sort(key=lambda c: c.user_sort if c.user_sort is not None else 999999, reverse=reverse)
+        elif col == "favorite_points":
+            self._caches.sort(key=lambda c: c.favorite_points or 0, reverse=reverse)
         elif col == "name":
             self._caches.sort(
                 key=lambda c: (c.name or "").lower(), reverse=reverse

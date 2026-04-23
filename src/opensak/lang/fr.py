@@ -190,6 +190,10 @@ STRINGS: dict[str, str] = {
     "settings_group_language":      "Langue",
     "settings_language_label":      "Langue:",
     "settings_language_hint":       "Les changements prendront effet au prochain démarrage",
+    "settings_group_user":                         "Profil Geocaching",
+    "settings_gc_username_label":                  "Nom d'utilisateur :",
+    "settings_gc_username_placeholder":            "Votre nom geocaching.com",
+    "settings_gc_username_hint":                   "Utilisé pour identifier vos propres logs (ex. détection FTF)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Gérer les bases de données",
@@ -391,6 +395,17 @@ STRINGS: dict[str, str] = {
     "col_premium":      "Premium",
     "col_archived":     "Archivée",
     "col_favorite":     "Favori ★",
+
+    "col_dnf_date":          "Date DNF",
+    "col_found_date":       "Date trouvée",
+    "col_first_to_find":     "FTF",
+    "col_user_flag":         "Drapeau",
+    "col_user_sort":         "Tri",
+    "col_user_data_1":       "Données util. 1",
+    "col_user_data_2":       "Données util. 2",
+    "col_user_data_3":       "Données util. 3",
+    "col_user_data_4":       "Données util. 4",
+    "col_favorite_points":   "Points fav.",
 
     # ── Right-click context menu ──────────────────────────────────────────────
     "ctx_open_geocaching":  "🌐  Ouvrir sur geocaching.com",

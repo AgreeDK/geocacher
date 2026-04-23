@@ -36,6 +36,17 @@ _ALL_COLUMNS_DEF = [
     ("archived",     "col_archived",     70, False),
     ("favorite",     "col_favorite",     60,  True),
     ("corrected",    "col_corrected",    40, False),
+    # ── Issue #33: GSAK-compatible fields ─────────────────────────────────────
+    ("found_date",     "col_found_date",    90, False),
+    ("dnf_date",       "col_dnf_date",      90, False),
+    ("first_to_find",  "col_first_to_find", 45, False),
+    ("favorite_points","col_favorite_points",55, False),
+    ("user_flag",      "col_user_flag",     45, False),
+    ("user_sort",      "col_user_sort",     55, False),
+    ("user_data_1",    "col_user_data_1",  100, False),
+    ("user_data_2",    "col_user_data_2",  100, False),
+    ("user_data_3",    "col_user_data_3",  100, False),
+    ("user_data_4",    "col_user_data_4",  100, False),
 ]
 
 def get_all_columns():

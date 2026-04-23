@@ -14,6 +14,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.10.0] — 2026-04-23
+### Added
+- **GSAK field parity (issue #33)** — 11 nye felter på alle caches:
+  `dnf_date`, `first_to_find`, `user_flag`, `user_sort`, `user_data_1–4`,
+  `distance`, `bearing`, `favorite_points`. Tilføjes automatisk til
+  eksisterende databaser ved opstart (migration 4).
+- **Fundet dato** — `found_date` hentes nu fra "Found it"-logs i
+  reference-databasen ved Opdater fra My Finds PQ og vises som kolonne.
+- **11 nye valgfrie kolonner** i kolonnevælgeren: Fundet dato, DNF dato,
+  FTF, Fav. point, Flag, Sortering, Brugerdata 1–4.
+- **Geocaching brugernavn** — nyt felt i Indstillinger → Generelt til
+  at gemme sit geocaching.com brugernavn (bruges til FTF-detektion m.m.).
+### Fixed
+- Databaser fra den gamle `geocacher/`-mappe flyttes automatisk til
+  `opensak/`-mappen ved opstart.
+- `found_date` skrives nu korrekt til databasen via direkte SQL
+  (ORM tracking-problem med ALTER TABLE kolonner).
+- Datetime-parsing af SQLite datoformater med mellemrum og mikrosekunder.
+
+---
+
+
 ## [1.9.3] — 2026-04-23
 ### Fixed
 

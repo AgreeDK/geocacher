@@ -132,6 +132,17 @@ class AppSettings:
         if self.active_home_name == name:
             self.active_home_name = ""
 
+    # ── Geocaching brugernavn ─────────────────────────────────────────────────
+
+    @property
+    def gc_username(self) -> str:
+        """Brugerens geocaching.com brugernavn (bruges til FTF-detektion m.m.)"""
+        return self._s.value("user/gc_username", "")
+
+    @gc_username.setter
+    def gc_username(self, value: str) -> None:
+        self._s.setValue("user/gc_username", value.strip())
+
     # ── Units ─────────────────────────────────────────────────────────────────
 
     @property

@@ -236,6 +236,25 @@ class SettingsDialog(QDialog):
         lang_layout.addWidget(hint)
 
         layout.addWidget(lang_group)
+
+        # ── Geocaching brugernavn ─────────────────────────────────────────────
+        user_group = QGroupBox(tr("settings_group_user"))
+        user_layout = QVBoxLayout(user_group)
+
+        user_row = QHBoxLayout()
+        user_row.addWidget(QLabel(tr("settings_gc_username_label")))
+        self._gc_username = QLineEdit()
+        self._gc_username.setPlaceholderText(tr("settings_gc_username_placeholder"))
+        self._gc_username.setMaximumWidth(200)
+        user_row.addWidget(self._gc_username)
+        user_row.addStretch()
+        user_layout.addLayout(user_row)
+
+        hint = QLabel(tr("settings_gc_username_hint"))
+        hint.setStyleSheet("color: gray; font-size: 10px;")
+        user_layout.addWidget(hint)
+
+        layout.addWidget(user_group)
         layout.addStretch()
         return tab
 
@@ -592,11 +611,13 @@ class SettingsDialog(QDialog):
         self._coord_format.setCurrentIndex(idx if idx >= 0 else 0)
         lang_idx = self._lang_combo.findData(current_language())
         self._lang_combo.setCurrentIndex(lang_idx if lang_idx >= 0 else 0)
+        self._gc_username.setText(s.gc_username)
         # Opdater GC-status
         self._refresh_gc_status_on_open()
 
     def _save(self) -> None:
         s = get_settings()
+        s.gc_username   = self._gc_username.text()
         s.use_miles     = self._miles_cb.isChecked()
         s.show_archived = self._archived_cb.isChecked()
         s.show_found    = self._found_cb.isChecked()

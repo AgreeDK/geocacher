@@ -190,6 +190,10 @@ STRINGS: dict[str, str] = {
     "settings_group_language":      "Jazyk",
     "settings_language_label":      "Jazyk:",
     "settings_language_hint":       "Změna se projeví po příštím restartu",
+    "settings_group_user":                         "Geocaching profil",
+    "settings_gc_username_label":                  "Uživatelské jméno:",
+    "settings_gc_username_placeholder":            "Vaše geocaching.com jméno",
+    "settings_gc_username_hint":                   "Používá se k rozpoznání vlastních záznamů (např. FTF)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Správa databází",
@@ -392,6 +396,17 @@ STRINGS: dict[str, str] = {
     "col_premium":      "Premium",
     "col_archived":     "Archivováno",
     "col_favorite":     "Oblíbené ★",
+
+    "col_dnf_date":          "Datum DNF",
+    "col_found_date":       "Datum nálezu",
+    "col_first_to_find":     "FTF",
+    "col_user_flag":         "Příznak",
+    "col_user_sort":         "Řazení",
+    "col_user_data_1":       "Uživatelská data 1",
+    "col_user_data_2":       "Uživatelská data 2",
+    "col_user_data_3":       "Uživatelská data 3",
+    "col_user_data_4":       "Uživatelská data 4",
+    "col_favorite_points":   "Obl. body",
 
     # ── Right-click context menu ──────────────────────────────────────────────
     "ctx_open_geocaching":  "🌐  Otevřít na geocaching.com",

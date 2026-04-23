@@ -96,6 +96,30 @@ class Cache(Base):
     dnf: Mapped[bool] = mapped_column(Boolean, default=False)   # Did Not Find
     favorite_point: Mapped[bool] = mapped_column(Boolean, default=False)
 
+    # ── Issue #33: GSAK-compatible user fields ────────────────────────────────
+
+    # Derived from logs on import
+    dnf_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    first_to_find: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Personal flags / sorting
+    user_flag: Mapped[bool] = mapped_column(Boolean, default=False)
+    user_sort: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
+    # Four free-text user data fields (same as GSAK UserData1–4)
+    user_data_1: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    user_data_2: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    user_data_3: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    user_data_4: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Computed distance and bearing from database centre point
+    # Recalculated whenever the centre point changes (None until set)
+    distance: Mapped[Optional[float]] = mapped_column(Float, nullable=True)   # km
+    bearing: Mapped[Optional[float]] = mapped_column(Float, nullable=True)    # degrees 0–360
+
+    # Community favourite points count (API-only — None until API available)
+    favorite_points: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+
     # Metadata
     imported_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     source_file: Mapped[Optional[str]] = mapped_column(String(512))  # which GPX this came from

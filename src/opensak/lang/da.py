@@ -190,6 +190,10 @@ STRINGS: dict[str, str] = {
     "settings_group_language":      "Sprog / Language",
     "settings_language_label":      "Sprog:",
     "settings_language_hint":       "Ændring træder i kraft ved næste opstart",
+    "settings_group_user":                         "Geocaching profil",
+    "settings_gc_username_label":                  "Brugernavn:",
+    "settings_gc_username_placeholder":            "Dit geocaching.com brugernavn",
+    "settings_gc_username_hint":                   "Bruges til at genkende dine egne logs (fx FTF-detektion)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Administrer databaser",
@@ -391,6 +395,17 @@ STRINGS: dict[str, str] = {
     "col_premium":      "Premium",
     "col_archived":     "Arkiveret",
     "col_favorite":     "Favorit ★",
+
+    "col_dnf_date":          "DNF dato",
+    "col_found_date":       "Fundet dato",
+    "col_first_to_find":     "FTF",
+    "col_user_flag":         "Flag",
+    "col_user_sort":         "Sortering",
+    "col_user_data_1":       "Brugerdata 1",
+    "col_user_data_2":       "Brugerdata 2",
+    "col_user_data_3":       "Brugerdata 3",
+    "col_user_data_4":       "Brugerdata 4",
+    "col_favorite_points":   "Fav. point",
 
     # ── Højreklik kontekstmenu ────────────────────────────────────────────────
     "ctx_open_geocaching":  "🌐  Åbn på geocaching.com",

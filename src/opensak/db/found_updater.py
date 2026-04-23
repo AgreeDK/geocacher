@@ -36,18 +36,69 @@ class UpdateResult:
         )
 
 
-def get_found_gc_codes(reference_db_path: Path) -> set[GcCode]:
+def get_found_gc_codes(reference_db_path: Path) -> dict[GcCode, "datetime | None"]:
     """
-    Hent alle GC koder fra reference databasen.
-    Returnerer et set af GC koder.
+    Hent alle GC koder fra reference databasen med den tilhørende fund-dato.
+
+    Fund-datoen er datoen på den ældste "Found it"-log i reference-databasen
+    (My Finds PQ indeholder typisk ét log per cache — brugerens eget fund-log).
+
+    Returnerer et dict {gc_code: found_date} — found_date kan være None
+    hvis ingen "Found it"-log findes for cachen.
     """
+    from datetime import datetime, timezone
+
     url = f"sqlite:///{reference_db_path}"
     engine = create_engine(url, connect_args={"check_same_thread": False, "timeout": 30})
 
     try:
         with engine.connect() as conn:
-            rows = conn.execute(text("SELECT gc_code FROM caches")).fetchall()
-            return {row[0] for row in rows if row[0]}
+            # Tjek om logs-tabellen findes i reference-databasen
+            tables = {
+                row[0]
+                for row in conn.execute(
+                    text("SELECT name FROM sqlite_master WHERE type='table'")
+                ).fetchall()
+            }
+            has_logs = "logs" in tables
+
+            # Hent alle fundne GC koder
+            rows = conn.execute(text("SELECT id, gc_code FROM caches")).fetchall()
+            id_to_gc: dict[int, str] = {row[0]: row[1] for row in rows if row[1]}
+
+            if not id_to_gc:
+                return {}
+
+            found_dates: dict[str, "datetime | None"] = {gc: None for gc in id_to_gc.values()}
+
+            if has_logs:
+                # Hent ældste "Found it"-log per cache.
+                # log_type varierer mellem geocaching.com eksporter:
+                # "Found it", "Found It", "found it" — brug LOWER() for sikkerhed.
+                # My Finds PQ har typisk kun ét log per cache (brugerens eget).
+                log_rows = conn.execute(text("""
+                    SELECT cache_id, MIN(log_date)
+                    FROM logs
+                    WHERE LOWER(log_type) = 'found it'
+                    GROUP BY cache_id
+                """)).fetchall()
+
+                for cache_id, log_date_raw in log_rows:
+                    gc = id_to_gc.get(cache_id)
+                    if gc and log_date_raw:
+                        # Parse dato — SQLite returnerer strenge som
+                        # '2009-08-12 19:00:00.000000' (mellemrum, ikke T, med µs)
+                        # datetime.fromisoformat() håndterer alle varianter i Python 3.7+
+                        try:
+                            raw = str(log_date_raw).strip().rstrip("Z").replace("T", " ")
+                            # Fjern overskydende mikrosekunder hvis nødvendigt
+                            found_dates[gc] = datetime.fromisoformat(raw).replace(
+                                tzinfo=timezone.utc
+                            )
+                        except ValueError:
+                            pass
+
+            return found_dates
     except Exception as e:
         raise RuntimeError(f"Kunne ikke læse reference database: {e}")
     finally:
@@ -69,14 +120,14 @@ def update_found_from_reference(reference_db_path: Path) -> UpdateResult:
     """
     result = UpdateResult()
 
-    # Hent alle GC koder fra reference databasen
+    # Hent alle GC koder + fund-datoer fra reference databasen
     try:
-        found_codes = get_found_gc_codes(reference_db_path)
+        found_map = get_found_gc_codes(reference_db_path)
     except RuntimeError as e:
         result.errors.append(str(e))
         return result
 
-    if not found_codes:
+    if not found_map:
         result.errors.append("Ingen caches fundet i reference databasen")
         return result
 
@@ -86,17 +137,23 @@ def update_found_from_reference(reference_db_path: Path) -> UpdateResult:
         all_caches = session.query(Cache).all()
 
         for cache in all_caches:
-            if cache.gc_code in found_codes:
+            if cache.gc_code in found_map:
+                found_date = found_map[cache.gc_code]
                 if cache.found:
+                    # Allerede markeret — opdatér/overskriv found_date hvis
+                    # reference-databasen har en dato (altid mere præcis end None)
+                    if found_date:
+                        cache.found_date = found_date
                     result.already += 1
                 else:
                     cache.found = True
+                    cache.found_date = found_date
                     result.updated += 1
             # Vi tæller ikke not_found her da de fleste PQ databaser
             # kun har et udsnit af alle fundne caches
 
         # Tæl hvor mange GC koder i reference DB ikke er i aktiv DB
         active_codes = {c.gc_code for c in all_caches}
-        result.not_found = len(found_codes - active_codes)
+        result.not_found = len(found_map.keys() - active_codes)
 
     return result

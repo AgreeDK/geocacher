@@ -190,6 +190,10 @@ STRINGS: dict[str, str] = {
     "settings_group_language":      "Språk",
     "settings_language_label":      "Språk:",
     "settings_language_hint":       "Ändringarna träder i kraft vid nästa omstart",
+    "settings_group_user":                         "Geocaching-profil",
+    "settings_gc_username_label":                  "Användarnamn:",
+    "settings_gc_username_placeholder":            "Ditt geocaching.com-användarnamn",
+    "settings_gc_username_hint":                   "Används för att identifiera egna loggningar (t.ex. FTF)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Hantera databaser",
@@ -391,6 +395,17 @@ STRINGS: dict[str, str] = {
     "col_premium":      "Premium",
     "col_archived":     "Arkiverad",
     "col_favorite":     "Favorit ★",
+
+    "col_dnf_date":          "DNF-datum",
+    "col_found_date":       "Hittad datum",
+    "col_first_to_find":     "FTF",
+    "col_user_flag":         "Flagga",
+    "col_user_sort":         "Sortering",
+    "col_user_data_1":       "Användardata 1",
+    "col_user_data_2":       "Användardata 2",
+    "col_user_data_3":       "Användardata 3",
+    "col_user_data_4":       "Användardata 4",
+    "col_favorite_points":   "Fav.-poäng",
 
     # ── Right-click context menu ──────────────────────────────────────────────
     "ctx_open_geocaching":  "🌐  Öppna hos geocaching.com",

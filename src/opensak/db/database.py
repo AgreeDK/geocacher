@@ -121,11 +121,11 @@ def _run_migrations(engine: Engine) -> None:
     """
     with engine.connect() as conn:
         # ── Migration 1: Tilføj is_corrected til user_notes ──────────────────
-        existing = [
+        existing_notes = [
             row[1]
             for row in conn.execute(text("PRAGMA table_info(user_notes)")).fetchall()
         ]
-        if "is_corrected" not in existing:
+        if "is_corrected" not in existing_notes:
             conn.execute(text(
                 "ALTER TABLE user_notes ADD COLUMN is_corrected BOOLEAN NOT NULL DEFAULT 0"
             ))
@@ -173,17 +173,46 @@ def _run_migrations(engine: Engine) -> None:
             conn.commit()
             print("Migration: opdaterede waypoints unique constraint til (cache_id, prefix, name)")
 
-        # ── Migration 3: Add county column to caches ──────────────────────
+        # ── Migration 3: Tilføj county til caches ────────────────────────────
         existing_caches = [
             row[1]
             for row in conn.execute(text("PRAGMA table_info(caches)")).fetchall()
         ]
         if "county" not in existing_caches:
-            conn.execute(text(
-                "ALTER TABLE caches ADD COLUMN county VARCHAR(64)"
-            ))
+            conn.execute(text("ALTER TABLE caches ADD COLUMN county VARCHAR(64)"))
             conn.commit()
-            print("Migration: added caches.county")
+            print("Migration: tilføjede caches.county")
+
+        # ── Migration 4: GSAK field parity (issue #33) ───────────────────────
+        # Re-læs eksisterende kolonner efter migration 3 kan have tilføjet county
+        existing_caches = [
+            row[1]
+            for row in conn.execute(text("PRAGMA table_info(caches)")).fetchall()
+        ]
+
+        gsak_columns = [
+            ("dnf_date",        "DATETIME"),
+            ("first_to_find",   "BOOLEAN DEFAULT 0"),
+            ("user_flag",       "BOOLEAN DEFAULT 0"),
+            ("user_sort",       "INTEGER"),
+            ("user_data_1",     "TEXT"),
+            ("user_data_2",     "TEXT"),
+            ("user_data_3",     "TEXT"),
+            ("user_data_4",     "TEXT"),
+            ("distance",        "FLOAT"),
+            ("bearing",         "FLOAT"),
+            ("favorite_points", "INTEGER"),
+        ]
+
+        added = []
+        for col_name, col_def in gsak_columns:
+            if col_name not in existing_caches:
+                conn.execute(text(f"ALTER TABLE caches ADD COLUMN {col_name} {col_def}"))
+                added.append(col_name)
+
+        if added:
+            conn.commit()
+            print(f"Migration: tilføjede GSAK-felter til caches: {', '.join(added)}")
 
 
 def get_engine() -> Engine:

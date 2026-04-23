@@ -559,6 +559,34 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
     for tb in data.get("trackables", []):
         session.add(Trackable(cache=cache, ref=tb["ref"], name=tb["name"]))
 
+    # ── Derive dnf_date, first_to_find from logs (issue #33) ─────────────────
+    # These are only set/updated when a fresh import brings logs in.
+    # We only touch them if we actually have log data to derive from.
+    logs_data = data.get("logs", [])
+    if logs_data:
+        # dnf_date: date of the most recent "Didn't find it" log by any finder
+        # (GSAK stores the last DNF date regardless of who logged it)
+        dnf_dates = [
+            lg["log_date"]
+            for lg in logs_data
+            if lg.get("log_type") == "Didn't find it" and lg.get("log_date")
+        ]
+        cache.dnf_date = max(dnf_dates) if dnf_dates else None
+
+        # first_to_find: True if the very earliest "Found it" log has
+        # finder_id matching owner_id is ambiguous, so we use the simpler
+        # GSAK convention: True if any log text contains "FTF" (case-insensitive)
+        # OR if this cache's found flag is True and the earliest Found log
+        # has finder == placed_by (owner), which is not reliable either.
+        # Most reliable approach that works without the API:
+        # Check if any log text contains "FTF" or "First to Find" (common convention)
+        ftf_keywords = ("ftf", "first to find", "first finder", "første til at finde")
+        cache.first_to_find = any(
+            any(kw in (lg.get("text") or "").lower() for kw in ftf_keywords)
+            for lg in logs_data
+            if lg.get("log_type") == "Found it"
+        )
+
     return cache, created
 
 

@@ -70,6 +70,35 @@ class DatabaseManager:
         from opensak.config import get_app_data_dir
         return get_app_data_dir() / "Default.db"
 
+    @staticmethod
+    def _migrate_path(path: Path) -> Path:
+        """
+        Flyt databaser fra den gamle 'geocacher'-mappe til 'opensak'-mappen.
+        Kaldes automatisk ved indlæsning af QSettings.
+        Selve .db-filen flyttes fysisk hvis den gamle sti stadig eksisterer.
+        """
+        from opensak.config import get_app_data_dir
+        str_path = str(path)
+
+        # Tjek om stien indeholder den gamle app-mappe
+        old_markers = ["/geocacher/", "\\geocacher\\", "/geocacher\\", "\\geocacher/"]
+        if not any(m in str_path for m in old_markers):
+            return path  # allerede korrekt
+
+        app_dir = get_app_data_dir()  # ~/.local/share/opensak
+        new_path = app_dir / path.name
+
+        # Flyt filen hvis den gamle eksisterer og den nye ikke gør
+        if path.exists() and not new_path.exists():
+            import shutil
+            shutil.move(str(path), str(new_path))
+            print(f"Migration: flyttede database {path.name} → opensak/")
+        elif path.exists() and new_path.exists():
+            # Begge eksisterer — brug den nye, ignorer den gamle
+            pass
+
+        return new_path
+
     def _load_from_settings(self) -> None:
         """Indlæs liste over kendte databaser fra QSettings."""
         count = self._settings.beginReadArray("databases")
@@ -78,16 +107,21 @@ class DatabaseManager:
             name = self._settings.value("name")
             path = self._settings.value("path")
             if name and path:
-                info = DatabaseInfo(name, Path(path))
+                migrated = self._migrate_path(Path(path))
+                info = DatabaseInfo(name, migrated)
                 self._databases.append(info)
         self._settings.endArray()
 
         # Aktiv database
         active_path = self._settings.value("active_database")
         if active_path:
-            found = self._find_by_path(Path(active_path))
+            migrated_active = self._migrate_path(Path(active_path))
+            found = self._find_by_path(migrated_active)
             if found:
                 self._active = found
+
+        # Gem migrerede stier tilbage til QSettings (én gang)
+        self._save_to_settings()
 
         # Hvis ingen databaser kendes, opret Default
         if not self._databases:
