@@ -63,6 +63,11 @@ STRINGS: dict[str, str] = {
     "action_wp_edit":               "&Edit cache…",
     "action_wp_delete":             "&Delete cache…",
 
+    # Delete multiple / Flag operations
+    "action_delete_flagged":        "🚩  Delete flagged caches…",
+    "action_delete_filtered":       "🗑️  Delete all caches in filter…",
+    "action_clear_flags":           "Clear all flags",
+
     # View menu
     "action_refresh":               "&Refresh list",
     "action_filter":                "🔍  &Set filter…",
@@ -98,6 +103,9 @@ STRINGS: dict[str, str] = {
     "status_cache_added":           "Cache {gc_code} added",
     "status_cache_updated":         "Cache {gc_code} updated",
     "status_cache_deleted":         "Cache {gc_code} deleted",
+    "status_deleted_count":         "{count} caches deleted",
+    "status_flags_cleared":         "All flags cleared",
+    "status_flagged_count":         "{flagged} of {total} caches flagged",
     "status_db_name":               "Database: {db_name}",
 
     # ── Waypoint dialog ───────────────────────────────────────────────────────
@@ -107,6 +115,16 @@ STRINGS: dict[str, str] = {
     "wp_already_exists_msg":        "{gc_code} already exists in the database.",
     "wp_delete_title":              "Delete cache",
     "wp_delete_msg":                "Are you sure you want to delete:\n{gc_code} — {name}?",
+
+    # Delete flagged / filtered
+    "delete_flagged_title":         "Delete flagged caches",
+    "delete_flagged_none":          "No caches are flagged in the current filter.",
+    "delete_flagged_msg":           "Are you sure you want to delete {count} flagged cache(s)?\nThis action cannot be undone.",
+    "delete_filtered_title":        "Delete all caches in filter",
+    "delete_filtered_none":         "No caches in the current filter.",
+    "delete_filtered_msg":          "Are you sure you want to delete ALL {count} caches in the filter?\nThis action cannot be undone.",
+    "clear_flags_title":            "Clear all flags",
+    "clear_flags_msg":              "Clear flags from all caches in the active database?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Import GPX / PQ Zip",
@@ -399,7 +417,7 @@ STRINGS: dict[str, str] = {
     "col_dnf_date":          "DNF date",
     "col_found_date":       "Found date",
     "col_first_to_find":     "FTF",
-    "col_user_flag":         "Flag",
+    "col_user_flag":         "👤",
     "col_user_sort":         "Sort",
     "col_user_data_1":       "User data 1",
     "col_user_data_2":       "User data 2",

@@ -63,6 +63,11 @@ STRINGS: dict[str, str] = {
     "action_wp_edit":               "&Cache bearbeiten…",
     "action_wp_delete":             "&Cache löschen…",
 
+    # Delete multiple / Flag operations
+    "action_delete_flagged":        "🚩  Markierte Caches löschen…",
+    "action_delete_filtered":       "🗑️  Alle Caches im Filter löschen…",
+    "action_clear_flags":           "Alle Markierungen entfernen",
+
     # View menu
     "action_refresh":               "&Liste aktualisieren",
     "action_filter":                "🔍  &Filter einstellen…",
@@ -98,6 +103,9 @@ STRINGS: dict[str, str] = {
     "status_cache_added":           "Cache {gc_code} hinzugefügt",
     "status_cache_updated":         "Cache {gc_code} aktualisiert",
     "status_cache_deleted":         "Cache {gc_code} gelöscht",
+    "status_deleted_count":         "{count} Caches gelöscht",
+    "status_flags_cleared":         "Alle Markierungen entfernt",
+    "status_flagged_count":         "{flagged} von {total} Caches markiert",
     "status_db_name":               "Datenbank: {db_name}",
 
     # ── Waypoint dialog ───────────────────────────────────────────────────────
@@ -107,6 +115,16 @@ STRINGS: dict[str, str] = {
     "wp_already_exists_msg":        "{gc_code} existiert bereits in der Datenbank.",
     "wp_delete_title":              "Cache löschen",
     "wp_delete_msg":                "Möchtest du diesen Cache wirklich löschen: \n{gc_code} — {name}?",
+
+    # Delete flagged / filtered
+    "delete_flagged_title":         "Markierte Caches löschen",
+    "delete_flagged_none":          "Keine Caches im aktiven Filter sind markiert.",
+    "delete_flagged_msg":           "Möchten Sie wirklich {count} markierte(n) Cache(s) löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.",
+    "delete_filtered_title":        "Alle Caches im Filter löschen",
+    "delete_filtered_none":         "Keine Caches im aktiven Filter.",
+    "delete_filtered_msg":          "Möchten Sie wirklich ALLE {count} Caches im Filter löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.",
+    "clear_flags_title":            "Alle Markierungen entfernen",
+    "clear_flags_msg":              "Markierungen von allen Caches in der aktiven Datenbank entfernen?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "GPX / PQ-Zip importieren",
@@ -399,7 +417,7 @@ STRINGS: dict[str, str] = {
     "col_dnf_date":          "DNF-Datum",
     "col_found_date":       "Gefunden am",
     "col_first_to_find":     "FTF",
-    "col_user_flag":         "Flag",
+    "col_user_flag":         "👤",
     "col_user_sort":         "Sortierung",
     "col_user_data_1":       "Benutzerdaten 1",
     "col_user_data_2":       "Benutzerdaten 2",

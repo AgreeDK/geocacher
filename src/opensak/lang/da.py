@@ -63,6 +63,11 @@ STRINGS: dict[str, str] = {
     "action_wp_edit":               "&Rediger cache…",
     "action_wp_delete":             "&Slet cache…",
 
+    # Slet flere / Flag operationer
+    "action_delete_flagged":        "🚩  Slet markerede (Flag) caches…",
+    "action_delete_filtered":       "🗑️  Slet alle caches i filter…",
+    "action_clear_flags":           "Fjern alle flag",
+
     # Vis-menu
     "action_refresh":               "&Opdater liste",
     "action_filter":                "🔍  &Sæt filter…",
@@ -98,6 +103,9 @@ STRINGS: dict[str, str] = {
     "status_cache_added":           "Cache {gc_code} tilføjet",
     "status_cache_updated":         "Cache {gc_code} opdateret",
     "status_cache_deleted":         "Cache {gc_code} slettet",
+    "status_deleted_count":         "{count} caches slettet",
+    "status_flags_cleared":         "Alle flag fjernet",
+    "status_flagged_count":         "{flagged} af {total} caches er markeret",
     "status_db_name":               "Database: {db_name}",
 
     # ── Waypoint dialog ───────────────────────────────────────────────────────
@@ -107,6 +115,16 @@ STRINGS: dict[str, str] = {
     "wp_already_exists_msg":        "{gc_code} findes allerede i databasen.",
     "wp_delete_title":              "Slet cache",
     "wp_delete_msg":                "Er du sikker på at du vil slette:\n{gc_code} — {name}?",
+
+    # Slet flaggede / filterede
+    "delete_flagged_title":         "Slet markerede caches",
+    "delete_flagged_none":          "Ingen caches er markeret med flag i det aktive filter.",
+    "delete_flagged_msg":           "Er du sikker på at du vil slette {count} markerede cache(s)?\nDenne handling kan ikke fortrydes.",
+    "delete_filtered_title":        "Slet alle caches i filter",
+    "delete_filtered_none":         "Ingen caches i det aktive filter.",
+    "delete_filtered_msg":          "Er du sikker på at du vil slette ALLE {count} caches i filteret?\nDenne handling kan ikke fortrydes.",
+    "clear_flags_title":            "Fjern alle flag",
+    "clear_flags_msg":              "Fjern flag fra alle caches i den aktive database?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Importer GPX / PQ Zip",
@@ -399,7 +417,7 @@ STRINGS: dict[str, str] = {
     "col_dnf_date":          "DNF dato",
     "col_found_date":       "Fundet dato",
     "col_first_to_find":     "FTF",
-    "col_user_flag":         "Flag",
+    "col_user_flag":         "👤",
     "col_user_sort":         "Sortering",
     "col_user_data_1":       "Brugerdata 1",
     "col_user_data_2":       "Brugerdata 2",

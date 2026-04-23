@@ -63,6 +63,11 @@ STRINGS: dict[str, str] = {
     "action_wp_edit":               "&Editera cache…",
     "action_wp_delete":             "&Ta bort cache…",
 
+    # Delete multiple / Flag operations
+    "action_delete_flagged":        "🚩  Ta bort markerade cachar…",
+    "action_delete_filtered":       "🗑️  Ta bort alla cachar i filtret…",
+    "action_clear_flags":           "Rensa alla flaggor",
+
     # View menu
     "action_refresh":               "&Uppdatera listan",
     "action_filter":                "🔍  &Sätt filter…",
@@ -98,6 +103,9 @@ STRINGS: dict[str, str] = {
     "status_cache_added":           "Cache {gc_code} tillagd",
     "status_cache_updated":         "Cache {gc_code} updaterad",
     "status_cache_deleted":         "Cache {gc_code} borttagen",
+    "status_deleted_count":         "{count} cachar borttagna",
+    "status_flags_cleared":         "Alla flaggor rensade",
+    "status_flagged_count":         "{flagged} av {total} cachar markerade",
     "status_db_name":               "Databas: {db_name}",
 
     # ── Waypoint dialog ───────────────────────────────────────────────────────
@@ -107,6 +115,16 @@ STRINGS: dict[str, str] = {
     "wp_already_exists_msg":        "{gc_code} finns redan i databasen.",
     "wp_delete_title":              "Ta bort cache",
     "wp_delete_msg":                "Är du säker på att du vill ta bort:\n{gc_code} — {name}?",
+
+    # Delete flagged / filtered
+    "delete_flagged_title":         "Ta bort markerade cachar",
+    "delete_flagged_none":          "Inga cachar är markerade i det aktiva filtret.",
+    "delete_flagged_msg":           "Är du säker på att du vill ta bort {count} markerad(e) cache(ar)?\nDenna åtgärd kan inte ångras.",
+    "delete_filtered_title":        "Ta bort alla cachar i filtret",
+    "delete_filtered_none":         "Inga cachar i det aktiva filtret.",
+    "delete_filtered_msg":          "Är du säker på att du vill ta bort ALLA {count} cachar i filtret?\nDenna åtgärd kan inte ångras.",
+    "clear_flags_title":            "Rensa alla flaggor",
+    "clear_flags_msg":              "Rensa flaggor från alla cachar i den aktiva databasen?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Importera GPX / PQ Zip",
@@ -399,7 +417,7 @@ STRINGS: dict[str, str] = {
     "col_dnf_date":          "DNF-datum",
     "col_found_date":       "Hittad datum",
     "col_first_to_find":     "FTF",
-    "col_user_flag":         "Flagga",
+    "col_user_flag":         "👤",
     "col_user_sort":         "Sortering",
     "col_user_data_1":       "Användardata 1",
     "col_user_data_2":       "Användardata 2",

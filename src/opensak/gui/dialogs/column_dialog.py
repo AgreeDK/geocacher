@@ -16,6 +16,7 @@ from opensak.lang import tr
 # Kolonnestruktur: (felt_id, tr_nøgle, bredde, standard_synlig)
 _ALL_COLUMNS_DEF = [
     ("status",       "col_status_icon",  22,  True),
+    ("user_flag",    "col_user_flag",    22,  True),
     ("gc_code",      "col_gc_code",      80,  True),
     ("name",         "col_name",        260,  True),
     ("cache_type",   "col_type",        130,  True),
@@ -41,7 +42,6 @@ _ALL_COLUMNS_DEF = [
     ("dnf_date",       "col_dnf_date",      90, False),
     ("first_to_find",  "col_first_to_find", 45, False),
     ("favorite_points","col_favorite_points",55, False),
-    ("user_flag",      "col_user_flag",     45, False),
     ("user_sort",      "col_user_sort",     55, False),
     ("user_data_1",    "col_user_data_1",  100, False),
     ("user_data_2",    "col_user_data_2",  100, False),

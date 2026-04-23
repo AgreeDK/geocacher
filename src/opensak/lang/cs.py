@@ -63,6 +63,11 @@ STRINGS: dict[str, str] = {
     "action_wp_edit":               "&Upravit keš…",
     "action_wp_delete":             "&Smazat keš…",
 
+    # Delete multiple / Flag operations
+    "action_delete_flagged":        "🚩  Smazat označené keše…",
+    "action_delete_filtered":       "🗑️  Smazat všechny keše ve filtru…",
+    "action_clear_flags":           "Odebrat všechny příznaky",
+
     # View menu
     "action_refresh":               "&Obnovit seznam",
     "action_filter":                "🔍  &Nastavit filtr…",
@@ -98,6 +103,9 @@ STRINGS: dict[str, str] = {
     "status_cache_added":           "Keš {gc_code} přidána",
     "status_cache_updated":         "Keš {gc_code} aktualizována",
     "status_cache_deleted":         "Keš {gc_code} smazána",
+    "status_deleted_count":         "{count} kešů smazáno",
+    "status_flags_cleared":         "Všechny příznaky odebrány",
+    "status_flagged_count":         "{flagged} z {total} kešů označeno",
     "status_db_name":               "Databáze: {db_name}",
 
     # ── Waypoint dialog ───────────────────────────────────────────────────────
@@ -107,6 +115,16 @@ STRINGS: dict[str, str] = {
     "wp_already_exists_msg":        "{gc_code} již v databázi existuje.",
     "wp_delete_title":              "Smazat keš",
     "wp_delete_msg":                "Opravdu chcete smazat:\\n{gc_code} — {name}?",
+
+    # Delete flagged / filtered
+    "delete_flagged_title":         "Smazat označené keše",
+    "delete_flagged_none":          "Žádné keše nejsou označeny v aktivním filtru.",
+    "delete_flagged_msg":           "Opravdu chcete smazat {count} označený/é keš(e)?\nTuto akci nelze vrátit.",
+    "delete_filtered_title":        "Smazat všechny keše ve filtru",
+    "delete_filtered_none":         "Žádné keše v aktivním filtru.",
+    "delete_filtered_msg":          "Opravdu chcete smazat VŠECHNY {count} keše ve filtru?\nTuto akci nelze vrátit.",
+    "clear_flags_title":            "Odebrat všechny příznaky",
+    "clear_flags_msg":              "Odebrat příznaky ze všech kešů v aktivní databázi?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Import GPX / PQ Zip",
@@ -400,7 +418,7 @@ STRINGS: dict[str, str] = {
     "col_dnf_date":          "Datum DNF",
     "col_found_date":       "Datum nálezu",
     "col_first_to_find":     "FTF",
-    "col_user_flag":         "Příznak",
+    "col_user_flag":         "👤",
     "col_user_sort":         "Řazení",
     "col_user_data_1":       "Uživatelská data 1",
     "col_user_data_2":       "Uživatelská data 2",

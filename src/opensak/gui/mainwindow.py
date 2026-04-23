@@ -58,6 +58,7 @@ class MainWindow(QMainWindow):
         # Top: cache list — fuld bredde
         self._cache_table = CacheTableView()
         self._cache_table.cache_selected.connect(self._on_cache_selected)
+        self._cache_table.flags_changed.connect(self._on_flags_changed)
         self._splitter.addWidget(self._cache_table)
 
         # Bottom: horisontal splitter — detaljer til venstre, kort til højre
@@ -124,6 +125,22 @@ class MainWindow(QMainWindow):
         self._act_wp_delete.setEnabled(False)
         self._act_wp_delete.triggered.connect(self._delete_waypoint)
         wp_menu.addAction(self._act_wp_delete)
+
+        wp_menu.addSeparator()
+
+        act_delete_flagged = QAction(tr("action_delete_flagged"), self)
+        act_delete_flagged.triggered.connect(self._delete_flagged_caches)
+        wp_menu.addAction(act_delete_flagged)
+
+        act_delete_filtered = QAction(tr("action_delete_filtered"), self)
+        act_delete_filtered.triggered.connect(self._delete_filtered_caches)
+        wp_menu.addAction(act_delete_filtered)
+
+        wp_menu.addSeparator()
+
+        act_clear_flags = QAction(tr("action_clear_flags"), self)
+        act_clear_flags.triggered.connect(self._clear_all_flags)
+        wp_menu.addAction(act_clear_flags)
 
         # ── Vis ───────────────────────────────────────────────────────────────
         view_menu = menubar.addMenu(tr("menu_view"))
@@ -656,6 +673,97 @@ class MainWindow(QMainWindow):
             self._refresh_cache_list()
             self._statusbar.showMessage(
                 tr("status_cache_deleted", gc_code=cache.gc_code), 3000
+            )
+
+    def _delete_flagged_caches(self) -> None:
+        """Slet alle caches med Flag=True i det aktive filter."""
+        caches = self._cache_table.get_flagged_caches()
+        if not caches:
+            QMessageBox.information(
+                self,
+                tr("delete_flagged_title"),
+                tr("delete_flagged_none"),
+            )
+            return
+        reply = QMessageBox.question(
+            self,
+            tr("delete_flagged_title"),
+            tr("delete_flagged_msg", count=len(caches)),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            gc_codes = [c.gc_code for c in caches]
+            from opensak.db.models import Cache as CacheModel
+            with get_session() as session:
+                session.query(CacheModel).filter(
+                    CacheModel.gc_code.in_(gc_codes)
+                ).delete(synchronize_session=False)
+            self._detail_panel.clear()
+            self._act_wp_edit.setEnabled(False)
+            self._act_wp_delete.setEnabled(False)
+            self._refresh_cache_list()
+            self._statusbar.showMessage(
+                tr("status_deleted_count", count=len(gc_codes)), 3000
+            )
+
+    def _delete_filtered_caches(self) -> None:
+        """Slet alle caches i det aktive filter (uanset flag)."""
+        caches = self._cache_table.get_all_caches()
+        if not caches:
+            QMessageBox.information(
+                self,
+                tr("delete_filtered_title"),
+                tr("delete_filtered_none"),
+            )
+            return
+        reply = QMessageBox.question(
+            self,
+            tr("delete_filtered_title"),
+            tr("delete_filtered_msg", count=len(caches)),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            gc_codes = [c.gc_code for c in caches]
+            from opensak.db.models import Cache as CacheModel
+            with get_session() as session:
+                session.query(CacheModel).filter(
+                    CacheModel.gc_code.in_(gc_codes)
+                ).delete(synchronize_session=False)
+            self._detail_panel.clear()
+            self._act_wp_edit.setEnabled(False)
+            self._act_wp_delete.setEnabled(False)
+            self._refresh_cache_list()
+            self._statusbar.showMessage(
+                tr("status_deleted_count", count=len(gc_codes)), 3000
+            )
+
+    def _clear_all_flags(self) -> None:
+        """Fjern alle flag (user_flag=False) på alle caches i aktiv database."""
+        reply = QMessageBox.question(
+            self,
+            tr("clear_flags_title"),
+            tr("clear_flags_msg"),
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            from opensak.db.models import Cache as CacheModel
+            with get_session() as session:
+                session.query(CacheModel).filter(
+                    CacheModel.user_flag == True  # noqa: E712
+                ).update({CacheModel.user_flag: False}, synchronize_session=False)
+            self._refresh_cache_list()
+            self._statusbar.showMessage(tr("status_flags_cleared"), 3000)
+
+    def _on_flags_changed(self) -> None:
+        """Opdatér statuslinjen når et flag toggler."""
+        flagged = len(self._cache_table.get_flagged_caches())
+        total = self._cache_table.row_count()
+        if flagged:
+            self._statusbar.showMessage(
+                tr("status_flagged_count", flagged=flagged, total=total), 3000
             )
 
     def _open_filter_dialog(self) -> None:

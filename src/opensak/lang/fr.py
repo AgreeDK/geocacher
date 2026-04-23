@@ -63,6 +63,11 @@ STRINGS: dict[str, str] = {
     "action_wp_edit":               "&Modifier une cache…",
     "action_wp_delete":             "&Supprimer une cache…",
 
+    # Delete multiple / Flag operations
+    "action_delete_flagged":        "🚩  Supprimer les caches marqués…",
+    "action_delete_filtered":       "🗑️  Supprimer tous les caches du filtre…",
+    "action_clear_flags":           "Effacer tous les drapeaux",
+
     # View menu
     "action_refresh":               "&Rafraîchir la liste",
     "action_filter":                "🔍  &Définir le filtre…",
@@ -98,6 +103,9 @@ STRINGS: dict[str, str] = {
     "status_cache_added":           "Cache {gc_code} ajoutée",
     "status_cache_updated":         "Cache {gc_code} mise à jour",
     "status_cache_deleted":         "Cache {gc_code} supprimée",
+    "status_deleted_count":         "{count} caches supprimés",
+    "status_flags_cleared":         "Tous les drapeaux effacés",
+    "status_flagged_count":         "{flagged} sur {total} caches marqués",
     "status_db_name":               "Base de données: {db_name}",
 
     # ── Waypoint dialog ───────────────────────────────────────────────────────
@@ -107,6 +115,16 @@ STRINGS: dict[str, str] = {
     "wp_already_exists_msg":        "{gc_code} existe déjà dans la base de données.",
     "wp_delete_title":              "Supprimer la cache",
     "wp_delete_msg":                "Êtes-vous sûr de vouloir supprimer :\n{gc_code} — {name}?",
+
+    # Delete flagged / filtered
+    "delete_flagged_title":         "Supprimer les caches marqués",
+    "delete_flagged_none":          "Aucun cache n'est marqué dans le filtre actif.",
+    "delete_flagged_msg":           "Voulez-vous vraiment supprimer {count} cache(s) marqué(s) ?\nCette action est irréversible.",
+    "delete_filtered_title":        "Supprimer tous les caches du filtre",
+    "delete_filtered_none":         "Aucun cache dans le filtre actif.",
+    "delete_filtered_msg":          "Voulez-vous vraiment supprimer TOUS les {count} caches du filtre ?\nCette action est irréversible.",
+    "clear_flags_title":            "Effacer tous les drapeaux",
+    "clear_flags_msg":              "Effacer les drapeaux de tous les caches de la base active ?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Importer GPX / Zip de PQ",
@@ -399,7 +417,7 @@ STRINGS: dict[str, str] = {
     "col_dnf_date":          "Date DNF",
     "col_found_date":       "Date trouvée",
     "col_first_to_find":     "FTF",
-    "col_user_flag":         "Drapeau",
+    "col_user_flag":         "👤",
     "col_user_sort":         "Tri",
     "col_user_data_1":       "Données util. 1",
     "col_user_data_2":       "Données util. 2",

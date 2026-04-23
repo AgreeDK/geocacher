@@ -63,6 +63,11 @@ STRINGS: dict[str, str] = {
     "action_wp_edit":               "&Editar cache…",
     "action_wp_delete":             "&Excluir cache…",
 
+    # Delete multiple / Flag operations
+    "action_delete_flagged":        "🚩  Excluir caches marcados…",
+    "action_delete_filtered":       "🗑️  Excluir todos os caches no filtro…",
+    "action_clear_flags":           "Limpar todos os marcadores",
+
     # View menu
     "action_refresh":               "&Atualizar lista",
     "action_filter":                "🔍  &Definir filtro",
@@ -98,6 +103,9 @@ STRINGS: dict[str, str] = {
     "status_cache_added":           "Cache {gc_code} adicionada",
     "status_cache_updated":         "Cache {gc_code} atualizada",
     "status_cache_deleted":         "Cache {gc_code} excluída",
+    "status_deleted_count":         "{count} caches excluídos",
+    "status_flags_cleared":         "Todos os marcadores limpos",
+    "status_flagged_count":         "{flagged} de {total} caches marcados",
     "status_db_name":               "Base de dados: {db_name}",
 
     # ── Waypoint dialog ───────────────────────────────────────────────────────
@@ -107,6 +115,16 @@ STRINGS: dict[str, str] = {
     "wp_already_exists_msg":        "{gc_code} já existe na base de dados.",
     "wp_delete_title":              "Excluir cache",
     "wp_delete_msg":                "Tem certeza de que deseja excluir:\n{gc_code} — {name}?",
+
+    # Delete flagged / filtered
+    "delete_flagged_title":         "Excluir caches marcados",
+    "delete_flagged_none":          "Nenhum cache está marcado no filtro ativo.",
+    "delete_flagged_msg":           "Tem certeza que deseja excluir {count} cache(s) marcado(s)?\nEsta ação não pode ser desfeita.",
+    "delete_filtered_title":        "Excluir todos os caches no filtro",
+    "delete_filtered_none":         "Nenhum cache no filtro ativo.",
+    "delete_filtered_msg":          "Tem certeza que deseja excluir TODOS os {count} caches no filtro?\nEsta ação não pode ser desfeita.",
+    "clear_flags_title":            "Limpar todos os marcadores",
+    "clear_flags_msg":              "Limpar marcadores de todos os caches na base de dados ativa?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Importar GPX / PQ Zip",
@@ -400,7 +418,7 @@ STRINGS: dict[str, str] = {
     "col_dnf_date":          "Data DNF",
     "col_found_date":       "Data encontrada",
     "col_first_to_find":     "FTF",
-    "col_user_flag":         "Bandeira",
+    "col_user_flag":         "👤",
     "col_user_sort":         "Ordem",
     "col_user_data_1":       "Dados util. 1",
     "col_user_data_2":       "Dados util. 2",

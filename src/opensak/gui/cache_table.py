@@ -10,7 +10,7 @@ from datetime import datetime
 
 from PySide6.QtCore import Qt, QAbstractTableModel, QModelIndex, Signal, QPoint
 from PySide6.QtGui import QColor, QFont
-from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QMenu
+from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QMenu, QApplication
 
 from opensak.db.models import Cache
 from opensak.filters.engine import _haversine_km
@@ -51,7 +51,7 @@ def get_column_defs() -> dict:
         "dnf_date":        (tr("col_dnf_date"),        90),
         "first_to_find":   (tr("col_first_to_find"),   45),
         "favorite_points": (tr("col_favorite_points"), 55),
-        "user_flag":       (tr("col_user_flag"),       45),
+        "user_flag":       (tr("col_user_flag"),    22),
         "user_sort":       (tr("col_user_sort"),       55),
         "user_data_1":     (tr("col_user_data_1"),    100),
         "user_data_2":     (tr("col_user_data_2"),    100),
@@ -86,11 +86,39 @@ def _gc_sort_key(gc_code: GcCode) -> str:
 class CacheTableModel(QAbstractTableModel):
     """Qt table model backed by a list of Cache objects."""
 
+    flags_changed = Signal()   # emitteres når user_flag toggler
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._caches: list[Cache] = []
         self._distances: dict[int, float] = {}
         self._columns: list[str] = _get_active_columns()
+
+    def flags(self, index: QModelIndex):
+        base = super().flags(index)
+        if index.isValid() and self._columns[index.column()] == "user_flag":
+            return base | Qt.ItemFlag.ItemIsEditable
+        return base
+
+    def setData(self, index: QModelIndex, value, role=Qt.ItemDataRole.EditRole) -> bool:
+        """Toggle user_flag når brugeren klikker på Flag-kolonnen."""
+        if not index.isValid():
+            return False
+        col = self._columns[index.column()]
+        if col != "user_flag":
+            return False
+        cache = self._caches[index.row()]
+        new_flag = not bool(cache.user_flag)
+        from opensak.db.database import get_session
+        from opensak.db.models import Cache as CacheModel
+        with get_session() as session:
+            c = session.query(CacheModel).filter_by(gc_code=cache.gc_code).first()
+            if c:
+                c.user_flag = new_flag
+        cache.user_flag = new_flag
+        self.dataChanged.emit(index, index, [Qt.ItemDataRole.DisplayRole])
+        self.flags_changed.emit()
+        return True
 
     def reload_columns(self) -> None:
         """Genindlæs kolonnedefinitioner fra indstillinger."""
@@ -331,11 +359,13 @@ class CacheTableView(QTableView):
     """The main cache list widget."""
 
     cache_selected = Signal(object)
+    flags_changed = Signal()   # videresendes fra model
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._model = CacheTableModel()
         self.setModel(self._model)
+        self._model.flags_changed.connect(self.flags_changed)
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -352,6 +382,16 @@ class CacheTableView(QTableView):
         self.selectionModel().currentRowChanged.connect(self._on_row_changed)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
+
+    def mousePressEvent(self, event) -> None:
+        """Klik på user_flag-kolonnen toggler flaget direkte."""
+        index = self.indexAt(event.pos())
+        if index.isValid():
+            col = self._model._columns[index.column()]
+            if col == "user_flag" and event.button() == Qt.MouseButton.LeftButton:
+                self._model.setData(index, None)
+                return
+        super().mousePressEvent(event)
 
     def _apply_column_widths(self) -> None:
         header = self.horizontalHeader()
@@ -544,3 +584,15 @@ class CacheTableView(QTableView):
 
     def row_count(self) -> int:
         return self._model.rowCount()
+
+    def get_all_caches(self) -> list[Cache]:
+        """Returner alle caches i det aktive filter (som vist i tabellen)."""
+        return [
+            self._model.cache_at(i)
+            for i in range(self._model.rowCount())
+            if self._model.cache_at(i) is not None
+        ]
+
+    def get_flagged_caches(self) -> list[Cache]:
+        """Returner alle flaggede caches i det aktive filter."""
+        return [c for c in self.get_all_caches() if c.user_flag]
