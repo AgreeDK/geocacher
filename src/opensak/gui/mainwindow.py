@@ -480,6 +480,7 @@ class MainWindow(QMainWindow):
         """Kaldes når brugeren klikker på en pin på kortet."""
         full = self._load_full_cache(gc_code)
         if full:
+            self._cache_table.select_by_gc_code(gc_code)
             self._detail_panel.show_cache(full)
             self._statusbar.showMessage(
                 f"{full.gc_code} — {full.name}"

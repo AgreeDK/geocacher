@@ -482,5 +482,16 @@ class CacheTableView(QTableView):
             return self._model.cache_at(indexes[0].row())
         return None
 
+    def select_by_gc_code(self, gc_code: str) -> None:
+        """Vælg og scroll til rækken med det givne gc_code. Bruges når
+        brugeren klikker på en pin på kortet, så listen synkroniseres."""
+        for row in range(self._model.rowCount()):
+            cache = self._model.cache_at(row)
+            if cache and cache.gc_code == gc_code:
+                index = self._model.index(row, 0)
+                self.setCurrentIndex(index)
+                self.scrollTo(index, self.ScrollHint.PositionAtCenter)
+                return
+
     def row_count(self) -> int:
         return self._model.rowCount()
