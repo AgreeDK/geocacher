@@ -14,6 +14,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.9.2] — 2026-04-23
+### Fixed
+- **Map → list sync** — clicking a pin on the map now highlights and scrolls
+  to the corresponding row in the cache list (#50) — contributed by @hansblom
+- **Database dialog** — the Delete button is now disabled when the active
+  database is selected, preventing accidental deletion (#52)
+
+---
+
+## [1.9.1] - 2026-04-22
+
+### Improved
+- Expanded test coverage: added test suite for `found_updater`, Garmin GPS export,
+  and `.loc` importer (thanks @Fabio-A-Sa, #54)
+- Introduced shared test fixtures via `conftest.py` for better test organization
+  (thanks @Fabio-A-Sa, #54)
+
+### Fixed
+- Minor corrections to Portuguese (PT) language file (thanks @Fabio-A-Sa, #55)
+
 ## [1.9.0] — 2026-04-22
 ### Added
 - **County column** in the cache table with full filter support (#41) — contributed by @Fabio-A-Sa
