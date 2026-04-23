@@ -51,30 +51,30 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(4, 4, 4, 4)
         main_layout.setSpacing(4)
 
-        # ── Main splitter: list | detail ──────────────────────────────────────
-        self._splitter = QSplitter(Qt.Orientation.Horizontal)
+        # ── Main splitter: cache list (top) | bottom panel (below) ───────────
+        self._splitter = QSplitter(Qt.Orientation.Vertical)
 
-        # Left: cache list
+        # Top: cache list — fuld bredde
         self._cache_table = CacheTableView()
         self._cache_table.cache_selected.connect(self._on_cache_selected)
         self._splitter.addWidget(self._cache_table)
 
-        # Right: detail + map placeholder stacked vertically
-        right_splitter = QSplitter(Qt.Orientation.Vertical)
+        # Bottom: horisontal splitter — detaljer til venstre, kort til højre
+        self._bottom_splitter = QSplitter(Qt.Orientation.Horizontal)
 
         self._detail_panel = CacheDetailPanel()
-        right_splitter.addWidget(self._detail_panel)
+        self._bottom_splitter.addWidget(self._detail_panel)
 
         # Map widget
         from opensak.gui.map_widget import MapWidget
         self._map_widget = MapWidget()
         self._map_widget.cache_selected.connect(self._on_map_cache_selected)
-        self._map_widget.setMinimumHeight(200)
-        right_splitter.addWidget(self._map_widget)
+        self._map_widget.setMinimumWidth(300)
+        self._bottom_splitter.addWidget(self._map_widget)
 
-        right_splitter.setSizes([400, 300])
-        self._splitter.addWidget(right_splitter)
-        self._splitter.setSizes([580, 520])
+        self._bottom_splitter.setSizes([560, 540])
+        self._splitter.addWidget(self._bottom_splitter)
+        self._splitter.setSizes([380, 400])
 
         main_layout.addWidget(self._splitter)
 
@@ -355,6 +355,8 @@ class MainWindow(QMainWindow):
             self.restoreState(s.window_state)
         if s.splitter_state:
             self._splitter.restoreState(s.splitter_state)
+        if getattr(s, "bottom_splitter_state", None):
+            self._bottom_splitter.restoreState(s.bottom_splitter_state)
 
     def _update_title(self) -> None:
         """Opdatér vinduestitel med aktiv database navn."""
@@ -385,6 +387,7 @@ class MainWindow(QMainWindow):
         s.window_geometry = self.saveGeometry()
         s.window_state    = self.saveState()
         s.splitter_state  = self._splitter.saveState()
+        s.bottom_splitter_state = self._bottom_splitter.saveState()
         s.sync()
         super().closeEvent(event)
 

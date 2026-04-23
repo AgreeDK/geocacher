@@ -217,6 +217,14 @@ class AppSettings:
     def splitter_state(self, value) -> None:
         self._s.setValue("window/splitter_state", value)
 
+    @property
+    def bottom_splitter_state(self):
+        return self._s.value("window/bottom_splitter_state")
+
+    @bottom_splitter_state.setter
+    def bottom_splitter_state(self, value) -> None:
+        self._s.setValue("window/bottom_splitter_state", value)
+
     # ── Last used paths ───────────────────────────────────────────────────────
 
     @property
