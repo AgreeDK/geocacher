@@ -35,20 +35,20 @@ def _setup_active_db(active_path: Path, entries: list[dict], make_cache) -> None
 # ── get_found_gc_codes ────────────────────────────────────────────────────────
 
 class TestGetFoundGcCodes:
-    def test_returns_set_of_gc_codes(self, tmp_path, make_cache):
+    def test_returns_dict_of_gc_codes(self, tmp_path, make_cache):
         ref_path = tmp_path / "ref.db"
         _setup_ref_db(ref_path, ["GC00001", "GC00002", "GC00003"], make_cache)
 
         codes = get_found_gc_codes(ref_path)
-        assert isinstance(codes, set)
-        assert codes == {"GC00001", "GC00002", "GC00003"}
+        assert isinstance(codes, dict)
+        assert set(codes.keys()) == {"GC00001", "GC00002", "GC00003"}
 
-    def test_empty_database_returns_empty_set(self, tmp_path):
+    def test_empty_database_returns_empty_dict(self, tmp_path):
         ref_path = tmp_path / "empty_ref.db"
         init_db(db_path=ref_path)
 
         codes = get_found_gc_codes(ref_path)
-        assert codes == set()
+        assert codes == {}
 
     def test_single_entry(self, tmp_path, make_cache):
         ref_path = tmp_path / "single.db"
