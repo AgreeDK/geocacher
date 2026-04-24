@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Geocaching HQ Block Party">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#007A3D"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <text x="256" y="292" font-size="130" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#FFFFFF" stroke="none">HQ</text>
+  </g>
+</svg>

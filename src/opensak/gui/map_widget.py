@@ -31,32 +31,10 @@ class TileInterceptor(QWebEngineUrlRequestInterceptor):
 
 from opensak.gui.icon_provider import get_map_pin_html as _get_pin_html
 
-_TYPE_KEY_MAP: dict[str, str] = {
-    "traditional cache":             "traditional",
-    "multi-cache":                   "multi",
-    "mystery cache":                 "mystery",
-    "unknown cache":                 "mystery",
-    "letterbox hybrid":              "letterbox",
-    "whereigo cache":                "whereigo",
-    "earthcache":                    "earthcache",
-    "virtual cache":                 "virtual",
-    "webcam cache":                  "webcam",
-    "event cache":                   "event",
-    "cache in trash out event":      "cito",
-    "mega-event cache":              "mega_event",
-    "giga-event cache":              "giga_event",
-    "lab cache":                     "lab_cache",
-    "community celebration event":   "community_celebration",
-    "gps adventures maze":           "gps_adventures",
-}
-
 
 def _cache_pin_html(cache_type: str, found: bool) -> str:
-    """Return Leaflet divIcon HTML for a cache type pin."""
-    if found:
-        return _get_pin_html("found")
-    key = _TYPE_KEY_MAP.get((cache_type or "").lower(), "unknown")
-    return _get_pin_html(key)
+    """Return Leaflet divIcon HTML for a cache — SVG ikon, smiley hvis fundet."""
+    return _get_pin_html(cache_type, found=found)
 
 
 # ── Python ↔ JavaScript bro ───────────────────────────────────────────────────
@@ -161,18 +139,15 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
 // ── Hjælpefunktioner ──────────────────────────────────────────────────────────
 function makePinIcon(pinHtml, found, corrected) {
     var wrapper = pinHtml;
-    if (found) {
-        wrapper = wrapper.replace('<div style="position:relative', '<div style="opacity:0.55;position:relative');
-    }
     if (corrected) {
         wrapper = wrapper.replace('</div>', '<div class="cache-pin-corrected-ring"></div></div>');
     }
     return L.divIcon({
         className: '',
         html: wrapper,
-        iconSize: [24, 32],
-        iconAnchor: [12, 32],
-        popupAnchor: [0, -34]
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -18]
     });
 }
 

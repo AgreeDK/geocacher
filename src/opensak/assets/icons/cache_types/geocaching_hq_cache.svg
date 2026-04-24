@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Geocaching HQ Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#007A3D"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M142 248 L256 154 L370 248"/>
+    <path d="M170 238 V380 H342 V238"/>
+    <path d="M224 380 V296 H288 V380"/>
+    <path d="M190 278 H220 V324 H190 Z"/>
+    <path d="M292 278 H322 V324 H292 Z"/>
+    <path d="M256 154 V102"/>
+    <path d="M256 102 H316 L300 132 H256"/>
+  </g>
+</svg>

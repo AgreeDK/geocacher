@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Community Celebration Event">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#9E1B1F"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M142 184 C178 158 204 198 240 170 C276 142 308 184 370 158 V236 C308 262 276 220 240 248 C204 276 178 236 142 262 Z"/>
+    <circle cx="190" cy="318" r="26" fill="#FFFFFF" stroke="none"/>
+    <circle cx="256" cy="302" r="34" fill="#FFFFFF" stroke="none"/>
+    <circle cx="322" cy="318" r="26" fill="#FFFFFF" stroke="none"/>
+    <path d="M146 390 C150 346 230 346 234 390 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M206 402 C212 344 300 344 306 402 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M278 390 C282 346 362 346 366 390 Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

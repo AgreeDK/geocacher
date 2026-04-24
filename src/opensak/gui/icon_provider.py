@@ -1,9 +1,9 @@
 """
-icon_provider.py — OpenSAK cache icon provider
+src/opensak/gui/icon_provider.py — OpenSAK cache icon provider
 
 Leverer QIcon og QPixmap for cache-typer, størrelser og kort-pins.
-Alle ikoner er bundlet som SVG-strenge direkte i modulet (ingen løse filer),
-så der ikke er afhængighed af filsystemet ved kørsel.
+Bruger SVG filer fra assets/icons/ mapperne hvis de findes,
+med fallback til håndlavede SVG strenge.
 
 Brug:
     from opensak.gui.icon_provider import (
@@ -19,12 +19,127 @@ Brug:
     pin  = get_map_pin_html("mystery")          # HTML til Leaflet divIcon
 """
 
+from __future__ import annotations
+from pathlib import Path
+from functools import lru_cache
+
 from PySide6.QtGui import QIcon, QPixmap, QPainter
 from PySide6.QtCore import QByteArray, Qt
 from PySide6.QtSvg import QSvgRenderer
 
 
-# ── Internal helpers (defined first) ─────────────────────────────────────────
+# ── Asset paths ───────────────────────────────────────────────────────────────
+
+_ASSETS_DIR = Path(__file__).parent.parent / "assets" / "icons"
+_CACHE_TYPES_DIR = _ASSETS_DIR / "cache_types"
+_CACHE_FOUND_DIR = _ASSETS_DIR / "cache_found"
+
+
+# ── Mapping: intern nøgle → SVG filnavn (uden .svg) ──────────────────────────
+
+_TYPE_FILE_MAP: dict[str, str] = {
+    "traditional":           "traditional_cache",
+    "multi":                 "multi_cache",
+    "mystery":               "mystery_cache",
+    "letterbox":             "letterbox_hybrid",
+    "whereigo":              "wherigo_cache",
+    "earthcache":            "earthcache",
+    "virtual":               "virtual_cache",
+    "webcam":                "webcam_cache",
+    "event":                 "event_cache",
+    "cito":                  "cache_in_trash_out_event",
+    "mega_event":            "mega_event_cache",
+    "giga_event":            "giga_event_cache",
+    "lab_cache":             "adventure_lab",
+    "gps_adventures":        "gps_adventures_maze",
+    "community_celebration": "community_celebration_event",
+    "locationless":          "locationless_cache",
+    "project_ape":           "project_ape_cache",
+    "geocaching_hq":         "geocaching_hq_cache",
+    "geocaching_hq_celebration": "geocaching_hq_celebration",
+    "geocaching_hq_block_party": "geocaching_hq_block_party",
+}
+
+# Mapping: intern nøgle → smiley farvenavn (svarer til filnavne i cache_found/)
+_FOUND_COLOR_MAP: dict[str, str] = {
+    "traditional":           "green",
+    "multi":                 "orange",
+    "mystery":               "dark_blue",
+    "letterbox":             "brown",
+    "whereigo":              "teal",
+    "earthcache":            "dark_green",
+    "virtual":               "purple",
+    "webcam":                "gray",
+    "event":                 "red",
+    "cito":                  "red",
+    "mega_event":            "red",
+    "giga_event":            "gold",
+    "lab_cache":             "light_blue",
+    "gps_adventures":        "navy_blue",
+    "community_celebration": "maroon",
+    "locationless":          "brown",
+    "project_ape":           "dark_green",
+    "geocaching_hq":         "dark_green",
+    "geocaching_hq_celebration": "dark_green",
+    "geocaching_hq_block_party": "dark_green",
+    "unknown":               "gray",
+}
+
+
+# ── Mapping: database cache_type streng → intern nøgle ───────────────────────
+
+_DB_TYPE_KEY_MAP: dict[str, str] = {
+    "traditional cache":             "traditional",
+    "multi-cache":                   "multi",
+    "mystery cache":                 "mystery",
+    "unknown cache":                 "mystery",
+    "letterbox hybrid":              "letterbox",
+    "whereigo cache":                "whereigo",
+    "earthcache":                    "earthcache",
+    "virtual cache":                 "virtual",
+    "webcam cache":                  "webcam",
+    "event cache":                   "event",
+    "cache in trash out event":      "cito",
+    "mega-event cache":              "mega_event",
+    "giga-event cache":              "giga_event",
+    "lab cache":                     "lab_cache",
+    "community celebration event":   "community_celebration",
+    "gps adventures maze":           "gps_adventures",
+    "locationless (reverse) cache":  "locationless",
+    "project a.p.e. cache":          "project_ape",
+    "groundspeak hq":                "geocaching_hq",
+    "geocaching hq cache":           "geocaching_hq",
+    "geocaching hq celebration":     "geocaching_hq_celebration",
+    "geocaching hq block party":     "geocaching_hq_block_party",
+}
+
+
+# ── SVG fil læsning ───────────────────────────────────────────────────────────
+
+@lru_cache(maxsize=128)
+def _read_svg_file(path: Path) -> str | None:
+    """Læs SVG fil og returner indhold som streng. None hvis filen ikke findes."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except (FileNotFoundError, OSError):
+        return None
+
+
+def _get_type_svg(key: str) -> str | None:
+    """Hent SVG streng for en cache type fra disk."""
+    filename = _TYPE_FILE_MAP.get(key)
+    if not filename:
+        return None
+    return _read_svg_file(_CACHE_TYPES_DIR / f"{filename}.svg")
+
+
+def _get_found_svg(key: str) -> str | None:
+    """Hent smiley SVG streng for en fundet cache type fra disk."""
+    color = _FOUND_COLOR_MAP.get(key, "green")
+    return _read_svg_file(_CACHE_FOUND_DIR / f"found_cache_smiley_{color}.svg")
+
+
+# ── Internal helpers (fallback SVG strenge) ───────────────────────────────────
 
 def _size_circle(label: str, fill: str = "#3498db", stroke: str = "#2980b9") -> str:
     """Generate a circular size-badge SVG."""
@@ -76,18 +191,12 @@ def _calendar(badge: str, extra: str = "") -> str:
     )
 
 
-# ── SVG data ──────────────────────────────────────────────────────────────────
+# ── Fallback SVG data (bruges hvis SVG filer ikke findes) ─────────────────────
 
-_CACHE_TYPE_SVGS: dict[str, str] = {
-
-    # ── Standard box types ────────────────────────────────────────────────────
-
-    "traditional": _box("#2ecc71", "#27ae60"),
-
-    "multi": _box_text("#e67e22", "#ca6f1e", "2+"),
-
-    "mystery": _box_text("#3498db", "#2980b9", "?"),
-
+_FALLBACK_SVGS: dict[str, str] = {
+    "traditional":           _box("#2ecc71", "#27ae60"),
+    "multi":                 _box_text("#e67e22", "#ca6f1e", "2+"),
+    "mystery":               _box_text("#3498db", "#2980b9", "?"),
     "letterbox": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="4" y="8" width="24" height="7" rx="2" fill="#7b3f00" stroke="#7b3f00" stroke-width="0.5"/>'
@@ -96,7 +205,6 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<circle cx="20" cy="21" r="3.5" fill="#d4a76a" opacity="0.9"/>'
         '</svg>'
     ),
-
     "whereigo": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="4" y="8" width="24" height="7" rx="2" fill="#17a589" stroke="#17a589" stroke-width="0.5"/>'
@@ -104,9 +212,6 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<polygon points="16,16 21,26 16,23 11,26" fill="white" opacity="0.9"/>'
         '</svg>'
     ),
-
-    # ── Special types ─────────────────────────────────────────────────────────
-
     "earthcache": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<circle cx="16" cy="18" r="12" fill="#27ae60" stroke="#1e8449" stroke-width="1"/>'
@@ -114,7 +219,6 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<ellipse cx="20" cy="20" rx="4" ry="5" fill="#f0e68c" opacity="0.85"/>'
         '</svg>'
     ),
-
     "virtual": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="4" y="8" width="24" height="7" rx="2" fill="none" stroke="#8e44ad" '
@@ -125,7 +229,6 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         'fill="#8e44ad" font-family="sans-serif">V</text>'
         '</svg>'
     ),
-
     "webcam": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="3" y="11" width="20" height="14" rx="3" fill="#7f8c8d" stroke="#616a6b" stroke-width="1"/>'
@@ -135,7 +238,6 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<circle cx="13" cy="18" r="1.5" fill="#3498db"/>'
         '</svg>'
     ),
-
     "lab_cache": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="12" y="3" width="8" height="7" rx="1.5" fill="#9b59b6" stroke="#7d3c98" stroke-width="1"/>'
@@ -146,7 +248,6 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<circle cx="19" cy="22" r="1.5" fill="white" opacity="0.7"/>'
         '</svg>'
     ),
-
     "gps_adventures": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="3" y="3" width="26" height="26" rx="3" fill="#16a085" stroke="#0e6655" stroke-width="1"/>'
@@ -156,21 +257,14 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<circle cx="16" cy="25" r="2.5" fill="#e74c3c"/>'
         '</svg>'
     ),
-
-    # ── Event types (calendar base) ───────────────────────────────────────────
-
-    "event": _calendar("E"),
-
-    "cito": _calendar("C"),
-
-    "mega_event": _calendar("M"),
-
-    "giga_event": _calendar(
+    "event":                 _calendar("E"),
+    "cito":                  _calendar("C"),
+    "mega_event":            _calendar("M"),
+    "giga_event":            _calendar(
         "G",
         '<polygon points="16,2 17.2,6 21,6 18,8.5 19.2,12.5 16,10 12.8,12.5 14,8.5 11,6 14.8,6" '
         'fill="#f1c40f" stroke="#e67e22" stroke-width="0.5"/>',
     ),
-
     "community_celebration": _calendar(
         "CC",
         '<circle cx="5" cy="7" r="2" fill="#f1c40f"/>'
@@ -178,31 +272,25 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<circle cx="3" cy="19" r="2" fill="#3498db"/>'
         '<circle cx="29" cy="19" r="2" fill="#9b59b6"/>',
     ),
-
-    # ── Status variants ───────────────────────────────────────────────────────
-
     "found": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="4" y="8" width="24" height="7" rx="2" fill="#27ae60" stroke="#27ae60" stroke-width="0.5"/>'
         '<rect x="6" y="14" width="20" height="13" rx="2" fill="#2ecc71" stroke="#27ae60" stroke-width="1"/>'
         '<rect x="13" y="17" width="6" height="4" rx="1" fill="white" opacity="0.75"/>'
         '<circle cx="25" cy="9" r="7" fill="#f39c12" stroke="white" stroke-width="1.5"/>'
-        '<polyline points="21,9 24,12 30,5" fill="none" stroke="white" stroke-width="2" '
-        'stroke-linecap="round" stroke-linejoin="round"/>'
+        '<polyline points="21,9 24,12 29,6" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>'
         '</svg>'
     ),
-
     "dnf": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
-        '<rect x="4" y="8" width="24" height="7" rx="2" fill="#27ae60" stroke="#27ae60" stroke-width="0.5"/>'
-        '<rect x="6" y="14" width="20" height="13" rx="2" fill="#2ecc71" stroke="#27ae60" stroke-width="1"/>'
+        '<rect x="4" y="8" width="24" height="7" rx="2" fill="#922b21" stroke="#922b21" stroke-width="0.5"/>'
+        '<rect x="6" y="14" width="20" height="13" rx="2" fill="#c0392b" stroke="#922b21" stroke-width="1"/>'
         '<rect x="13" y="17" width="6" height="4" rx="1" fill="white" opacity="0.75"/>'
         '<circle cx="25" cy="9" r="7" fill="#e74c3c" stroke="white" stroke-width="1.5"/>'
         '<line x1="21" y1="5" x2="29" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"/>'
         '<line x1="29" y1="5" x2="21" y2="13" stroke="white" stroke-width="2" stroke-linecap="round"/>'
         '</svg>'
     ),
-
     "disabled": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="4" y="8" width="24" height="7" rx="2" fill="#7f8c8d" stroke="#616a6b" stroke-width="0.5"/>'
@@ -210,7 +298,6 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<line x1="4" y1="6" x2="28" y2="30" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round"/>'
         '</svg>'
     ),
-
     "archived": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="4" y="8" width="24" height="7" rx="2" fill="#616a6b" stroke="#4a4a4a" stroke-width="0.5"/>'
@@ -220,7 +307,6 @@ _CACHE_TYPE_SVGS: dict[str, str] = {
         '<line x1="10" y1="24" x2="22" y2="24" stroke="white" stroke-width="1.5" opacity="0.8"/>'
         '</svg>'
     ),
-
     "unknown": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="4" y="8" width="24" height="7" rx="2" fill="#95a5a6" stroke="#7f8c8d" stroke-width="0.5"/>'
@@ -241,7 +327,7 @@ _CACHE_SIZE_SVGS: dict[str, str] = {
     "not_chosen": _size_circle("—",  "#bdc3c7", "#95a5a6"),
 }
 
-# ── Map pin data ──────────────────────────────────────────────────────────────
+# ── Map pin farver (til Leaflet divIcon pins) ─────────────────────────────────
 
 _PIN_COLORS: dict[str, str] = {
     "traditional":           "#2ecc71",
@@ -289,6 +375,7 @@ _PIN_LABELS: dict[str, str] = {
     "unknown":               "?",
 }
 
+
 # ── Qt rendering ──────────────────────────────────────────────────────────────
 
 def _svg_to_pixmap(svg_data: str, size: int = 32) -> QPixmap:
@@ -306,83 +393,115 @@ def _normalize_key(raw: str) -> str:
     return (raw or "").lower().replace(" ", "_").replace("-", "_")
 
 
+def _db_type_to_key(cache_type: str) -> str:
+    """Konverter database cache_type streng til intern nøgle."""
+    return _DB_TYPE_KEY_MAP.get((cache_type or "").lower(), _normalize_key(cache_type))
+
+
+def _get_svg_for_key(key: str) -> str:
+    """Hent SVG for en intern type-nøgle. Prøver fil først, derefter fallback."""
+    svg = _get_type_svg(key)
+    if svg:
+        return svg
+    return _FALLBACK_SVGS.get(key, _FALLBACK_SVGS["unknown"])
+
+
+def _get_found_svg_for_key(key: str) -> str:
+    """Hent smiley SVG for en fundet cache type. Prøver fil først, derefter fallback."""
+    svg = _get_found_svg(key)
+    if svg:
+        return svg
+    # Fallback til generisk found ikon
+    return _FALLBACK_SVGS.get("found", _FALLBACK_SVGS["unknown"])
+
+
 # ── Public API ────────────────────────────────────────────────────────────────
 
-def get_cache_type_icon(cache_type: str, size: int = 32) -> QIcon:
+def get_cache_type_icon(cache_type: str, size: int = 32, found: bool = False) -> QIcon:
     """
-    Return QIcon for a cache type key.
+    Return QIcon for en cache type.
 
-    Known keys: traditional, multi, mystery, letterbox, whereigo,
-                earthcache, virtual, webcam, event, cito, mega_event,
-                giga_event, lab_cache, gps_adventures, community_celebration,
-                found, dnf, disabled, archived, unknown.
+    cache_type kan være enten:
+    - En database streng som "Traditional Cache", "Multi-cache" osv.
+    - En intern nøgle som "traditional", "multi" osv.
+    - En status som "found", "dnf", "disabled", "archived"
 
-    Falls back to "unknown" for unrecognised types.
+    Hvis found=True returneres smiley-ikonet for typen.
     """
-    svg = _CACHE_TYPE_SVGS.get(_normalize_key(cache_type), _CACHE_TYPE_SVGS["unknown"])
+    key = _db_type_to_key(cache_type)
+    if found:
+        svg = _get_found_svg_for_key(key)
+    else:
+        svg = _get_svg_for_key(key)
     return QIcon(_svg_to_pixmap(svg, size))
 
 
 def get_cache_size_icon(cache_size: str, size: int = 32) -> QIcon:
     """
-    Return QIcon for a cache container size.
+    Return QIcon for en cache container størrelse.
 
-    Known keys: nano, micro, small, regular, large, other, not_chosen.
-    Falls back to "other" for unrecognised sizes.
+    Kendte nøgler: nano, micro, small, regular, large, other, not_chosen.
+    Falder tilbage til "other" for ukendte størrelser.
     """
     svg = _CACHE_SIZE_SVGS.get(_normalize_key(cache_size), _CACHE_SIZE_SVGS["other"])
     return QIcon(_svg_to_pixmap(svg, size))
 
 
-def get_cache_type_pixmap(cache_type: str, size: int = 32) -> QPixmap:
-    """Return QPixmap for a cache type — useful for composite map overlays."""
-    svg = _CACHE_TYPE_SVGS.get(_normalize_key(cache_type), _CACHE_TYPE_SVGS["unknown"])
+def get_cache_type_pixmap(cache_type: str, size: int = 32, found: bool = False) -> QPixmap:
+    """Return QPixmap for en cache type — nyttigt til composite map overlays."""
+    key = _db_type_to_key(cache_type)
+    if found:
+        svg = _get_found_svg_for_key(key)
+    else:
+        svg = _get_svg_for_key(key)
     return _svg_to_pixmap(svg, size)
 
 
-def get_map_pin_html(cache_type: str) -> str:
+def get_map_pin_html(cache_type: str, found: bool = False) -> str:
     """
-    Return HTML string for a Leaflet divIcon map pin.
-
-    Usage in map_widget.py JavaScript:
-        L.marker([lat, lng], {
-            icon: L.divIcon({
-                html: '<pin_html_here>',
-                iconSize: [24, 32],
-                iconAnchor: [12, 32],
-                popupAnchor: [0, -32],
-                className: ''
-            })
-        })
+    Return HTML streng til en Leaflet divIcon map pin.
+    Viser altid det rigtige cache type ikon — smiley overlay hvis found=True.
+    Bruger base64 <img> tag så SVG farver bevares korrekt i browser.
     """
-    key = _normalize_key(cache_type)
-    color = _PIN_COLORS.get(key, "#bdc3c7")
-    label = _PIN_LABELS.get(key, "")
+    import base64
 
-    label_span = (
-        f'<span style="position:absolute;top:4px;left:0;right:0;text-align:center;'
-        f'font-size:7px;font-weight:700;color:white;font-family:sans-serif;'
-        f'line-height:1;">{label}</span>'
-    ) if label else ""
+    key = _db_type_to_key(cache_type)
+
+    # Altid vis cache type ikon som base
+    svg = _get_svg_for_key(key)
+    b64 = base64.b64encode(svg.encode("utf-8")).decode("ascii")
+    img_html = (
+        f'<img src="data:image/svg+xml;base64,{b64}" '
+        f'width="32" height="32" style="display:block;"/>'
+    )
+
+    if found:
+        # Smiley overlay i øverste højre hjørne
+        found_svg = _get_found_svg_for_key(key)
+        found_b64 = base64.b64encode(found_svg.encode("utf-8")).decode("ascii")
+        overlay = (
+            f'<img src="data:image/svg+xml;base64,{found_b64}" '
+            f'width="16" height="16" '
+            f'style="position:absolute;top:-4px;right:-4px;display:block;'
+            f'filter:drop-shadow(0 1px 1px rgba(0,0,0,0.5));"/>'
+        )
+    else:
+        overlay = ""
 
     return (
-        f'<div style="position:relative;width:24px;height:32px;">'
-        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32" '
-        f'width="24" height="32" style="display:block;">'
-        f'<path d="M12 2 C5 2 2 8 2 13 C2 21 12 30 12 30 C12 30 22 21 22 13 C22 8 19 2 12 2Z" '
-        f'fill="{color}" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>'
-        f'<circle cx="12" cy="12" r="6" fill="white" opacity="0.25"/>'
-        f'</svg>'
-        f'{label_span}'
+        f'<div style="position:relative;width:32px;height:32px;'
+        f'filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4));">'
+        f'{img_html}'
+        f'{overlay}'
         f'</div>'
     )
 
 
 def get_all_type_keys() -> list[str]:
-    """Return sorted list of all known cache type keys."""
-    return sorted(_CACHE_TYPE_SVGS.keys())
+    """Return sorteret liste af alle kendte cache type nøgler."""
+    return sorted(set(list(_FALLBACK_SVGS.keys()) + list(_TYPE_FILE_MAP.keys())))
 
 
 def get_all_size_keys() -> list[str]:
-    """Return sorted list of all known cache size keys."""
+    """Return sorteret liste af alle kendte cache størrelse nøgler."""
     return sorted(_CACHE_SIZE_SVGS.keys())

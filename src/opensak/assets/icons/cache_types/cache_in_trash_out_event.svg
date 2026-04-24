@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Cache In Trash Out Event">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#115766"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M174 372 C168 270 204 178 256 132 C308 178 344 270 338 372 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M222 310 C270 302 308 270 326 218"/>
+    <path d="M224 308 C214 248 248 214 318 204"/>
+    <path d="M188 132 H324"/>
+    <path d="M218 100 H294"/>
+  </g>
+</svg>

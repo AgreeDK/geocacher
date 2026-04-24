@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="GPS Adventures Maze Exhibit">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#69AD3C"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M178 154 V126"/>
+    <path d="M178 154 H334 V350 H178 V386"/>
+    <path d="M210 196 H302"/>
+    <path d="M210 196 V250 H250"/>
+    <path d="M302 196 V242 H278"/>
+    <path d="M210 292 H302"/>
+    <path d="M302 292 V336"/>
+    <path d="M250 250 V336"/>
+    <path d="M178 126 H226"/>
+  </g>
+</svg>

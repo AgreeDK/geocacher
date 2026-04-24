@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Webcam Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#0B8390"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <circle cx="256" cy="206" r="82"/>
+    <circle cx="256" cy="206" r="34"/>
+    <path d="M230 290 H282"/>
+    <path d="M190 380 H322"/>
+    <path d="M220 290 L196 380"/>
+    <path d="M292 290 L316 380"/>
+  </g>
+</svg>

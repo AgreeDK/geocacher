@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Letterbox Hybrid">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#075B7A"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <rect x="132" y="172" width="248" height="168" rx="12"/>
+    <path d="M140 184 L256 272 L372 184"/>
+    <path d="M140 332 L220 260"/>
+    <path d="M372 332 L292 260"/>
+  </g>
+</svg>

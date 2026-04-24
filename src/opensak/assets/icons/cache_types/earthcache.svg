@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="EarthCache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#69C6D4"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <circle cx="256" cy="256" r="128" fill="#FFFFFF" stroke="none"/>
+    <path d="M190 154 C184 206 204 220 238 218 C256 218 264 242 250 256 C230 276 238 302 264 306 C294 312 308 340 292 374"/>
+    <path d="M310 166 C286 190 300 218 328 224 C350 230 354 258 332 270 C306 284 308 316 338 326"/>
+    <path d="M150 256 H362"/>
+    <path d="M256 128 C210 172 210 340 256 384"/>
+    <path d="M256 128 C302 172 302 340 256 384"/>
+  </g>
+</svg>

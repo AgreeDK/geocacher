@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Traditional Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#007A3D"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M132 210 L256 152 L380 210 L256 268 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M132 210 L132 326 L256 386 L380 326 L380 210"/>
+    <path d="M256 268 L256 386"/>
+    <path d="M184 300 L218 316"/>
+  </g>
+</svg>

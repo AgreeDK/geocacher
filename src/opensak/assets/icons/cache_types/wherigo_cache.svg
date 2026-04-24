@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Wherigo Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#06426E"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <circle cx="256" cy="256" r="128"/>
+    <circle cx="256" cy="256" r="16" fill="#FFFFFF" stroke="none"/>
+    <path d="M300 168 L268 272 L212 344 L244 240 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M256 132 V160"/>
+    <path d="M256 352 V380"/>
+    <path d="M132 256 H160"/>
+    <path d="M352 256 H380"/>
+  </g>
+</svg>

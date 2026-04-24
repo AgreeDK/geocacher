@@ -291,33 +291,32 @@ class CacheTableModel(QAbstractTableModel):
 
     @staticmethod
     def _type_icon_key(cache: Cache) -> str:
-        """Map a Cache object to an icon_provider key, respecting status."""
+        """Map a Cache object to an icon_provider key (cache type only, ikke status)."""
         if cache.archived:
             return "archived"
-        if cache.found:
-            return "found"
-        if cache.dnf:
-            return "dnf"
         if not cache.available:
             return "disabled"
         t = (cache.cache_type or "").lower()
         mapping = {
-            "traditional cache": "traditional",
-            "multi-cache":       "multi",
-            "mystery cache":     "mystery",
-            "unknown cache":     "mystery",
-            "letterbox hybrid":  "letterbox",
-            "whereigo cache":    "whereigo",
-            "earthcache":        "earthcache",
-            "virtual cache":     "virtual",
-            "webcam cache":      "webcam",
-            "event cache":       "event",
-            "cache in trash out event": "cito",
-            "mega-event cache":  "mega_event",
-            "giga-event cache":  "giga_event",
-            "lab cache":         "lab_cache",
-            "community celebration event": "community_celebration",
-            "gps adventures maze": "gps_adventures",
+            "traditional cache":            "traditional",
+            "multi-cache":                  "multi",
+            "mystery cache":                "mystery",
+            "unknown cache":                "mystery",
+            "letterbox hybrid":             "letterbox",
+            "whereigo cache":               "whereigo",
+            "earthcache":                   "earthcache",
+            "virtual cache":                "virtual",
+            "webcam cache":                 "webcam",
+            "event cache":                  "event",
+            "cache in trash out event":     "cito",
+            "mega-event cache":             "mega_event",
+            "giga-event cache":             "giga_event",
+            "lab cache":                    "lab_cache",
+            "community celebration event":  "community_celebration",
+            "gps adventures maze":          "gps_adventures",
+            "locationless (reverse) cache": "locationless",
+            "project a.p.e. cache":         "project_ape",
+            "groundspeak hq":               "geocaching_hq",
         }
         return mapping.get(t, "unknown")
 
@@ -339,7 +338,10 @@ class CacheTableModel(QAbstractTableModel):
     def _decoration_value(self, cache: Cache, col: str):
         """Return QIcon for columns that show icons."""
         if col == "cache_type":
-            return get_cache_type_icon(self._type_icon_key(cache), size=20)
+            return get_cache_type_icon(
+                self._type_icon_key(cache),
+                size=24,
+            )
         if col == "container":
             return get_cache_size_icon(self._size_icon_key(cache), size=20)
         return None

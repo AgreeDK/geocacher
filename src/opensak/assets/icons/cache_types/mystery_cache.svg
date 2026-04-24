@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Mystery Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#06426E"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M190 156 H238 C238 126 276 126 276 156 H322 V212 C354 212 354 252 322 252 V306 H276 C276 338 238 338 238 306 H190 V252 C158 252 158 212 190 212 Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

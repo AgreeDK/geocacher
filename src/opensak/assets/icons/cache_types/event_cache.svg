@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Event Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#9E1B1F"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <rect x="146" y="150" width="220" height="224" rx="14"/>
+    <path d="M146 214 H366"/>
+    <path d="M196 124 V172"/>
+    <path d="M316 124 V172"/>
+    <path d="M256 254 L280 306 L336 312 L294 350 L306 404 L256 376 L206 404 L218 350 L176 312 L232 306 Z"/>
+  </g>
+</svg>

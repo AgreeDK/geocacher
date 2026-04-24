@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Multi-Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#F5820B"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M150 174 L292 126 L374 166 L230 216 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M150 174 L230 216 L374 166"/>
+    <path d="M150 174 L150 240 L230 282 L374 232 L374 166"/>
+    <path d="M150 286 L230 328 L374 278"/>
+    <path d="M150 286 L150 352 L230 394 L374 344 L374 278"/>
+    <path d="M210 240 L246 258"/>
+  </g>
+</svg>

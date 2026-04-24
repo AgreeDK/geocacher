@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Mega-Event Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#9E1B1F"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <circle cx="256" cy="206" r="48" fill="#FFFFFF" stroke="none"/>
+    <circle cx="166" cy="228" r="36" fill="#FFFFFF" stroke="none"/>
+    <circle cx="346" cy="228" r="36" fill="#FFFFFF" stroke="none"/>
+    <path d="M176 390 C184 314 328 314 336 390 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M92 382 C98 326 202 326 210 382 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M302 382 C310 326 414 326 420 382 Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>

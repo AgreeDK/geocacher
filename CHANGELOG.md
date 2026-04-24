@@ -14,6 +14,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.10.5] — 2026-04-24
+### Changed
+- **New cache type icons** — cache icons updated for better view
+
+---
+
 ## [1.10.4] — 2026-04-24
 ### Changed
 - **version number in filenames** — version number should now be added to download filenames.

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Adventure Lab">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#F5820B"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M256 382 C256 382 352 266 352 190 C352 138 308 96 256 96 C204 96 160 138 160 190 C160 266 256 382 256 382 Z" fill="#FFFFFF" stroke="none"/>
+    <circle cx="256" cy="190" r="38"/>
+    <path d="M178 386 C206 410 306 410 334 386"/>
+  </g>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Geocaching HQ Celebration">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#007A3D"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M256 96 C316 96 362 142 362 202 C362 282 256 390 256 390 C256 390 150 282 150 202 C150 142 196 96 256 96 Z" fill="#FFFFFF" stroke="none"/>
+    <text x="256" y="238" font-size="82" font-family="Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#007A3D" stroke="none">HQ</text>
+    <path d="M244 386 L256 416 L268 386"/>
+  </g>
+</svg>

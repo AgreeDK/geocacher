@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Locationless Cache">
+  <rect x="32" y="32" width="448" height="448" rx="72" fill="#7A4B25"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+
+    <path d="M256 116 V396"/>
+    <path d="M172 164 H330 L360 204 L330 244 H172 L142 204 Z" fill="#FFFFFF" stroke="none"/>
+    <path d="M340 268 H182 L152 308 L182 348 H340 L370 308 Z" fill="#FFFFFF" stroke="none"/>
+  </g>
+</svg>
