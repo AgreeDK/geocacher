@@ -45,7 +45,7 @@ jobs:
         run: Compress-Archive -Path dist/OpenSAK -DestinationPath dist/OpenSAK-${{ github.ref_name }}-Windows.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: OpenSAK-Windows
+          name: OpenSAK-${{ github.ref_name }}-Windows
           path: dist/OpenSAK-${{ github.ref_name }}-Windows.zip
           retention-days: 7
 
@@ -100,7 +100,7 @@ jobs:
           fi
       - uses: actions/upload-artifact@v4
         with:
-          name: OpenSAK-Linux
+          name: OpenSAK-${{ github.ref_name }}-Linux
           path: |
             OpenSAK-${{ github.ref_name }}-Linux-x86_64.AppImage
             OpenSAK-${{ github.ref_name }}-Linux-x86_64.tar.gz
@@ -145,7 +145,7 @@ jobs:
           || (cd dist && zip -r ../OpenSAK-${{ github.ref_name }}-macOS-arm64.zip OpenSAK.app && echo "Fallback ZIP created")
       - uses: actions/upload-artifact@v4
         with:
-          name: OpenSAK-macOS-arm64
+          name: OpenSAK-${{ github.ref_name }}-macOS-arm64
           path: |
             OpenSAK-${{ github.ref_name }}-macOS-arm64.dmg
             OpenSAK-${{ github.ref_name }}-macOS-arm64.zip
@@ -190,7 +190,7 @@ jobs:
           || (cd dist && zip -r ../OpenSAK-${{ github.ref_name }}-macOS-x86_64.zip OpenSAK.app && echo "Fallback ZIP created")
       - uses: actions/upload-artifact@v4
         with:
-          name: OpenSAK-macOS-x86_64
+          name: OpenSAK-${{ github.ref_name }}-macOS-x86_64
           path: |
             OpenSAK-${{ github.ref_name }}-macOS-x86_64.dmg
             OpenSAK-${{ github.ref_name }}-macOS-x86_64.zip
@@ -210,19 +210,19 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: OpenSAK-Windows
+          name: OpenSAK-${{ github.ref_name }}-Windows
           path: release-files/
       - uses: actions/download-artifact@v4
         with:
-          name: OpenSAK-Linux
+          name: OpenSAK-${{ github.ref_name }}-Linux
           path: release-files/
       - uses: actions/download-artifact@v4
         with:
-          name: OpenSAK-macOS-arm64
+          name: OpenSAK-${{ github.ref_name }}-macOS-arm64
           path: release-files/
       - uses: actions/download-artifact@v4
         with:
-          name: OpenSAK-macOS-x86_64
+          name: OpenSAK-${{ github.ref_name }}-macOS-x86_64
           path: release-files/
       - name: List release files
         run: ls -lh release-files/
