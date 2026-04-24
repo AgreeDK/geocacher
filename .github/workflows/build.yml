@@ -42,11 +42,11 @@ jobs:
           PYTHONPATH: src
       - name: Create ZIP
         shell: powershell
-        run: Compress-Archive -Path dist/OpenSAK -DestinationPath dist/OpenSAK-Windows.zip
+        run: Compress-Archive -Path dist/OpenSAK -DestinationPath dist/OpenSAK-${{ github.ref_name }}-Windows.zip
       - uses: actions/upload-artifact@v4
         with:
           name: OpenSAK-Windows
-          path: dist/OpenSAK-Windows.zip
+          path: dist/OpenSAK-${{ github.ref_name }}-Windows.zip
           retention-days: 7
 
   # ============================================================
@@ -85,25 +85,25 @@ jobs:
       - name: Build AppDir
         run: python3 scripts/make_appdir.py
       - name: Build AppImage
-        run: ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir OpenSAK-Linux-x86_64.AppImage
+        run: ARCH=x86_64 ./appimagetool --appimage-extract-and-run AppDir OpenSAK-${{ github.ref_name }}-Linux-x86_64.AppImage
         env:
           ARCH: x86_64
       - name: Verify output and create fallback tar.gz
         run: |
-          if [ -f OpenSAK-Linux-x86_64.AppImage ]; then
+          if [ -f OpenSAK-${{ github.ref_name }}-Linux-x86_64.AppImage ]; then
             echo "AppImage OK"
-            ls -lh OpenSAK-Linux-x86_64.AppImage
-            chmod +x OpenSAK-Linux-x86_64.AppImage
+            ls -lh OpenSAK-${{ github.ref_name }}-Linux-x86_64.AppImage
+            chmod +x OpenSAK-${{ github.ref_name }}-Linux-x86_64.AppImage
           else
             echo "AppImage failed - creating tar.gz fallback"
-            tar -czf OpenSAK-Linux-x86_64.tar.gz -C dist OpenSAK/
+            tar -czf OpenSAK-${{ github.ref_name }}-Linux-x86_64.tar.gz -C dist OpenSAK/
           fi
       - uses: actions/upload-artifact@v4
         with:
           name: OpenSAK-Linux
           path: |
-            OpenSAK-Linux-x86_64.AppImage
-            OpenSAK-Linux-x86_64.tar.gz
+            OpenSAK-${{ github.ref_name }}-Linux-x86_64.AppImage
+            OpenSAK-${{ github.ref_name }}-Linux-x86_64.tar.gz
           retention-days: 7
 
   # ============================================================
@@ -140,15 +140,15 @@ jobs:
             --window-size 500 300 \
             --icon-size 100 \
             --app-drop-link 350 150 \
-            OpenSAK-macOS-arm64.dmg \
+            OpenSAK-${{ github.ref_name }}-macOS-arm64.dmg \
             dist/OpenSAK.app \
-          || (cd dist && zip -r ../OpenSAK-macOS-arm64.zip OpenSAK.app && echo "Fallback ZIP created")
+          || (cd dist && zip -r ../OpenSAK-${{ github.ref_name }}-macOS-arm64.zip OpenSAK.app && echo "Fallback ZIP created")
       - uses: actions/upload-artifact@v4
         with:
           name: OpenSAK-macOS-arm64
           path: |
-            OpenSAK-macOS-arm64.dmg
-            OpenSAK-macOS-arm64.zip
+            OpenSAK-${{ github.ref_name }}-macOS-arm64.dmg
+            OpenSAK-${{ github.ref_name }}-macOS-arm64.zip
           retention-days: 7
 
   # ============================================================
@@ -185,15 +185,15 @@ jobs:
             --window-size 500 300 \
             --icon-size 100 \
             --app-drop-link 350 150 \
-            OpenSAK-macOS-x86_64.dmg \
+            OpenSAK-${{ github.ref_name }}-macOS-x86_64.dmg \
             dist/OpenSAK.app \
-          || (cd dist && zip -r ../OpenSAK-macOS-x86_64.zip OpenSAK.app && echo "Fallback ZIP created")
+          || (cd dist && zip -r ../OpenSAK-${{ github.ref_name }}-macOS-x86_64.zip OpenSAK.app && echo "Fallback ZIP created")
       - uses: actions/upload-artifact@v4
         with:
           name: OpenSAK-macOS-x86_64
           path: |
-            OpenSAK-macOS-x86_64.dmg
-            OpenSAK-macOS-x86_64.zip
+            OpenSAK-${{ github.ref_name }}-macOS-x86_64.dmg
+            OpenSAK-${{ github.ref_name }}-macOS-x86_64.zip
           retention-days: 7
 
   # ============================================================
@@ -243,10 +243,10 @@ jobs:
 
             | Platform | File | Instructions |
             |----------|------|--------------|
-            | 🪟 Windows | `OpenSAK-Windows.zip` | Unzip and double-click `OpenSAK.exe` |
-            | 🐧 Linux | `OpenSAK-Linux-x86_64.AppImage` | See instructions below |
-            | 🍎 macOS Apple Silicon (M1/M2/M3/M4) | `OpenSAK-macOS-arm64.dmg` | Open and drag OpenSAK to Applications |
-            | 🍎 macOS Intel | `OpenSAK-macOS-x86_64.dmg` | Open and drag OpenSAK to Applications |
+            | 🪟 Windows | `OpenSAK-${{ steps.version.outputs.VERSION }}-Windows.zip` | Unzip and double-click `OpenSAK.exe` |
+            | 🐧 Linux | `OpenSAK-${{ steps.version.outputs.VERSION }}-Linux-x86_64.AppImage` | See instructions below |
+            | 🍎 macOS Apple Silicon (M1/M2/M3/M4) | `OpenSAK-${{ steps.version.outputs.VERSION }}-macOS-arm64.dmg` | Open and drag OpenSAK to Applications |
+            | 🍎 macOS Intel | `OpenSAK-${{ steps.version.outputs.VERSION }}-macOS-x86_64.dmg` | Open and drag OpenSAK to Applications |
 
             > **Not sure which Mac you have?** Click the Apple menu () → "About This Mac".
             > If it says "Apple M1/M2/M3/M4" choose **arm64**. If it says "Intel" choose **x86_64**.
@@ -254,15 +254,15 @@ jobs:
             ### Linux
 
             ```bash
-            chmod +x OpenSAK-Linux-x86_64.AppImage
-            ./OpenSAK-Linux-x86_64.AppImage
+            chmod +x OpenSAK-${{ steps.version.outputs.VERSION }}-Linux-x86_64.AppImage
+            ./OpenSAK-${{ steps.version.outputs.VERSION }}-Linux-x86_64.AppImage
             ```
 
             Or right-click → Properties → Allow executing as program, then double-click.
 
             ### Windows
 
-            1. Download `OpenSAK-Windows.zip`
+            1. Download `OpenSAK-${{ steps.version.outputs.VERSION }}-Windows.zip`
             2. Right-click → Extract All
             3. Open the extracted folder and double-click `OpenSAK.exe`
 
