@@ -14,10 +14,29 @@ from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QMenu,
 
 from opensak.db.models import Cache
 from opensak.filters.engine import _haversine_km
+import math
+
+
+def _bearing_deg(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Beregn azimut (kompasretning) fra punkt 1 til punkt 2 i grader (0-360)."""
+    r = math.pi / 180
+    dlon = (lon2 - lon1) * r
+    la1, la2 = lat1 * r, lat2 * r
+    x = math.sin(dlon) * math.cos(la2)
+    y = math.cos(la1) * math.sin(la2) - math.sin(la1) * math.cos(la2) * math.cos(dlon)
+    return (math.degrees(math.atan2(x, y)) + 360) % 360
+
+
+def _bearing_compass(deg: float) -> str:
+    """Returner kompasretning på dansk (8 verdenshjørner) + grader."""
+    dirs = ["N", "NØ", "Ø", "SØ", "S", "SV", "V", "NV"]
+    idx = round(deg / 45) % 8
+    return f"{dirs[idx]} {int(round(deg))}°"
 from opensak.gui.settings import get_settings
 from opensak.coords import format_coords
 from opensak.lang import tr
 from opensak.utils.types import GcCode
+from opensak.gui.icon_provider import get_cache_type_icon, get_cache_size_icon
 
 
 # ── Alle mulige kolonner ──────────────────────────────────────────────────────
@@ -25,10 +44,9 @@ from opensak.utils.types import GcCode
 def get_column_defs() -> dict:
     """Returner kolonnenavne oversat til det aktive sprog."""
     return {
-        "status":       ("",                          22),
         "gc_code":      (tr("col_gc_code"),           80),
         "name":         (tr("col_name"),             260),
-        "cache_type":   (tr("col_type"),             130),
+        "cache_type":   (tr("col_type"),              28),
         "difficulty":   (tr("col_difficulty"),        50),
         "terrain":      (tr("col_terrain"),           50),
         "container":    (tr("col_container"),         80),
@@ -51,7 +69,8 @@ def get_column_defs() -> dict:
         "dnf_date":        (tr("col_dnf_date"),        90),
         "first_to_find":   (tr("col_first_to_find"),   45),
         "favorite_points": (tr("col_favorite_points"), 55),
-        "user_flag":       (tr("col_user_flag"),    22),
+        "user_flag":       (tr("col_user_flag"),    30),
+        "bearing":         (tr("col_bearing"),           55),
         "user_sort":       (tr("col_user_sort"),       55),
         "user_data_1":     (tr("col_user_data_1"),    100),
         "user_data_2":     (tr("col_user_data_2"),    100),
@@ -83,6 +102,55 @@ def _gc_sort_key(gc_code: GcCode) -> str:
     return "GC" + suffix.zfill(10)
 
 
+from PySide6.QtWidgets import QStyledItemDelegate, QApplication
+from PySide6.QtGui import QPainter, QColor
+from PySide6.QtCore import QRect
+
+
+class SizeBarDelegate(QStyledItemDelegate):
+    """Tegner en vandret fyldt bar (GSAK-stil) for container-kolonnen."""
+
+    # Bredde i procent for hvert størrelsesstrin (0.0–1.0)
+    _BAR_WIDTHS = {
+        "nano":       0.10,
+        "micro":      0.25,
+        "small":      0.45,
+        "regular":    0.65,
+        "large":      0.90,
+        "other":      0.50,
+        "not chosen": 0.00,
+        "virtual":    0.00,
+        "":           0.00,
+    }
+    _BAR_COLOR   = QColor("#5b8dd9")   # GSAK-blå
+    _EMPTY_COLOR = QColor("#dde3ee")   # lys grå baggrund
+
+    def paint(self, painter: QPainter, option, index) -> None:
+        size_key = index.data(Qt.ItemDataRole.UserRole + 10) or ""
+        ratio = self._BAR_WIDTHS.get(size_key.lower(), 0.30)
+
+        painter.save()
+
+        # Baggrund
+        bg = option.rect.adjusted(4, 3, -4, -3)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(self._EMPTY_COLOR)
+        painter.drawRoundedRect(bg, 2, 2)
+
+        # Fyldt del
+        if ratio > 0:
+            filled = QRect(bg.x(), bg.y(), int(bg.width() * ratio), bg.height())
+            painter.setBrush(self._BAR_COLOR)
+            painter.drawRoundedRect(filled, 2, 2)
+
+        painter.restore()
+
+    def sizeHint(self, option, index):
+        sh = super().sizeHint(option, index)
+        sh.setHeight(max(sh.height(), 20))
+        return sh
+
+
 class CacheTableModel(QAbstractTableModel):
     """Qt table model backed by a list of Cache objects."""
 
@@ -92,6 +160,7 @@ class CacheTableModel(QAbstractTableModel):
         super().__init__(parent)
         self._caches: list[Cache] = []
         self._distances: dict[int, float] = {}
+        self._bearings: dict[int, float] = {}
         self._columns: list[str] = _get_active_columns()
 
     def flags(self, index: QModelIndex):
@@ -141,6 +210,10 @@ class CacheTableModel(QAbstractTableModel):
                     settings.home_lat, settings.home_lon,
                     c.latitude, c.longitude
                 )
+                self._bearings[c.id] = _bearing_deg(
+                    settings.home_lat, settings.home_lon,
+                    c.latitude, c.longitude
+                )
 
     def cache_at(self, row: int) -> Optional[Cache]:
         if 0 <= row < len(self._caches):
@@ -174,7 +247,7 @@ class CacheTableModel(QAbstractTableModel):
         if role == Qt.ItemDataRole.TextAlignmentRole:
             if col in ("difficulty", "terrain", "distance", "found",
                        "dnf", "premium_only", "archived", "log_count",
-                       "corrected", "first_to_find", "user_flag",
+                       "corrected", "first_to_find", "user_flag", "bearing",
                        "user_sort", "favorite_points"):
                 return Qt.AlignmentFlag.AlignCenter
             return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
@@ -192,6 +265,9 @@ class CacheTableModel(QAbstractTableModel):
                 return font
 
         if role == Qt.ItemDataRole.ToolTipRole:
+            if col == "cache_type":
+                t = cache.cache_type or ""
+                return t.replace("Unknown", "Mystery")
             if col == "corrected":
                 note = cache.user_note
                 if note and note.is_corrected:
@@ -199,35 +275,88 @@ class CacheTableModel(QAbstractTableModel):
                     coords = format_coords(note.corrected_lat, note.corrected_lon, fmt)
                     return tr("col_corrected_tooltip", coords=coords)
 
+        if role == Qt.ItemDataRole.DecorationRole:
+            return self._decoration_value(cache, col)
+
+        if role == Qt.ItemDataRole.UserRole + 10:
+            # Size key til SizeBarDelegate
+            return (cache.container or "").lower()
+
         if role == Qt.ItemDataRole.UserRole:
             return cache
 
         return None
 
+    # ── Cache-type string → icon key ──────────────────────────────────────────
+
+    @staticmethod
+    def _type_icon_key(cache: Cache) -> str:
+        """Map a Cache object to an icon_provider key, respecting status."""
+        if cache.archived:
+            return "archived"
+        if cache.found:
+            return "found"
+        if cache.dnf:
+            return "dnf"
+        if not cache.available:
+            return "disabled"
+        t = (cache.cache_type or "").lower()
+        mapping = {
+            "traditional cache": "traditional",
+            "multi-cache":       "multi",
+            "mystery cache":     "mystery",
+            "unknown cache":     "mystery",
+            "letterbox hybrid":  "letterbox",
+            "whereigo cache":    "whereigo",
+            "earthcache":        "earthcache",
+            "virtual cache":     "virtual",
+            "webcam cache":      "webcam",
+            "event cache":       "event",
+            "cache in trash out event": "cito",
+            "mega-event cache":  "mega_event",
+            "giga-event cache":  "giga_event",
+            "lab cache":         "lab_cache",
+            "community celebration event": "community_celebration",
+            "gps adventures maze": "gps_adventures",
+        }
+        return mapping.get(t, "unknown")
+
+    @staticmethod
+    def _size_icon_key(cache: Cache) -> str:
+        """Map container string to icon_provider size key."""
+        mapping = {
+            "nano":       "nano",
+            "micro":      "micro",
+            "small":      "small",
+            "regular":    "regular",
+            "large":      "large",
+            "other":      "other",
+            "not chosen": "not_chosen",
+            "virtual":    "not_chosen",
+        }
+        return mapping.get((cache.container or "").lower(), "other")
+
+    def _decoration_value(self, cache: Cache, col: str):
+        """Return QIcon for columns that show icons."""
+        if col == "cache_type":
+            return get_cache_type_icon(self._type_icon_key(cache), size=20)
+        if col == "container":
+            return get_cache_size_icon(self._size_icon_key(cache), size=20)
+        return None
+
     def _display_value(self, cache: Cache, col: str) -> str:
-        if col == "status":
-            if cache.archived:
-                return "🔒"
-            if cache.found:
-                return "✅"
-            if cache.dnf:
-                return "❌"
-            if not cache.available:
-                return "⚠️"
-            return ""
         if col == "gc_code":
             return cache.gc_code or ""
         if col == "name":
             return cache.name or ""
         if col == "cache_type":
-            t = cache.cache_type or ""
-            return t.replace(" Cache", "").replace("Unknown", "Mystery")
+            return ""   # ikon vises via DecorationRole — fuldt navn i tooltip
         if col == "difficulty":
             return f"{cache.difficulty:.1f}" if cache.difficulty else "?"
         if col == "terrain":
             return f"{cache.terrain:.1f}" if cache.terrain else "?"
         if col == "container":
-            return cache.container or ""
+            return ""   # ikon vises via DecorationRole
         if col == "country":
             return cache.country or ""
         if col == "state":
@@ -241,6 +370,11 @@ class CacheTableModel(QAbstractTableModel):
             if get_settings().use_miles:
                 return f"{dist * 0.621371:.1f} mi"
             return f"{dist:.1f} km"
+        if col == "bearing":
+            deg = self._bearings.get(cache.id)
+            if deg is None:
+                return "?"
+            return _bearing_compass(deg)
         if col == "found":
             return "✓" if cache.found else ""
         if col == "placed_by":
@@ -306,6 +440,10 @@ class CacheTableModel(QAbstractTableModel):
         elif col == "distance":
             self._caches.sort(
                 key=lambda c: self._distances.get(c.id, 99999), reverse=reverse
+            )
+        elif col == "bearing":
+            self._caches.sort(
+                key=lambda c: self._bearings.get(c.id, 999), reverse=reverse
             )
         elif col == "found":
             self._caches.sort(key=lambda c: int(c.found), reverse=reverse)
@@ -400,6 +538,11 @@ class CacheTableView(QTableView):
             width = get_column_defs().get(col_id, (col_id, 80))[1]
             self.setColumnWidth(i, width)
             header.setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
+            if col_id == "container":
+                self._size_bar_delegate = SizeBarDelegate(self)
+                self.setItemDelegateForColumn(i, self._size_bar_delegate)
+            else:
+                self.setItemDelegateForColumn(i, None)
         if "name" in columns:
             name_idx = columns.index("name")
             header.setSectionResizeMode(

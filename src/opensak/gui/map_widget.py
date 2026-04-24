@@ -27,13 +27,36 @@ class TileInterceptor(QWebEngineUrlRequestInterceptor):
         if "tile.openstreetmap.org" in url:
             info.setHttpHeader(b"Referer", b"https://www.openstreetmap.org/")
 
-# ── Cache type → Leaflet marker farve ────────────────────────────────────────
+# ── Cache type → Leaflet marker HTML ─────────────────────────────────────────
 
-from opensak.utils.constants import CACHE_COLOURS, DEFAULT_CACHE_COLOUR
+from opensak.gui.icon_provider import get_map_pin_html as _get_pin_html
+
+_TYPE_KEY_MAP: dict[str, str] = {
+    "traditional cache":             "traditional",
+    "multi-cache":                   "multi",
+    "mystery cache":                 "mystery",
+    "unknown cache":                 "mystery",
+    "letterbox hybrid":              "letterbox",
+    "whereigo cache":                "whereigo",
+    "earthcache":                    "earthcache",
+    "virtual cache":                 "virtual",
+    "webcam cache":                  "webcam",
+    "event cache":                   "event",
+    "cache in trash out event":      "cito",
+    "mega-event cache":              "mega_event",
+    "giga-event cache":              "giga_event",
+    "lab cache":                     "lab_cache",
+    "community celebration event":   "community_celebration",
+    "gps adventures maze":           "gps_adventures",
+}
 
 
-def _cache_colour(cache_type: str) -> str:
-    return CACHE_COLOURS.get(cache_type, DEFAULT_CACHE_COLOUR)
+def _cache_pin_html(cache_type: str, found: bool) -> str:
+    """Return Leaflet divIcon HTML for a cache type pin."""
+    if found:
+        return _get_pin_html("found")
+    key = _TYPE_KEY_MAP.get((cache_type or "").lower(), "unknown")
+    return _get_pin_html(key)
 
 
 # ── Python ↔ JavaScript bro ───────────────────────────────────────────────────
@@ -73,19 +96,15 @@ MAP_HTML = """<!DOCTYPE html>
 
 <style>
   html, body, #map { height: 100%; margin: 0; padding: 0; }
-  .cache-pin {
-    width: 22px; height: 22px;
+  .cache-pin-corrected-ring {
+    position: absolute;
+    top: -3px; left: -3px;
+    width: 30px; height: 30px;
+    border: 3px solid #e65100;
     border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    border: 2px solid #fff;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    pointer-events: none;
   }
-  .cache-pin-found { opacity: 0.45; }
-  .cache-pin-corrected {
-    outline: 3px solid #e65100;
-    outline-offset: 2px;
-    border-radius: 50% 50% 50% 0;
-  }
+  .cache-pin-found { opacity: 0.55; }
   .home-marker {
     width: 16px; height: 16px;
     background: #e53935;
@@ -140,14 +159,20 @@ new QWebChannel(qt.webChannelTransport, function(channel) {
 });
 
 // ── Hjælpefunktioner ──────────────────────────────────────────────────────────
-function makePinIcon(colour, found, corrected) {
-    var cls = 'cache-pin' + (found ? ' cache-pin-found' : '') + (corrected ? ' cache-pin-corrected' : '');
+function makePinIcon(pinHtml, found, corrected) {
+    var wrapper = pinHtml;
+    if (found) {
+        wrapper = wrapper.replace('<div style="position:relative', '<div style="opacity:0.55;position:relative');
+    }
+    if (corrected) {
+        wrapper = wrapper.replace('</div>', '<div class="cache-pin-corrected-ring"></div></div>');
+    }
     return L.divIcon({
         className: '',
-        html: '<div class="' + cls + '" style="background:' + colour + '"></div>',
-        iconSize: [22, 22],
-        iconAnchor: [11, 22],
-        popupAnchor: [0, -24]
+        html: wrapper,
+        iconSize: [24, 32],
+        iconAnchor: [12, 32],
+        popupAnchor: [0, -34]
     });
 }
 
@@ -180,7 +205,7 @@ function loadCaches(cachesJson) {
         var lat = c.corrected ? c.clat : c.lat;
         var lon = c.corrected ? c.clon : c.lon;
         var marker = L.marker([lat, lon], {
-            icon: makePinIcon(c.colour, c.found, c.corrected),
+            icon: makePinIcon(c.pin_html, c.found, c.corrected),
             title: c.name + (c.corrected ? ' 📍' : '')
         });
 
@@ -359,10 +384,10 @@ class MapWidget(QWidget):
                 "terrain":    c.terrain or 0,
                 "lat":        c.latitude,
                 "lon":        c.longitude,
-                "clat":       eff_lat,       # korrigeret lat (samme som lat hvis ikke korrigeret)
-                "clon":       eff_lon,       # korrigeret lon
+                "clat":       eff_lat,
+                "clon":       eff_lon,
                 "corrected":  has_corrected,
-                "colour":     _cache_colour(c.cache_type or ""),
+                "pin_html":   _cache_pin_html(c.cache_type or "", bool(c.found)),
                 "found":      c.found,
             })
 

@@ -14,6 +14,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.10.2] — 2026-04-24
+### Changed
+- **Cache type column** — now shows only the cache type icon (no text); the full
+  type name is visible as a tooltip on hover. Column width reduced to icon size.
+- **Container column** — replaced icon with a filled horizontal bar (GSAK-style)
+  showing cache size visually: Nano through Large rendered as a proportional blue bar.
+- **Bearing column** — direction now displayed as compass points with degrees,
+  e.g. `NØ 42°`, `S 180°`, `V 274°` (previously arrow emoji + degrees).
+- **Bearing column** added to default visible columns (after Distance).
+- **Flag column** — width increased slightly so the 🚩 icon is fully visible.
+- **Default column order** updated to match GSAK layout:
+  Flag → GC Code → Name → Type → Container → D → T → Distance → Bearing → Found → Favourite
+- **Search fields** moved from the menu bar to a dedicated search toolbar on its own
+  line below the main toolbar, left-aligned. Two separate fields: **GC code** (filters
+  by GC number only) and **Name** (filters by cache name only).
+
+---
+
 ## [1.10.1] — 2026-04-23
 ### Fixed
 - **Black description and map on Windows** (issue #57) — disabled GPU acceleration

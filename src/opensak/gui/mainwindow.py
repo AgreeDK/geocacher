@@ -7,8 +7,8 @@ from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QSplitter, QVBoxLayout,
-    QHBoxLayout, QLabel, QLineEdit, QStatusBar,
-    QToolBar, QPushButton, QComboBox, QFrame,
+    QFrame, QHBoxLayout, QLabel, QLineEdit, QStatusBar,
+    QToolBar, QPushButton, QComboBox,
     QSizePolicy, QMessageBox, QWidgetAction
 )
 
@@ -35,6 +35,7 @@ class MainWindow(QMainWindow):
         self._setup_ui()
         self._setup_menu()
         self._setup_toolbar()
+        self._setup_search_bar()
         self._setup_statusbar()
         self._restore_state()
         self._update_title()
@@ -228,17 +229,8 @@ class MainWindow(QMainWindow):
         act_about.triggered.connect(self._show_about)
         help_menu.addAction(act_about)
 
-        # ── Søgefelt og Vis-dropdown i menulinjen ─────────────────────────────
+        # ── Vis-dropdown i menulinjen ─────────────────────────────────────────
         menubar.addSeparator()
-
-        # Søgefelt
-        self._search_box = QLineEdit()
-        self._search_box.setPlaceholderText(tr("search_placeholder"))
-        self._search_box.setFixedWidth(180)
-        self._search_box.textChanged.connect(self._on_search_changed)
-        search_action = QWidgetAction(self)
-        search_action.setDefaultWidget(self._search_box)
-        menubar.addAction(search_action)
 
         # Vis-dropdown
         self._quick_filter = QComboBox()
@@ -359,6 +351,56 @@ class MainWindow(QMainWindow):
         settings_act.triggered.connect(self._open_settings)
         tb.addAction(settings_act)
 
+    def _setup_search_bar(self) -> None:
+        """Søgelinje på linje 3 under primær toolbar — højrejusteret via HBoxLayout."""
+        from PySide6.QtWidgets import (
+            QToolBar, QLabel, QLineEdit, QWidgetAction, QWidget, QSizePolicy, QHBoxLayout
+        )
+        sb = QToolBar(tr("search_bar_title"))
+        sb.setObjectName("search_toolbar")
+        sb.setMovable(False)
+        self.addToolBarBreak()
+        self.addToolBar(sb)
+
+        # Container-widget med HBoxLayout — spacer skubber felterne til højre
+        container = QWidget()
+        container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        row = QHBoxLayout(container)
+        row.setContentsMargins(0, 0, 8, 0)
+        row.setSpacing(4)
+
+        # GC-nummer label + felt
+        gc_lbl = QLabel(tr("search_gc_label") + ":")
+        row.addWidget(gc_lbl)
+
+        self._search_gc = QLineEdit()
+        self._search_gc.setPlaceholderText("GC12345")
+        self._search_gc.setFixedWidth(110)
+        self._search_gc.setClearButtonEnabled(True)
+        self._search_gc.textChanged.connect(self._on_search_changed)
+        row.addWidget(self._search_gc)
+
+        # Separator
+        sep = QFrame()
+        sep.setFrameShape(QFrame.Shape.VLine)
+        sep.setFrameShadow(QFrame.Shadow.Sunken)
+        row.addWidget(sep)
+
+        # Navn label + felt
+        name_lbl = QLabel(tr("search_name_label") + ":")
+        row.addWidget(name_lbl)
+
+        self._search_box = QLineEdit()
+        self._search_box.setPlaceholderText(tr("search_placeholder"))
+        self._search_box.setFixedWidth(220)
+        self._search_box.setClearButtonEnabled(True)
+        self._search_box.textChanged.connect(self._on_search_changed)
+        row.addWidget(self._search_box)
+
+        container_action = QWidgetAction(self)
+        container_action.setDefaultWidget(container)
+        sb.addAction(container_action)
+
     def _setup_statusbar(self) -> None:
         self._statusbar = QStatusBar()
         self.setStatusBar(self._statusbar)
@@ -461,14 +503,17 @@ class MainWindow(QMainWindow):
             from opensak.filters.engine import ArchivedFilter
             fs.add(ArchivedFilter())
 
-        # Search box
-        search = self._search_box.text().strip()
-        if search:
-            from opensak.filters.engine import NameFilter, GcCodeFilter, FilterSet as FS
-            search_or = FS(mode="OR")
-            search_or.add(NameFilter(search))
-            search_or.add(GcCodeFilter(search))
-            fs.add(search_or)
+        # GC-nummer søgefelt (søger kun i GC kode)
+        gc_search = self._search_gc.text().strip()
+        if gc_search:
+            from opensak.filters.engine import GcCodeFilter
+            fs.add(GcCodeFilter(gc_search))
+
+        # Navn søgefelt (søger kun i navn)
+        name_search = self._search_box.text().strip()
+        if name_search:
+            from opensak.filters.engine import NameFilter
+            fs.add(NameFilter(name_search))
 
         return fs
 
