@@ -8,6 +8,7 @@ Supported formats:
 
 Parse also accepts the geocaching.com copy-paste format:
   N 34° 58.088' E 034° 03.281'   (DMM with degree sign and apostrophe)
+  N 34° 58.088 E 034° 03.281     (DMM with degree sign, no apostrophe)
 """
 
 from __future__ import annotations
@@ -82,7 +83,9 @@ def parse_coords(text: str) -> Coordinate | None:
     ----------------
     DD  :  55.78750, 12.41667
     DMM :  N55 47.250 E012 25.000
-    DMM°:  N 34° 58.088' E 034° 03.281'   (geocaching.com copy-paste)
+    DMM°:  N 34° 58.088' E 034° 03.281'   (med apostrof)
+    DMM°:  N 34° 58.088 E 034° 03.281     (uden apostrof — fixes #59)
+    DMM°:  N38° 33.502 W90° 22.774        (uden mellemrum efter hemisphere)
     DMS :  N55° 47' 15.00" E012° 25' 00.00"
     """
     import re
@@ -96,10 +99,10 @@ def parse_coords(text: str) -> Coordinate | None:
         return float(m.group(1)), float(m.group(2))
 
     # ── DMM°: "N 34° 58.088' E 034° 03.281'" (geocaching.com format) ─────────
-    # Grads-tegn efter grader, apostrof efter minutter, mellemrum tilladt overalt
+    # Grads-tegn efter grader, apostrof efter minutter er valgfri (fixes #59)
     m = re.match(
-        r'^([NSns])\s*(\d{1,3})\s*°\s*(\d+(?:\.\d+)?)\s*[\'′]\s*'
-        r'([EWew])\s*(\d{1,3})\s*°\s*(\d+(?:\.\d+)?)\s*[\'′]\s*$',
+        r'^([NSns])\s*(\d{1,3})\s*°?\s*(\d+(?:\.\d+)?)\s*[\'′]?\s*'
+        r'([EWew])\s*(\d{1,3})\s*°?\s*(\d+(?:\.\d+)?)\s*[\'′]?\s*$',
         text
     )
     if m:
