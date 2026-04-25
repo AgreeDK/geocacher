@@ -1,5 +1,5 @@
 """OpenSAK — cross-platform geocache management tool."""
 
-__version__ = "1.10.6"
+__version__ = "1.10.7"
 __author__ = "OpenSAK Contributors"
 __license__ = "MIT"

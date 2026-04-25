@@ -14,6 +14,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.10.7] — 2026-04-25
+### Changed
+- **Handle lower screen resolutions** — better view on low screen resolutions
+
+---
+
 ## [1.10.6] — 2026-04-25
 ### Changed
 - **Handle lower screen resolutions** — better view on low screen resolutions
