@@ -30,7 +30,7 @@ from opensak.utils.types import GcCode
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setMinimumSize(1100, 680)
+        self.setMinimumSize(800, 500)
         self._current_filterset = FilterSet()
         self._setup_ui()
         self._setup_menu()
@@ -415,22 +415,10 @@ class MainWindow(QMainWindow):
         if s.window_state:
             self.restoreState(s.window_state)
 
-        # Layout version guard: if saved splitter state was from an old
-        # 3-panel layout it will be incompatible with the current 2-widget
-        # vertical splitter. We check the widget count after restore —
-        # if it doesn't match we fall back to default sizes and clear the
-        # stored state so it won't cause problems on next launch either.
-        if s.splitter_state:
-            self._splitter.restoreState(s.splitter_state)
-            if self._splitter.count() != 2:
-                self._splitter.setSizes([380, 400])
-                s.splitter_state = None
-
-        if getattr(s, "bottom_splitter_state", None):
-            self._bottom_splitter.restoreState(s.bottom_splitter_state)
-            if self._bottom_splitter.count() != 2:
-                self._bottom_splitter.setSizes([560, 540])
-                s.bottom_splitter_state = None
+        # Gendan splitter-størrelser som procentandele af vinduets størrelse.
+        # Vi gemmer ratios (0.0–1.0) i stedet for absolutte pixels, så
+        # layoutet ser fornuftigt ud uanset skærmopløsning (issue #62).
+        QTimer.singleShot(0, self._restore_splitter_ratios)
 
     def _update_title(self) -> None:
         """Opdatér vinduestitel med aktiv database navn."""
@@ -456,12 +444,47 @@ class MainWindow(QMainWindow):
             tr("status_db_name", db_name=db_info.name), 4000
         )
 
+    def _restore_splitter_ratios(self) -> None:
+        """Gendan splitter-størrelser fra gemte procentandele (issue #62).
+
+        Ratios gemmes som floats (0.0–1.0) så layoutet skalerer korrekt
+        på tværs af skærmopløsninger og platforme.
+        """
+        s = get_settings()
+        total_v = self._splitter.height()
+        ratio_v = getattr(s, "splitter_ratio_top", 0.49)
+        if total_v > 10:
+            top = int(total_v * ratio_v)
+            self._splitter.setSizes([top, total_v - top])
+        else:
+            self._splitter.setSizes([380, 400])
+
+        total_h = self._bottom_splitter.width()
+        ratio_h = getattr(s, "bottom_splitter_ratio_left", 0.51)
+        if total_h > 10:
+            left = int(total_h * ratio_h)
+            self._bottom_splitter.setSizes([left, total_h - left])
+        else:
+            self._bottom_splitter.setSizes([560, 540])
+
+    def _save_splitter_ratios(self) -> None:
+        """Gem splitter-størrelser som procentandele (issue #62)."""
+        s = get_settings()
+        sizes_v = self._splitter.sizes()
+        total_v = sum(sizes_v)
+        if total_v > 0:
+            s.splitter_ratio_top = sizes_v[0] / total_v
+
+        sizes_h = self._bottom_splitter.sizes()
+        total_h = sum(sizes_h)
+        if total_h > 0:
+            s.bottom_splitter_ratio_left = sizes_h[0] / total_h
+
     def closeEvent(self, event) -> None:
         s = get_settings()
         s.window_geometry = self.saveGeometry()
         s.window_state    = self.saveState()
-        s.splitter_state  = self._splitter.saveState()
-        s.bottom_splitter_state = self._bottom_splitter.saveState()
+        self._save_splitter_ratios()
         s.sync()
         super().closeEvent(event)
 
