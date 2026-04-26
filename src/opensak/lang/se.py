@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 src/opensak/lang/se.py —Swedish language file for OpenSAK.
 

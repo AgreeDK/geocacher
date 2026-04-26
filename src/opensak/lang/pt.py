@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """
 src/opensak/lang/pt.py — Portuguese language file for OpenSAK.
 
