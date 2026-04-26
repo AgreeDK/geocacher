@@ -42,7 +42,7 @@ _TYPE_FILE_MAP: dict[str, str] = {
     "multi":                 "multi_cache",
     "mystery":               "mystery_cache",
     "letterbox":             "letterbox_hybrid",
-    "whereigo":              "wherigo_cache",
+    "wherigo":               "wherigo_cache",
     "earthcache":            "earthcache",
     "virtual":               "virtual_cache",
     "webcam":                "webcam_cache",
@@ -66,7 +66,7 @@ _FOUND_COLOR_MAP: dict[str, str] = {
     "multi":                 "orange",
     "mystery":               "dark_blue",
     "letterbox":             "brown",
-    "whereigo":              "teal",
+    "wherigo":               "teal",
     "earthcache":            "dark_green",
     "virtual":               "purple",
     "webcam":                "gray",
@@ -94,7 +94,7 @@ _DB_TYPE_KEY_MAP: dict[str, str] = {
     "mystery cache":                 "mystery",
     "unknown cache":                 "mystery",
     "letterbox hybrid":              "letterbox",
-    "whereigo cache":                "whereigo",
+    "wherigo cache":                 "wherigo",
     "earthcache":                    "earthcache",
     "virtual cache":                 "virtual",
     "webcam cache":                  "webcam",
@@ -205,7 +205,7 @@ _FALLBACK_SVGS: dict[str, str] = {
         '<circle cx="20" cy="21" r="3.5" fill="#d4a76a" opacity="0.9"/>'
         '</svg>'
     ),
-    "whereigo": (
+    "wherigo": (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">'
         '<rect x="4" y="8" width="24" height="7" rx="2" fill="#17a589" stroke="#17a589" stroke-width="0.5"/>'
         '<rect x="6" y="14" width="20" height="13" rx="2" fill="#1abc9c" stroke="#17a589" stroke-width="1"/>'
@@ -334,7 +334,7 @@ _PIN_COLORS: dict[str, str] = {
     "multi":                 "#e67e22",
     "mystery":               "#3498db",
     "letterbox":             "#a0522d",
-    "whereigo":              "#1abc9c",
+    "wherigo":               "#1abc9c",
     "earthcache":            "#27ae60",
     "virtual":               "#8e44ad",
     "webcam":                "#7f8c8d",
@@ -357,7 +357,7 @@ _PIN_LABELS: dict[str, str] = {
     "multi":                 "2+",
     "mystery":               "?",
     "letterbox":             "LB",
-    "whereigo":              "W",
+    "wherigo":               "W",
     "earthcache":            "E",
     "virtual":               "V",
     "webcam":                "",

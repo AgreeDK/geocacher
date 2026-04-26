@@ -343,7 +343,7 @@ class CacheTableModel(QAbstractTableModel):
             "mystery cache":                "mystery",
             "unknown cache":                "mystery",
             "letterbox hybrid":             "letterbox",
-            "whereigo cache":               "whereigo",
+            "wherigo cache":                "wherigo",
             "earthcache":                   "earthcache",
             "virtual cache":                "virtual",
             "webcam cache":                 "webcam",
