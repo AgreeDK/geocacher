@@ -100,7 +100,7 @@ class SettingsDialog(QDialog):
 
         self._points_table = QTableWidget(0, 3)
         self._points_table.setHorizontalHeaderLabels([
-            tr("settings_hp_col_name"),
+            tr("col_name"),
             tr("settings_hp_col_lat"),
             tr("settings_hp_col_lon"),
         ])
@@ -136,12 +136,12 @@ class SettingsDialog(QDialog):
         self._btn_activate.clicked.connect(self._activate_point)
         list_btn_row.addWidget(self._btn_activate)
 
-        self._btn_edit = QPushButton(tr("settings_hp_edit"))
+        self._btn_edit = QPushButton(tr("edit"))
         self._btn_edit.setEnabled(False)
         self._btn_edit.clicked.connect(self._edit_point)
         list_btn_row.addWidget(self._btn_edit)
 
-        self._btn_delete = QPushButton(tr("settings_hp_delete"))
+        self._btn_delete = QPushButton(tr("delete"))
         self._btn_delete.setEnabled(False)
         self._btn_delete.clicked.connect(self._delete_point)
         list_btn_row.addWidget(self._btn_delete)
@@ -163,7 +163,7 @@ class SettingsDialog(QDialog):
         coord_row = QHBoxLayout()
         coord_row.addWidget(QLabel(tr("settings_hp_coord_label")))
         self._new_coord = QLineEdit()
-        self._new_coord.setPlaceholderText(tr("settings_hp_coord_placeholder"))
+        self._new_coord.setPlaceholderText(tr("coord_conv_placeholder"))
         coord_row.addWidget(self._new_coord)
         add_layout.addLayout(coord_row)
 

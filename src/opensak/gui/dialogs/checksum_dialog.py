@@ -83,7 +83,7 @@ class ChecksumDialog(QDialog):
         in_layout.addWidget(hint)
 
         self._input = QLineEdit()
-        self._input.setPlaceholderText(tr("chk_input_placeholder"))
+        self._input.setPlaceholderText(tr("coord_conv_placeholder"))
         self._input.setFont(mono)
         self._input.textChanged.connect(self._calculate)
         in_layout.addWidget(self._input)

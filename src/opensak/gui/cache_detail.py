@@ -84,10 +84,10 @@ class CacheDetailPanel(QWidget):
 
         for lbl, caption in [
             (self._gc_code_lbl,   tr("detail_gc_code")),
-            (self._type_lbl,      tr("detail_type")),
+            (self._type_lbl,      tr("col_type")),
             (self._dt_lbl,        tr("detail_dt")),
             (self._container_lbl, tr("detail_container")),
-            (self._country_lbl,   tr("detail_country")),
+            (self._country_lbl,   tr("col_country")),
             (self._coords_lbl,    tr("detail_coords")),
         ]:
             col = QVBoxLayout()
@@ -433,7 +433,7 @@ class CacheDetailPanel(QWidget):
         if cache.placed_by:
             parts.append(tr("detail_placed_by", name=cache.placed_by))
         if cache.hidden_date:
-            parts.append(f"Dato: {cache.hidden_date.strftime('%d.%m.%Y')}")
+            parts.append(tr("detail_hidden_date", date=cache.hidden_date.strftime('%d.%m.%Y')))
         self._placed_lbl.setText("   |   ".join(parts))
 
         # Description — renderes via QWebEngineView så billeder og CJK-fonte virker
