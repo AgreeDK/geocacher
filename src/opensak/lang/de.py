@@ -384,6 +384,7 @@ STRINGS: dict[str, str] = {
     "col_user_flag":         "👤",
     "search_gc_label":       "GC-Code",
     "col_bearing":           "Richtung",
+    "bearing_dirs":          "N NO O SO S SW W NW",
     "col_user_sort":         "Sortierung",
     "col_user_data_1":       "Benutzerdaten 1",
     "col_user_data_2":       "Benutzerdaten 2",
