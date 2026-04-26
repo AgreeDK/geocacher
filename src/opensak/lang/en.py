@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Decode hint (ROT13)",
+    "detail_encode_btn":            "🔒  Encode hint (ROT13)",
     "detail_log_search_placeholder":"Search in logs…",
     "detail_archived_mark":         " [ARCHIVED]",
     "detail_placed_by":             "Placed by: {name}",

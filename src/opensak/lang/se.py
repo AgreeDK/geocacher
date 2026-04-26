@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Loggar",
     "detail_tab_logs_count":        "Loggar ({count})",
     "detail_decode_btn":            "🔓  Avkoda ledtråd (ROT13)",
+    "detail_encode_btn":            "🔒  Koda ledtråd (ROT13)",
     "detail_log_search_placeholder":"Sök i loggar…",
     "detail_archived_mark":         " [ARKIVERAD]",
     "detail_placed_by":             "Utlagd av: {name}",

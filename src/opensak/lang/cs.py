@@ -346,6 +346,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logy",
     "detail_tab_logs_count":        "Logy ({count})",
     "detail_decode_btn":            "🔓  Dekódovat nápovědu (ROT13)",
+    "detail_encode_btn":            "🔒  Kódovat nápovědu (ROT13)",
     "detail_log_search_placeholder":"Hledat v lozích…",
     "detail_archived_mark":         " [ARCHIVOVÁNO]",
     "detail_placed_by":             "Umístil: {name}",
