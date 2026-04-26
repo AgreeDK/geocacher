@@ -16,6 +16,7 @@ from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 
 from opensak.db.models import Cache
+from opensak.lang import tr
 from opensak.utils.types import GcCode
 
 
@@ -185,7 +186,7 @@ function loadCaches(cachesJson) {
         });
 
         var coordNote = c.corrected
-            ? '<br><span style="color:#e65100;font-size:11px">📍 Korrigerede koordinater</span>'
+            ? '<br><span style="color:#e65100;font-size:11px">📍 ' + c.corrected_label + '</span>'
             : '';
         marker.bindPopup(
             '<b>' + c.gc_code + '</b><br>' +
@@ -352,18 +353,19 @@ class MapWidget(QWidget):
             has_corrected = bool(note and getattr(note, "is_corrected", False))
             eff_lat, eff_lon = _effective_coords(c)
             data.append({
-                "gc_code":    c.gc_code,
-                "name":       c.name or "",
-                "cache_type": c.cache_type or "",
-                "difficulty": c.difficulty or 0,
-                "terrain":    c.terrain or 0,
-                "lat":        c.latitude,
-                "lon":        c.longitude,
-                "clat":       eff_lat,
-                "clon":       eff_lon,
-                "corrected":  has_corrected,
-                "pin_html":   _cache_pin_html(c.cache_type or "", bool(c.found)),
-                "found":      c.found,
+                "gc_code":        c.gc_code,
+                "name":           c.name or "",
+                "cache_type":     c.cache_type or "",
+                "difficulty":     c.difficulty or 0,
+                "terrain":        c.terrain or 0,
+                "lat":            c.latitude,
+                "lon":            c.longitude,
+                "clat":           eff_lat,
+                "clon":           eff_lon,
+                "corrected":      has_corrected,
+                "corrected_label": tr("detail_corrected_coords"),
+                "pin_html":       _cache_pin_html(c.cache_type or "", bool(c.found)),
+                "found":          c.found,
             })
 
         json_str = json.dumps(data, ensure_ascii=False)
