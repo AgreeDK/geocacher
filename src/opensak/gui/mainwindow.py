@@ -70,6 +70,7 @@ class MainWindow(QMainWindow):
         self._bottom_splitter.setObjectName("bottom_splitter")
 
         self._detail_panel = CacheDetailPanel()
+        self._detail_panel.corrected_coords_changed.connect(self._on_corrected_coords_changed)
         self._bottom_splitter.addWidget(self._detail_panel)
 
         # Map widget
@@ -596,6 +597,12 @@ class MainWindow(QMainWindow):
             self._statusbar.showMessage(
                 f"{full.gc_code} — {full.name}"
             )
+
+    def _on_corrected_coords_changed(self, gc_code: GcCode) -> None:
+        """Update the map pin for a single cache after corrected coordinates change."""
+        full = self._load_full_cache(gc_code)
+        if full:
+            self._map_widget.update_cache(full)
 
     def _on_search_changed(self, text: str) -> None:
         QTimer.singleShot(300, self._refresh_cache_list)
