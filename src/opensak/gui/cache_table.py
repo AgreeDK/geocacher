@@ -690,8 +690,8 @@ class CacheTableView(QTableView):
         cur_lon = note.corrected_lon if (note and note.is_corrected) else None
         dlg = CorrectedCoordsDialog(
             gc_code=cache.gc_code,
-            current_lat=cur_lat,
-            current_lon=cur_lon,
+            corrected_lat=cur_lat,
+            corrected_lon=cur_lon,
             parent=self,
         )
         if dlg.exec():

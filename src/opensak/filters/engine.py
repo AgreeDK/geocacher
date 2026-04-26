@@ -649,7 +649,7 @@ def apply_filters(
         joinedload(Cache.trackables),   # bruges i TrackableFilter
         noload(Cache.logs),             # ikke brugt i filtre — load on-demand
         noload(Cache.waypoints),        # ikke brugt i filtre — load on-demand
-        noload(Cache.user_note),        # ikke brugt i filtre — load on-demand
+        joinedload(Cache.user_note),    # one-to-one, cheap join; needed for corrected-coords display
     )
     all_caches = query.all()
 

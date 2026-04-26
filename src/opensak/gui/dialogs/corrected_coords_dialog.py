@@ -75,7 +75,6 @@ class CorrectedCoordsDialog(QDialog):
 
         self._input = QLineEdit()
         self._input.setPlaceholderText(tr("coord_conv_placeholder"))
-        self._input.textChanged.connect(self._on_input_changed)
 
         if current_lat is not None and current_lon is not None:
             fmt = get_settings().coord_format
