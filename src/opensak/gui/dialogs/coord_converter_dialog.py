@@ -39,8 +39,9 @@ class CoordConverterDialog(QDialog):
         self._lon: float | None = lon
         self._setup_ui()
         if lat is not None and lon is not None:
-            # Pre-fill input with DMM (geocaching standard)
+            self._input.blockSignals(True)
             self._input.setText(format_coords(lat, lon, CoordFormat.DMM))
+            self._input.blockSignals(False)
             self._update_outputs(lat, lon)
 
     def _setup_ui(self) -> None:
@@ -124,6 +125,7 @@ class CoordConverterDialog(QDialog):
         copy_btn = QPushButton(tr("coord_conv_copy_btn"))
         copy_btn.setMaximumWidth(70)
         copy_btn.setEnabled(False)
+        copy_btn.setAutoDefault(False)
         copy_btn.clicked.connect(lambda: self._copy(edit.text()))
         row.addWidget(edit)
         row.addWidget(copy_btn)
