@@ -435,7 +435,7 @@ class CacheDetailPanel(QWidget):
         if cache.placed_by:
             parts.append(tr("detail_placed_by", name=cache.placed_by))
         if cache.hidden_date:
-            parts.append(f"Dato: {cache.hidden_date.strftime('%d.%m.%Y')}")
+            parts.append(tr("detail_hidden_date", date=cache.hidden_date.strftime('%d.%m.%Y')))
         self._placed_lbl.setText("   |   ".join(parts))
 
         # Description — renderes via QWebEngineView så billeder og CJK-fonte virker
