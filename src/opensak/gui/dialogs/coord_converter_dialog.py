@@ -14,11 +14,15 @@ from PySide6.QtWidgets import (
     QLabel, QLineEdit, QPushButton, QGroupBox,
     QDialogButtonBox, QApplication, QFrame
 )
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QFontMetrics
 
 from opensak.coords import parse_coords, format_coords
 from opensak.utils.types import CoordFormat
 from opensak.lang import tr
+
+# Widest string any format can produce (DMS at extreme lat/lon values).
+# Used to compute a consistent minimum width for all coordinate fields.
+_WIDEST_COORD = 'S89° 59\' 59.96"  W179° 59\' 59.96"'
 
 
 class CoordConverterDialog(QDialog):
@@ -62,6 +66,9 @@ class CoordConverterDialog(QDialog):
         font = QFont()
         font.setFamily("monospace")
         self._input.setFont(font)
+        self._input.setMinimumWidth(
+            QFontMetrics(font).horizontalAdvance(_WIDEST_COORD) + 16
+        )
         self._input.textChanged.connect(self._on_input_changed)
         in_layout.addWidget(self._input)
 
@@ -122,6 +129,9 @@ class CoordConverterDialog(QDialog):
         edit.setReadOnly(True)
         edit.setFont(font)
         edit.setPlaceholderText("—")
+        edit.setMinimumWidth(
+            QFontMetrics(font).horizontalAdvance(_WIDEST_COORD) + 16
+        )
         copy_btn = QPushButton(tr("coord_conv_copy_btn"))
         copy_btn.setMaximumWidth(70)
         copy_btn.setEnabled(False)
