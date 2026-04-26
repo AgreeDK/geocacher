@@ -33,6 +33,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(800, 500)
         self._current_filterset = FilterSet()
         self._current_sort = SortSpec("name", ascending=True)
+        self._active_filter_name = ""
         self._setup_ui()
         self._setup_menu()
         self._setup_toolbar()
@@ -877,16 +878,18 @@ class MainWindow(QMainWindow):
 
     def _open_filter_dialog(self) -> None:
         from opensak.gui.dialogs.filter_dialog import FilterDialog
-        dlg = FilterDialog(self, self._current_filterset)
+        dlg = FilterDialog(self, self._current_filterset, self._active_filter_name)
         dlg.filter_applied.connect(self._on_filter_applied)
         dlg.exec()
 
-    def _on_filter_applied(self, filterset, sort) -> None:
+    def _on_filter_applied(self, filterset, sort, profile_name: str) -> None:
         self._current_filterset = filterset
         self._current_sort = sort
+        self._active_filter_name = profile_name
         self._save_sort_for_active_db()
         self._act_clear_filter.setEnabled(True)
-        self._filter_lbl.setText(tr("filter_active_label"))
+        label = profile_name if profile_name else tr("filter_active_label")
+        self._filter_lbl.setText(f"🔍 {label}")
         self._quick_filter.setCurrentIndex(0)
         with get_session() as session:
             from opensak.filters.engine import apply_filters
@@ -902,6 +905,7 @@ class MainWindow(QMainWindow):
 
     def _clear_filter(self) -> None:
         self._current_filterset = FilterSet()
+        self._active_filter_name = ""
         self._act_clear_filter.setEnabled(False)
         self._filter_lbl.setText("")
         self._refresh_cache_list()

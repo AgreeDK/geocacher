@@ -178,9 +178,10 @@ class TriStateBox(QWidget):
 class FilterDialog(QDialog):
     """Komplet filter dialog med tre faner."""
 
-    filter_applied = Signal(object, object)  # FilterSet, SortSpec
+    filter_applied = Signal(object, object, str)  # FilterSet, SortSpec, profile_name
 
-    def __init__(self, parent=None, current_filterset: Optional[FilterSet] = None):
+    def __init__(self, parent=None, current_filterset: Optional[FilterSet] = None,
+                 last_profile_name: str = ""):
         super().__init__(parent)
         self.setWindowTitle(tr("filter_dialog_title"))
         self._attr_boxes: dict[int, tuple] = {}
@@ -198,7 +199,12 @@ class FilterDialog(QDialog):
                 rect.y() + (rect.height() - h) // 2,
             )
         self._setup_ui()
-        if current_filterset:
+        if last_profile_name:
+            for i in range(self._profile_combo.count()):
+                if self._profile_combo.itemText(i) == last_profile_name:
+                    self._profile_combo.setCurrentIndex(i)
+                    break
+        elif current_filterset:
             self._load_filterset(current_filterset)
 
     # ── UI bygning ────────────────────────────────────────────────────────────
@@ -933,5 +939,10 @@ class FilterDialog(QDialog):
 
     def _apply(self) -> None:
         fs = self._build_filterset()
-        self.filter_applied.emit(fs, SortSpec("name"))
+        profile_name = (
+            self._profile_combo.currentText()
+            if self._profile_combo.currentData() is not None
+            else ""
+        )
+        self.filter_applied.emit(fs, SortSpec("name"), profile_name)
         self.accept()
