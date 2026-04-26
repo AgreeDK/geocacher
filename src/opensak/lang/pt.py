@@ -384,6 +384,7 @@ STRINGS: dict[str, str] = {
     "detail_log_search_placeholder":"Pesquisar nos logs…",
     "detail_archived_mark":         " [ARQUIVADA]",
     "detail_placed_by":             "Colocada por: {name}",
+    "detail_hidden_date":           "Data: {date}",
     "detail_no_description":        "(Sem descrição)",
     "detail_no_hint":               "(Sem dica)",
     "detail_no_logs":               "(Sem logs)",

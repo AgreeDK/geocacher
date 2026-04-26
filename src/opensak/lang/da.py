@@ -383,6 +383,7 @@ STRINGS: dict[str, str] = {
     "detail_log_search_placeholder":"Søg i logs…",
     "detail_archived_mark":         " [ARKIVERET]",
     "detail_placed_by":             "Udlagt af: {name}",
+    "detail_hidden_date":           "Dato: {date}",
     "detail_no_description":        "(Ingen beskrivelse)",
     "detail_no_hint":               "(Intet hint)",
     "detail_no_logs":               "(Ingen logs)",
