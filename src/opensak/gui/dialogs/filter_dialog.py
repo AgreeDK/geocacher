@@ -154,8 +154,8 @@ class TriStateBox(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(4)
-        self._ja  = QCheckBox(tr("filter_yes"))
-        self._nej = QCheckBox(tr("filter_no"))
+        self._ja  = QCheckBox(tr("yes"))
+        self._nej = QCheckBox(tr("no"))
         layout.addWidget(self._ja)
         layout.addWidget(self._nej)
 
@@ -523,7 +523,7 @@ class FilterDialog(QDialog):
         grid.setContentsMargins(6, 6, 6, 6)
 
         # Header
-        for col, txt in enumerate([tr("filter_attr_col_name"), tr("filter_yes"), tr("filter_no"), tr("filter_none_short")]):
+        for col, txt in enumerate([tr("filter_attr_col_name"), tr("yes"), tr("no"), tr("filter_none_short")]):
             lbl = QLabel(f"<b>{txt}</b>")
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             grid.addWidget(lbl, 0, col)

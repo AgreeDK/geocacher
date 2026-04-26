@@ -84,10 +84,10 @@ class CacheDetailPanel(QWidget):
 
         for lbl, caption in [
             (self._gc_code_lbl,   tr("detail_gc_code")),
-            (self._type_lbl,      tr("detail_type")),
+            (self._type_lbl,      tr("col_type")),
             (self._dt_lbl,        tr("detail_dt")),
             (self._container_lbl, tr("detail_container")),
-            (self._country_lbl,   tr("detail_country")),
+            (self._country_lbl,   tr("col_country")),
             (self._coords_lbl,    tr("detail_coords")),
         ]:
             col = QVBoxLayout()

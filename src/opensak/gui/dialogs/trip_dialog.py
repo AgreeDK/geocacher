@@ -142,11 +142,11 @@ class _PreviewMixin:
 
         self._table = QTableWidget(0, 6)
         self._table.setHorizontalHeaderLabels([
-            tr("trip_col_gc"),
-            tr("trip_col_name"),
-            tr("trip_col_type"),
+            tr("search_gc_label"),
+            tr("col_name"),
+            tr("col_type"),
             "D", "T",
-            tr("trip_col_dist"),
+            tr("col_distance"),
         ])
         self._table.horizontalHeader().setSectionResizeMode(
             1, QHeaderView.ResizeMode.Stretch
@@ -600,7 +600,7 @@ class TripPlannerDialog(_PreviewMixin, QDialog):
         coord_row = QHBoxLayout()
         coord_row.addWidget(QLabel(tr("trip_route_coord_label")))
         self._pt_coord = QLineEdit()
-        self._pt_coord.setPlaceholderText(tr("trip_route_coord_placeholder"))
+        self._pt_coord.setPlaceholderText(tr("coord_conv_placeholder"))
         self._pt_coord.textChanged.connect(self._on_pt_coord_changed)
         coord_row.addWidget(self._pt_coord)
         add_layout.addLayout(coord_row)
