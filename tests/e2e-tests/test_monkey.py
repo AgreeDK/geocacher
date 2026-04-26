@@ -148,78 +148,9 @@ def _fire(kind: str, target: object, rng: random.Random, qtbot) -> None:
 
 
 @pytest.fixture
-def monkey_window(qtbot, tmp_path, monkeypatch):
-    """MainWindow backed by a fresh throwaway database."""
-    import opensak.db.manager as mgr_module
-    from opensak.db.database import init_db
-    from opensak.db.manager import DatabaseInfo
-    from opensak.lang import load_language
-
-    load_language("en")
-
-    db_path = tmp_path / "monkey.db"
-    init_db(db_path=db_path)
-
-    # Seed the DB with real GPX data so the table, detail panel, and cache-
-    # dependent actions (edit/delete waypoint, GPS export, trip planner…) are
-    # all exercised with actual rows rather than an empty database.
-    from opensak.db.database import get_session
-    from opensak.importer import import_gpx
-    from tests.data import SAMPLE_GPX, SAMPLE_WPTS_GPX, make_variant_gpx
-
-    gpx_file = tmp_path / "sample.gpx"
-    gpx_file.write_text(SAMPLE_GPX, encoding="utf-8")
-    wpts_file = tmp_path / "sample-wpts.gpx"
-    wpts_file.write_text(SAMPLE_WPTS_GPX, encoding="utf-8")
-
-    with get_session() as session:
-        import_gpx(gpx_file, session, wpts_path=wpts_file)
-
-    variant_file = tmp_path / "variant.gpx"
-    variant_file.write_text(make_variant_gpx("GCAAA01", "GCAAA02"), encoding="utf-8")
-    with get_session() as session:
-        import_gpx(variant_file, session)
-
-    # Lightweight stand-in that never touches the user's QSettings or real DBs.
-    class _FakeManager:
-        def __init__(self):
-            self._info = DatabaseInfo("MonkeyTest", db_path)
-
-        @property
-        def active(self):
-            return self._info
-
-        @property
-        def active_path(self):
-            return self._info.path
-
-        @property
-        def databases(self):
-            return [self._info]
-
-        def ensure_active_initialised(self):
-            pass
-
-        def switch_to(self, db_info):
-            pass
-
-        def new_database(self, name, path=None):
-            raise RuntimeError("new_database called during monkey test")
-
-    monkeypatch.setattr(mgr_module, "_manager", _FakeManager())
-
-    from opensak.gui.mainwindow import MainWindow
-
-    window = MainWindow()
-    qtbot.addWidget(window)
-    window.show()
-    qtbot.waitExposed(window)
-    # Wait for the QTimer.singleShot(100) that loads the cache table.
-    qtbot.wait(300)
-
-    yield window
-
-    mgr_module._manager = None
+def monkey_window(seeded_window):
+    """Alias for seeded_window — kept for backward compatibility with test name."""
+    return seeded_window
 
 
 # ── Test ──────────────────────────────────────────────────────────────────────
