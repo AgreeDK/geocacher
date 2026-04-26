@@ -559,19 +559,39 @@ class FilterSet:
 
 # Valid sort fields and how to extract the sort key from a Cache object
 SORT_FIELDS: dict[str, Any] = {
-    "name":        lambda c: (c.name or "").lower(),
-    "gc_code":     lambda c: c.gc_code or "",
-    "cache_type":  lambda c: c.cache_type or "",
-    "difficulty":  lambda c: c.difficulty or 0.0,
-    "terrain":     lambda c: c.terrain or 0.0,
-    "hidden_date": lambda c: c.hidden_date or 0,
-    "country":     lambda c: (c.country or "").lower(),
-    "state":       lambda c: (c.state or "").lower(),
-    "county":      lambda c: (c.county or "").lower(),
-    "placed_by":   lambda c: (c.placed_by or "").lower(),
-    "container":   lambda c: (c.container or "").lower(),
-    "found":       lambda c: int(c.found),
-    "archived":    lambda c: int(c.archived),
+    "name":            lambda c: (c.name or "").lower(),
+    "gc_code":         lambda c: c.gc_code or "",
+    "cache_type":      lambda c: c.cache_type or "",
+    "difficulty":      lambda c: c.difficulty or 0.0,
+    "terrain":         lambda c: c.terrain or 0.0,
+    "hidden_date":     lambda c: c.hidden_date or 0,
+    "country":         lambda c: (c.country or "").lower(),
+    "state":           lambda c: (c.state or "").lower(),
+    "county":          lambda c: (c.county or "").lower(),
+    "placed_by":       lambda c: (c.placed_by or "").lower(),
+    "container":       lambda c: (c.container or "").lower(),
+    "found":           lambda c: int(c.found),
+    "archived":        lambda c: int(c.archived),
+    # Kolonner sorteret i CacheTableModel — accepteres af SortSpec men bruges
+    # ikke af apply_filters (sortering sker i Python-laget via model.sort())
+    "distance":        lambda c: c.distance or 99999.0,
+    "bearing":         lambda c: c.bearing or 0.0,
+    "log_count":       lambda c: 0,   # placeholder — model.sort() håndterer det
+    "last_log":        lambda c: 0,
+    "found_date":      lambda c: c.found_date or 0,
+    "dnf":             lambda c: int(c.dnf),
+    "dnf_date":        lambda c: c.dnf_date or 0,
+    "premium_only":    lambda c: int(c.premium_only),
+    "favorite":        lambda c: int(c.favorite_point),
+    "favorite_points": lambda c: c.favorite_points or 0,
+    "corrected":       lambda c: 0,   # placeholder — model.sort() håndterer det
+    "first_to_find":   lambda c: int(c.first_to_find or False),
+    "user_flag":       lambda c: int(c.user_flag or False),
+    "user_sort":       lambda c: c.user_sort if c.user_sort is not None else 999999,
+    "user_data_1":     lambda c: (c.user_data_1 or "").lower(),
+    "user_data_2":     lambda c: (c.user_data_2 or "").lower(),
+    "user_data_3":     lambda c: (c.user_data_3 or "").lower(),
+    "user_data_4":     lambda c: (c.user_data_4 or "").lower(),
 }
 
 

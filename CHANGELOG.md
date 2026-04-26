@@ -14,6 +14,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.1] — 2026-04-26
+### Fixed
+- **Sortering huskes per database** — sorteringskolonne og retning gemmes nu
+  per database i indstillingerne og genanvendes automatisk ved Refresh, genstart
+  og database-skift. Tidligere nulstillede sorteringen til "Name" ved enhver
+  opdatering (fixes #63).
+- **Corrected coordinates vises i kolonnen** — 📍 ikonet i cache-listen vises
+  nu korrekt for caches med korrigerede koordinater. Fejlen skyldtes at
+  `user_note` ikke blev indlæst sammen med caches fra databasen (fixes #72).
+
+---
+
 ## [1.11.0] — 2026-04-26
 ### Added
 - **GUI Monkey Test in CI** — automated GUI smoke test now runs in CI on every
