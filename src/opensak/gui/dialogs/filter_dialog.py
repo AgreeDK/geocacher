@@ -144,6 +144,21 @@ from opensak.filters.engine import (
 from opensak.utils.constants import ATTRIBUTES, CACHE_TYPES, CONTAINER_SIZES
 
 
+# ── D/T spin box: snaps to valid 0.5-increment values (1.0–5.0) ──────────────
+
+class DTSpinBox(QDoubleSpinBox):
+    """QDoubleSpinBox restricted to the nine standard D/T values (1.0–5.0 in 0.5 steps).
+    The text field is read-only — value can only be changed via the arrow buttons."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setRange(1.0, 5.0)
+        self.setSingleStep(0.5)
+        self.setDecimals(1)
+        self.setValue(1.0)
+        self.lineEdit().setReadOnly(True)
+
+
 # ── Hjælper widget: tre-tilstands checkbox (Ja / Nej / Ingen) ─────────────────
 
 class TriStateBox(QWidget):
@@ -328,15 +343,8 @@ class FilterDialog(QDialog):
         dt_layout = QFormLayout(dt_group)
 
         d_row = QHBoxLayout()
-        self._diff_min = QDoubleSpinBox()
-        self._diff_min.setRange(1.0, 5.0)
-        self._diff_min.setSingleStep(0.5)
-        self._diff_min.setDecimals(1)
-        self._diff_min.setValue(1.0)
-        self._diff_max = QDoubleSpinBox()
-        self._diff_max.setRange(1.0, 5.0)
-        self._diff_max.setSingleStep(0.5)
-        self._diff_max.setDecimals(1)
+        self._diff_min = DTSpinBox()
+        self._diff_max = DTSpinBox()
         self._diff_max.setValue(5.0)
         d_row.addWidget(QLabel(tr("filter_from")))
         d_row.addWidget(self._diff_min)
@@ -346,15 +354,8 @@ class FilterDialog(QDialog):
         dt_layout.addRow(tr("filter_difficulty_label"), d_row)
 
         t_row = QHBoxLayout()
-        self._terr_min = QDoubleSpinBox()
-        self._terr_min.setRange(1.0, 5.0)
-        self._terr_min.setSingleStep(0.5)
-        self._terr_min.setDecimals(1)
-        self._terr_min.setValue(1.0)
-        self._terr_max = QDoubleSpinBox()
-        self._terr_max.setRange(1.0, 5.0)
-        self._terr_max.setSingleStep(0.5)
-        self._terr_max.setDecimals(1)
+        self._terr_min = DTSpinBox()
+        self._terr_max = DTSpinBox()
         self._terr_max.setValue(5.0)
         t_row.addWidget(QLabel(tr("filter_from")))
         t_row.addWidget(self._terr_min)
