@@ -205,14 +205,14 @@ function loadCaches(cachesJson) {
     });
 }
 
-function setHomeLocation(lat, lon) {
+function setHomeLocation(lat, lon, label) {
     if (homeMarker) map.removeLayer(homeMarker);
     homeMarker = L.marker([lat, lon], {
         icon: makeHomeIcon(),
         zIndexOffset: 1000,
-        title: 'Hjem'
+        title: label
     }).addTo(map);
-    homeMarker.bindPopup('<b>Hjem</b>');
+    homeMarker.bindPopup('<b>' + label + '</b>');
 }
 
 function panToCache(gcCode) {
@@ -324,7 +324,7 @@ class MapWidget(QWidget):
         # Sæt hjemkoordinat
         from opensak.gui.settings import get_settings
         s = get_settings()
-        self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon})")
+        self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(tr('map_home_label'))})")
 
         # Indlæs ventende caches hvis der er nogen
         if self._pending_caches is not None:
@@ -388,7 +388,7 @@ class MapWidget(QWidget):
         from opensak.gui.settings import get_settings
         s = get_settings()
         if self._ready:
-            self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon})")
+            self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(tr('map_home_label'))})")
 
     def fit_all(self) -> None:
         if self._ready:

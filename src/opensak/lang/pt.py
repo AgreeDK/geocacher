@@ -346,6 +346,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Descodificar dica (ROT13)",
+    "detail_encode_btn":            "🔒  Codificar dica (ROT13)",
     "detail_log_search_placeholder":"Pesquisar nos logs…",
     "detail_archived_mark":         " [ARQUIVADA]",
     "detail_placed_by":             "Colocada por: {name}",
@@ -385,6 +386,7 @@ STRINGS: dict[str, str] = {
     "col_user_flag":         "👤",
     "search_gc_label":       "Código GC",
     "col_bearing":           "Direção",
+    "bearing_dirs":          "N NE L SE S SO O NO",
     "col_user_sort":         "Ordem",
     "col_user_data_1":       "Dados util. 1",
     "col_user_data_2":       "Dados util. 2",
@@ -473,6 +475,7 @@ STRINGS: dict[str, str] = {
     "mid_result_group":             "Ponto médio",
 
     # ── Corrected coordinates ─────────────────────────────────────────────────
+    "map_home_label":               "Casa",
     "detail_corrected_coords":      "Coordenadas corrigidas",
     "detail_corrected_tooltip":     "Clique para abrir as coordenadas corrigidas na aplicação de mapas",
     "detail_corrected_edit_btn":    "✏️  Editar",

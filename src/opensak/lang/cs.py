@@ -346,6 +346,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logy",
     "detail_tab_logs_count":        "Logy ({count})",
     "detail_decode_btn":            "🔓  Dekódovat nápovědu (ROT13)",
+    "detail_encode_btn":            "🔒  Kódovat nápovědu (ROT13)",
     "detail_log_search_placeholder":"Hledat v lozích…",
     "detail_archived_mark":         " [ARCHIVOVÁNO]",
     "detail_placed_by":             "Umístil: {name}",
@@ -385,6 +386,7 @@ STRINGS: dict[str, str] = {
     "col_user_flag":         "👤",
     "search_gc_label":       "GC kód",
     "col_bearing":           "Směr",
+    "bearing_dirs":          "S SV V JV J JZ Z SZ",
     "col_user_sort":         "Řazení",
     "col_user_data_1":       "Uživatelská data 1",
     "col_user_data_2":       "Uživatelská data 2",
@@ -473,6 +475,7 @@ STRINGS: dict[str, str] = {
     "mid_result_group":             "Střední bod",
 
     # ── Corrected coordinates ─────────────────────────────────────────────────
+    "map_home_label":               "Domov",
     "detail_corrected_coords":      "Opravené souřadnice",
     "detail_corrected_tooltip":     "Kliknutím otevřete opravené souřadnice v mapové aplikaci",
     "detail_corrected_edit_btn":    "✏️  Upravit",

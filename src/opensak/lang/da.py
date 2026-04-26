@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Dekod hint (ROT13)",
+    "detail_encode_btn":            "🔒  Kodér hint (ROT13)",
     "detail_log_search_placeholder":"Søg i logs…",
     "detail_archived_mark":         " [ARKIVERET]",
     "detail_placed_by":             "Udlagt af: {name}",
@@ -384,6 +385,7 @@ STRINGS: dict[str, str] = {
     "col_user_flag":         "👤",
     "search_gc_label":       "GC kode",
     "col_bearing":           "Retning",
+    "bearing_dirs":          "N NØ Ø SØ S SV V NV",
     "col_user_sort":         "Sortering",
     "col_user_data_1":       "Brugerdata 1",
     "col_user_data_2":       "Brugerdata 2",
@@ -472,6 +474,7 @@ STRINGS: dict[str, str] = {
     "mid_result_group":             "Midtpunkt",
 
     # ── Korrigerede koordinater ───────────────────────────────────────────────
+    "map_home_label":               "Hjem",
     "detail_corrected_coords":      "Korrigerede koordinater",
     "detail_corrected_tooltip":     "Klik for at åbne korrigerede koordinater i kortapp",
     "detail_corrected_edit_btn":    "✏️  Rediger",

@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Decode hint (ROT13)",
+    "detail_encode_btn":            "🔒  Encode hint (ROT13)",
     "detail_log_search_placeholder":"Search in logs…",
     "detail_archived_mark":         " [ARCHIVED]",
     "detail_placed_by":             "Placed by: {name}",
@@ -384,6 +385,7 @@ STRINGS: dict[str, str] = {
     "col_user_flag":         "👤",
     "search_gc_label":       "GC code",
     "col_bearing":           "Bearing",
+    "bearing_dirs":          "N NE E SE S SW W NW",
     "col_user_sort":         "Sort",
     "col_user_data_1":       "User data 1",
     "col_user_data_2":       "User data 2",
@@ -472,6 +474,7 @@ STRINGS: dict[str, str] = {
     "mid_result_group":             "Midpoint",
 
     # ── Corrected coordinates ─────────────────────────────────────────────────
+    "map_home_label":               "Home",
     "detail_corrected_coords":      "Corrected coordinates",
     "detail_corrected_tooltip":     "Click to open corrected coordinates in map app",
     "detail_corrected_edit_btn":    "✏️  Edit",

@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Decoder l'indice (ROT13)",
+    "detail_encode_btn":            "🔒  Encoder l'indice (ROT13)",
     "detail_log_search_placeholder":"Rechercher dans les logs…",
     "detail_archived_mark":         " [ARCHIVÉE]",
     "detail_placed_by":             "Placée par: {name}",
@@ -384,6 +385,7 @@ STRINGS: dict[str, str] = {
     "col_user_flag":         "👤",
     "search_gc_label":       "Code GC",
     "col_bearing":           "Direction",
+    "bearing_dirs":          "N NE E SE S SO O NO",
     "col_user_sort":         "Tri",
     "col_user_data_1":       "Données util. 1",
     "col_user_data_2":       "Données util. 2",
@@ -472,6 +474,7 @@ STRINGS: dict[str, str] = {
     "mid_result_group":             "Point médian",
 
     # ── Coordonnées corrigées ─────────────────────────────────────────────────
+    "map_home_label":               "Domicile",
     "detail_corrected_coords":      "Coordonnées corrigées",
     "detail_corrected_tooltip":     "Cliquer pour ouvrir les coordonnées corrigées dans l'application de carte",
     "detail_corrected_edit_btn":    "✏️  Modifier",

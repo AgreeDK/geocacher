@@ -14,6 +14,11 @@ from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QMenu,
 
 from opensak.db.models import Cache
 from opensak.filters.engine import _haversine_km
+from opensak.gui.settings import get_settings
+from opensak.coords import format_coords
+from opensak.lang import tr
+from opensak.utils.types import GcCode
+from opensak.gui.icon_provider import get_cache_type_icon, get_cache_size_icon
 import math
 
 
@@ -28,15 +33,9 @@ def _bearing_deg(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 
 def _bearing_compass(deg: float) -> str:
-    """Returner kompasretning på dansk (8 verdenshjørner) + grader."""
-    dirs = ["N", "NØ", "Ø", "SØ", "S", "SV", "V", "NV"]
+    dirs = tr("bearing_dirs").split()
     idx = round(deg / 45) % 8
     return f"{dirs[idx]} {int(round(deg))}°"
-from opensak.gui.settings import get_settings
-from opensak.coords import format_coords
-from opensak.lang import tr
-from opensak.utils.types import GcCode
-from opensak.gui.icon_provider import get_cache_type_icon, get_cache_size_icon
 
 
 # ── Alle mulige kolonner ──────────────────────────────────────────────────────

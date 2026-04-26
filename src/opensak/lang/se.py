@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Loggar",
     "detail_tab_logs_count":        "Loggar ({count})",
     "detail_decode_btn":            "🔓  Avkoda ledtråd (ROT13)",
+    "detail_encode_btn":            "🔒  Koda ledtråd (ROT13)",
     "detail_log_search_placeholder":"Sök i loggar…",
     "detail_archived_mark":         " [ARKIVERAD]",
     "detail_placed_by":             "Utlagd av: {name}",
@@ -384,6 +385,7 @@ STRINGS: dict[str, str] = {
     "col_user_flag":         "👤",
     "search_gc_label":       "GC-kod",
     "col_bearing":           "Riktning",
+    "bearing_dirs":          "N NÖ Ö SÖ S SV V NV",
     "col_user_sort":         "Sortering",
     "col_user_data_1":       "Användardata 1",
     "col_user_data_2":       "Användardata 2",
@@ -472,6 +474,7 @@ STRINGS: dict[str, str] = {
     "mid_result_group":             "Mittpunkt",
 
     # ── Corrected coordinates ─────────────────────────────────────────────────
+    "map_home_label":               "Hem",
     "detail_corrected_coords":      "Korrigerade koordinater",
     "detail_corrected_tooltip":     "Klicka för att öppna korrigerade koordinater på kartan",
     "detail_corrected_edit_btn":    "✏️  Editera",
