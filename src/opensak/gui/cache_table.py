@@ -595,7 +595,7 @@ class CacheTableView(QTableView):
         if "name" in columns:
             name_idx = columns.index("name")
             header.setSectionResizeMode(
-                name_idx, QHeaderView.ResizeMode.Stretch
+                name_idx, QHeaderView.ResizeMode.Interactive
             )
 
     def reload_columns(self) -> None:
