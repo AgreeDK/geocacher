@@ -178,9 +178,10 @@ class TriStateBox(QWidget):
 class FilterDialog(QDialog):
     """Komplet filter dialog med tre faner."""
 
-    filter_applied = Signal(object, object)  # FilterSet, SortSpec
+    filter_applied = Signal(object, object, str)  # FilterSet, SortSpec, profile_name
 
-    def __init__(self, parent=None, current_filterset: Optional[FilterSet] = None):
+    def __init__(self, parent=None, current_filterset: Optional[FilterSet] = None,
+                 last_profile_name: str = ""):
         super().__init__(parent)
         self.setWindowTitle(tr("filter_dialog_title"))
         self._attr_boxes: dict[int, tuple] = {}
@@ -198,7 +199,12 @@ class FilterDialog(QDialog):
                 rect.y() + (rect.height() - h) // 2,
             )
         self._setup_ui()
-        if current_filterset:
+        if last_profile_name:
+            for i in range(self._profile_combo.count()):
+                if self._profile_combo.itemText(i) == last_profile_name:
+                    self._profile_combo.setCurrentIndex(i)
+                    break
+        elif current_filterset:
             self._load_filterset(current_filterset)
 
     # ── UI bygning ────────────────────────────────────────────────────────────
@@ -224,11 +230,12 @@ class FilterDialog(QDialog):
         save_btn.clicked.connect(self._save_profile)
         profile_row.addWidget(save_btn)
 
-        del_btn = QPushButton("🗑")
-        del_btn.setMaximumWidth(40)
-        del_btn.setToolTip(tr("filter_delete_profile_tooltip"))
-        del_btn.clicked.connect(self._delete_profile)
-        profile_row.addWidget(del_btn)
+        self._del_btn = QPushButton("🗑")
+        self._del_btn.setMaximumWidth(40)
+        self._del_btn.setToolTip(tr("filter_delete_profile_tooltip"))
+        self._del_btn.setEnabled(False)
+        self._del_btn.clicked.connect(self._delete_profile)
+        profile_row.addWidget(self._del_btn)
 
         profile_row.addStretch()
         layout.addLayout(profile_row)
@@ -791,6 +798,7 @@ class FilterDialog(QDialog):
 
     def _on_profile_selected(self, index: int) -> None:
         path = self._profile_combo.currentData()
+        self._del_btn.setEnabled(path is not None)
         if path is None:
             return
         try:
@@ -931,5 +939,10 @@ class FilterDialog(QDialog):
 
     def _apply(self) -> None:
         fs = self._build_filterset()
-        self.filter_applied.emit(fs, SortSpec("name"))
+        profile_name = (
+            self._profile_combo.currentText()
+            if self._profile_combo.currentData() is not None
+            else ""
+        )
+        self.filter_applied.emit(fs, SortSpec("name"), profile_name)
         self.accept()
