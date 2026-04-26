@@ -32,6 +32,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setMinimumSize(800, 500)
         self._current_filterset = FilterSet()
+        self._current_sort = SortSpec("name", ascending=True)
         self._setup_ui()
         self._setup_menu()
         self._setup_toolbar()
@@ -60,6 +61,7 @@ class MainWindow(QMainWindow):
         self._cache_table = CacheTableView()
         self._cache_table.cache_selected.connect(self._on_cache_selected)
         self._cache_table.flags_changed.connect(self._on_flags_changed)
+        self._cache_table.sort_changed.connect(self._on_sort_changed)
         self._splitter.addWidget(self._cache_table)
 
         # Bottom: horisontal splitter — detaljer til venstre, kort til højre
@@ -414,6 +416,7 @@ class MainWindow(QMainWindow):
             self.restoreGeometry(s.window_geometry)
         if s.window_state:
             self.restoreState(s.window_state)
+        self._load_sort_for_active_db()
 
         # Gendan splitter-størrelser som procentandele af vinduets størrelse.
         # Vi gemmer ratios (0.0–1.0) i stedet for absolutte pixels, så
@@ -439,6 +442,7 @@ class MainWindow(QMainWindow):
         """Kaldes når brugeren skifter aktiv database."""
         self._update_title()
         self._detail_panel.clear()
+        self._load_sort_for_active_db()
         self._refresh_cache_list()
         self._statusbar.showMessage(
             tr("status_db_name", db_name=db_info.name), 4000
@@ -494,7 +498,7 @@ class MainWindow(QMainWindow):
         """Reload caches from DB applying current filters."""
         fs = self._build_current_filterset()
         with get_session() as session:
-            caches = apply_filters(session, fs, SortSpec("name"))
+            caches = apply_filters(session, fs, self._current_sort)
 
         self._cache_table.load_caches(caches)
         self._map_widget.load_caches(caches)
@@ -613,7 +617,7 @@ class MainWindow(QMainWindow):
         """Reload cache-tabellen uden at opdatere kortet. Bruges efter import."""
         fs = self._build_current_filterset()
         with get_session() as session:
-            caches = apply_filters(session, fs, SortSpec("name"))
+            caches = apply_filters(session, fs, self._current_sort)
         self._cache_table.load_caches(caches)
         count = self._cache_table.row_count()
         if count == 1:
@@ -834,6 +838,40 @@ class MainWindow(QMainWindow):
                 tr("status_flagged_count", flagged=flagged, total=total), 3000
             )
 
+    def _on_sort_changed(self, col_id: str, ascending: bool) -> None:
+        """Kaldes når brugeren klikker en kolonneheader i tabellen."""
+        self._current_sort = SortSpec(col_id, ascending=ascending)
+        self._save_sort_for_active_db()
+
+    def _save_sort_for_active_db(self) -> None:
+        """Gem aktuel sortering per database i QSettings."""
+        from opensak.db.manager import get_db_manager
+        from PySide6.QtCore import QSettings
+        manager = get_db_manager()
+        if not manager.active:
+            return
+        s = QSettings("OpenSAK Project", "OpenSAK")
+        key = f"sort/{manager.active.path}"
+        s.setValue(f"{key}/field", self._current_sort.field)
+        s.setValue(f"{key}/ascending", self._current_sort.ascending)
+        s.sync()
+
+    def _load_sort_for_active_db(self) -> None:
+        """Indlaes gemt sortering for den aktive database fra QSettings."""
+        from opensak.db.manager import get_db_manager
+        from PySide6.QtCore import QSettings
+        manager = get_db_manager()
+        if not manager.active:
+            return
+        s = QSettings("OpenSAK Project", "OpenSAK")
+        key = f"sort/{manager.active.path}"
+        field = s.value(f"{key}/field", "name")
+        ascending = s.value(f"{key}/ascending", True, type=bool)
+        self._current_sort = SortSpec(field, ascending=ascending)
+        # Genanvend sort-indikatoren i tabellen hvis den allerede er loaded
+        if hasattr(self, "_cache_table"):
+            self._cache_table.apply_sort(field, ascending)
+
     def _open_filter_dialog(self) -> None:
         from opensak.gui.dialogs.filter_dialog import FilterDialog
         dlg = FilterDialog(self, self._current_filterset)
@@ -842,6 +880,8 @@ class MainWindow(QMainWindow):
 
     def _on_filter_applied(self, filterset, sort) -> None:
         self._current_filterset = filterset
+        self._current_sort = sort
+        self._save_sort_for_active_db()
         self._act_clear_filter.setEnabled(True)
         self._filter_lbl.setText(tr("filter_active_label"))
         self._quick_filter.setCurrentIndex(0)

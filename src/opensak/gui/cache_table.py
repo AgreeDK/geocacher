@@ -190,7 +190,8 @@ class SizeBarDelegate(QStyledItemDelegate):
 class CacheTableModel(QAbstractTableModel):
     """Qt table model backed by a list of Cache objects."""
 
-    flags_changed = Signal()   # emitteres når user_flag toggler
+    flags_changed = Signal()          # emitteres når user_flag toggler
+    sort_changed = Signal(str, bool)  # (col_id, ascending) når brugeren sorterer
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -532,19 +533,24 @@ class CacheTableModel(QAbstractTableModel):
                 reverse=reverse
             )
         self.endResetModel()
+        self.sort_changed.emit(col, not reverse)
 
 
 class CacheTableView(QTableView):
     """The main cache list widget."""
 
     cache_selected = Signal(object)
-    flags_changed = Signal()   # videresendes fra model
+    flags_changed = Signal()          # videresendes fra model
+    sort_changed = Signal(str, bool)  # (col_id, ascending) videresendes fra model
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._model = CacheTableModel()
         self.setModel(self._model)
         self._model.flags_changed.connect(self.flags_changed)
+        self._model.sort_changed.connect(self._on_model_sort_changed)
+        self._last_sort_col: Optional[int] = None
+        self._last_sort_asc: bool = True
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -595,8 +601,35 @@ class CacheTableView(QTableView):
         self._model.reload_columns()
         self._apply_column_widths()
 
+    def _on_model_sort_changed(self, col_id: str, ascending: bool) -> None:
+        """Store last sort so we can re-apply after reload."""
+        cols = self._model._columns
+        if col_id in cols:
+            self._last_sort_col = cols.index(col_id)
+            self._last_sort_asc = ascending
+        self.sort_changed.emit(col_id, ascending)
+
+    def apply_sort(self, col_id: str, ascending: bool) -> None:
+        """Genanvend sortering - kaldes fra mainwindow ved opstart/db-skift."""
+        cols = self._model._columns
+        if col_id not in cols:
+            return
+        col_idx = cols.index(col_id)
+        order = (Qt.SortOrder.AscendingOrder if ascending
+                 else Qt.SortOrder.DescendingOrder)
+        self._last_sort_col = col_idx
+        self._last_sort_asc = ascending
+        self._model.sort(col_idx, order)
+        self.horizontalHeader().setSortIndicator(col_idx, order)
+
     def load_caches(self, caches: list[Cache]) -> None:
         self._model.load(caches)
+        # Genanvend sortering - beginResetModel() nulstiller Qt sort-indikatoren
+        if self._last_sort_col is not None:
+            order = (Qt.SortOrder.AscendingOrder if self._last_sort_asc
+                     else Qt.SortOrder.DescendingOrder)
+            self._model.sort(self._last_sort_col, order)
+            self.horizontalHeader().setSortIndicator(self._last_sort_col, order)
 
     def _on_row_changed(self, current, previous) -> None:
         cache = self._model.cache_at(current.row())
