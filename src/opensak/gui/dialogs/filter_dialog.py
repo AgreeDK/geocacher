@@ -224,11 +224,12 @@ class FilterDialog(QDialog):
         save_btn.clicked.connect(self._save_profile)
         profile_row.addWidget(save_btn)
 
-        del_btn = QPushButton("🗑")
-        del_btn.setMaximumWidth(40)
-        del_btn.setToolTip(tr("filter_delete_profile_tooltip"))
-        del_btn.clicked.connect(self._delete_profile)
-        profile_row.addWidget(del_btn)
+        self._del_btn = QPushButton("🗑")
+        self._del_btn.setMaximumWidth(40)
+        self._del_btn.setToolTip(tr("filter_delete_profile_tooltip"))
+        self._del_btn.setEnabled(False)
+        self._del_btn.clicked.connect(self._delete_profile)
+        profile_row.addWidget(self._del_btn)
 
         profile_row.addStretch()
         layout.addLayout(profile_row)
@@ -791,6 +792,7 @@ class FilterDialog(QDialog):
 
     def _on_profile_selected(self, index: int) -> None:
         path = self._profile_combo.currentData()
+        self._del_btn.setEnabled(path is not None)
         if path is None:
             return
         try:
