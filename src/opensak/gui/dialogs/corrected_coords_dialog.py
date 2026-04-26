@@ -30,8 +30,10 @@ class CorrectedCoordsDialog(QDialog):
     def __init__(
         self,
         gc_code: GcCode,
-        current_lat: Optional[float] = None,
-        current_lon: Optional[float] = None,
+        orig_lat: Optional[float] = None,
+        orig_lon: Optional[float] = None,
+        corrected_lat: Optional[float] = None,
+        corrected_lon: Optional[float] = None,
         parent=None,
     ):
         super().__init__(parent)
@@ -40,7 +42,7 @@ class CorrectedCoordsDialog(QDialog):
         self._lon: Optional[float] = None
         self.setWindowTitle(tr("corrected_dialog_title"))
         self.setMinimumWidth(420)
-        self._setup_ui(current_lat, current_lon)
+        self._setup_ui(corrected_lat, corrected_lon)
 
     def _setup_ui(
         self, current_lat: Optional[float], current_lon: Optional[float]
@@ -72,7 +74,8 @@ class CorrectedCoordsDialog(QDialog):
         input_layout.addWidget(input_label)
 
         self._input = QLineEdit()
-        self._input.setPlaceholderText(tr("corrected_dialog_placeholder"))
+        self._input.setPlaceholderText(tr("coord_conv_placeholder"))
+        self._input.textChanged.connect(self._on_input_changed)
 
         if current_lat is not None and current_lon is not None:
             fmt = get_settings().coord_format
@@ -135,7 +138,7 @@ class CorrectedCoordsDialog(QDialog):
             self._lat = None
             self._lon = None
             self._preview.setText("")
-            self._error_lbl.setText(tr("corrected_dialog_parse_error"))
+            self._error_lbl.setText(tr("coord_conv_parse_error"))
             self._ok_btn.setEnabled(False)
 
     def _on_accept(self) -> None:

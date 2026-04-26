@@ -86,7 +86,7 @@ class ProjectionDialog(QDialog):
         start_layout.addWidget(hint)
 
         self._start_input = QLineEdit()
-        self._start_input.setPlaceholderText(tr("proj_start_placeholder"))
+        self._start_input.setPlaceholderText(tr("coord_conv_placeholder"))
         self._start_input.setFont(mono)
         self._start_input.textChanged.connect(self._on_input_changed)
         start_layout.addWidget(self._start_input)
