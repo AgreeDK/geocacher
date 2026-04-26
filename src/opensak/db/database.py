@@ -214,6 +214,19 @@ def _run_migrations(engine: Engine) -> None:
             conn.commit()
             print(f"Migration: tilføjede GSAK-felter til caches: {', '.join(added)}")
 
+        # ── Migration 5: Normaliser GPS Adventures cache_type varianter ─────
+        result = conn.execute(text("""
+            UPDATE caches
+            SET cache_type = 'GPS Adventures Maze'
+            WHERE LOWER(cache_type) IN (
+                'gps adventures exhibit',
+                'gps adventures maze exhibit'
+            )
+        """))
+        if result.rowcount:
+            conn.commit()
+            print(f"Migration: normaliserede {result.rowcount} GPS Adventures cache_type værdier")
+
 
 def get_engine() -> Engine:
     """Return the current engine, raising if init_db() hasn't been called."""

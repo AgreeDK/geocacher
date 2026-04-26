@@ -105,6 +105,8 @@ _DB_TYPE_KEY_MAP: dict[str, str] = {
     "lab cache":                     "lab_cache",
     "community celebration event":   "community_celebration",
     "gps adventures maze":           "gps_adventures",
+    "gps adventures maze exhibit":   "gps_adventures",
+    "gps adventures exhibit":        "gps_adventures",
     "locationless (reverse) cache":  "locationless",
     "project a.p.e. cache":          "project_ape",
     "groundspeak hq":                "geocaching_hq",

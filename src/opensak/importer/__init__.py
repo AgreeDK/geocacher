@@ -183,6 +183,8 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
     owner        = _text(gs_cache, "gs:owner",             active_ns)
     owner_id     = gs_cache.find("gs:owner", active_ns).get("id") if gs_cache is not None and gs_cache.find("gs:owner", active_ns) is not None else None
     cache_type   = _text(gs_cache, "gs:type",              active_ns) or cache_type_full
+    if cache_type.lower() in ("gps adventures maze exhibit", "gps adventures exhibit"):
+        cache_type = "GPS Adventures Maze"
     container    = _text(gs_cache, "gs:container",         active_ns)
     difficulty   = _float(gs_cache, "gs:difficulty",       active_ns)
     terrain      = _float(gs_cache, "gs:terrain",          active_ns)

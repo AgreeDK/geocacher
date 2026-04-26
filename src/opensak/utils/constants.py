@@ -19,6 +19,7 @@ CACHE_TYPES: list[str] = [
     "Earthcache",
     "Virtual Cache",
     "Webcam Cache",
+    "GPS Adventures Maze",
 ]
 
 # ── Container sizes ───────────────────────────────────────────────────────────
