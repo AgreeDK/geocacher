@@ -539,6 +539,7 @@ class CacheTableView(QTableView):
 
     cache_selected = Signal(object)
     flags_changed = Signal()   # videresendes fra model
+    sort_changed = Signal(str, bool)  # (column_name, ascending)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -558,6 +559,7 @@ class CacheTableView(QTableView):
         self.verticalHeader().setDefaultSectionSize(24)
         self._apply_column_widths()
         self.horizontalHeader().setSortIndicatorShown(True)
+        self.horizontalHeader().sortIndicatorChanged.connect(self._on_sort_indicator_changed)
         self.selectionModel().currentRowChanged.connect(self._on_row_changed)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
@@ -597,6 +599,27 @@ class CacheTableView(QTableView):
 
     def load_caches(self, caches: list[Cache]) -> None:
         self._model.load(caches)
+
+    def _on_sort_indicator_changed(self, logical_index: int, order) -> None:
+        """Emit sort_changed with column name when user clicks a header."""
+        columns = self._model._columns
+        if logical_index >= len(columns):
+            return
+        col_name = columns[logical_index]
+        ascending = (order == Qt.SortOrder.AscendingOrder)
+        self.sort_changed.emit(col_name, ascending)
+
+    def restore_sort(self, field: str, ascending: bool) -> None:
+        """Programmatically sort the table by column name without emitting sort_changed."""
+        columns = self._model._columns
+        if field not in columns:
+            return
+        col_index = columns.index(field)
+        order = Qt.SortOrder.AscendingOrder if ascending else Qt.SortOrder.DescendingOrder
+        # Block the signal so restoring sort does not trigger another save
+        self.horizontalHeader().sortIndicatorChanged.disconnect(self._on_sort_indicator_changed)
+        self.sortByColumn(col_index, order)
+        self.horizontalHeader().sortIndicatorChanged.connect(self._on_sort_indicator_changed)
 
     def _on_row_changed(self, current, previous) -> None:
         cache = self._model.cache_at(current.row())

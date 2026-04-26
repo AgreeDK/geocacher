@@ -236,6 +236,23 @@ class AppSettings:
     def bottom_splitter_state(self, value) -> None:
         self._s.setValue("window/bottom_splitter_state", value)
 
+    # ── Sort settings (per database) ─────────────────────────────────────────
+
+    @property
+    def sort_spec(self) -> dict:
+        """Saved sort state per database: {field, ascending}."""
+        raw = self._s.value(self._db_key("sort_spec"), None)
+        if raw:
+            try:
+                return json.loads(raw)
+            except Exception:
+                pass
+        return {"field": "name", "ascending": True}
+
+    @sort_spec.setter
+    def sort_spec(self, value: dict) -> None:
+        self._s.setValue(self._db_key("sort_spec"), json.dumps(value))
+
     # ── Last used paths ───────────────────────────────────────────────────────
 
     @property

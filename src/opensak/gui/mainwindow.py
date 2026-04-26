@@ -32,6 +32,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setMinimumSize(800, 500)
         self._current_filterset = FilterSet()
+        self._current_sort: dict = get_settings().sort_spec
         self._setup_ui()
         self._setup_menu()
         self._setup_toolbar()
@@ -60,6 +61,7 @@ class MainWindow(QMainWindow):
         self._cache_table = CacheTableView()
         self._cache_table.cache_selected.connect(self._on_cache_selected)
         self._cache_table.flags_changed.connect(self._on_flags_changed)
+        self._cache_table.sort_changed.connect(self._on_sort_changed)
         self._splitter.addWidget(self._cache_table)
 
         # Bottom: horisontal splitter — detaljer til venstre, kort til højre
@@ -439,6 +441,7 @@ class MainWindow(QMainWindow):
         """Kaldes når brugeren skifter aktiv database."""
         self._update_title()
         self._detail_panel.clear()
+        self._current_sort = get_settings().sort_spec
         self._refresh_cache_list()
         self._statusbar.showMessage(
             tr("status_db_name", db_name=db_info.name), 4000
@@ -498,6 +501,10 @@ class MainWindow(QMainWindow):
 
         self._cache_table.load_caches(caches)
         self._map_widget.load_caches(caches)
+        self._cache_table.restore_sort(
+            self._current_sort.get("field", "name"),
+            self._current_sort.get("ascending", True),
+        )
         count = self._cache_table.row_count()
         if count == 1:
             self._count_lbl.setText(tr("count_cache_single"))
@@ -615,6 +622,10 @@ class MainWindow(QMainWindow):
         with get_session() as session:
             caches = apply_filters(session, fs, SortSpec("name"))
         self._cache_table.load_caches(caches)
+        self._cache_table.restore_sort(
+            self._current_sort.get("field", "name"),
+            self._current_sort.get("ascending", True),
+        )
         count = self._cache_table.row_count()
         if count == 1:
             self._count_lbl.setText(tr("count_cache_single"))
@@ -850,12 +861,21 @@ class MainWindow(QMainWindow):
             caches = apply_filters(session, filterset, sort)
         self._cache_table.load_caches(caches)
         self._map_widget.load_caches(caches)
+        self._on_sort_changed(sort.field, sort.ascending)
+        self._cache_table.restore_sort(sort.field, sort.ascending)
         count = self._cache_table.row_count()
         if count == 1:
             self._count_lbl.setText(tr("count_cache_single"))
         else:
             self._count_lbl.setText(tr("count_caches", count=count))
         self._statusbar.showMessage(tr("status_filter_result", count=count), 3000)
+
+    def _on_sort_changed(self, field: str, ascending: bool) -> None:
+        """Persist sort settings when user changes sort column or direction."""
+        self._current_sort = {"field": field, "ascending": ascending}
+        s = get_settings()
+        s.sort_spec = self._current_sort
+        s.sync()
 
     def _clear_filter(self) -> None:
         self._current_filterset = FilterSet()
