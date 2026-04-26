@@ -9,19 +9,16 @@ The keys (left side) must NEVER be changed — they are used in the code.
 STRINGS: dict[str, str] = {
 
     # ── General ───────────────────────────────────────────────────────────────
-    "ok":                           "OK",
     "cancel":                       "Zrušit",
     "close":                        "Zavřít",
     "yes":                          "Ano",
     "no":                           "Ne",
     "save":                         "Uložit",
     "delete":                       "Smazat",
-    "add":                          "Přidat",
     "edit":                         "Upravit",
     "error":                        "Chyba",
     "warning":                      "Upozornění",
     "info":                         "Informace",
-    "confirm":                      "Potvrdit",
     "search":                       "Hledat",
     "status_ready":                 "Připraveno",
     "restart_required":             "Vyžadován restart",
@@ -32,9 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Quick filter bar ──────────────────────────────────────────────────────
-    "search_label":                 "Hledat:",
     "search_placeholder":           "Název nebo GC kód…",
-    "show_label":                   "Zobrazit:",
     "quick_all":                    "Všechny keše",
     "quick_not_found":              "Nenalezené",
     "quick_found":                  "Nalezené",
@@ -90,7 +85,6 @@ STRINGS: dict[str, str] = {
     "action_dist_bearing":          "📏  &Vzdálenost && Azimut…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
-    "toolbar_import":               "Import",
     "toolbar_filter":               "Filtr",
     "toolbar_clear_filter":         "Zrušit filtr",
     "toolbar_gps":                  "Odeslat do GPS",
@@ -127,12 +121,8 @@ STRINGS: dict[str, str] = {
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Import GPX / PQ Zip",
-    "import_drop_hint":             "Přetáhněte GPX nebo ZIP soubory sem",
     "import_browse":                "Procházet…",
     "import_start":                 "Spustit import",
-    "import_running":               "Importuji…",
-    "import_done":                  "Import dokončen: importováno {count} keší",
-    "import_error":                 "Import selhal: {error}",
     "import_complete":              "✓ Import dokončen: {name}",
     "import_new_caches":            "Nové keše:",
     "import_updated":               "Aktualizované:",
@@ -142,7 +132,6 @@ STRINGS: dict[str, str] = {
     "import_failed":                "✗ Import selhal:",
     "import_again":                 "Importovat znovu",
         "import_select_files_label":  "Vyberte jeden nebo více souborů GPX nebo Pocket Query ZIP:",
-    "import_no_file":               "Žádný soubor nevybrán",
     "import_browse_title":          "Vyberte soubor GPX nebo ZIP",
     "import_remove_selected":     "Odebrat vybrané",
     "import_file_filter":           "Soubory GPX a ZIP (*.gpx *.zip);;Všechny soubory (*)",
@@ -158,10 +147,6 @@ STRINGS: dict[str, str] = {
     "filter_tab_general":           "Obecné",
     "filter_tab_dates":             "Data",
     "filter_tab_attributes":        "Atributy",
-    "filter_apply":                 "Použít filtr",
-    "filter_reset":                 "Resetovat",
-    "filter_save_profile":          "Uložit profil…",
-    "filter_load_profile":          "Načíst profil…",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Odeslat do GPS",
@@ -194,8 +179,6 @@ STRINGS: dict[str, str] = {
     # ── Settings dialog ───────────────────────────────────────────────────────
     "settings_dialog_title":        "Nastavení",
     "settings_group_location":      "Domácí souřadnice",
-    "settings_lat_label":           "Zeměpisná šířka:",
-    "settings_lon_label":           "Zeměpisná délka:",
     "settings_group_display":       "Zobrazení",
     "settings_use_miles":           "Zobrazovat vzdálenosti v mílích (místo km)",
     "settings_show_archived":       "Zobrazovat archivované keše",
@@ -214,23 +197,13 @@ STRINGS: dict[str, str] = {
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Správa databází",
-    "db_add":                       "Vytvořit novou…",
-    "db_open":                      "Otevřít existující…",
-    "db_activate":                  "Aktivovat",
-    "db_active_marker":             "(aktivní)",
     "db_delete_confirm_title":      "Smazat databázi",
-    "db_cannot_delete_active":      "Aktivní databázi nelze smazat.\\nNejprve přepněte na jinou databázi.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
     "found_dialog_title":           "Aktualizovat nálezy z referenční databáze",
-    "found_start":                  "Spustit aktualizaci",
-    "found_running":                "Aktualizuji…",
-    "found_done":                   "{count} keší označeno jako nalezené",
 
     # ── Column chooser dialog ─────────────────────────────────────────────────
     "column_dialog_title":          "Vybrat sloupce",
-    "column_available":             "Dostupné sloupce",
-    "column_visible":               "Viditelné sloupce",
 
     # ── About dialog ──────────────────────────────────────────────────────────
     "about_title":                  "O OpenSAK",
@@ -250,7 +223,6 @@ STRINGS: dict[str, str] = {
     "wp_val_name_required":         "Název je povinný.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
-    "gps_delete_cb_tooltip":        "Smaže všechny .gpx soubory ve složce Garmin/GPX na zařízení\\npřed nahráním nového souboru. Platí pouze pro přímé nahrávání do GPS.",
     "gps_log_placeholder":          "Stav se zobrazí zde…",
 
     # ── Found dialog ──────────────────────────────────────────────────────────
@@ -374,7 +346,6 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logy",
     "detail_tab_logs_count":        "Logy ({count})",
     "detail_decode_btn":            "🔓  Dekódovat nápovědu (ROT13)",
-    "detail_hide_hint_btn":         "🔒  Skrýt nápovědu",
     "detail_log_search_placeholder":"Hledat v lozích…",
     "detail_archived_mark":         " [ARCHIVOVÁNO]",
     "detail_placed_by":             "Umístil: {name}",
@@ -385,8 +356,6 @@ STRINGS: dict[str, str] = {
     "detail_no_logs_match":         "(Žádné logy neodpovídají '{text}')",
 
     # ── Toolbar extras ────────────────────────────────────────────────────────
-    "toolbar_fit_all":              "Zobrazit vše",
-    "toolbar_fit_all_tooltip":      "Přiblížit mapu na všechny keše",
 
     # ── Cache table columns ───────────────────────────────────────────────────
     "col_status_icon":  "Ikona stavu",
@@ -437,8 +406,6 @@ STRINGS: dict[str, str] = {
     "wp_label_name":                "Název *:",
     "wp_label_type":                "Typ *:",
     "wp_label_container":           "Schránka:",
-    "wp_label_lat":                 "Zeměpisná šířka *:",
-    "wp_label_lon":                 "Zeměpisná délka *:",
     "wp_label_dt":                  "D / T:",
     "wp_label_difficulty":          "Obtížnost:",
     "wp_label_terrain":             "Terén:",
@@ -636,7 +603,6 @@ STRINGS: dict[str, str] = {
     "action_trip_planner":          "🗺️  &Plánovač výletu…",
     "toolbar_trip":                 "Plánovač výletu",
     "toolbar_trip_tooltip":         "Naplánovat geocachingový výlet",
-    "toolbar_home":                 "Domů",
     "toolbar_home_tooltip":         "Přesunout mapu na domácí bod",
 
     "trip_center_info":             "📍 Poloměr je počítán od vašeho středového bodu (nastavte v Nastavení). Nastavte poloměr na 0 pro zobrazení všech keší bez omezení vzdálenosti.",

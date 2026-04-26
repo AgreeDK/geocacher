@@ -9,19 +9,16 @@ Nøglerne (venstre side) må ALDRIG ændres — de bruges i koden.
 STRINGS: dict[str, str] = {
 
     # ── Generelt ──────────────────────────────────────────────────────────────
-    "ok":                           "OK",
     "cancel":                       "Annuller",
     "close":                        "Luk",
     "yes":                          "Ja",
     "no":                           "Nej",
     "save":                         "Gem",
     "delete":                       "Slet",
-    "add":                          "Tilføj",
     "edit":                         "Rediger",
     "error":                        "Fejl",
     "warning":                      "Advarsel",
     "info":                         "Information",
-    "confirm":                      "Bekræft",
     "search":                       "Søg",
     "status_ready":                 "Klar",
     "restart_required":             "Genstart kræves",
@@ -32,9 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Hurtigfilter-bar ──────────────────────────────────────────────────────
-    "search_label":                 "Søg:",
     "search_placeholder":           "Navn eller GC kode…",
-    "show_label":                   "Vis:",
     "quick_all":                    "Alle caches",
     "quick_not_found":              "Ikke fundne",
     "quick_found":                  "Fundne",
@@ -90,7 +85,6 @@ STRINGS: dict[str, str] = {
     "action_dist_bearing":          "📏  &Afstand && Retning…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
-    "toolbar_import":               "Importer",
     "toolbar_filter":               "Filter",
     "toolbar_clear_filter":         "Nulstil filter",
     "toolbar_gps":                  "Send til GPS",
@@ -127,12 +121,8 @@ STRINGS: dict[str, str] = {
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Importer GPX / PQ Zip",
-    "import_drop_hint":             "Træk GPX eller ZIP filer hertil",
     "import_browse":                "Vælg filer…",
     "import_start":                 "Start import",
-    "import_running":               "Importerer…",
-    "import_done":                  "Import færdig: {count} caches importeret",
-    "import_error":                 "Import fejlede: {error}",
     "import_complete":              "✓ Import fuldført: {name}",
     "import_new_caches":            "Nye caches:",
     "import_updated":               "Opdaterede:",
@@ -142,7 +132,6 @@ STRINGS: dict[str, str] = {
     "import_failed":                "✗ Fejl under import:",
     "import_again":                 "Importer igen",
         "import_select_files_label":  "Vælg en eller flere GPX- eller Pocket Query ZIP-filer:",
-    "import_no_file":               "Ingen fil valgt",
     "import_browse_title":          "Vælg GPX eller ZIP fil",
     "import_remove_selected":     "Fjern valgte",
     "import_file_filter":           "GPX og ZIP filer (*.gpx *.zip);;Alle filer (*)",
@@ -158,10 +147,6 @@ STRINGS: dict[str, str] = {
     "filter_tab_general":           "Generelt",
     "filter_tab_dates":             "Datoer",
     "filter_tab_attributes":        "Attributter",
-    "filter_apply":                 "Anvend filter",
-    "filter_reset":                 "Nulstil",
-    "filter_save_profile":          "Gem profil…",
-    "filter_load_profile":          "Indlæs profil…",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Send til GPS",
@@ -194,8 +179,6 @@ STRINGS: dict[str, str] = {
     # ── Indstillinger dialog ──────────────────────────────────────────────────
     "settings_dialog_title":        "Indstillinger",
     "settings_group_location":      "Hjemkoordinat",
-    "settings_lat_label":           "Breddegrad:",
-    "settings_lon_label":           "Længdegrad:",
     "settings_group_display":       "Visning",
     "settings_use_miles":           "Vis afstande i miles (i stedet for km)",
     "settings_show_archived":       "Vis arkiverede caches",
@@ -214,23 +197,13 @@ STRINGS: dict[str, str] = {
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Administrer databaser",
-    "db_add":                       "Opret ny…",
-    "db_open":                      "Åbn eksisterende…",
-    "db_activate":                  "Aktiver",
-    "db_active_marker":             "(aktiv)",
     "db_delete_confirm_title":      "Slet database",
-    "db_cannot_delete_active":      "Den aktive database kan ikke slettes.\nSkift til en anden database først.",
 
     # ── Fund-opdater dialog ───────────────────────────────────────────────────
     "found_dialog_title":           "Opdater fund fra reference database",
-    "found_start":                  "Start opdatering",
-    "found_running":                "Opdaterer…",
-    "found_done":                   "{count} caches markeret som fundne",
 
     # ── Kolonne-vælger dialog ─────────────────────────────────────────────────
     "column_dialog_title":          "Vælg kolonner",
-    "column_available":             "Tilgængelige kolonner",
-    "column_visible":               "Viste kolonner",
 
     # ── Om dialog ─────────────────────────────────────────────────────────────
     "about_title":                  "Om OpenSAK",
@@ -250,7 +223,6 @@ STRINGS: dict[str, str] = {
     "wp_val_name_required":         "Navn er påkrævet.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
-    "gps_delete_cb_tooltip":        "Sletter alle .gpx filer i Garmin/GPX mappen på enheden\ninden den nye fil uploades. Virker kun ved direkte GPS-upload.",
     "gps_log_placeholder":          "Status vises her…",
 
     # ── Found dialog ──────────────────────────────────────────────────────────
@@ -373,7 +345,6 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Dekod hint (ROT13)",
-    "detail_hide_hint_btn":         "🔒  Skjul hint",
     "detail_log_search_placeholder":"Søg i logs…",
     "detail_archived_mark":         " [ARKIVERET]",
     "detail_placed_by":             "Udlagt af: {name}",
@@ -384,8 +355,6 @@ STRINGS: dict[str, str] = {
     "detail_no_logs_match":         "(Ingen logs matcher '{text}')",
 
     # ── Toolbar ekstra ────────────────────────────────────────────────────────
-    "toolbar_fit_all":              "Vis alle",
-    "toolbar_fit_all_tooltip":      "Zoom kortet til alle caches",
 
     # ── Cache tabel kolonner ──────────────────────────────────────────────────
     "col_status_icon":  "Status ikon",
@@ -436,8 +405,6 @@ STRINGS: dict[str, str] = {
     "wp_label_name":                "Navn *:",
     "wp_label_type":                "Type *:",
     "wp_label_container":           "Container:",
-    "wp_label_lat":                 "Breddegrad *:",
-    "wp_label_lon":                 "Længdegrad *:",
     "wp_label_dt":                  "D / T:",
     "wp_label_difficulty":          "Sværhedsgrad:",
     "wp_label_terrain":             "Terræn:",
@@ -636,7 +603,6 @@ STRINGS: dict[str, str] = {
     "action_trip_planner":          "🗺️  &Turplanlægger…",
     "toolbar_trip":                 "Turplanlægger",
     "toolbar_trip_tooltip":         "Planlæg en geocaching-tur",
-    "toolbar_home":                 "Hjem",
     "toolbar_home_tooltip":         "Vis hjemmepunkt på kort",
 
 
