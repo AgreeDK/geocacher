@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 src/opensak/lang/fr.py — Fichier de langue en français pour OpenSAK.
 

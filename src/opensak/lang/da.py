@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 src/opensak/lang/da.py — Dansk sprogfil for OpenSAK.
 

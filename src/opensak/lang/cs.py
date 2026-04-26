@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 src/opensak/lang/cs.py — Czech language file for OpenSAK.
 
