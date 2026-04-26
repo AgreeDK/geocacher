@@ -9,20 +9,16 @@ Keys (left side) must NEVER be changed — they are used in the code.
 STRINGS: dict[str, str] = {
 
     # ── General ───────────────────────────────────────────────────────────────
-    "app_name":                     "OpenSAK",
-    "ok":                           "OK",
     "cancel":                       "Avbryt",
     "close":                        "Stäng",
     "yes":                          "Ja",
     "no":                           "Nej",
     "save":                         "Spara",
     "delete":                       "Ta bort",
-    "add":                          "Lägg till",
     "edit":                         "Editera",
     "error":                        "Fel",
     "warning":                      "Varning",
     "info":                         "Information",
-    "confirm":                      "Bekräfta",
     "search":                       "Sök",
     "status_ready":                 "Färdig",
     "restart_required":             "Omstart krävs",
@@ -33,9 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Quick filter bar ──────────────────────────────────────────────────────
-    "search_label":                 "Sök:",
     "search_placeholder":           "Namn or GC kod…",
-    "show_label":                   "Visa:",
     "quick_all":                    "Alla cacher",
     "quick_not_found":              "Hittar inget",
     "quick_found":                  "Hittad",
@@ -91,7 +85,6 @@ STRINGS: dict[str, str] = {
     "action_dist_bearing":          "📏  &Avstånd && Bäring…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
-    "toolbar_import":               "Importera",
     "toolbar_filter":               "Filtrera",
     "toolbar_clear_filter":         "Rensa filter",
     "toolbar_gps":                  "Skicka till GPS",
@@ -128,12 +121,8 @@ STRINGS: dict[str, str] = {
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Importera GPX / PQ Zip",
-    "import_drop_hint":             "Dra GPX or ZIP files hit",
     "import_browse":                "Bläddra…",
     "import_start":                 "Starta import",
-    "import_running":               "Importerar…",
-    "import_done":                  "Import färdig: {count} cacher importerade",
-    "import_error":                 "Import felade: {error}",
     "import_complete":              "✓ Import klar: {name}",
     "import_new_caches":            "Nya cacher:",
     "import_updated":               "Uppdaterade:",
@@ -143,7 +132,6 @@ STRINGS: dict[str, str] = {
     "import_failed":                "✗ Import felade:",
     "import_again":                 "Importera igen",
         "import_select_files_label":  "Välj en eller flera GPX- eller Pocket Query ZIP-filer:",
-    "import_no_file":               "Ingen fil vald",
     "import_browse_title":          "Välj en GPX eller ZIP fil",
     "import_remove_selected":     "Ta bort valda",
     "import_file_filter":           "GPX och ZIP filer (*.gpx *.zip);;Alla filer (*)",
@@ -159,10 +147,6 @@ STRINGS: dict[str, str] = {
     "filter_tab_general":           "Allmänt",
     "filter_tab_dates":             "Datum",
     "filter_tab_attributes":        "Attribut",
-    "filter_apply":                 "Applicera filter",
-    "filter_reset":                 "Återställ",
-    "filter_save_profile":          "Spara profil…",
-    "filter_load_profile":          "Ladda profile…",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Skicka till GPS",
@@ -195,8 +179,6 @@ STRINGS: dict[str, str] = {
     # ── Settings dialog ───────────────────────────────────────────────────────
     "settings_dialog_title":        "Inställningar",
     "settings_group_location":      "Hemkoordinater",
-    "settings_lat_label":           "Latitud:",
-    "settings_lon_label":           "Longitud:",
     "settings_group_display":       "Visa",
     "settings_use_miles":           "Visa avstånd i miles (i stället för km)",
     "settings_show_archived":       "Visa arkiverade cacher",
@@ -215,24 +197,13 @@ STRINGS: dict[str, str] = {
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Hantera databaser",
-    "db_add":                       "Skapa ny…",
-    "db_open":                      "Oppna existerande…",
-    "db_delete":                    "Ta bort",
-    "db_activate":                  "Aktivera",
-    "db_active_marker":             "(aktiv)",
     "db_delete_confirm_title":      "Ta bort databas",
-    "db_cannot_delete_active":      "Den aktiva kan inte raderas.\nByt till en annan databas först.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
     "found_dialog_title":           "Updatera hittade från referensdatabasen",
-    "found_start":                  "Starta updatering",
-    "found_running":                "Updaterar…",
-    "found_done":                   "{count} cacher markerade som hittade",
 
     # ── Column chooser dialog ─────────────────────────────────────────────────
     "column_dialog_title":          "Välj kolumner",
-    "column_available":             "Tillgängliga kolumner",
-    "column_visible":               "Synliga kolumner",
 
     # ── About dialog ──────────────────────────────────────────────────────────
     "about_title":                  "Om OpenSAK",
@@ -252,7 +223,6 @@ STRINGS: dict[str, str] = {
     "wp_val_name_required":         "Namn krävs.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
-    "gps_delete_cb_tooltip":        "Tar bort alla .gpx filer i Garmin/GPX foldern på enheten\ninnan ny fil laddas upp. Gäller endast direkt till GPS.",
     "gps_log_placeholder":          "Status visas här…",
 
     # ── Found dialog ──────────────────────────────────────────────────────────
@@ -353,8 +323,6 @@ STRINGS: dict[str, str] = {
     "filter_caches_with":           "Cacher som har:",
     "filter_all_selected":          "ALLA valda attribut",
     "filter_attr_col_name":         "Attribut",
-    "filter_yes":                   "Ja",
-    "filter_no":                    "Nej",
     "filter_none_short":            "Någon",
     "filter_save_title":            "Spara filter",
     "filter_profile_name_label":    "Filter profilnamn:",
@@ -366,10 +334,8 @@ STRINGS: dict[str, str] = {
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Välj en cache från listan",
     "detail_gc_code":               "GC Kod",
-    "detail_type":                  "Typ",
     "detail_dt":                    "D / T",
     "detail_container":             "Behållare",
-    "detail_country":               "Land",
     "detail_coords":                "Koordinater",
     "detail_gc_tooltip":            "Klicka för att öppna på geocaching.com",
     "detail_coords_tooltip":        "Klicka för att öppna i Google Maps",
@@ -379,7 +345,6 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Loggar",
     "detail_tab_logs_count":        "Loggar ({count})",
     "detail_decode_btn":            "🔓  Avkoda ledtråd (ROT13)",
-    "detail_hide_hint_btn":         "🔒  Göm ledtråd",
     "detail_log_search_placeholder":"Sök i loggar…",
     "detail_archived_mark":         " [ARKIVERAD]",
     "detail_placed_by":             "Utlagd av: {name}",
@@ -390,8 +355,6 @@ STRINGS: dict[str, str] = {
     "detail_no_logs_match":         "(Inga loggar matchar '{text}')",
 
     # ── Toolbar extras ────────────────────────────────────────────────────────
-    "toolbar_fit_all":              "Få plats med alla",
-    "toolbar_fit_all_tooltip":      "Zooma kartan till alla cacher",
     
     # ── Cache table columns ───────────────────────────────────────────────────
     "col_status_icon":  "Status ikon",
@@ -419,8 +382,6 @@ STRINGS: dict[str, str] = {
     "col_found_date":       "Hittad datum",
     "col_first_to_find":     "FTF",
     "col_user_flag":         "👤",
-    "search_bar_title":      "Sök",
-    "search_name_label":     "Namn",
     "search_gc_label":       "GC-kod",
     "col_bearing":           "Riktning",
     "col_user_sort":         "Sortering",
@@ -444,9 +405,6 @@ STRINGS: dict[str, str] = {
     "wp_label_name":                "Namn *:",
     "wp_label_type":                "Typ *:",
     "wp_label_container":           "Behållare:",
-    "wp_label_coords":              "Koordinater",
-    "wp_label_lat":                 "Latitud *:",
-    "wp_label_lon":                 "Longitud *:",
     "wp_label_dt":                  "D / T:",
     "wp_label_difficulty":          "Svårighet:",
     "wp_label_terrain":             "Terräng:",
@@ -490,7 +448,6 @@ STRINGS: dict[str, str] = {
     "proj_title":                   "Koordinateprojicering",
     "proj_start_group":             "Startkoordinat",
     "proj_start_hint":              "Ange startkoordinat i DMM, DMS eller DD format",
-    "proj_start_placeholder":       "t.e.x. N59 49.250 E017 37.000",
     "proj_params_group":            "Bäring och avstånd",
     "proj_bearing_label":           "Bäring (azimuth):",
     "proj_distance_label":          "Avstånd:",
@@ -502,7 +459,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Kontrollsumma",
     "chk_input_group":              "Koordinat",
     "chk_input_hint":               "Skriv eller klistra in en koordinat — alla siffor summeras automatiskt",
-    "chk_input_placeholder":        "t.e.x. N59 49.250 E017 37.000",
     "chk_result_group":             "Resultat",
     "chk_total_label":              "Total summma:",
     "chk_ns_label":                 "N/S delen:",
@@ -513,7 +469,6 @@ STRINGS: dict[str, str] = {
     "mid_title":                    "Mittpunkt",
     "mid_point_a":                  "Koordinat A",
     "mid_point_b":                  "Koordinat B",
-    "mid_placeholder":              "t.e.x. N59 49.250 E017 37.000",
     "mid_result_group":             "Mittpunkt",
 
     # ── Corrected coordinates ─────────────────────────────────────────────────
@@ -535,14 +490,11 @@ STRINGS: dict[str, str] = {
     "corrected_dialog_heading":     "Korrigerade koordinater — {gc_code}",
     "corrected_dialog_hint":        "Ange lösta koordinater i DMM, DMS or DD format. Dessa används vid export till GPS och visas på kartan.",
     "corrected_dialog_input_label": "Koordinater:",
-    "corrected_dialog_placeholder": "t.e.x. N59 49.250 E017 37.000",
-    "corrected_dialog_parse_error": "Okänt koordinatformat — försök t.e.x. N59 49.250 E017 37.000",
 
     # ── Distance & bearing dialog ─────────────────────────────────────────────
     "dist_title":                   "Avstånd & Bäring",
     "dist_point_a":                 "Koordinat A (från)",
     "dist_point_b":                 "Koordinat B (till)",
-    "dist_placeholder":             "t.e.x. N59 49.250 E017 37.000",
     "dist_result_group":            "Resultat",
     "dist_distance_label":          "Avstånd:",
     "dist_bearing_fwd":             "Bäring A → B:",
@@ -642,10 +594,6 @@ STRINGS: dict[str, str] = {
     "trip_cb_available":            "Bara tillgängliga (inte arkiverade)",
     "trip_preview_group":           "Förhandsvisning",
     "trip_result_label":            "{count} cacher valda för resan",
-    "trip_col_gc":                  "GC kod",
-    "trip_col_name":                "Namn",
-    "trip_col_type":                "Typ",
-    "trip_col_dist":                "Avstånd",
     "trip_btn_export_gps":          "📤  Skicka till GPS…",
     "trip_btn_export_file":         "💾  Spara som GPX fil…",
     "trip_save_dialog_title":       "Spara resan som GPX",
@@ -655,7 +603,6 @@ STRINGS: dict[str, str] = {
     "action_trip_planner":          "🗺️  &Reseplanerare…",
     "toolbar_trip":                 "Reseplanerare",
     "toolbar_trip_tooltip":         "Planera en geocaching resa",
-    "toolbar_home":                 "Hem",
     "toolbar_home_tooltip":         "Panorera kartan till hemmapunkten",
 
 
@@ -665,17 +612,13 @@ STRINGS: dict[str, str] = {
 
 
     # ── Hjemmepunkter i indstillinger ────────────────────────────────────────
-    "settings_hp_col_name":                    "Namn",
     "settings_hp_col_lat":                     "Latitud",
     "settings_hp_col_lon":                     "Longitud",
     "settings_hp_activate":                    "★ Aktivera",
-    "settings_hp_edit":                        "Editera",
-    "settings_hp_delete":                      "Ta bort",
     "settings_hp_add_group":                   "Lägg till / editera punkt",
     "settings_hp_name_label":                  "Namn:",
     "settings_hp_name_placeholder":            "e.g. Hem, Stugan…",
     "settings_hp_coord_label":                 "Koordinater:",
-    "settings_hp_coord_placeholder":           "t.e.x. N59 49.250 E017 37.000",
     "settings_hp_coord_error":                 "✗  Okänt koordinatformat",
     "settings_hp_add_btn":                     "Spara punkt",
     "settings_hp_delete_title":                "Ta bort hempunkt",
@@ -697,7 +640,6 @@ STRINGS: dict[str, str] = {
     "trip_route_point_name":                   "Namn:",
     "trip_route_name_placeholder":             "t.r.x. Hotell, rastplats…",
     "trip_route_coord_label":                  "Koordinat:",
-    "trip_route_coord_placeholder":            "t.e.x. N59 49.250 E017 37.000",
     "trip_route_add_btn":                      "Lägg till punkt",
     "trip_route_from_home":                    "Från hempunkterna…",
     "trip_route_from_home_tooltip":            "Lägg till en sparad hempunkt som en punkt på rutten",

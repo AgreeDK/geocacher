@@ -9,20 +9,16 @@ Les clés (côté gauche) ne doivent JAMAIS être modifiées — elles sont util
 STRINGS: dict[str, str] = {
 
     # ── General ───────────────────────────────────────────────────────────────
-    "app_name":                     "OpenSAK",
-    "ok":                           "OK",
     "cancel":                       "Annuler",
     "close":                        "Fermer",
     "yes":                          "Oui",
     "no":                           "Non",
     "save":                         "Enregistrer",
     "delete":                       "Supprimer",
-    "add":                          "Ajouter",
     "edit":                         "Modifier",
     "error":                        "Erreur",
     "warning":                      "Avertissement",
     "info":                         "Information",
-    "confirm":                      "Confirmer",
     "search":                       "Rechercher",
     "status_ready":                 "Prêt",
     "restart_required":             "Redémarrage requis",
@@ -33,9 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Quick filter bar ──────────────────────────────────────────────────────
-    "search_label":                 "Recherche:",
     "search_placeholder":           "Nom ou code GC…",
-    "show_label":                   "Show:",
     "quick_all":                    "Toutes les caches",
     "quick_not_found":              "Not found",
     "quick_found":                  "Found",
@@ -91,7 +85,6 @@ STRINGS: dict[str, str] = {
     "action_dist_bearing":          "📏  &Distance && Cap…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
-    "toolbar_import":               "Importer",
     "toolbar_filter":               "Filtre",
     "toolbar_clear_filter":         "Effacer le filtre",
     "toolbar_gps":                  "Envoyer au GPS",
@@ -128,12 +121,8 @@ STRINGS: dict[str, str] = {
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Importer GPX / Zip de PQ",
-    "import_drop_hint":             "Déposer un GPX ou un fichier ZIP ici",
     "import_browse":                "Parcourir…",
     "import_start":                 "Démarrer l'import",
-    "import_running":               "Importation en cours…",
-    "import_done":                  "Importation terminée: {count} caches importées",
-    "import_error":                 "L'importation a échoué: {error}",
     "import_complete":              "✓ Importation terminée : {name}",
     "import_new_caches":            "Nouvelles caches :",
     "import_updated":               "Mises à jour :",
@@ -143,7 +132,6 @@ STRINGS: dict[str, str] = {
     "import_failed":                "✗ Échec de l'importation :",
     "import_again":                 "Importer à nouveau",
         "import_select_files_label":  "Sélectionnez un ou plusieurs fichiers GPX ou ZIP Pocket Query :",
-    "import_no_file":               "Aucun fichier sélectionné",
     "import_browse_title":          "Sélectionner un fichier GPX ou ZIP",
     "import_remove_selected":     "Supprimer la sélection",
     "import_file_filter":           "Fichiers GPX et ZIP (*.gpx *.zip);;Tous les fichiers (*)",
@@ -159,10 +147,6 @@ STRINGS: dict[str, str] = {
     "filter_tab_general":           "Général",
     "filter_tab_dates":             "Dates",
     "filter_tab_attributes":        "Attributs",
-    "filter_apply":                 "Appliquer le filtre",
-    "filter_reset":                 "Réinitialiser",
-    "filter_save_profile":          "Enregistrer le profil…",
-    "filter_load_profile":          "Charger le profil…",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Envoyer au GPS",
@@ -195,8 +179,6 @@ STRINGS: dict[str, str] = {
     # ── Settings dialog ───────────────────────────────────────────────────────
     "settings_dialog_title":        "Paramètres",
     "settings_group_location":      "Coordonnées de base",
-    "settings_lat_label":           "Latitude:",
-    "settings_lon_label":           "Longitude:",
     "settings_group_display":       "Affichage",
     "settings_use_miles":           "Afficher les distances en miles (au lieu de km)",
     "settings_show_archived":       "Afficher les caches archivées",
@@ -215,24 +197,13 @@ STRINGS: dict[str, str] = {
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Gérer les bases de données",
-    "db_add":                       "Créer une nouvelle…",
-    "db_open":                      "Ouvrir une existante…",
-    "db_delete":                    "Supprimer",
-    "db_activate":                  "Activer",
-    "db_active_marker":             "(active)",
     "db_delete_confirm_title":      "Supprimer la base de données",
-    "db_cannot_delete_active":      "La base de données active ne peut pas être supprimée.\nVeuillez basculer vers une autre base de données en premier.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
     "found_dialog_title":           "Mettre à jour les caches trouvées à partir de la base de données de référence",
-    "found_start":                  "Démarrer la mise à jour",
-    "found_running":                "Mise à jour en cours…",
-    "found_done":                   "{count} caches marquées comme trouvées",
 
     # ── Column chooser dialog ─────────────────────────────────────────────────
     "column_dialog_title":          "Choisir les colonnes",
-    "column_available":             "Colonnes disponibles",
-    "column_visible":               "Colonnes visibles",
 
     # ── About dialog ──────────────────────────────────────────────────────────
     "about_title":                  "À propos d'OpenSAK",
@@ -252,7 +223,6 @@ STRINGS: dict[str, str] = {
     "wp_val_name_required":         "Le nom est requis.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
-    "gps_delete_cb_tooltip":        "Supprimer tous les fichiers .gpx du dossier Garmin/GPX sur l'appareil\navant le téléchargement du nouveau fichier. S'applique uniquement au téléchargement GPS direct.",
     "gps_log_placeholder":          "Le statut sera affiché ici…",
 
     # ── Found dialog ──────────────────────────────────────────────────────────
@@ -353,8 +323,6 @@ STRINGS: dict[str, str] = {
     "filter_caches_with":           "Caches qui ont:",
     "filter_all_selected":          "TOUS les attributs sélectionnés",
     "filter_attr_col_name":         "Attribut",
-    "filter_yes":                   "Oui",
-    "filter_no":                    "Non",
     "filter_none_short":            "Tous",
     "filter_save_title":            "Enregistrer le filtre",
     "filter_profile_name_label":    "Nom du profil de filtre:",
@@ -366,10 +334,8 @@ STRINGS: dict[str, str] = {
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Sélectionnez une cache dans la liste",
     "detail_gc_code":               "Code GC",
-    "detail_type":                  "Type",
     "detail_dt":                    "D / T",
     "detail_container":             "Conteneur",
-    "detail_country":               "Pays",
     "detail_coords":                "Coordonnées",
     "detail_gc_tooltip":            "Cliquez pour ouvrir sur geocaching.com",
     "detail_coords_tooltip":        "Cliquez pour ouvrir dans Google Maps",
@@ -379,7 +345,6 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Decoder l'indice (ROT13)",
-    "detail_hide_hint_btn":         "🔒  Masquer l'indice",
     "detail_log_search_placeholder":"Rechercher dans les logs…",
     "detail_archived_mark":         " [ARCHIVÉE]",
     "detail_placed_by":             "Placée par: {name}",
@@ -390,8 +355,6 @@ STRINGS: dict[str, str] = {
     "detail_no_logs_match":         "(Aucun log ne correspond à '{text}')",
 
     # ── Toolbar extras ────────────────────────────────────────────────────────
-    "toolbar_fit_all":              "Afficher tout",
-    "toolbar_fit_all_tooltip":      "Zoomer la carte sur toutes les caches",
 
     # ── Cache table columns ───────────────────────────────────────────────────
     "col_status_icon":  "Icone de statut",
@@ -419,8 +382,6 @@ STRINGS: dict[str, str] = {
     "col_found_date":       "Date trouvée",
     "col_first_to_find":     "FTF",
     "col_user_flag":         "👤",
-    "search_bar_title":      "Recherche",
-    "search_name_label":     "Nom",
     "search_gc_label":       "Code GC",
     "col_bearing":           "Direction",
     "col_user_sort":         "Tri",
@@ -444,9 +405,6 @@ STRINGS: dict[str, str] = {
     "wp_label_name":                "Nom *:",
     "wp_label_type":                "Type *:",
     "wp_label_container":           "Conteneur:",
-    "wp_label_coords":              "Coordonnées",
-    "wp_label_lat":                 "Latitude *:",
-    "wp_label_lon":                 "Longitude *:",
     "wp_label_dt":                  "D / T:",
     "wp_label_difficulty":          "Difficulté:",
     "wp_label_terrain":             "Terrain:",
@@ -490,7 +448,6 @@ STRINGS: dict[str, str] = {
     "proj_title":                   "Projection de coordonnées",
     "proj_start_group":             "Coordonnées de départ",
     "proj_start_hint":              "Entrez les coordonnées de départ au format DMM, DMS ou DD",
-    "proj_start_placeholder":       "ex. N55 47.250 E012 25.000",
     "proj_params_group":            "Cap et distance",
     "proj_bearing_label":           "Cap (azimut):",
     "proj_distance_label":          "Distance:",
@@ -502,7 +459,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Somme des chiffres",
     "chk_input_group":              "Coordonnées",
     "chk_input_hint":               "Saisissez ou collez des coordonnées — tous les chiffres sont additionnés automatiquement",
-    "chk_input_placeholder":        "ex. N55 47.250 E012 25.000",
     "chk_result_group":             "Résultats",
     "chk_total_label":              "Somme totale:",
     "chk_ns_label":                 "Partie N/S:",
@@ -513,7 +469,6 @@ STRINGS: dict[str, str] = {
     "mid_title":                    "Point médian",
     "mid_point_a":                  "Coordonnées A",
     "mid_point_b":                  "Coordonnées B",
-    "mid_placeholder":              "ex. N55 47.250 E012 25.000",
     "mid_result_group":             "Point médian",
 
     # ── Coordonnées corrigées ─────────────────────────────────────────────────
@@ -535,14 +490,11 @@ STRINGS: dict[str, str] = {
     "corrected_dialog_heading":     "Coordonnées corrigées — {gc_code}",
     "corrected_dialog_hint":        "Saisir les coordonnées résolues au format DMM, DMS ou DD. Elles seront utilisées pour l'export GPS et affichées sur la carte.",
     "corrected_dialog_input_label": "Coordonnées :",
-    "corrected_dialog_placeholder": "ex. N55 47.250 E012 25.000",
-    "corrected_dialog_parse_error": "Format de coordonnées inconnu — essayez par ex. N55 47.250 E012 25.000",
 
     # ── Distance & cap ────────────────────────────────────────────────────────
     "dist_title":                   "Distance & Cap",
     "dist_point_a":                 "Coordonnées A (de)",
     "dist_point_b":                 "Coordonnées B (vers)",
-    "dist_placeholder":             "ex. N55 47.250 E012 25.000",
     "dist_result_group":            "Résultats",
     "dist_distance_label":          "Distance:",
     "dist_bearing_fwd":             "Cap A → B:",
@@ -642,10 +594,6 @@ STRINGS: dict[str, str] = {
     "trip_cb_available":            "Uniquement disponibles (non archivées)",
     "trip_preview_group":           "Aperçu",
     "trip_result_label":            "{count} caches sélectionnées pour la sortie",
-    "trip_col_gc":                  "Code GC",
-    "trip_col_name":                "Nom",
-    "trip_col_type":                "Type",
-    "trip_col_dist":                "Distance",
     "trip_btn_export_gps":          "📤  Envoyer vers GPS…",
     "trip_btn_export_file":         "💾  Enregistrer en GPX…",
     "trip_save_dialog_title":       "Enregistrer la sortie en GPX",
@@ -655,7 +603,6 @@ STRINGS: dict[str, str] = {
     "action_trip_planner":          "🗺️  &Planificateur de sortie…",
     "toolbar_trip":                 "Planificateur",
     "toolbar_trip_tooltip":         "Planifier une sortie geocaching",
-    "toolbar_home":                 "Accueil",
     "toolbar_home_tooltip":         "Centrer la carte sur le point de départ",
 
 
@@ -665,17 +612,13 @@ STRINGS: dict[str, str] = {
 
 
     # ── Hjemmepunkter i indstillinger ────────────────────────────────────────
-    "settings_hp_col_name":                    "Nom",
     "settings_hp_col_lat":                     "Latitude",
     "settings_hp_col_lon":                     "Longitude",
     "settings_hp_activate":                    "★ Activer",
-    "settings_hp_edit":                        "Modifier",
-    "settings_hp_delete":                      "Supprimer",
     "settings_hp_add_group":                   "Ajouter / modifier un point",
     "settings_hp_name_label":                  "Nom :",
     "settings_hp_name_placeholder":            "ex. Domicile, Résidence…",
     "settings_hp_coord_label":                 "Coordonnée :",
-    "settings_hp_coord_placeholder":           "ex. N55 47.250 E012 25.000",
     "settings_hp_coord_error":                 "✗  Format de coordonnée inconnu",
     "settings_hp_add_btn":                     "Enregistrer le point",
     "settings_hp_delete_title":                "Supprimer le point de départ",
@@ -697,7 +640,6 @@ STRINGS: dict[str, str] = {
     "trip_route_point_name":                   "Nom :",
     "trip_route_name_placeholder":             "ex. Hôtel, Aire de repos…",
     "trip_route_coord_label":                  "Coordonnée :",
-    "trip_route_coord_placeholder":            "ex. N55 47.250 E012 25.000",
     "trip_route_add_btn":                      "Ajouter le point",
     "trip_route_from_home":                    "Depuis les points de départ…",
     "trip_route_from_home_tooltip":            "Ajouter un point de départ enregistré comme point d'itinéraire",

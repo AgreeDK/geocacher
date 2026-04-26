@@ -72,7 +72,7 @@ class CorrectedCoordsDialog(QDialog):
         input_layout.addWidget(input_label)
 
         self._input = QLineEdit()
-        self._input.setPlaceholderText(tr("corrected_dialog_placeholder"))
+        self._input.setPlaceholderText(tr("coord_conv_placeholder"))
         self._input.textChanged.connect(self._on_input_changed)
 
         # Forudfyld med eksisterende korrigerede koordinater
@@ -137,7 +137,7 @@ class CorrectedCoordsDialog(QDialog):
             self._lat = None
             self._lon = None
             self._preview.setText("")
-            self._error_lbl.setText(tr("corrected_dialog_parse_error"))
+            self._error_lbl.setText(tr("coord_conv_parse_error"))
             self._ok_btn.setEnabled(False)
 
     def _on_accept(self) -> None:

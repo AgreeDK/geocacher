@@ -356,7 +356,7 @@ class MainWindow(QMainWindow):
         from PySide6.QtWidgets import (
             QToolBar, QLabel, QLineEdit, QWidgetAction, QWidget, QSizePolicy, QHBoxLayout
         )
-        sb = QToolBar(tr("search_bar_title"))
+        sb = QToolBar(tr("search"))
         sb.setObjectName("search_toolbar")
         sb.setMovable(False)
         self.addToolBarBreak()
@@ -387,7 +387,7 @@ class MainWindow(QMainWindow):
         row.addWidget(sep)
 
         # Navn label + felt
-        name_lbl = QLabel(tr("search_name_label") + ":")
+        name_lbl = QLabel(tr("col_name") + ":")
         row.addWidget(name_lbl)
 
         self._search_box = QLineEdit()

@@ -74,7 +74,7 @@ class WaypointDialog(QDialog):
         basic_layout.addRow(tr("wp_label_container"), self._container)
 
         # Koordinater — tekstfelt med parse-feedback (samme mønster som corrected_coords_dialog)
-        coord_group = QGroupBox(tr("wp_label_coords"))
+        coord_group = QGroupBox(tr("detail_coords"))
         coord_layout = QVBoxLayout(coord_group)
         coord_layout.setSpacing(4)
 
@@ -213,7 +213,7 @@ class WaypointDialog(QDialog):
         else:
             self._parsed_lat = None
             self._parsed_lon = None
-            self._coord_feedback.setText(tr("corrected_dialog_parse_error"))
+            self._coord_feedback.setText(tr("coord_conv_parse_error"))
             self._coord_feedback.setStyleSheet("color: #c62828; font-size: 10px;")
 
     def _populate(self, cache: Cache) -> None:
@@ -273,7 +273,7 @@ class WaypointDialog(QDialog):
         # Koordinat-feltet er udfyldt men ikke parset korrekt
         coord_text = self._coord_input.text().strip()
         if coord_text and self._parsed_lat is None:
-            QMessageBox.warning(self, tr("warning"), tr("corrected_dialog_parse_error"))
+            QMessageBox.warning(self, tr("warning"), tr("coord_conv_parse_error"))
             return
 
         self.accept()

@@ -9,20 +9,16 @@ The keys (left side) must NEVER be changed — they are used in the code.
 STRINGS: dict[str, str] = {
 
     # ── General ───────────────────────────────────────────────────────────────
-    "app_name":                     "OpenSAK",
-    "ok":                           "OK",
     "cancel":                       "Cancel",
     "close":                        "Close",
     "yes":                          "Yes",
     "no":                           "No",
     "save":                         "Save",
     "delete":                       "Delete",
-    "add":                          "Add",
     "edit":                         "Edit",
     "error":                        "Error",
     "warning":                      "Warning",
     "info":                         "Information",
-    "confirm":                      "Confirm",
     "search":                       "Search",
     "status_ready":                 "Ready",
     "restart_required":             "Restart required",
@@ -33,9 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Quick filter bar ──────────────────────────────────────────────────────
-    "search_label":                 "Search:",
     "search_placeholder":           "Name or GC code…",
-    "show_label":                   "Show:",
     "quick_all":                    "All caches",
     "quick_not_found":              "Not found",
     "quick_found":                  "Found",
@@ -91,7 +85,6 @@ STRINGS: dict[str, str] = {
     "action_dist_bearing":          "📏  &Distance && Bearing…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
-    "toolbar_import":               "Import",
     "toolbar_filter":               "Filter",
     "toolbar_clear_filter":         "Clear filter",
     "toolbar_gps":                  "Send to GPS",
@@ -128,12 +121,8 @@ STRINGS: dict[str, str] = {
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Import GPX / PQ Zip",
-    "import_drop_hint":             "Drag GPX or ZIP files here",
     "import_browse":                "Browse…",
     "import_start":                 "Start import",
-    "import_running":               "Importing…",
-    "import_done":                  "Import complete: {count} caches imported",
-    "import_error":                 "Import failed: {error}",
     "import_complete":              "✓ Import complete: {name}",
     "import_new_caches":            "New caches:",
     "import_updated":               "Updated:",
@@ -143,7 +132,6 @@ STRINGS: dict[str, str] = {
     "import_failed":                "✗ Import failed:",
     "import_again":                 "Import again",
         "import_select_files_label":  "Select one or more GPX or Pocket Query ZIP files:",
-    "import_no_file":               "No file selected",
     "import_browse_title":          "Select GPX or ZIP file",
     "import_remove_selected":     "Remove selected",
     "import_file_filter":           "GPX and ZIP files (*.gpx *.zip);;All files (*)",
@@ -159,10 +147,6 @@ STRINGS: dict[str, str] = {
     "filter_tab_general":           "General",
     "filter_tab_dates":             "Dates",
     "filter_tab_attributes":        "Attributes",
-    "filter_apply":                 "Apply filter",
-    "filter_reset":                 "Reset",
-    "filter_save_profile":          "Save profile…",
-    "filter_load_profile":          "Load profile…",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Send to GPS",
@@ -195,8 +179,6 @@ STRINGS: dict[str, str] = {
     # ── Settings dialog ───────────────────────────────────────────────────────
     "settings_dialog_title":        "Settings",
     "settings_group_location":      "Home coordinates",
-    "settings_lat_label":           "Latitude:",
-    "settings_lon_label":           "Longitude:",
     "settings_group_display":       "Display",
     "settings_use_miles":           "Show distances in miles (instead of km)",
     "settings_show_archived":       "Show archived caches",
@@ -215,24 +197,13 @@ STRINGS: dict[str, str] = {
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Manage databases",
-    "db_add":                       "Create new…",
-    "db_open":                      "Open existing…",
-    "db_delete":                    "Delete",
-    "db_activate":                  "Activate",
-    "db_active_marker":             "(active)",
     "db_delete_confirm_title":      "Delete database",
-    "db_cannot_delete_active":      "The active database cannot be deleted.\nSwitch to another database first.",
 
     # ── Found updater dialog ──────────────────────────────────────────────────
     "found_dialog_title":           "Update finds from reference database",
-    "found_start":                  "Start update",
-    "found_running":                "Updating…",
-    "found_done":                   "{count} caches marked as found",
 
     # ── Column chooser dialog ─────────────────────────────────────────────────
     "column_dialog_title":          "Choose columns",
-    "column_available":             "Available columns",
-    "column_visible":               "Visible columns",
 
     # ── About dialog ──────────────────────────────────────────────────────────
     "about_title":                  "About OpenSAK",
@@ -252,7 +223,6 @@ STRINGS: dict[str, str] = {
     "wp_val_name_required":         "Name is required.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
-    "gps_delete_cb_tooltip":        "Deletes all .gpx files in the Garmin/GPX folder on the device\nbefore uploading the new file. Only applies to direct GPS upload.",
     "gps_log_placeholder":          "Status will be shown here…",
 
     # ── Found dialog ──────────────────────────────────────────────────────────
@@ -353,8 +323,6 @@ STRINGS: dict[str, str] = {
     "filter_caches_with":           "Caches that have:",
     "filter_all_selected":          "ALL selected attributes",
     "filter_attr_col_name":         "Attribute",
-    "filter_yes":                   "Yes",
-    "filter_no":                    "No",
     "filter_none_short":            "Any",
     "filter_save_title":            "Save filter",
     "filter_profile_name_label":    "Filter profile name:",
@@ -366,10 +334,8 @@ STRINGS: dict[str, str] = {
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Select a cache from the list",
     "detail_gc_code":               "GC Code",
-    "detail_type":                  "Type",
     "detail_dt":                    "D / T",
     "detail_container":             "Container",
-    "detail_country":               "Country",
     "detail_coords":                "Coordinates",
     "detail_gc_tooltip":            "Click to open on geocaching.com",
     "detail_coords_tooltip":        "Click to open in Google Maps",
@@ -379,7 +345,6 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Decode hint (ROT13)",
-    "detail_hide_hint_btn":         "🔒  Hide hint",
     "detail_log_search_placeholder":"Search in logs…",
     "detail_archived_mark":         " [ARCHIVED]",
     "detail_placed_by":             "Placed by: {name}",
@@ -390,8 +355,6 @@ STRINGS: dict[str, str] = {
     "detail_no_logs_match":         "(No logs match '{text}')",
 
     # ── Toolbar extras ────────────────────────────────────────────────────────
-    "toolbar_fit_all":              "Fit all",
-    "toolbar_fit_all_tooltip":      "Zoom map to all caches",
 
     # ── Cache table columns ───────────────────────────────────────────────────
     "col_status_icon":  "Status icon",
@@ -419,8 +382,6 @@ STRINGS: dict[str, str] = {
     "col_found_date":       "Found date",
     "col_first_to_find":     "FTF",
     "col_user_flag":         "👤",
-    "search_bar_title":      "Search",
-    "search_name_label":     "Name",
     "search_gc_label":       "GC code",
     "col_bearing":           "Bearing",
     "col_user_sort":         "Sort",
@@ -444,9 +405,6 @@ STRINGS: dict[str, str] = {
     "wp_label_name":                "Name *:",
     "wp_label_type":                "Type *:",
     "wp_label_container":           "Container:",
-    "wp_label_coords":              "Coordinates",
-    "wp_label_lat":                 "Latitude *:",
-    "wp_label_lon":                 "Longitude *:",
     "wp_label_dt":                  "D / T:",
     "wp_label_difficulty":          "Difficulty:",
     "wp_label_terrain":             "Terrain:",
@@ -490,7 +448,6 @@ STRINGS: dict[str, str] = {
     "proj_title":                   "Coordinate Projection",
     "proj_start_group":             "Start coordinate",
     "proj_start_hint":              "Enter start coordinate in DMM, DMS or DD format",
-    "proj_start_placeholder":       "e.g. N55 47.250 E012 25.000",
     "proj_params_group":            "Bearing and distance",
     "proj_bearing_label":           "Bearing (azimuth):",
     "proj_distance_label":          "Distance:",
@@ -502,7 +459,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Digit Checksum",
     "chk_input_group":              "Coordinate",
     "chk_input_hint":               "Type or paste a coordinate — all digits are summed automatically",
-    "chk_input_placeholder":        "e.g. N55 47.250 E012 25.000",
     "chk_result_group":             "Results",
     "chk_total_label":              "Total sum:",
     "chk_ns_label":                 "N/S part:",
@@ -513,7 +469,6 @@ STRINGS: dict[str, str] = {
     "mid_title":                    "Midpoint",
     "mid_point_a":                  "Coordinate A",
     "mid_point_b":                  "Coordinate B",
-    "mid_placeholder":              "e.g. N55 47.250 E012 25.000",
     "mid_result_group":             "Midpoint",
 
     # ── Corrected coordinates ─────────────────────────────────────────────────
@@ -535,14 +490,11 @@ STRINGS: dict[str, str] = {
     "corrected_dialog_heading":     "Corrected coordinates — {gc_code}",
     "corrected_dialog_hint":        "Enter the solved coordinates in DMM, DMS or DD format. These will be used for GPS export and shown on the map.",
     "corrected_dialog_input_label": "Coordinates:",
-    "corrected_dialog_placeholder": "e.g. N55 47.250 E012 25.000",
-    "corrected_dialog_parse_error": "Unknown coordinate format — try e.g. N55 47.250 E012 25.000",
 
     # ── Distance & bearing dialog ─────────────────────────────────────────────
     "dist_title":                   "Distance & Bearing",
     "dist_point_a":                 "Coordinate A (from)",
     "dist_point_b":                 "Coordinate B (to)",
-    "dist_placeholder":             "e.g. N55 47.250 E012 25.000",
     "dist_result_group":            "Results",
     "dist_distance_label":          "Distance:",
     "dist_bearing_fwd":             "Bearing A → B:",
@@ -642,10 +594,6 @@ STRINGS: dict[str, str] = {
     "trip_cb_available":            "Only available (not archived)",
     "trip_preview_group":           "Preview",
     "trip_result_label":            "{count} caches selected for the trip",
-    "trip_col_gc":                  "GC code",
-    "trip_col_name":                "Name",
-    "trip_col_type":                "Type",
-    "trip_col_dist":                "Distance",
     "trip_btn_export_gps":          "📤  Send to GPS…",
     "trip_btn_export_file":         "💾  Save as GPX file…",
     "trip_save_dialog_title":       "Save trip as GPX",
@@ -655,7 +603,6 @@ STRINGS: dict[str, str] = {
     "action_trip_planner":          "🗺️  &Trip Planner…",
     "toolbar_trip":                 "Trip Planner",
     "toolbar_trip_tooltip":         "Plan a geocaching trip",
-    "toolbar_home":                 "Home",
     "toolbar_home_tooltip":         "Pan map to home point",
 
 
@@ -665,17 +612,13 @@ STRINGS: dict[str, str] = {
 
 
     # ── Hjemmepunkter i indstillinger ────────────────────────────────────────
-    "settings_hp_col_name":                    "Name",
     "settings_hp_col_lat":                     "Latitude",
     "settings_hp_col_lon":                     "Longitude",
     "settings_hp_activate":                    "★ Activate",
-    "settings_hp_edit":                        "Edit",
-    "settings_hp_delete":                      "Delete",
     "settings_hp_add_group":                   "Add / edit point",
     "settings_hp_name_label":                  "Name:",
     "settings_hp_name_placeholder":            "e.g. Home, Cottage…",
     "settings_hp_coord_label":                 "Coordinate:",
-    "settings_hp_coord_placeholder":           "e.g. N55 47.250 E012 25.000",
     "settings_hp_coord_error":                 "✗  Unknown coordinate format",
     "settings_hp_add_btn":                     "Save point",
     "settings_hp_delete_title":                "Delete home point",
@@ -697,7 +640,6 @@ STRINGS: dict[str, str] = {
     "trip_route_point_name":                   "Name:",
     "trip_route_name_placeholder":             "e.g. Hotel, Rest stop…",
     "trip_route_coord_label":                  "Coordinate:",
-    "trip_route_coord_placeholder":            "e.g. N55 47.250 E012 25.000",
     "trip_route_add_btn":                      "Add point",
     "trip_route_from_home":                    "From home points…",
     "trip_route_from_home_tooltip":            "Add a saved home point as a route point",

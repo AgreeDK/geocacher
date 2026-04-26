@@ -9,20 +9,16 @@ Nøglerne (venstre side) må ALDRIG ændres — de bruges i koden.
 STRINGS: dict[str, str] = {
 
     # ── Generelt ──────────────────────────────────────────────────────────────
-    "app_name":                     "OpenSAK",
-    "ok":                           "OK",
     "cancel":                       "Annuller",
     "close":                        "Luk",
     "yes":                          "Ja",
     "no":                           "Nej",
     "save":                         "Gem",
     "delete":                       "Slet",
-    "add":                          "Tilføj",
     "edit":                         "Rediger",
     "error":                        "Fejl",
     "warning":                      "Advarsel",
     "info":                         "Information",
-    "confirm":                      "Bekræft",
     "search":                       "Søg",
     "status_ready":                 "Klar",
     "restart_required":             "Genstart kræves",
@@ -33,9 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Hurtigfilter-bar ──────────────────────────────────────────────────────
-    "search_label":                 "Søg:",
     "search_placeholder":           "Navn eller GC kode…",
-    "show_label":                   "Vis:",
     "quick_all":                    "Alle caches",
     "quick_not_found":              "Ikke fundne",
     "quick_found":                  "Fundne",
@@ -91,7 +85,6 @@ STRINGS: dict[str, str] = {
     "action_dist_bearing":          "📏  &Afstand && Retning…",
 
     # ── Toolbar ───────────────────────────────────────────────────────────────
-    "toolbar_import":               "Importer",
     "toolbar_filter":               "Filter",
     "toolbar_clear_filter":         "Nulstil filter",
     "toolbar_gps":                  "Send til GPS",
@@ -128,12 +121,8 @@ STRINGS: dict[str, str] = {
 
     # ── Import dialog ─────────────────────────────────────────────────────────
     "import_dialog_title":          "Importer GPX / PQ Zip",
-    "import_drop_hint":             "Træk GPX eller ZIP filer hertil",
     "import_browse":                "Vælg filer…",
     "import_start":                 "Start import",
-    "import_running":               "Importerer…",
-    "import_done":                  "Import færdig: {count} caches importeret",
-    "import_error":                 "Import fejlede: {error}",
     "import_complete":              "✓ Import fuldført: {name}",
     "import_new_caches":            "Nye caches:",
     "import_updated":               "Opdaterede:",
@@ -143,7 +132,6 @@ STRINGS: dict[str, str] = {
     "import_failed":                "✗ Fejl under import:",
     "import_again":                 "Importer igen",
         "import_select_files_label":  "Vælg en eller flere GPX- eller Pocket Query ZIP-filer:",
-    "import_no_file":               "Ingen fil valgt",
     "import_browse_title":          "Vælg GPX eller ZIP fil",
     "import_remove_selected":     "Fjern valgte",
     "import_file_filter":           "GPX og ZIP filer (*.gpx *.zip);;Alle filer (*)",
@@ -159,10 +147,6 @@ STRINGS: dict[str, str] = {
     "filter_tab_general":           "Generelt",
     "filter_tab_dates":             "Datoer",
     "filter_tab_attributes":        "Attributter",
-    "filter_apply":                 "Anvend filter",
-    "filter_reset":                 "Nulstil",
-    "filter_save_profile":          "Gem profil…",
-    "filter_load_profile":          "Indlæs profil…",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Send til GPS",
@@ -195,8 +179,6 @@ STRINGS: dict[str, str] = {
     # ── Indstillinger dialog ──────────────────────────────────────────────────
     "settings_dialog_title":        "Indstillinger",
     "settings_group_location":      "Hjemkoordinat",
-    "settings_lat_label":           "Breddegrad:",
-    "settings_lon_label":           "Længdegrad:",
     "settings_group_display":       "Visning",
     "settings_use_miles":           "Vis afstande i miles (i stedet for km)",
     "settings_show_archived":       "Vis arkiverede caches",
@@ -215,24 +197,13 @@ STRINGS: dict[str, str] = {
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Administrer databaser",
-    "db_add":                       "Opret ny…",
-    "db_open":                      "Åbn eksisterende…",
-    "db_delete":                    "Slet",
-    "db_activate":                  "Aktiver",
-    "db_active_marker":             "(aktiv)",
     "db_delete_confirm_title":      "Slet database",
-    "db_cannot_delete_active":      "Den aktive database kan ikke slettes.\nSkift til en anden database først.",
 
     # ── Fund-opdater dialog ───────────────────────────────────────────────────
     "found_dialog_title":           "Opdater fund fra reference database",
-    "found_start":                  "Start opdatering",
-    "found_running":                "Opdaterer…",
-    "found_done":                   "{count} caches markeret som fundne",
 
     # ── Kolonne-vælger dialog ─────────────────────────────────────────────────
     "column_dialog_title":          "Vælg kolonner",
-    "column_available":             "Tilgængelige kolonner",
-    "column_visible":               "Viste kolonner",
 
     # ── Om dialog ─────────────────────────────────────────────────────────────
     "about_title":                  "Om OpenSAK",
@@ -252,7 +223,6 @@ STRINGS: dict[str, str] = {
     "wp_val_name_required":         "Navn er påkrævet.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
-    "gps_delete_cb_tooltip":        "Sletter alle .gpx filer i Garmin/GPX mappen på enheden\ninden den nye fil uploades. Virker kun ved direkte GPS-upload.",
     "gps_log_placeholder":          "Status vises her…",
 
     # ── Found dialog ──────────────────────────────────────────────────────────
@@ -353,8 +323,6 @@ STRINGS: dict[str, str] = {
     "filter_caches_with":           "Cacher der har:",
     "filter_all_selected":          "ALLE valgte attributter",
     "filter_attr_col_name":         "Attribut",
-    "filter_yes":                   "Ja",
-    "filter_no":                    "Nej",
     "filter_none_short":            "Ingen",
     "filter_save_title":            "Gem filter",
     "filter_profile_name_label":    "Navn på filter profil:",
@@ -366,10 +334,8 @@ STRINGS: dict[str, str] = {
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Vælg en cache fra listen",
     "detail_gc_code":               "GC Kode",
-    "detail_type":                  "Type",
     "detail_dt":                    "D / T",
     "detail_container":             "Container",
-    "detail_country":               "Land",
     "detail_coords":                "Koordinater",
     "detail_gc_tooltip":            "Klik for at åbne på geocaching.com",
     "detail_coords_tooltip":        "Klik for at åbne i Google Maps",
@@ -379,7 +345,6 @@ STRINGS: dict[str, str] = {
     "detail_tab_logs":              "Logs",
     "detail_tab_logs_count":        "Logs ({count})",
     "detail_decode_btn":            "🔓  Dekod hint (ROT13)",
-    "detail_hide_hint_btn":         "🔒  Skjul hint",
     "detail_log_search_placeholder":"Søg i logs…",
     "detail_archived_mark":         " [ARKIVERET]",
     "detail_placed_by":             "Udlagt af: {name}",
@@ -390,8 +355,6 @@ STRINGS: dict[str, str] = {
     "detail_no_logs_match":         "(Ingen logs matcher '{text}')",
 
     # ── Toolbar ekstra ────────────────────────────────────────────────────────
-    "toolbar_fit_all":              "Vis alle",
-    "toolbar_fit_all_tooltip":      "Zoom kortet til alle caches",
 
     # ── Cache tabel kolonner ──────────────────────────────────────────────────
     "col_status_icon":  "Status ikon",
@@ -419,8 +382,6 @@ STRINGS: dict[str, str] = {
     "col_found_date":       "Fundet dato",
     "col_first_to_find":     "FTF",
     "col_user_flag":         "👤",
-    "search_bar_title":      "Søg",
-    "search_name_label":     "Navn",
     "search_gc_label":       "GC kode",
     "col_bearing":           "Retning",
     "col_user_sort":         "Sortering",
@@ -444,9 +405,6 @@ STRINGS: dict[str, str] = {
     "wp_label_name":                "Navn *:",
     "wp_label_type":                "Type *:",
     "wp_label_container":           "Container:",
-    "wp_label_coords":              "Koordinater",
-    "wp_label_lat":                 "Breddegrad *:",
-    "wp_label_lon":                 "Længdegrad *:",
     "wp_label_dt":                  "D / T:",
     "wp_label_difficulty":          "Sværhedsgrad:",
     "wp_label_terrain":             "Terræn:",
@@ -490,7 +448,6 @@ STRINGS: dict[str, str] = {
     "proj_title":                   "Koordinatprojektion",
     "proj_start_group":             "Startkoordinat",
     "proj_start_hint":              "Skriv startkoordinat i DMM, DMS eller DD format",
-    "proj_start_placeholder":       "f.eks. N55 47.250 E012 25.000",
     "proj_params_group":            "Retning og afstand",
     "proj_bearing_label":           "Retning (azimut):",
     "proj_distance_label":          "Afstand:",
@@ -502,7 +459,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Tjeksum-beregner",
     "chk_input_group":              "Koordinat",
     "chk_input_hint":               "Skriv eller indsæt et koordinat — alle cifre summeres automatisk",
-    "chk_input_placeholder":        "f.eks. N55 47.250 E012 25.000",
     "chk_result_group":             "Resultater",
     "chk_total_label":              "Total sum:",
     "chk_ns_label":                 "N/S del:",
@@ -513,7 +469,6 @@ STRINGS: dict[str, str] = {
     "mid_title":                    "Midtpunkt",
     "mid_point_a":                  "Koordinat A",
     "mid_point_b":                  "Koordinat B",
-    "mid_placeholder":              "f.eks. N55 47.250 E012 25.000",
     "mid_result_group":             "Midtpunkt",
 
     # ── Korrigerede koordinater ───────────────────────────────────────────────
@@ -535,14 +490,11 @@ STRINGS: dict[str, str] = {
     "corrected_dialog_heading":     "Korrigerede koordinater — {gc_code}",
     "corrected_dialog_hint":        "Indtast de løste koordinater i DMM, DMS eller DD format. De bruges ved GPS export og vises på kortet.",
     "corrected_dialog_input_label": "Koordinater:",
-    "corrected_dialog_placeholder": "f.eks. N55 47.250 E012 25.000",
-    "corrected_dialog_parse_error": "Ukendt koordinatformat — prøv f.eks. N55 47.250 E012 25.000",
 
     # ── Afstand & retning dialog ──────────────────────────────────────────────
     "dist_title":                   "Afstand & Retning",
     "dist_point_a":                 "Koordinat A (fra)",
     "dist_point_b":                 "Koordinat B (til)",
-    "dist_placeholder":             "f.eks. N55 47.250 E012 25.000",
     "dist_result_group":            "Resultater",
     "dist_distance_label":          "Afstand:",
     "dist_bearing_fwd":             "Retning A → B:",
@@ -642,10 +594,6 @@ STRINGS: dict[str, str] = {
     "trip_cb_available":            "Kun tilgængelige (ikke arkiverede)",
     "trip_preview_group":           "Forhåndsvisning",
     "trip_result_label":            "{count} caches valgt til turen",
-    "trip_col_gc":                  "GC kode",
-    "trip_col_name":                "Navn",
-    "trip_col_type":                "Type",
-    "trip_col_dist":                "Afstand",
     "trip_btn_export_gps":          "📤  Send til GPS…",
     "trip_btn_export_file":         "💾  Gem som GPX fil…",
     "trip_save_dialog_title":       "Gem tur som GPX",
@@ -655,7 +603,6 @@ STRINGS: dict[str, str] = {
     "action_trip_planner":          "🗺️  &Turplanlægger…",
     "toolbar_trip":                 "Turplanlægger",
     "toolbar_trip_tooltip":         "Planlæg en geocaching-tur",
-    "toolbar_home":                 "Hjem",
     "toolbar_home_tooltip":         "Vis hjemmepunkt på kort",
 
 
@@ -665,17 +612,13 @@ STRINGS: dict[str, str] = {
 
 
     # ── Hjemmepunkter i indstillinger ────────────────────────────────────────
-    "settings_hp_col_name":                    "Navn",
     "settings_hp_col_lat":                     "Breddegrad",
     "settings_hp_col_lon":                     "Længdegrad",
     "settings_hp_activate":                    "★ Aktivér",
-    "settings_hp_edit":                        "Rediger",
-    "settings_hp_delete":                      "Slet",
     "settings_hp_add_group":                   "Tilføj / rediger punkt",
     "settings_hp_name_label":                  "Navn:",
     "settings_hp_name_placeholder":            "f.eks. Hjem, Sommerhus…",
     "settings_hp_coord_label":                 "Koordinat:",
-    "settings_hp_coord_placeholder":           "f.eks. N55 47.250 E012 25.000",
     "settings_hp_coord_error":                 "✗  Ukendt koordinatformat",
     "settings_hp_add_btn":                     "Gem punkt",
     "settings_hp_delete_title":                "Slet hjemmepunkt",
@@ -697,7 +640,6 @@ STRINGS: dict[str, str] = {
     "trip_route_point_name":                   "Navn:",
     "trip_route_name_placeholder":             "f.eks. Hotel, Rasteplads…",
     "trip_route_coord_label":                  "Koordinat:",
-    "trip_route_coord_placeholder":            "f.eks. N55 47.250 E012 25.000",
     "trip_route_add_btn":                      "Tilføj punkt",
     "trip_route_from_home":                    "Fra hjemmepunkter…",
     "trip_route_from_home_tooltip":            "Tilføj et gemt hjemmepunkt som rutepunkt",
