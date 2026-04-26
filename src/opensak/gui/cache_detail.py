@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 import webbrowser
 from opensak.utils.constants import LOG_COLOURS
-from PySide6.QtCore import Qt, QUrl
+from PySide6.QtCore import Qt, QUrl, Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QTextBrowser, QTabWidget, QFrame, QSizePolicy,
@@ -42,6 +42,8 @@ class _DescWebPage(QWebEnginePage):
 
 class CacheDetailPanel(QWidget):
     """Displays full details for a single selected cache."""
+
+    corrected_coords_changed = Signal(str)  # gc_code
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -334,6 +336,8 @@ class CacheDetailPanel(QWidget):
         self._corrected_lat = lat
         self._corrected_lon = lon
         self._update_corrected_ui()
+        if self._current_gc_code:
+            self.corrected_coords_changed.emit(self._current_gc_code)
 
     def _update_corrected_ui(self) -> None:
         """Opdater visningen af korrigerede koordinater."""

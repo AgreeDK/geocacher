@@ -266,6 +266,41 @@ function panToHome() {
         map.setZoom(12);
     }
 }
+
+function updateCacheMarker(cacheJson) {
+    var c = JSON.parse(cacheJson);
+    if (markers[c.gc_code]) {
+        clusterGroup.removeLayer(markers[c.gc_code]);
+        delete markers[c.gc_code];
+    }
+    if (!c.lat && !c.lon) return;
+
+    var lat = c.corrected ? c.clat : c.lat;
+    var lon = c.corrected ? c.clon : c.lon;
+    var marker = L.marker([lat, lon], {
+        icon: makePinIcon(c.pin_html, c.found, c.corrected),
+        title: c.name + (c.corrected ? ' 📍' : '')
+    });
+
+    var coordNote = c.corrected
+        ? '<br><span style="color:#e65100;font-size:11px">📍 ' + c.corrected_label + '</span>'
+        : '';
+    marker.bindPopup(
+        '<b>' + c.gc_code + '</b><br>' +
+        c.name + '<br>' +
+        '<span style="color:gray">' + c.cache_type + ' D' + c.difficulty + '/T' + c.terrain + '</span>' +
+        coordNote
+    );
+
+    marker.on('click', function() {
+        if (bridge) bridge.on_cache_clicked(c.gc_code);
+        selectMarker(c.gc_code);
+    });
+
+    markers[c.gc_code] = marker;
+    clusterGroup.addLayer(marker);
+    map.panTo([lat, lon]);
+}
 </script>
 </body>
 </html>
@@ -393,6 +428,33 @@ class MapWidget(QWidget):
     def fit_all(self) -> None:
         if self._ready:
             self._run_js("fitAllMarkers()")
+
+    def update_cache(self, cache: Cache) -> None:
+        """Refresh a single cache marker without reloading the whole map."""
+        if not self._ready:
+            return
+        from opensak.gps.garmin import _effective_coords
+        note = getattr(cache, "user_note", None)
+        has_corrected = bool(note and getattr(note, "is_corrected", False))
+        eff_lat, eff_lon = _effective_coords(cache)
+        data = {
+            "gc_code":         cache.gc_code,
+            "name":            cache.name or "",
+            "cache_type":      cache.cache_type or "",
+            "difficulty":      cache.difficulty or 0,
+            "terrain":         cache.terrain or 0,
+            "lat":             cache.latitude,
+            "lon":             cache.longitude,
+            "clat":            eff_lat,
+            "clon":            eff_lon,
+            "corrected":       has_corrected,
+            "corrected_label": tr("detail_corrected_coords"),
+            "pin_html":        _cache_pin_html(cache.cache_type or "", bool(cache.found)),
+            "found":           cache.found,
+        }
+        json_str = json.dumps(data, ensure_ascii=False)
+        json_str = json_str.replace("\\", "\\\\").replace("`", "\\`")
+        self._run_js(f"updateCacheMarker(`{json_str}`)")
 
     def pan_to_home(self) -> None:
         if self._ready:
