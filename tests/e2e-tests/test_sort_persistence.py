@@ -6,6 +6,8 @@ Covers:
   2. Sort restored from settings when a MainWindow is (re-)created.
   3. Sort is per-database: switching databases loads the correct saved sort.
   4. Sort from the filter dialog is saved to settings.
+  5. Two-column sort stack: second click adds a secondary sort; third click
+     drops the oldest; clicking the same column again just updates direction.
 
 Requires pytest-qt; skipped automatically when unavailable.
 """
@@ -68,12 +70,15 @@ class _StubSettings:
         self.active_home_name = ""
 
     @property
-    def sort_spec(self) -> dict:
-        return self._store.get("sort_spec", {"field": "name", "ascending": True})
+    def sort_stack(self) -> list[dict]:
+        raw = self._store.get("sort_stack")
+        if isinstance(raw, list):
+            return raw
+        return [{"field": "name", "ascending": True}]
 
-    @sort_spec.setter
-    def sort_spec(self, value: dict) -> None:
-        self._store["sort_spec"] = value
+    @sort_stack.setter
+    def sort_stack(self, value: list[dict]) -> None:
+        self._store["sort_stack"] = value
 
     def sync(self) -> None:
         pass
@@ -84,7 +89,7 @@ def _build_window(qtbot, monkeypatch, db_path, mgr_module, fake_manager, setting
     Create and show a MainWindow backed by *db_path*.
 
     *settings_store* is a plain dict used as backing storage for the stub
-    AppSettings so each test can inspect / pre-populate sort_spec without
+    AppSettings so each test can inspect / pre-populate sort_stack without
     touching real QSettings.
     """
     from opensak.gui.mainwindow import MainWindow
@@ -138,54 +143,48 @@ class TestSortSavedOnColumnClick:
     """Sort settings are persisted when the user clicks a column header."""
 
     def test_sort_by_difficulty_saved(self, sort_window, qtbot):
-        window, mock_settings = sort_window
+        window, stub = sort_window
         table = window._cache_table
-
         columns = table._model._columns
         if "difficulty" not in columns:
             pytest.skip("difficulty column not visible")
 
-        col_idx = columns.index("difficulty")
-        table.sortByColumn(col_idx, Qt.SortOrder.AscendingOrder)
+        table.sortByColumn(columns.index("difficulty"), Qt.SortOrder.AscendingOrder)
         qtbot.wait(50)
 
-        saved = mock_settings.sort_spec
-        assert saved["field"] == "difficulty"
-        assert saved["ascending"] is True
+        stack = stub.sort_stack
+        assert stack[0]["field"] == "difficulty"
+        assert stack[0]["ascending"] is True
 
     def test_sort_descending_saved(self, sort_window, qtbot):
-        window, mock_settings = sort_window
+        window, stub = sort_window
         table = window._cache_table
-
         columns = table._model._columns
         if "name" not in columns:
             pytest.skip("name column not visible")
 
-        col_idx = columns.index("name")
-        table.sortByColumn(col_idx, Qt.SortOrder.DescendingOrder)
+        table.sortByColumn(columns.index("name"), Qt.SortOrder.DescendingOrder)
         qtbot.wait(50)
 
-        saved = mock_settings.sort_spec
-        assert saved["field"] == "name"
-        assert saved["ascending"] is False
+        stack = stub.sort_stack
+        assert stack[0]["field"] == "name"
+        assert stack[0]["ascending"] is False
 
     def test_sort_changes_on_second_click(self, sort_window, qtbot):
-        window, mock_settings = sort_window
+        window, stub = sort_window
         table = window._cache_table
         columns = table._model._columns
-
         if "difficulty" not in columns or "terrain" not in columns:
             pytest.skip("required columns not visible")
 
         table.sortByColumn(columns.index("difficulty"), Qt.SortOrder.AscendingOrder)
         qtbot.wait(50)
-        assert mock_settings.sort_spec["field"] == "difficulty"
+        assert stub.sort_stack[0]["field"] == "difficulty"
 
         table.sortByColumn(columns.index("terrain"), Qt.SortOrder.DescendingOrder)
         qtbot.wait(50)
-        saved = mock_settings.sort_spec
-        assert saved["field"] == "terrain"
-        assert saved["ascending"] is False
+        assert stub.sort_stack[0]["field"] == "terrain"
+        assert stub.sort_stack[0]["ascending"] is False
 
 
 class TestSortRestoredOnStartup:
@@ -208,8 +207,7 @@ class TestSortRestoredOnStartup:
             import_gpx(gpx_file, session)
 
         fake_manager = _make_fake_manager(db_path)
-        # Pre-populate settings with a non-default sort
-        settings_store = {"sort_spec": {"field": "difficulty", "ascending": False}}
+        settings_store = {"sort_stack": [{"field": "difficulty", "ascending": False}]}
 
         gen = _build_window(qtbot, monkeypatch, db_path, mgr_module, fake_manager, settings_store)
         window, _ = next(gen)
@@ -219,9 +217,8 @@ class TestSortRestoredOnStartup:
             if "difficulty" not in columns:
                 pytest.skip("difficulty column not visible")
 
-            col_idx = columns.index("difficulty")
             header = table.horizontalHeader()
-            assert header.sortIndicatorSection() == col_idx
+            assert header.sortIndicatorSection() == columns.index("difficulty")
             assert header.sortIndicatorOrder() == Qt.SortOrder.DescendingOrder
         finally:
             try:
@@ -257,9 +254,8 @@ class TestSortRestoredOnStartup:
             if "name" not in columns:
                 pytest.skip("name column not visible")
 
-            col_idx = columns.index("name")
             header = table.horizontalHeader()
-            assert header.sortIndicatorSection() == col_idx
+            assert header.sortIndicatorSection() == columns.index("name")
             assert header.sortIndicatorOrder() == Qt.SortOrder.AscendingOrder
         finally:
             try:
@@ -294,13 +290,12 @@ class TestSortPerDatabase:
         info_a = DatabaseInfo("DB_A", db_a)
         info_b = DatabaseInfo("DB_B", db_b)
 
-        # Per-database sort store: keyed by safe path
         def _safe(p):
             return str(p).replace("/", "_").replace("\\", "_")
 
-        per_db: dict[str, dict] = {
-            _safe(db_a): {"field": "difficulty", "ascending": True},
-            _safe(db_b): {"field": "terrain", "ascending": False},
+        per_db: dict[str, list] = {
+            _safe(db_a): [{"field": "difficulty", "ascending": True}],
+            _safe(db_b): [{"field": "terrain", "ascending": False}],
         }
 
         fake_manager = _make_fake_manager(db_a, name="DB_A")
@@ -314,12 +309,12 @@ class TestSortPerDatabase:
             active_home_name = ""
 
             @property
-            def sort_spec(self):
+            def sort_stack(self):
                 key = _safe(fake_manager.active.path)
-                return per_db.get(key, {"field": "name", "ascending": True})
+                return per_db.get(key, [{"field": "name", "ascending": True}])
 
-            @sort_spec.setter
-            def sort_spec(self, v):
+            @sort_stack.setter
+            def sort_stack(self, v):
                 key = _safe(fake_manager.active.path)
                 per_db[key] = v
 
@@ -343,17 +338,14 @@ class TestSortPerDatabase:
                 columns = table._model._columns
                 header = table.horizontalHeader()
 
-                # Check initial sort (DB_A → difficulty ascending)
                 if "difficulty" in columns:
                     assert header.sortIndicatorSection() == columns.index("difficulty")
                     assert header.sortIndicatorOrder() == Qt.SortOrder.AscendingOrder
 
-                # Simulate switching to DB_B
                 fake_manager.switch_to(info_b)
                 window._on_database_switched(info_b)
                 qtbot.wait(200)
 
-                # Check sort after switch (DB_B → terrain descending)
                 if "terrain" in columns:
                     assert header.sortIndicatorSection() == columns.index("terrain")
                     assert header.sortIndicatorOrder() == Qt.SortOrder.DescendingOrder
@@ -365,16 +357,16 @@ class TestFilterDialogSortSaved:
     """Sort emitted from the filter dialog is persisted."""
 
     def test_filter_sort_saved_to_settings(self, sort_window, qtbot):
-        window, mock_settings = sort_window
+        window, stub = sort_window
         from opensak.filters.engine import FilterSet, SortSpec
 
         sort = SortSpec(field="difficulty", ascending=False)
         window._on_filter_applied(FilterSet(), sort)
         qtbot.wait(50)
 
-        saved = mock_settings.sort_spec
-        assert saved["field"] == "difficulty"
-        assert saved["ascending"] is False
+        stack = stub.sort_stack
+        assert stack[0]["field"] == "difficulty"
+        assert stack[0]["ascending"] is False
 
     def test_filter_sort_reflected_in_table_indicator(self, sort_window, qtbot):
         window, _ = sort_window
@@ -392,3 +384,116 @@ class TestFilterDialogSortSaved:
         header = table.horizontalHeader()
         assert header.sortIndicatorSection() == columns.index("terrain")
         assert header.sortIndicatorOrder() == Qt.SortOrder.AscendingOrder
+
+
+class TestTwoColumnSortStack:
+    """Second click on a different column adds a secondary sort; stack stays <= 2."""
+
+    def test_second_click_adds_secondary_sort(self, sort_window, qtbot):
+        window, stub = sort_window
+        table = window._cache_table
+        columns = table._model._columns
+
+        if "difficulty" not in columns or "terrain" not in columns:
+            pytest.skip("required columns not visible")
+
+        table.sortByColumn(columns.index("difficulty"), Qt.SortOrder.AscendingOrder)
+        qtbot.wait(50)
+        table.sortByColumn(columns.index("terrain"), Qt.SortOrder.DescendingOrder)
+        qtbot.wait(50)
+
+        stack = stub.sort_stack
+        assert len(stack) == 2
+        assert stack[0]["field"] == "terrain"    # most recent = primary
+        assert stack[1]["field"] == "difficulty"  # previous = secondary
+
+    def test_third_click_drops_oldest(self, sort_window, qtbot):
+        window, stub = sort_window
+        table = window._cache_table
+        columns = table._model._columns
+
+        needed = {"difficulty", "terrain", "name"}
+        if not needed.issubset(set(columns)):
+            pytest.skip("required columns not visible")
+
+        table.sortByColumn(columns.index("difficulty"), Qt.SortOrder.AscendingOrder)
+        qtbot.wait(50)
+        table.sortByColumn(columns.index("terrain"), Qt.SortOrder.AscendingOrder)
+        qtbot.wait(50)
+        table.sortByColumn(columns.index("name"), Qt.SortOrder.AscendingOrder)
+        qtbot.wait(50)
+
+        stack = stub.sort_stack
+        assert len(stack) == 2
+        fields = [s["field"] for s in stack]
+        assert "name" in fields       # most recent kept
+        assert "terrain" in fields    # second most recent kept
+        assert "difficulty" not in fields  # oldest dropped
+
+    def test_same_column_again_does_not_duplicate(self, sort_window, qtbot):
+        window, stub = sort_window
+        table = window._cache_table
+        columns = table._model._columns
+
+        if "difficulty" not in columns or "terrain" not in columns:
+            pytest.skip("required columns not visible")
+
+        # Build a 2-entry stack: terrain (primary), difficulty (secondary)
+        table.sortByColumn(columns.index("difficulty"), Qt.SortOrder.AscendingOrder)
+        qtbot.wait(50)
+        table.sortByColumn(columns.index("terrain"), Qt.SortOrder.AscendingOrder)
+        qtbot.wait(50)
+
+        # Click difficulty again — should not create a duplicate entry
+        table.sortByColumn(columns.index("difficulty"), Qt.SortOrder.DescendingOrder)
+        qtbot.wait(50)
+
+        stack = stub.sort_stack
+        fields = [s["field"] for s in stack]
+        assert fields.count("difficulty") == 1
+        assert stack[0]["field"] == "difficulty"
+        assert stack[0]["ascending"] is False
+
+    def test_two_sort_stack_restored_on_startup(self, qtbot, tmp_path, monkeypatch):
+        """Header indicator shows the primary (most recent) sort after restore."""
+        import opensak.db.manager as mgr_module
+        from opensak.db.database import init_db, get_session
+        from opensak.importer import import_gpx
+        from opensak.lang import load_language
+        from tests.data import SAMPLE_GPX
+
+        load_language("en")
+
+        db_path = tmp_path / "two_sort_restore.db"
+        init_db(db_path=db_path)
+        gpx_file = tmp_path / "sample.gpx"
+        gpx_file.write_text(SAMPLE_GPX, encoding="utf-8")
+        with get_session() as session:
+            import_gpx(gpx_file, session)
+
+        fake_manager = _make_fake_manager(db_path)
+        settings_store = {
+            "sort_stack": [
+                {"field": "difficulty", "ascending": False},  # primary
+                {"field": "name", "ascending": True},          # secondary
+            ]
+        }
+
+        gen = _build_window(qtbot, monkeypatch, db_path, mgr_module, fake_manager, settings_store)
+        window, _ = next(gen)
+        try:
+            table = window._cache_table
+            columns = table._model._columns
+            if "difficulty" not in columns:
+                pytest.skip("difficulty column not visible")
+
+            # The header indicator should point at the primary sort (difficulty ↓)
+            header = table.horizontalHeader()
+            assert header.sortIndicatorSection() == columns.index("difficulty")
+            assert header.sortIndicatorOrder() == Qt.SortOrder.DescendingOrder
+        finally:
+            try:
+                next(gen)
+            except StopIteration:
+                pass
+            mgr_module._manager = None

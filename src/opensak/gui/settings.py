@@ -239,19 +239,23 @@ class AppSettings:
     # ── Sort settings (per database) ─────────────────────────────────────────
 
     @property
-    def sort_spec(self) -> dict:
-        """Saved sort state per database: {field, ascending}."""
+    def sort_stack(self) -> list[dict]:
+        """Saved sort stack per database: list of up to 2 {field, ascending}, primary first."""
         raw = self._s.value(self._db_key("sort_spec"), None)
         if raw:
             try:
-                return json.loads(raw)
+                data = json.loads(raw)
+                if isinstance(data, list):
+                    return data[:2]
+                if isinstance(data, dict):
+                    return [data]  # backwards-compat: single spec saved by older version
             except Exception:
                 pass
-        return {"field": "name", "ascending": True}
+        return [{"field": "name", "ascending": True}]
 
-    @sort_spec.setter
-    def sort_spec(self, value: dict) -> None:
-        self._s.setValue(self._db_key("sort_spec"), json.dumps(value))
+    @sort_stack.setter
+    def sort_stack(self, value: list[dict]) -> None:
+        self._s.setValue(self._db_key("sort_spec"), json.dumps(value[:2]))
 
     # ── Last used paths ───────────────────────────────────────────────────────
 

@@ -609,17 +609,29 @@ class CacheTableView(QTableView):
         ascending = (order == Qt.SortOrder.AscendingOrder)
         self.sort_changed.emit(col_name, ascending)
 
-    def restore_sort(self, field: str, ascending: bool) -> None:
-        """Programmatically sort the table by column name without emitting sort_changed."""
+    def restore_sort(self, sort_stack: list[dict]) -> None:
+        """Apply a saved sort stack without emitting sort_changed.
+
+        sort_stack is a list of {field, ascending} dicts, primary sort first.
+        With two entries the secondary sort is applied first so that the
+        primary sort (applied last) acts as the tiebreaker — Python's sort
+        is stable, so equal primary keys keep their secondary-sorted order.
+        """
         columns = self._model._columns
-        if field not in columns:
-            return
-        col_index = columns.index(field)
-        order = Qt.SortOrder.AscendingOrder if ascending else Qt.SortOrder.DescendingOrder
-        # Block the signal so restoring sort does not trigger another save
-        self.horizontalHeader().sortIndicatorChanged.disconnect(self._on_sort_indicator_changed)
-        self.sortByColumn(col_index, order)
-        self.horizontalHeader().sortIndicatorChanged.connect(self._on_sort_indicator_changed)
+        header = self.horizontalHeader()
+        header.sortIndicatorChanged.disconnect(self._on_sort_indicator_changed)
+        try:
+            # Apply in reverse: secondary first, primary last
+            for spec in reversed(sort_stack):
+                field = spec.get("field", "name")
+                ascending = spec.get("ascending", True)
+                if field not in columns:
+                    continue
+                col_index = columns.index(field)
+                order = Qt.SortOrder.AscendingOrder if ascending else Qt.SortOrder.DescendingOrder
+                self.sortByColumn(col_index, order)
+        finally:
+            header.sortIndicatorChanged.connect(self._on_sort_indicator_changed)
 
     def _on_row_changed(self, current, previous) -> None:
         cache = self._model.cache_at(current.row())
