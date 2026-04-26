@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  unit-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,20 +29,24 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
 
-      - name: Run tests
+      - name: Run unit tests
         run: |
           source .venv/bin/activate
-          pytest -v tests -m "not gui"
+          pytest tests/unit-tests -v
 
-  monkey-test:
+  e2e-tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python 3.11
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install system Qt dependencies
         run: |
@@ -62,11 +66,11 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-qt
 
-      - name: Run monkey test
+      - name: Run e2e tests
         env:
           QT_QPA_PLATFORM: xcb
           QTWEBENGINE_CHROMIUM_FLAGS: "--disable-gpu --disable-software-rasterizer"
         run: |
           source .venv/bin/activate
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
-            pytest tests/test_monkey.py -v
+            pytest tests/e2e-tests -v

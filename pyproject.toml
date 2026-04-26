@@ -27,8 +27,9 @@ dev = [
 where = ["src"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["src"]
+testpaths = ["tests/unit-tests", "tests/e2e-tests"]
+pythonpath = ["src", "."]
+addopts = "--import-mode=importlib"
 markers = [
     "gui: tests that require a display and pytest-qt",
 ]
