@@ -108,40 +108,76 @@ from PySide6.QtCore import QRect
 
 
 class SizeBarDelegate(QStyledItemDelegate):
-    """Tegner en vandret fyldt bar (GSAK-stil) for container-kolonnen."""
+    """Tegner GSAK-stil segmenteret størrelsesindikator for container-kolonnen.
 
-    # Bredde i procent for hvert størrelsesstrin (0.0–1.0)
-    _BAR_WIDTHS = {
-        "nano":       0.10,
-        "micro":      0.25,
-        "small":      0.45,
-        "regular":    0.65,
-        "large":      0.90,
-        "other":      0.50,
-        "not chosen": 0.00,
-        "virtual":    0.00,
-        "":           0.00,
+    5 firkantede segmenter fylder op fra venstre:
+      Nano=1, Micro=2, Small=3, Regular=4, Large=5, Other=3 (midten)
+    Virtual og EarthCache vises med 5 tomme segmenter + 'V'/'E' i det sidste.
+    """
+
+    # Antal fyldte segmenter per størrelse (ud af 5)
+    _SEGMENTS = {
+        "nano":       1,
+        "micro":      2,
+        "small":      3,
+        "regular":    4,
+        "large":      5,
+        "other":      3,
+        "not chosen": 0,
+        "":           0,
     }
+    # Cache-typer der vises med tomt felt + bogstav
+    _LABEL_TYPES = {
+        "virtual cache": "V",
+        "earthcache":    "E",
+    }
+
+    _SEG_COUNT   = 5
+    _SEG_GAP     = 2
     _BAR_COLOR   = QColor("#5b8dd9")   # GSAK-blå
-    _EMPTY_COLOR = QColor("#dde3ee")   # lys grå baggrund
+    _EMPTY_COLOR = QColor("#c8d4ea")   # lys grå baggrund
+    _LABEL_COLOR = QColor("#4a72b0")   # bogstav-farve (mørkere blå)
 
     def paint(self, painter: QPainter, option, index) -> None:
-        size_key = index.data(Qt.ItemDataRole.UserRole + 10) or ""
-        ratio = self._BAR_WIDTHS.get(size_key.lower(), 0.30)
+        data = index.data(Qt.ItemDataRole.UserRole + 10) or {}
+        size_key  = data.get("size", "").lower()  if isinstance(data, dict) else ""
+        cache_type = data.get("type", "").lower() if isinstance(data, dict) else ""
+
+        filled   = self._SEGMENTS.get(size_key, 0)
+        label    = self._LABEL_TYPES.get(cache_type, "")
 
         painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        # Baggrund
-        bg = option.rect.adjusted(4, 3, -4, -3)
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(self._EMPTY_COLOR)
-        painter.drawRoundedRect(bg, 2, 2)
+        rect = option.rect
+        margin_x, margin_y = 4, 3
+        total_w = rect.width()  - 2 * margin_x
+        total_h = rect.height() - 2 * margin_y
+        x0 = rect.x() + margin_x
+        y0 = rect.y() + margin_y
 
-        # Fyldt del
-        if ratio > 0:
-            filled = QRect(bg.x(), bg.y(), int(bg.width() * ratio), bg.height())
-            painter.setBrush(self._BAR_COLOR)
-            painter.drawRoundedRect(filled, 2, 2)
+        seg_w = max(4, (total_w - self._SEG_GAP * (self._SEG_COUNT - 1)) // self._SEG_COUNT)
+
+        for i in range(self._SEG_COUNT):
+            sx = x0 + i * (seg_w + self._SEG_GAP)
+            seg_rect = QRect(sx, y0, seg_w, total_h)
+
+            is_filled = (i < filled) and not label
+            is_last   = (i == self._SEG_COUNT - 1)
+
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(self._BAR_COLOR if is_filled else self._EMPTY_COLOR)
+            painter.drawRoundedRect(seg_rect, 1, 1)
+
+            # Bogstav i det sidste segment for Virtual/Earth
+            if label and is_last:
+                painter.setPen(self._LABEL_COLOR)
+                font = painter.font()
+                font.setPointSize(7)
+                font.setBold(True)
+                painter.setFont(font)
+                painter.drawText(seg_rect, Qt.AlignmentFlag.AlignCenter, label)
+                painter.setPen(Qt.PenStyle.NoPen)
 
         painter.restore()
 
@@ -279,8 +315,11 @@ class CacheTableModel(QAbstractTableModel):
             return self._decoration_value(cache, col)
 
         if role == Qt.ItemDataRole.UserRole + 10:
-            # Size key til SizeBarDelegate
-            return (cache.container or "").lower()
+            # Dict med size + type til SizeBarDelegate
+            return {
+                "size": (cache.container or "").lower(),
+                "type": (cache.cache_type or "").lower(),
+            }
 
         if role == Qt.ItemDataRole.UserRole:
             return cache

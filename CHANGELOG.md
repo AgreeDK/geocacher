@@ -14,6 +14,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.10.8] — 2026-04-26
+### Added
+- **GSAK-style container size indicator** — the container column now shows 5 segmented
+  squares filling left-to-right by size: Nano=1, Micro=2, Small=3, Regular=4, Large=5.
+  Virtual Cache and EarthCache display 5 empty segments with a small **V** or **E** label
+  in the last segment (fixes #61, thanks hansblom for the suggestion).
+
+### Fixed
+- **Crash when clicking "Add corrected coordinates…"** — fixed a crash that occurred
+  when opening the corrected coordinates dialog from the context menu (PR #69, Fabio).
+- **"Dato:" hardcoded in Danish** — the date label in the log panel now uses the
+  translation system correctly instead of being hardcoded in Danish (PR #65, Fabio).
+
+### Changed
+- **Reduced duplicate translation keys** — cleaned up redundant keys across all language
+  files to keep translations consistent and easier to maintain (PR #67, Fabio).
+
+---
+
 ## [1.10.7] — 2026-04-25
 ### Changed
 - **Handle lower screen resolutions** — better view on low screen resolutions
