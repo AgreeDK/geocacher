@@ -475,6 +475,7 @@ STRINGS: dict[str, str] = {
     "mid_result_group":             "Střední bod",
 
     # ── Corrected coordinates ─────────────────────────────────────────────────
+    "map_home_label":               "Domov",
     "detail_corrected_coords":      "Opravené souřadnice",
     "detail_corrected_tooltip":     "Kliknutím otevřete opravené souřadnice v mapové aplikaci",
     "detail_corrected_edit_btn":    "✏️  Upravit",

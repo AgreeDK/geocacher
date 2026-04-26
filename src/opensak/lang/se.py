@@ -474,6 +474,7 @@ STRINGS: dict[str, str] = {
     "mid_result_group":             "Mittpunkt",
 
     # ── Corrected coordinates ─────────────────────────────────────────────────
+    "map_home_label":               "Hem",
     "detail_corrected_coords":      "Korrigerade koordinater",
     "detail_corrected_tooltip":     "Klicka för att öppna korrigerade koordinater på kartan",
     "detail_corrected_edit_btn":    "✏️  Editera",
