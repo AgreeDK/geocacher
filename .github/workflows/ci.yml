@@ -51,7 +51,8 @@ jobs:
             xvfb libgl1-mesa-dev libegl1 libxkbcommon-x11-0 \
             libdbus-1-3 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
             libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 \
-            libxcb-xfixes0 libxcb-shape0 libglib2.0-0
+            libxcb-xfixes0 libxcb-shape0 libglib2.0-0 \
+            libxcb-cursor0 libfontconfig1 libfreetype6
 
       - name: Install dependencies
         run: |
@@ -62,6 +63,9 @@ jobs:
           pip install pytest pytest-qt
 
       - name: Run monkey test
+        env:
+          QT_QPA_PLATFORM: xcb
+          QTWEBENGINE_CHROMIUM_FLAGS: "--disable-gpu --disable-software-rasterizer"
         run: |
           source .venv/bin/activate
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
