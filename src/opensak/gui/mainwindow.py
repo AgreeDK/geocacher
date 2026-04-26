@@ -536,11 +536,14 @@ class MainWindow(QMainWindow):
             from opensak.filters.engine import GcCodeFilter
             fs.add(GcCodeFilter(gc_search))
 
-        # Navn søgefelt (søger kun i navn)
+        # Navn/GC søgefelt — matcher på navn ELLER GC kode (issue #80)
         name_search = self._search_box.text().strip()
         if name_search:
-            from opensak.filters.engine import NameFilter
-            fs.add(NameFilter(name_search))
+            from opensak.filters.engine import NameFilter, GcCodeFilter
+            name_or_gc = FilterSet(mode="OR")
+            name_or_gc.add(NameFilter(name_search))
+            name_or_gc.add(GcCodeFilter(name_search))
+            fs.add(name_or_gc)
 
         return fs
 
