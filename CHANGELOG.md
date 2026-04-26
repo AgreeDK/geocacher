@@ -14,6 +14,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.0] — 2026-04-26
+### Added
+- **GUI Monkey Test in CI** — automated GUI smoke test now runs in CI on every
+  push, randomly interacting with the application to catch unexpected crashes
+  (PR #71, thanks @Fabio-A-Sa).
+- **CI matrix expanded to Python 3.12** — both unit-tests and e2e-tests now
+  run against Python 3.11 and 3.12 in parallel (PR #71, thanks @Fabio-A-Sa).
+
+### Fixed
+- **CorrectedCoordsDialog** — fixed crash caused by renamed parameters
+  `corrected_lat` / `corrected_lon` not matching the updated dialog signature.
+
+### Changed
+- **Tests reorganised** — split into `unit-tests/` and `e2e-tests/` folders
+  for clearer separation (PR #71, thanks @Fabio-A-Sa).
+
+---
+
 ## [1.10.8] — 2026-04-26
 ### Added
 - **GSAK-style container size indicator** — the container column now shows 5 segmented
