@@ -1,0 +1,149 @@
+"""
+tests/unit-tests/test_doctor.py — Phase 4: doctor utility tests.
+
+check_python, check_dependencies, check_config_dir, load_pyproject.
+"""
+
+import importlib
+import sys
+from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+
+from opensak.utils.doctor import (
+    check_config_dir,
+    check_dependencies,
+    check_python,
+    load_pyproject,
+)
+
+
+# ── check_python ──────────────────────────────────────────────────────────────
+
+
+class TestCheckPython:
+    def test_passes_when_version_meets_requirement(self, monkeypatch):
+        monkeypatch.setattr(sys, "version_info", (3, 11, 0))
+        name, ok, _ = check_python({"requires-python": ">=3.11"})
+        assert name == "Python"
+        assert ok is True
+
+    def test_fails_when_version_too_old(self, monkeypatch):
+        monkeypatch.setattr(sys, "version_info", (3, 9, 0))
+        name, ok, msg = check_python({"requires-python": ">=3.11"})
+        assert name == "Python"
+        assert ok is False
+        assert "3.11" in msg
+
+    def test_passes_with_newer_minor(self, monkeypatch):
+        monkeypatch.setattr(sys, "version_info", (3, 13, 0))
+        _, ok, _ = check_python({"requires-python": ">=3.11"})
+        assert ok is True
+
+    def test_passes_with_newer_major(self, monkeypatch):
+        monkeypatch.setattr(sys, "version_info", (4, 0, 0))
+        _, ok, _ = check_python({"requires-python": ">=3.11"})
+        assert ok is True
+
+    def test_passes_when_no_requirement_in_project(self):
+        _, ok, _ = check_python({})
+        assert ok is True
+
+    def test_message_includes_requirement_on_failure(self, monkeypatch):
+        monkeypatch.setattr(sys, "version_info", (3, 8, 0))
+        _, _, msg = check_python({"requires-python": ">=3.11"})
+        assert ">=3.11" in msg
+
+
+# ── check_dependencies ────────────────────────────────────────────────────────
+
+
+class TestCheckDependencies:
+    def test_ok_with_no_dependencies(self):
+        name, ok, msg = check_dependencies({"dependencies": []})
+        assert name == "Dependencies"
+        assert ok is True
+        assert msg == "OK"
+
+    def test_ok_when_all_packages_importable(self):
+        _, ok, _ = check_dependencies({"dependencies": ["sqlalchemy>=2.0"]})
+        assert ok is True
+
+    def test_fails_for_nonexistent_package(self):
+        _, ok, msg = check_dependencies({"dependencies": ["totally-fake-pkg>=1.0"]})
+        assert ok is False
+        assert "totally-fake-pkg" in msg
+
+    def test_reports_all_missing_packages(self):
+        project = {"dependencies": ["fake-one>=1", "fake-two>=2"]}
+        _, ok, msg = check_dependencies(project)
+        assert ok is False
+        assert "fake-one" in msg
+        assert "fake-two" in msg
+
+    def test_simulates_missing_package_via_mock(self, monkeypatch):
+        real_import = importlib.import_module
+
+        def fake_import(name):
+            if name == "sqlalchemy":
+                raise ImportError("mocked missing")
+            return real_import(name)
+
+        monkeypatch.setattr(importlib, "import_module", fake_import)
+        _, ok, msg = check_dependencies({"dependencies": ["sqlalchemy>=2.0"]})
+        assert ok is False
+        assert "sqlalchemy" in msg
+
+    def test_ok_with_missing_project_key(self):
+        _, ok, _ = check_dependencies({})
+        assert ok is True
+
+
+# ── check_config_dir ──────────────────────────────────────────────────────────
+
+
+class TestCheckConfigDir:
+    def test_creates_directory_under_home(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(Path, "home", lambda: tmp_path)
+        expected = tmp_path / ".opensak"
+        name, ok, path_str = check_config_dir()
+        assert name == "Config dir"
+        assert ok is True
+        assert expected.exists()
+
+    def test_returned_path_contains_opensak(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(Path, "home", lambda: tmp_path)
+        _, _, path_str = check_config_dir()
+        assert ".opensak" in path_str
+
+    def test_idempotent_when_dir_already_exists(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(Path, "home", lambda: tmp_path)
+        (tmp_path / ".opensak").mkdir()
+        _, ok, _ = check_config_dir()
+        assert ok is True
+
+
+# ── load_pyproject ────────────────────────────────────────────────────────────
+
+
+class TestLoadPyproject:
+    def test_returns_dict(self):
+        data = load_pyproject()
+        assert isinstance(data, dict)
+
+    def test_contains_project_section(self):
+        data = load_pyproject()
+        assert "project" in data
+
+    def test_project_name_is_opensak(self):
+        data = load_pyproject()
+        assert data["project"]["name"] == "opensak"
+
+    def test_project_has_dependencies_key(self):
+        data = load_pyproject()
+        assert "dependencies" in data["project"]
+
+    def test_requires_python_field_present(self):
+        data = load_pyproject()
+        assert "requires-python" in data["project"]

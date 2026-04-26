@@ -19,7 +19,7 @@ except ModuleNotFoundError:
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 def load_pyproject() -> dict:
-    root = Path(__file__).resolve().parents[2]
+    root = Path(__file__).resolve().parents[3]
     pyproject = root / "pyproject.toml"
 
     if not pyproject.exists():
@@ -59,6 +59,11 @@ def check_python(project: dict):
         False,
         f"{sys.version.split()[0]} (requires {spec})",
     )
+
+
+IMPORT_ALIASES: dict[str, str] = {
+    "PySide6": "PySide6",
+}
 
 
 def check_dependencies(project: dict):
