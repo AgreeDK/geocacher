@@ -77,7 +77,6 @@ class CorrectedCoordsDialog(QDialog):
         self._input.setPlaceholderText(tr("coord_conv_placeholder"))
         self._input.textChanged.connect(self._on_input_changed)
 
-        # Forudfyld med eksisterende korrigerede koordinater
         if current_lat is not None and current_lon is not None:
             fmt = get_settings().coord_format
             self._input.setText(format_coords(current_lat, current_lon, fmt))
@@ -109,7 +108,7 @@ class CorrectedCoordsDialog(QDialog):
         self._ok_btn.setEnabled(False)
         layout.addWidget(btn_box)
 
-        # Trigger initial parse hvis der er forudfyldt tekst
+        self._input.textChanged.connect(self._on_input_changed)
         if self._input.text():
             self._on_input_changed(self._input.text())
 
