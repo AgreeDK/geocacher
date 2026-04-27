@@ -104,6 +104,76 @@ def _gc_sort_key(gc_code: GcCode) -> str:
     return "GC" + suffix.zfill(10)
 
 
+# ── Issue #90: Container size sort order ─────────────────────────────────────
+#
+# Container values are sorted by logical "size" rather than alphabetically.
+# Non-physical container types (Virtual, EarthCache, Lab) are placed first
+# because they have no physical size — these are detected via cache_type, not
+# container, since Groundspeak GPX files set container="Other" or "Not chosen"
+# for these types.
+#
+# Sort order:
+#   1  Virtual / EarthCache / Lab    (no physical container — by cache_type)
+#   2  Nano
+#   3  Micro
+#   4  Small
+#   5  Regular
+#   6  Large
+#   7  Other                          (unknown size)
+#   8  Not chosen / empty             (incomplete data, sorts last)
+#
+_CONTAINER_SORT_ORDER = {
+    "nano":        2,
+    "micro":       3,
+    "small":       4,
+    "regular":     5,
+    "large":       6,
+    "other":       7,
+    "not chosen":  8,
+    "":            8,
+}
+
+# Cache types that have no physical container — these sort first (group 1)
+_NON_PHYSICAL_TYPES = {
+    "virtual cache",
+    "earthcache",
+    "lab cache",
+    "locationless (reverse) cache",
+}
+
+
+def _container_sort_key(container: str | None, cache_type: str | None = None) -> tuple:
+    """Return sort key tuple for the Container column.
+
+    Returns a (group, sub_key) tuple so:
+    - Primary sort is by logical container size group (1-8)
+    - Within group 1 (non-physical types), secondary sort is alphabetic
+      on cache_type so 'EarthCache' → 'Lab Cache' → 'Virtual Cache' stay
+      grouped together (and any future non-physical type slots in
+      alphabetically without code changes).
+    - Within other groups, sub_key is empty so Python's stable sort
+      preserves the existing order (e.g. distance sort).
+
+    Used by the Container column to sort by logical size instead of
+    alphabetically. Non-physical cache types (Virtual, EarthCache, Lab)
+    are detected by cache_type since they typically have container='Other'
+    or empty in GPX data.
+
+    Unknown values fall back to the same group as 'Other' so they don't
+    disappear at the very end.
+    """
+    # Non-physical types come first (group 1), sorted alphabetically by type
+    if cache_type:
+        ct = cache_type.strip().lower()
+        if ct in _NON_PHYSICAL_TYPES:
+            return (1, ct)
+    # Physical containers — sub_key empty so stable sort preserves order
+    if container is None:
+        return (_CONTAINER_SORT_ORDER[""], "")
+    key = container.strip().lower()
+    return (_CONTAINER_SORT_ORDER.get(key, 7), "")  # unknown → group 7
+
+
 from PySide6.QtWidgets import QStyledItemDelegate, QApplication
 from PySide6.QtGui import QPainter, QColor
 from PySide6.QtCore import QRect
@@ -113,8 +183,12 @@ class SizeBarDelegate(QStyledItemDelegate):
     """Tegner GSAK-stil segmenteret størrelsesindikator for container-kolonnen.
 
     5 firkantede segmenter fylder op fra venstre:
-      Nano=1, Micro=2, Small=3, Regular=4, Large=5, Other=3 (midten)
-    Virtual og EarthCache vises med 5 tomme segmenter + 'V'/'E' i det sidste.
+      Nano=1, Micro=2, Small=3, Regular=4, Large=5
+    Special visning (tomme segmenter + bogstav i sidste segment):
+      Other        → 'O'   (ukendt fysisk størrelse)
+      Virtual Cache → 'V'  (ingen fysisk container — by cache_type)
+      EarthCache   → 'E'   (ingen fysisk container — by cache_type)
+    Not chosen og tom → 5 tomme segmenter, intet bogstav
     """
 
     # Antal fyldte segmenter per størrelse (ud af 5)
@@ -124,11 +198,15 @@ class SizeBarDelegate(QStyledItemDelegate):
         "small":      3,
         "regular":    4,
         "large":      5,
-        "other":      3,
+        "other":      0,    # tom — bogstav vises i stedet (issue #90)
         "not chosen": 0,
         "":           0,
     }
-    # Cache-typer der vises med tomt felt + bogstav
+    # Bogstaver vist i sidste segment for size-værdier (issue #90)
+    _SIZE_LABELS = {
+        "other": "O",
+    }
+    # Cache-typer der vises med tomt felt + bogstav (uanset container value)
     _LABEL_TYPES = {
         "virtual cache": "V",
         "earthcache":    "E",
@@ -145,8 +223,10 @@ class SizeBarDelegate(QStyledItemDelegate):
         size_key  = data.get("size", "").lower()  if isinstance(data, dict) else ""
         cache_type = data.get("type", "").lower() if isinstance(data, dict) else ""
 
-        filled   = self._SEGMENTS.get(size_key, 0)
-        label    = self._LABEL_TYPES.get(cache_type, "")
+        filled = self._SEGMENTS.get(size_key, 0)
+        # cache_type label tager førsteret over size label (Virtual/Earth → V/E)
+        # ellers fall back til size-baseret label (Other → O)
+        label = self._LABEL_TYPES.get(cache_type, "") or self._SIZE_LABELS.get(size_key, "")
 
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -171,7 +251,7 @@ class SizeBarDelegate(QStyledItemDelegate):
             painter.setBrush(self._BAR_COLOR if is_filled else self._EMPTY_COLOR)
             painter.drawRoundedRect(seg_rect, 1, 1)
 
-            # Bogstav i det sidste segment for Virtual/Earth
+            # Bogstav i det sidste segment for Virtual/Earth/Other
             if label and is_last:
                 painter.setPen(self._LABEL_COLOR)
                 font = painter.font()
@@ -558,6 +638,12 @@ class CacheTableModel(QAbstractTableModel):
             self._caches.sort(key=lambda c: c.user_sort if c.user_sort is not None else 999999, reverse=reverse)
         elif col == "favorite_points":
             self._caches.sort(key=lambda c: c.favorite_points or 0, reverse=reverse)
+        elif col == "container":
+            # Issue #90: Sort by logical container size, not alphabetically
+            self._caches.sort(
+                key=lambda c: _container_sort_key(c.container, c.cache_type),
+                reverse=reverse,
+            )
         elif col == "latitude":
             # Numerisk sortering på rå float — ikke formateret tekst
             # Bruger effektive koordinater (corrected hvis sat)
