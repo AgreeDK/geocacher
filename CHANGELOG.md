@@ -16,7 +16,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.11.2] — 2026-04-26
 ### Fixed
-- **Add GC search to Name search field** — Name search field now support both Namr and GC code search (fixes #63).
+- **Add GC search to Name search field** — Name search field now support both Namr and GC code search (fixes #80).
 
 ---
 
