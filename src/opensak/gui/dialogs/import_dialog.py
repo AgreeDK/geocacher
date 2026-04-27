@@ -33,11 +33,9 @@ class ImportWorker(QThread):
         self.paths = paths
 
     def run(self) -> None:
-        from opensak.db.database import init_db, get_session
+        from opensak.db.database import get_session
         from opensak.importer import import_gpx, import_zip
         from opensak.utils.utils import get_import_type, ImportType
-
-        init_db()
 
         for i, path in enumerate(self.paths):
             self.file_started.emit(i, path.name)
@@ -201,6 +199,7 @@ class ImportDialog(QDialog):
         self._worker.file_error.connect(self._on_file_error)
         self._worker.progress.connect(self._on_progress)
         self._worker.all_done.connect(self._on_all_done)
+        self._worker.finished.connect(self._worker.deleteLater)
         self._worker.start()
 
     def _on_file_started(self, index: int, name: str) -> None:
@@ -257,6 +256,11 @@ class ImportDialog(QDialog):
 
         if self._any_success:
             self.import_completed.emit()
+
+    def closeEvent(self, event) -> None:
+        if self._worker and self._worker.isRunning():
+            self._worker.wait()
+        super().closeEvent(event)
 
     # ── Log helpers ───────────────────────────────────────────────────────────
 
