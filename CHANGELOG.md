@@ -14,9 +14,65 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.5] — 2026-04-27
+### Added
+- **Latitude and Longitude as selectable columns** — new optional columns
+  in the cache list show coordinates per cache. Format respects the user's
+  coordinate format setting (DD/DMM/DMS) so values match the detail panel.
+  Shows corrected coordinates when set (matches map behaviour). Tooltip
+  indicates whether coordinates are original or corrected (fixes #84,
+  thanks @hansblom for reporting).
+- **`format_lat()` and `format_lon()` helpers** in `coords.py` — new
+  single-axis formatters used by the Latitude/Longitude columns.
+- **Lab Cache 'L' label** — Lab Caches now display empty bars + 'L' in the
+  Container column, consistent with Virtual ('V') and EarthCache ('E').
+
+### Fixed
+- **Container column sorts by size, not alphabetically** — sorting the
+  Container column now produces a logical order grouped by visual style:
+  physical containers first (Nano → Micro → Small → Regular → Large), then
+  letter-display types alphabetically (E → L → O → V), then empty
+  ("Not chosen"). Stable sort preserves a previous secondary order such
+  as Distance (fixes #90, thanks @Fabio-A-Sa for reporting).
+- **'Other' container visualisation** — was showing 3 filled bars (visually
+  identical to Small); now shows 5 empty bars + 'O' label, consistent with
+  V/E/L (part of #90).
+- **Log count column always 0** — added `log_count` as a cached column on
+  the Cache model so the count is available without loading the logs
+  relationship (which is `noload`'ed for performance). Migration #6
+  populates `log_count` from existing logs on first startup, so existing
+  databases show correct counts immediately without re-import (fixes #87,
+  thanks @Fabio-A-Sa for reporting).
+- **Search field rollback to GSAK-style separate fields** — Name search
+  field now searches only cache names (not GC codes too). GC code search
+  remains in its own dedicated field. Restores GSAK convention of clear,
+  single-purpose search fields (fixes #86, thanks @Fabio-A-Sa for
+  reporting; rolls back the combined search added in #80).
+
+### Changed
+- **Search toolbar always visible** — the search toolbar can no longer be
+  accidentally hidden via the right-click context menu. Forced visible at
+  startup to recover from any previously hidden state in QSettings. The
+  search bar is essential UI and is planned to host more fields in future.
+
+---
+
+## [1.11.4] — 2026-04-27
+### Fixed
+- **Version number mismatch** — fixed `__init__.py` to correctly report version 1.11.4 (the v1.11.3 tag was created with `__version__` still set to "1.11.2"; this release brings the version string in sync with the release tag).
+
+---
+
+## [1.11.3] — 2026-04-27
+### Fixed
+- **Description and map not displayed on Windows 11** — fixed QWebEnginePage profile lifecycle issue that caused the description and map panels to remain blank on Windows 11 (fixes #93).
+- **Qt warning at shutdown** — eliminated "Release of profile requested but WebEnginePage still not deleted" warning by ensuring proper destruction order via QApplication.aboutToQuit signal.
+
+---
+
 ## [1.11.2] — 2026-04-26
 ### Fixed
-- **Add GC search to Name search field** — Name search field now support both Namr and GC code search (fixes #63).
+- **Add GC search to Name search field** — Name search field now support both Namr and GC code search (fixes #80).
 
 ---
 

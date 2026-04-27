@@ -29,7 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Quick filter bar ──────────────────────────────────────────────────────
-    "search_placeholder":           "Namn or GC kod…",
+    "search_placeholder":           "Namn…",
     "quick_all":                    "Alla cacher",
     "quick_not_found":              "Hittar inget",
     "quick_found":                  "Hittad",
@@ -378,7 +378,10 @@ STRINGS: dict[str, str] = {
     "col_premium":      "Premium",
     "col_archived":     "Arkiverad",
     "col_favorite":     "Favorit ★",
-
+    "col_latitude":               "Latitud",
+    "col_longitude":              "Longitud",
+    "col_coord_tooltip_original": "Ursprungliga koordinater",
+    "col_coord_tooltip_corrected":"Korrigerade koordinater",
     "col_dnf_date":          "DNF-datum",
     "col_found_date":       "Hittad datum",
     "col_first_to_find":     "FTF",

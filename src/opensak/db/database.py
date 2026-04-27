@@ -227,6 +227,33 @@ def _run_migrations(engine: Engine) -> None:
             conn.commit()
             print(f"Migration: normaliserede {result.rowcount} GPS Adventures cache_type værdier")
 
+        # ── Migration 6: log_count kolonne (issue #87) ───────────────────────
+        # log_count caches the number of logs per cache so the UI can display
+        # it without loading the logs relationship. apply_filters() uses
+        # noload(Cache.logs) for performance, which made cache.logs always
+        # return an empty list — and len(cache.logs) was therefore always 0.
+        # We add the column AND populate it from existing data so users don't
+        # have to re-import their databases for the count to appear.
+        existing_caches = [
+            row[1]
+            for row in conn.execute(text("PRAGMA table_info(caches)")).fetchall()
+        ]
+        if "log_count" not in existing_caches:
+            conn.execute(text(
+                "ALTER TABLE caches ADD COLUMN log_count INTEGER NOT NULL DEFAULT 0"
+            ))
+            # Populate from existing logs table — one UPDATE for all caches
+            result = conn.execute(text("""
+                UPDATE caches
+                SET log_count = (
+                    SELECT COUNT(*)
+                    FROM logs
+                    WHERE logs.cache_id = caches.id
+                )
+            """))
+            conn.commit()
+            print(f"Migration: tilføjede caches.log_count og opdaterede {result.rowcount} caches")
+
 
 def get_engine() -> Engine:
     """Return the current engine, raising if init_db() hasn't been called."""

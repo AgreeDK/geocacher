@@ -15,7 +15,7 @@ from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QMenu,
 from opensak.db.models import Cache
 from opensak.filters.engine import _haversine_km
 from opensak.gui.settings import get_settings
-from opensak.coords import format_coords
+from opensak.coords import format_coords, format_lat, format_lon, format_lat, format_lon
 from opensak.lang import tr
 from opensak.utils.types import GcCode
 from opensak.gui.icon_provider import get_cache_type_icon, get_cache_size_icon
@@ -63,6 +63,9 @@ def get_column_defs() -> dict:
         "archived":     (tr("col_archived"),          70),
         "favorite":     (tr("col_favorite"),          60),
         "corrected":    (tr("col_corrected"),         40),
+        # ── Issue #84: Latitude og Longitude ──────────────────────────────
+        "latitude":     (tr("col_latitude"),         110),
+        "longitude":    (tr("col_longitude"),        110),
         # ── Issue #33: GSAK-compatible fields ─────────────────────────────
         "found_date":      (tr("col_found_date"),      90),
         "dnf_date":        (tr("col_dnf_date"),        90),
@@ -101,6 +104,92 @@ def _gc_sort_key(gc_code: GcCode) -> str:
     return "GC" + suffix.zfill(10)
 
 
+# ── Issue #90: Container size sort order ─────────────────────────────────────
+#
+# Container values are sorted by visual grouping:
+#
+#   Group 1: Physical containers (smallest → largest)
+#            Nano → Micro → Small → Regular → Large
+#
+#   Group 2: Empty bars + letter (sorted alphabetically by the letter)
+#            EarthCache  → 'E'
+#            Lab Cache   → 'L'
+#            Other       → 'O'
+#            Virtual     → 'V'
+#
+#   Group 3: Empty bars, no letter
+#            Not chosen / empty
+#
+# This grouping mirrors the visual layout: caches that show filled bars come
+# first (sorted by physical size), then caches that show a letter (sorted
+# alphabetically by the letter — predictable and easy to extend), then
+# caches with no information at all.
+#
+# Non-physical cache types (Virtual, EarthCache, Lab) are detected via
+# cache_type because Groundspeak GPX files typically set container='Other'
+# or empty for these types.
+#
+_CONTAINER_PHYSICAL_ORDER = {
+    "nano":     1,
+    "micro":    2,
+    "small":    3,
+    "regular":  4,
+    "large":    5,
+}
+
+# Cache types that have no physical container — sort by their display letter
+# in group 2 (the same letter shown in SizeBarDelegate). New non-physical
+# types can be added here and they'll slot in alphabetically by their letter.
+_NON_PHYSICAL_TYPE_LETTERS = {
+    "earthcache":                   "E",
+    "lab cache":                    "L",
+    "virtual cache":                "V",
+    "locationless (reverse) cache": "R",
+}
+
+# Empty / unknown markers — group 3 (sorts last)
+_EMPTY_CONTAINERS = {"", "not chosen"}
+
+
+def _container_sort_key(container: str | None, cache_type: str | None = None) -> tuple:
+    """Return sort key tuple for the Container column.
+
+    Returns a (group, sub_key) tuple where:
+      group 1 = physical container, sub_key = size order (1-5)
+      group 2 = empty bars + letter, sub_key = the letter ('E', 'L', 'O', 'V')
+      group 3 = empty (no letter), sub_key = ''
+
+    Within group 1 the sub_key gives smallest → largest. Within group 2 the
+    sub_key gives alphabetic order. Within group 3 sub_key is empty so
+    Python's stable sort preserves existing order (e.g. distance sort).
+
+    Non-physical types (Virtual / Earth / Lab) are detected via cache_type
+    since their container value is typically 'Other' or empty in GPX data.
+    """
+    # Group 2a: Non-physical cache types take precedence over container value
+    # (a Virtual Cache with container='Other' should sort by 'V', not 'O')
+    if cache_type:
+        ct = cache_type.strip().lower()
+        letter = _NON_PHYSICAL_TYPE_LETTERS.get(ct)
+        if letter is not None:
+            return (2, letter)
+
+    # Normalise container value
+    key = (container or "").strip().lower()
+
+    # Group 1: Physical containers (smallest → largest)
+    if key in _CONTAINER_PHYSICAL_ORDER:
+        return (1, _CONTAINER_PHYSICAL_ORDER[key])
+
+    # Group 3: Empty / not chosen — no letter, sorts last
+    if key in _EMPTY_CONTAINERS:
+        return (3, "")
+
+    # Group 2b: Anything else with a container value = 'Other'-like (shows 'O')
+    # Includes the literal 'other' value and any unknown future container types
+    return (2, "O")
+
+
 from PySide6.QtWidgets import QStyledItemDelegate, QApplication
 from PySide6.QtGui import QPainter, QColor
 from PySide6.QtCore import QRect
@@ -110,8 +199,13 @@ class SizeBarDelegate(QStyledItemDelegate):
     """Tegner GSAK-stil segmenteret størrelsesindikator for container-kolonnen.
 
     5 firkantede segmenter fylder op fra venstre:
-      Nano=1, Micro=2, Small=3, Regular=4, Large=5, Other=3 (midten)
-    Virtual og EarthCache vises med 5 tomme segmenter + 'V'/'E' i det sidste.
+      Nano=1, Micro=2, Small=3, Regular=4, Large=5
+    Special visning (tomme segmenter + bogstav i sidste segment):
+      Other         → 'O'   (ukendt fysisk størrelse)
+      Virtual Cache → 'V'   (ingen fysisk container — by cache_type)
+      EarthCache    → 'E'   (ingen fysisk container — by cache_type)
+      Lab Cache     → 'L'   (ingen fysisk container — by cache_type)
+    Not chosen og tom → 5 tomme segmenter, intet bogstav
     """
 
     # Antal fyldte segmenter per størrelse (ud af 5)
@@ -121,14 +215,19 @@ class SizeBarDelegate(QStyledItemDelegate):
         "small":      3,
         "regular":    4,
         "large":      5,
-        "other":      3,
+        "other":      0,    # tom — bogstav vises i stedet (issue #90)
         "not chosen": 0,
         "":           0,
     }
-    # Cache-typer der vises med tomt felt + bogstav
+    # Bogstaver vist i sidste segment for size-værdier (issue #90)
+    _SIZE_LABELS = {
+        "other": "O",
+    }
+    # Cache-typer der vises med tomt felt + bogstav (uanset container value)
     _LABEL_TYPES = {
         "virtual cache": "V",
         "earthcache":    "E",
+        "lab cache":     "L",
     }
 
     _SEG_COUNT   = 5
@@ -142,8 +241,10 @@ class SizeBarDelegate(QStyledItemDelegate):
         size_key  = data.get("size", "").lower()  if isinstance(data, dict) else ""
         cache_type = data.get("type", "").lower() if isinstance(data, dict) else ""
 
-        filled   = self._SEGMENTS.get(size_key, 0)
-        label    = self._LABEL_TYPES.get(cache_type, "")
+        filled = self._SEGMENTS.get(size_key, 0)
+        # cache_type label tager førsteret over size label (Virtual/Earth → V/E)
+        # ellers fall back til size-baseret label (Other → O)
+        label = self._LABEL_TYPES.get(cache_type, "") or self._SIZE_LABELS.get(size_key, "")
 
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -168,7 +269,7 @@ class SizeBarDelegate(QStyledItemDelegate):
             painter.setBrush(self._BAR_COLOR if is_filled else self._EMPTY_COLOR)
             painter.drawRoundedRect(seg_rect, 1, 1)
 
-            # Bogstav i det sidste segment for Virtual/Earth
+            # Bogstav i det sidste segment for Virtual/Earth/Other
             if label and is_last:
                 painter.setPen(self._LABEL_COLOR)
                 font = painter.font()
@@ -284,7 +385,8 @@ class CacheTableModel(QAbstractTableModel):
             if col in ("difficulty", "terrain", "distance", "found",
                        "dnf", "premium_only", "archived", "log_count",
                        "corrected", "first_to_find", "user_flag", "bearing",
-                       "user_sort", "favorite_points"):
+                       "user_sort", "favorite_points",
+                       "latitude", "longitude"):
                 return Qt.AlignmentFlag.AlignCenter
             return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
 
@@ -310,6 +412,12 @@ class CacheTableModel(QAbstractTableModel):
                     fmt = get_settings().coord_format
                     coords = format_coords(note.corrected_lat, note.corrected_lon, fmt)
                     return tr("col_corrected_tooltip", coords=coords)
+            if col in ("latitude", "longitude"):
+                # Vis tooltip der angiver om koordinaterne er korrigerede
+                note = cache.user_note
+                if note and note.is_corrected:
+                    return tr("col_coord_tooltip_corrected")
+                return tr("col_coord_tooltip_original")
 
         if role == Qt.ItemDataRole.DecorationRole:
             return self._decoration_value(cache, col)
@@ -387,6 +495,20 @@ class CacheTableModel(QAbstractTableModel):
             return get_cache_size_icon(self._size_icon_key(cache), size=20)
         return None
 
+    @staticmethod
+    def _effective_coords(cache: Cache) -> tuple[float | None, float | None]:
+        """Returnér de effektive koordinater (corrected hvis sat, ellers original).
+
+        Bruges af latitude/longitude-kolonnerne så visningen matcher kortet,
+        som også viser corrected hvis tilgængelige.
+        """
+        note = cache.user_note
+        if (note and note.is_corrected
+                and note.corrected_lat is not None
+                and note.corrected_lon is not None):
+            return note.corrected_lat, note.corrected_lon
+        return cache.latitude, cache.longitude
+
     def _display_value(self, cache: Cache, col: str) -> str:
         if col == "gc_code":
             return cache.gc_code or ""
@@ -435,7 +557,10 @@ class CacheTableModel(QAbstractTableModel):
                     return latest.log_date.strftime("%d.%m.%Y")
             return ""
         if col == "log_count":
-            return str(len(cache.logs)) if cache.logs is not None else "0"
+            # Issue #87: use cached log_count column instead of len(cache.logs)
+            # because logs are noload'ed for performance and would always be
+            # an empty list here. log_count is maintained on import.
+            return str(cache.log_count or 0)
         if col == "dnf":
             return "DNF" if cache.dnf else ""
         if col == "premium_only":
@@ -447,6 +572,19 @@ class CacheTableModel(QAbstractTableModel):
         if col == "corrected":
             note = cache.user_note
             return "📍" if (note and note.is_corrected) else ""
+        # ── Issue #84: Latitude og Longitude (i brugerens valgte format) ──────
+        if col == "latitude":
+            lat, _ = self._effective_coords(cache)
+            if lat is None:
+                return ""
+            fmt = get_settings().coord_format
+            return format_lat(lat, fmt)
+        if col == "longitude":
+            _, lon = self._effective_coords(cache)
+            if lon is None:
+                return ""
+            fmt = get_settings().coord_format
+            return format_lon(lon, fmt)
         # ── Issue #33: GSAK-compatible fields ─────────────────────────────────
         if col == "found_date":
             return cache.found_date.strftime("%d.%m.%Y") if cache.found_date else ""
@@ -498,8 +636,9 @@ class CacheTableModel(QAbstractTableModel):
                 reverse=reverse,
             )
         elif col == "log_count":
+            # Issue #87: sort on cached log_count column (logs are noload'ed)
             self._caches.sort(
-                key=lambda c: len(c.logs) if c.logs else 0, reverse=reverse
+                key=lambda c: c.log_count or 0, reverse=reverse
             )
         elif col == "hidden_date":
             self._caches.sort(
@@ -521,6 +660,28 @@ class CacheTableModel(QAbstractTableModel):
             self._caches.sort(key=lambda c: c.user_sort if c.user_sort is not None else 999999, reverse=reverse)
         elif col == "favorite_points":
             self._caches.sort(key=lambda c: c.favorite_points or 0, reverse=reverse)
+        elif col == "container":
+            # Issue #90: Sort by logical container size, not alphabetically
+            self._caches.sort(
+                key=lambda c: _container_sort_key(c.container, c.cache_type),
+                reverse=reverse,
+            )
+        elif col == "latitude":
+            # Numerisk sortering på rå float — ikke formateret tekst
+            # Bruger effektive koordinater (corrected hvis sat)
+            self._caches.sort(
+                key=lambda c: (self._effective_coords(c)[0]
+                               if self._effective_coords(c)[0] is not None
+                               else -999.0),
+                reverse=reverse,
+            )
+        elif col == "longitude":
+            self._caches.sort(
+                key=lambda c: (self._effective_coords(c)[1]
+                               if self._effective_coords(c)[1] is not None
+                               else -999.0),
+                reverse=reverse,
+            )
         elif col == "name":
             self._caches.sort(
                 key=lambda c: (c.name or "").lower(), reverse=reverse

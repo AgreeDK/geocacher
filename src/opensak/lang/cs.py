@@ -29,7 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Quick filter bar ──────────────────────────────────────────────────────
-    "search_placeholder":           "Název nebo GC kód…",
+    "search_placeholder":           "Název…",
     "quick_all":                    "Všechny keše",
     "quick_not_found":              "Nenalezené",
     "quick_found":                  "Nalezené",
@@ -379,7 +379,10 @@ STRINGS: dict[str, str] = {
     "col_premium":      "Premium",
     "col_archived":     "Archivováno",
     "col_favorite":     "Oblíbené ★",
-
+    "col_latitude":               "Zeměpisná šířka",
+    "col_longitude":              "Zeměpisná délka",
+    "col_coord_tooltip_original": "Původní souřadnice",
+    "col_coord_tooltip_corrected":"Opravené souřadnice",
     "col_dnf_date":          "Datum DNF",
     "col_found_date":       "Datum nálezu",
     "col_first_to_find":     "FTF",

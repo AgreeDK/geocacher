@@ -557,6 +557,12 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
             text_encoded=lg["text_encoded"],
         ))
 
+    # ── Issue #87: Cache log count for fast UI display ──────────────────────
+    # Old logs were deleted at the start of this function (re-import), and
+    # seen_log_ids holds the de-duplicated set of logs we just added — so
+    # its length equals the new total count of logs for this cache.
+    cache.log_count = len(seen_log_ids)
+
     # Trackables
     for tb in data.get("trackables", []):
         session.add(Trackable(cache=cache, ref=tb["ref"], name=tb["name"]))

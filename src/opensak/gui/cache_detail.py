@@ -188,10 +188,18 @@ class CacheDetailPanel(QWidget):
         self._tabs = QTabWidget()
         self._tabs.setDocumentMode(True)
 
-        # Beskrivelse — QWebEngineView så eksterne billeder og CJK-fonte virker
+        # Beskrivelse — QWebEngineView så eksterne billeder og CJK-fonte virker.
+        # _DescWebPage må IKKE have Qt-parent — vi rydder selv op i
+        # _cleanup_webengine() der kaldes via QApplication.aboutToQuit.
+        # Dette undgår Qt's 'Expect troubles' advarsel ved nedlukning.
         self._desc_view = QWebEngineView()
-        self._desc_page = _DescWebPage(self._desc_view)
+        self._desc_page = _DescWebPage()
         self._desc_view.setPage(self._desc_page)
+
+        from PySide6.QtWidgets import QApplication
+        app = QApplication.instance()
+        if app is not None:
+            app.aboutToQuit.connect(self._cleanup_webengine)
         self._tabs.addTab(self._desc_view, tr("detail_tab_desc"))
 
         hint_widget = QWidget()
@@ -527,6 +535,17 @@ class CacheDetailPanel(QWidget):
             )
 
         self._log_browser.setHtml("".join(html))
+
+    def _cleanup_webengine(self) -> None:
+        """Slet QWebEnginePage før Qt rydder defaultProfile op.
+        Kaldes via QApplication.aboutToQuit signalet — skal køre BEFORE
+        QWebEngineProfile destrueres for at undgå 'Expect troubles' advarsel."""
+        try:
+            self._desc_view.setPage(None)
+            self._desc_page.deleteLater()
+        except RuntimeError:
+            # Widget er allerede slettet af Qt — intet at gøre
+            pass
 
 
 def _wrap_html(body: str) -> str:

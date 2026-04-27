@@ -329,14 +329,18 @@ class MapWidget(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self._view = QWebEngineView()
-
-        # Sæt tile interceptor på profilen
+        # Brug en isoleret off-the-record profil til kortet så TileInterceptor
+        # ikke påvirker andre QWebEngineView instanser (fx beskrivelsespanelet).
+        # Dette løser et Windows 11-specifikt problem hvor den globale
+        # defaultProfile interceptor blokerede setHtml() i cache_detail.py.
+        # Ingen Qt-parent — vi rydder selv op i _cleanup_webengine().
+        self._profile = QWebEngineProfile()
         self._interceptor = TileInterceptor()
-        profile = QWebEngineProfile.defaultProfile()
-        profile.setUrlRequestInterceptor(self._interceptor)
+        self._profile.setUrlRequestInterceptor(self._interceptor)
 
-        self._page = self._view.page()
+        self._page = QWebEnginePage(self._profile)
+        self._view = QWebEngineView()
+        self._view.setPage(self._page)
 
         # Sæt op WebChannel til Python ↔ JS kommunikation
         self._channel = QWebChannel()
@@ -350,6 +354,12 @@ class MapWidget(QWidget):
         self._page.setHtml(MAP_HTML, QUrl("qrc:///"))
 
         layout.addWidget(self._view)
+
+        # Tilmeld nedlukningsoprydning så page slettes FØR profil
+        from PySide6.QtWidgets import QApplication
+        app = QApplication.instance()
+        if app is not None:
+            app.aboutToQuit.connect(self._cleanup_webengine)
 
     def _on_load_finished(self, ok: bool) -> None:
         if not ok:
@@ -459,3 +469,16 @@ class MapWidget(QWidget):
     def pan_to_home(self) -> None:
         if self._ready:
             self._run_js("panToHome()")
+
+    def _cleanup_webengine(self) -> None:
+        """Slet QWebEnginePage før Qt rydder QWebEngineProfile op.
+        Kaldes via QApplication.aboutToQuit signalet — skal køre BEFORE
+        profilen destrueres for at undgå 'Expect troubles' advarsel."""
+        try:
+            self._ready = False
+            self._view.setPage(None)
+            self._page.deleteLater()
+            self._profile.deleteLater()
+        except RuntimeError:
+            # Widget er allerede slettet af Qt — intet at gøre
+            pass
