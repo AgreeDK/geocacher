@@ -356,15 +356,31 @@ class MainWindow(QMainWindow):
         tb.addAction(settings_act)
 
     def _setup_search_bar(self) -> None:
-        """Søgelinje på linje 3 under primær toolbar — højrejusteret via HBoxLayout."""
+        """Søgelinje på linje 3 under primær toolbar — højrejusteret via HBoxLayout.
+
+        Søgelinjen tvinges altid synlig fordi:
+        - Den indeholder essentielle søgefelter (GC code, Name)
+        - Qt gemmer toolbar-synlighed i QSettings, så et utilsigtet højreklik-
+          uncheck ville skjule den permanent for brugeren
+        - Den er planlagt til at indeholde flere felter (status, hurtig-nav)
+        """
         from PySide6.QtWidgets import (
             QToolBar, QLabel, QLineEdit, QWidgetAction, QWidget, QSizePolicy, QHBoxLayout
         )
         sb = QToolBar(tr("search"))
         sb.setObjectName("search_toolbar")
         sb.setMovable(False)
+        # Issue #86 follow-up: forhindre at brugeren skjuler søgelinjen via
+        # højreklik-menu på toolbar-området. toggleViewAction() er den action
+        # Qt bruger i toolbar-kontekstmenuen — ved at deaktivere den fjerner
+        # vi muligheden for at skjule søgelinjen utilsigtet.
+        sb.toggleViewAction().setEnabled(False)
+        sb.toggleViewAction().setVisible(False)
         self.addToolBarBreak()
         self.addToolBar(sb)
+        # Tving synlig — overskriver evt. gemt QSettings-state hvor en bruger
+        # tidligere har skjult toolbar'en
+        sb.setVisible(True)
 
         # Container-widget med HBoxLayout — spacer skubber felterne til højre
         container = QWidget()
@@ -538,14 +554,14 @@ class MainWindow(QMainWindow):
             from opensak.filters.engine import GcCodeFilter
             fs.add(GcCodeFilter(gc_search))
 
-        # Navn/GC søgefelt — matcher på navn ELLER GC kode (issue #80)
+        # Navn-søgefelt — matcher kun på navn (GSAK-style, issue #86)
+        # Issue #80 introduced a combined Name+GC code search here, but
+        # users prefer the GSAK convention of separate search fields with
+        # clear, single purposes. GC code search lives in its own field.
         name_search = self._search_box.text().strip()
         if name_search:
-            from opensak.filters.engine import NameFilter, GcCodeFilter
-            name_or_gc = FilterSet(mode="OR")
-            name_or_gc.add(NameFilter(name_search))
-            name_or_gc.add(GcCodeFilter(name_search))
-            fs.add(name_or_gc)
+            from opensak.filters.engine import NameFilter
+            fs.add(NameFilter(name_search))
 
         return fs
 

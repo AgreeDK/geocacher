@@ -29,7 +29,7 @@ STRINGS: dict[str, str] = {
     "window_title_with_db":         "OpenSAK — {db_name}",
 
     # ── Quick filter bar ──────────────────────────────────────────────────────
-    "search_placeholder":           "Nome ou GC code…",
+    "search_placeholder":           "Nome…",
     "quick_all":                    "Todas as caches",
     "quick_not_found":              "Não encontrada",
     "quick_found":                  "Encontrada",
