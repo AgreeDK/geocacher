@@ -14,6 +14,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.6] — 2026-04-27
+
+### Fixed 
+- **FTF false positives - only detect on user's own flag** 
+  fixes issue #114 and implement issue #58
+
+---
+
 ## [1.11.5] — 2026-04-27
 ### Added
 - **Latitude and Longitude as selectable columns** — new optional columns
