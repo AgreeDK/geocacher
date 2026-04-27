@@ -37,6 +37,13 @@ _GS_NAMESPACES = [
     "http://www.groundspeak.com/cache/1/0",
 ]
 
+# GSAK custom namespace — used in GPX files exported from GSAK
+_GSAK_NAMESPACES = [
+    "http://www.gsak.net/xmlv1/6",
+    "http://www.gsak.net/xmlv1/5",
+    "http://www.gsak.net/xmlv1/4",
+]
+
 
 def _make_ns(gs_uri: str) -> dict:
     """Return a namespace dict with the given Groundspeak URI."""
@@ -251,6 +258,18 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
                 "name": _text(tb_el, "gs:name", NS),
             })
 
+    # ── GSAK FTF flag (issue #58) ─────────────────────────────────────────────
+    # GSAK exports a <gsak:FirstToFind> element inside <gsak:wptExtension>.
+    # Values: "true"/"false" or "True"/"False".
+    gsak_ftf: Optional[bool] = None
+    for gsak_uri in _GSAK_NAMESPACES:
+        gsak_ext = wpt_el.find(f"{{{gsak_uri}}}wptExtension")
+        if gsak_ext is not None:
+            ftf_el = gsak_ext.find(f"{{{gsak_uri}}}FirstToFind")
+            if ftf_el is not None and ftf_el.text:
+                gsak_ftf = ftf_el.text.strip().lower() == "true"
+            break
+
     return {
         "gc_code":           gc_code,
         "name":              name,
@@ -276,6 +295,7 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
         "attributes":        attributes,
         "logs":              logs,
         "trackables":        trackables,
+        "gsak_ftf":          gsak_ftf,
     }
 
 
@@ -567,7 +587,7 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
     for tb in data.get("trackables", []):
         session.add(Trackable(cache=cache, ref=tb["ref"], name=tb["name"]))
 
-    # ── Derive dnf_date, first_to_find from logs (issue #33) ─────────────────
+    # ── Derive dnf_date, first_to_find from logs (issue #33, #58, #114) ────────
     # These are only set/updated when a fresh import brings logs in.
     # We only touch them if we actually have log data to derive from.
     logs_data = data.get("logs", [])
@@ -581,19 +601,64 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
         ]
         cache.dnf_date = max(dnf_dates) if dnf_dates else None
 
-        # first_to_find: True if the very earliest "Found it" log has
-        # finder_id matching owner_id is ambiguous, so we use the simpler
-        # GSAK convention: True if any log text contains "FTF" (case-insensitive)
-        # OR if this cache's found flag is True and the earliest Found log
-        # has finder == placed_by (owner), which is not reliable either.
-        # Most reliable approach that works without the API:
-        # Check if any log text contains "FTF" or "First to Find" (common convention)
-        ftf_keywords = ("ftf", "first to find", "first finder", "første til at finde")
-        cache.first_to_find = any(
-            any(kw in (lg.get("text") or "").lower() for kw in ftf_keywords)
-            for lg in logs_data
-            if lg.get("log_type") == "Found it"
-        )
+        # ── FTF detection (fixes #114, implements #58) ────────────────────────
+        # Priority order:
+        #   1. GSAK GPX flag (<gsak:FirstToFind>) — explicit user-set flag
+        #   2. Log-based detection — only for the CURRENT USER's own logs
+        #
+        # Issue #114 fix: The old code checked ALL logs for FTF keywords,
+        # which caused false positives when OTHER finders wrote things like
+        # "Congrats on FTF!" in their logs.  Now we only check the current
+        # user's own "Found it" logs, and only if the user has actually
+        # found the cache.
+
+        gsak_ftf = data.get("gsak_ftf")
+
+        if gsak_ftf is not None:
+            # GSAK flag is authoritative — user set it manually in GSAK
+            cache.first_to_find = gsak_ftf
+        elif cache.found:
+            # Log-based detection: only check the current user's own logs
+            from opensak.gui.settings import get_settings
+            gc_username = get_settings().gc_username.strip().lower()
+
+            ftf_keywords = ("ftf", "first to find", "first finder",
+                            "første til at finde")
+
+            if gc_username:
+                # User has configured their username — match their logs
+                user_found_logs = [
+                    lg for lg in logs_data
+                    if lg.get("log_type") == "Found it"
+                    and (lg.get("finder") or "").strip().lower() == gc_username
+                ]
+
+                # Check if user's own log text contains FTF keywords
+                user_log_has_ftf = any(
+                    any(kw in (lg.get("text") or "").lower()
+                        for kw in ftf_keywords)
+                    for lg in user_found_logs
+                )
+
+                # Check if user's log is the earliest "Found it" log
+                all_found_logs = [
+                    lg for lg in logs_data
+                    if lg.get("log_type") == "Found it" and lg.get("log_date")
+                ]
+                user_is_earliest = False
+                if user_found_logs and all_found_logs:
+                    all_found_logs.sort(key=lambda lg: lg["log_date"])
+                    earliest_finder = (all_found_logs[0].get("finder") or "").strip().lower()
+                    user_is_earliest = earliest_finder == gc_username
+
+                cache.first_to_find = user_log_has_ftf or user_is_earliest
+            else:
+                # No username configured — cannot reliably detect FTF
+                # Don't guess, leave as False to avoid false positives (#114)
+                cache.first_to_find = False
+        else:
+            # User has NOT found this cache — FTF is not applicable
+            cache.first_to_find = False
 
     return cache, created
 
