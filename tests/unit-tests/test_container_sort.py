@@ -1,18 +1,19 @@
 """
 tests/unit-tests/test_container_sort.py — Tests for issue #90.
 
-Verifies that the Container column sorts by logical size, not alphabetically.
+Verifies that the Container column sorts by visual grouping:
 
-Sort order (group):
-  1  Virtual / EarthCache / Lab    (no physical container — by cache_type,
-                                    sorted alphabetically within the group)
-  2  Nano
-  3  Micro
-  4  Small
-  5  Regular
-  6  Large
-  7  Other                          (unknown size)
-  8  Not chosen / empty             (incomplete data, sorts last)
+  Group 1: Physical containers (smallest → largest)
+           Nano → Micro → Small → Regular → Large
+
+  Group 2: Empty bars + letter (alphabetic by the letter)
+           EarthCache  → 'E'
+           Lab Cache   → 'L'
+           Other       → 'O'
+           Virtual     → 'V'
+
+  Group 3: Empty bars, no letter
+           Not chosen / empty
 
 Within each group, Python's stable sort preserves the existing order
 so a previous sort (e.g. distance) is retained as a secondary order.
@@ -51,51 +52,55 @@ class TestContainerSortKey:
 
     def test_physical_containers_in_size_order(self):
         """Physical containers must be ordered from smallest to largest."""
-        groups = [
-            _container_sort_key("Nano")[0],
-            _container_sort_key("Micro")[0],
-            _container_sort_key("Small")[0],
-            _container_sort_key("Regular")[0],
-            _container_sort_key("Large")[0],
+        order = [
+            _container_sort_key("Nano"),
+            _container_sort_key("Micro"),
+            _container_sort_key("Small"),
+            _container_sort_key("Regular"),
+            _container_sort_key("Large"),
         ]
-        assert groups == sorted(groups)
-        assert len(set(groups)) == 5  # all distinct
+        assert order == sorted(order)
+        assert len(set(order)) == 5  # all distinct
 
-    def test_virtual_cache_sorts_first(self):
-        """Virtual caches should sort before any physical container."""
-        virtual_key = _container_sort_key("Other", "Virtual Cache")
-        nano_key = _container_sort_key("Nano")
-        assert virtual_key < nano_key
+    def test_physical_containers_in_group_1(self):
+        """All physical containers should be in group 1."""
+        for size in ("Nano", "Micro", "Small", "Regular", "Large"):
+            assert _container_sort_key(size)[0] == 1
 
-    def test_earthcache_sorts_first(self):
-        """EarthCaches should sort before any physical container."""
-        earth_key = _container_sort_key("", "EarthCache")
-        nano_key = _container_sort_key("Nano")
-        assert earth_key < nano_key
+    def test_letter_types_in_group_2(self):
+        """All letter-display types should be in group 2."""
+        assert _container_sort_key("Other")[0] == 2
+        assert _container_sort_key("Other", "EarthCache")[0] == 2
+        assert _container_sort_key("Other", "Lab Cache")[0] == 2
+        assert _container_sort_key("Other", "Virtual Cache")[0] == 2
 
-    def test_lab_cache_sorts_first(self):
-        """Lab caches should sort before any physical container."""
-        lab_key = _container_sort_key("Other", "Lab Cache")
-        nano_key = _container_sort_key("Nano")
-        assert lab_key < nano_key
+    def test_empty_in_group_3(self):
+        """Empty / not chosen values should be in group 3."""
+        assert _container_sort_key("")[0] == 3
+        assert _container_sort_key("Not chosen")[0] == 3
+        assert _container_sort_key(None)[0] == 3
 
-    def test_other_sorts_after_large(self):
-        """'Other' is unknown size but exists — sorts after Large."""
-        assert _container_sort_key("Other") > _container_sort_key("Large")
+    def test_letters_are_alphabetic(self):
+        """Within group 2, sub_key should be the displayed letter."""
+        assert _container_sort_key("Other", "EarthCache")[1] == "E"
+        assert _container_sort_key("Other", "Lab Cache")[1] == "L"
+        assert _container_sort_key("Other")[1] == "O"
+        assert _container_sort_key("Other", "Virtual Cache")[1] == "V"
 
-    def test_not_chosen_sorts_last(self):
-        """'Not chosen' indicates incomplete data — sorts at the end."""
+    def test_physical_sorts_before_letters(self):
+        """Group 1 (physical) sorts before group 2 (letters)."""
+        large = _container_sort_key("Large")
+        earth = _container_sort_key("Other", "EarthCache")
+        virtual = _container_sort_key("Other", "Virtual Cache")
+        assert large < earth < virtual
+
+    def test_letters_sort_before_empty(self):
+        """Group 2 (letters) sorts before group 3 (empty)."""
+        virtual = _container_sort_key("Other", "Virtual Cache")
         not_chosen = _container_sort_key("Not chosen")
-        for size in ("Nano", "Micro", "Small", "Regular", "Large", "Other"):
-            assert _container_sort_key(size) < not_chosen
-
-    def test_empty_sorts_last(self):
-        """Empty string sorts last (same as 'Not chosen')."""
-        assert _container_sort_key("") == _container_sort_key("Not chosen")
-
-    def test_none_sorts_last(self):
-        """None container value sorts last."""
-        assert _container_sort_key(None) == _container_sort_key("Not chosen")
+        empty = _container_sort_key("")
+        assert virtual < not_chosen
+        assert virtual < empty
 
     def test_case_insensitive(self):
         """Container values should be matched case-insensitively."""
@@ -106,50 +111,52 @@ class TestContainerSortKey:
         """Leading/trailing whitespace should be ignored."""
         assert _container_sort_key("  Small  ") == _container_sort_key("Small")
 
-    def test_unknown_value_falls_back_to_other(self):
-        """Unknown container values fall back to 'Other' group, not lost."""
-        # Made-up value should sort with Other (group 7), not at the end
-        assert (_container_sort_key("XYZ")[0]
-                == _container_sort_key("Other")[0])
+    def test_unknown_container_falls_back_to_other(self):
+        """Unknown container values fall back to 'O' (group 2)."""
+        # Made-up value should sort as 'Other' ('O' in group 2)
+        assert _container_sort_key("XYZ") == _container_sort_key("Other")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Alphabetic sub-ordering within group 1 (non-physical types)
+# Alphabetic sub-ordering within group 2 (letter types)
 # ─────────────────────────────────────────────────────────────────────────────
 
-class TestNonPhysicalAlphabeticOrder:
-    """Within group 1, Virtual/Earth/Lab sort alphabetically by cache_type
-    so they stay grouped together visually (and future types slot in)."""
+class TestLetterAlphabeticOrder:
+    """Within group 2, types sort alphabetically by their displayed letter:
+    EarthCache 'E' → Lab Cache 'L' → Other 'O' → Virtual 'V'."""
 
-    def test_earthcache_before_lab(self):
+    def test_earth_before_lab(self):
         """E < L → EarthCache sorts before Lab Cache."""
         earth = _container_sort_key("Other", "EarthCache")
         lab = _container_sort_key("Other", "Lab Cache")
         assert earth < lab
 
-    def test_lab_before_virtual(self):
-        """L < V → Lab Cache sorts before Virtual Cache."""
+    def test_lab_before_other(self):
+        """L < O → Lab Cache sorts before Other."""
         lab = _container_sort_key("Other", "Lab Cache")
-        virtual = _container_sort_key("Other", "Virtual Cache")
-        assert lab < virtual
+        other = _container_sort_key("Other")
+        assert lab < other
 
-    def test_full_alphabetic_order_in_group_1(self):
-        """All three non-physical types should be in alphabetic order."""
+    def test_other_before_virtual(self):
+        """O < V → Other sorts before Virtual."""
+        other = _container_sort_key("Other")
+        virtual = _container_sort_key("Other", "Virtual Cache")
+        assert other < virtual
+
+    def test_full_alphabetic_order(self):
+        """All four letter-types sort: E → L → O → V."""
         caches = [
-            FakeCache("GC_VIRT1",  "Other", "Virtual Cache"),
-            FakeCache("GC_EARTH1", "",      "EarthCache"),
-            FakeCache("GC_LAB1",   "Other", "Lab Cache"),
-            FakeCache("GC_VIRT2",  "Other", "Virtual Cache"),
-            FakeCache("GC_EARTH2", "",      "EarthCache"),
+            FakeCache("GC_VIRT",  "Other", "Virtual Cache"),
+            FakeCache("GC_EARTH", "",      "EarthCache"),
+            FakeCache("GC_OTHER", "Other"),
+            FakeCache("GC_LAB",   "Other", "Lab Cache"),
         ]
         caches.sort(key=lambda c: _container_sort_key(c.container, c.cache_type))
-        types_in_order = [c.cache_type for c in caches]
-        assert types_in_order == [
-            "EarthCache",
-            "EarthCache",
-            "Lab Cache",
-            "Virtual Cache",
-            "Virtual Cache",
+        assert [c.gc_code for c in caches] == [
+            "GC_EARTH",  # E
+            "GC_LAB",    # L
+            "GC_OTHER",  # O
+            "GC_VIRT",   # V
         ]
 
 
@@ -163,7 +170,7 @@ class TestSortStability:
     This is critical: if a user sorts by Distance first, then by Container,
     they expect caches within each container group to still be ordered by
     Distance. Python's sort() is stable, but only if our key function gives
-    equal keys to caches in the same group.
+    equal keys to caches that should be considered the same.
     """
 
     def test_same_size_caches_keep_input_order(self):
@@ -187,8 +194,8 @@ class TestSortStability:
             FakeCache("FAR_LARGE",    "Large"),    # 10km
         ]
         caches.sort(key=lambda c: _container_sort_key(c.container, c.cache_type))
-        # Small (group 4) caches first, then Large (group 6)
-        # Within each group: distance order preserved (CLOSE before MID before FAR)
+        # Small (sub_key 3) caches first, then Large (sub_key 5) — both group 1
+        # Within each: distance order preserved (CLOSE before MID before FAR)
         assert [c.gc_code for c in caches] == [
             "CLOSE_SMALL",
             "MID_SMALL",
@@ -196,6 +203,16 @@ class TestSortStability:
             "MID_LARGE",
             "FAR_LARGE",
         ]
+
+    def test_same_letter_caches_keep_input_order(self):
+        """Two Virtual caches stay in input order (same sub_key 'V')."""
+        caches = [
+            FakeCache("GC_VIRT_A", "Other", "Virtual Cache"),
+            FakeCache("GC_VIRT_B", "Other", "Virtual Cache"),
+            FakeCache("GC_VIRT_C", "Other", "Virtual Cache"),
+        ]
+        caches.sort(key=lambda c: _container_sort_key(c.container, c.cache_type))
+        assert [c.gc_code for c in caches] == ["GC_VIRT_A", "GC_VIRT_B", "GC_VIRT_C"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -206,7 +223,7 @@ class TestContainerSorting:
     """Verify that sorting a list of caches produces the expected order."""
 
     def test_ascending_sort_full_set(self):
-        """Mixed list should produce: Earth → Lab → Virtual → Nano → … → Not chosen."""
+        """Mixed list produces: Nano → … → Large → E → L → O → V → Not chosen."""
         caches = [
             FakeCache("GC_LARGE",       "Large"),
             FakeCache("GC_MICRO",       "Micro"),
@@ -221,19 +238,19 @@ class TestContainerSorting:
         ]
         caches.sort(key=lambda c: _container_sort_key(c.container, c.cache_type))
         order = [c.gc_code for c in caches]
-        # Group 1 sorted alphabetically by cache_type:
-        # EarthCache → Lab Cache → Virtual Cache
+        # Group 1 (physical, smallest first), then group 2 (letters
+        # alphabetically: E, L, O, V), then group 3 (empty/not chosen)
         assert order == [
-            "GC_EARTH",
-            "GC_LAB",
-            "GC_VIRTUAL",
-            "GC_NANO",
-            "GC_MICRO",
-            "GC_SMALL",
-            "GC_REGULAR",
-            "GC_LARGE",
-            "GC_OTHER",
-            "GC_NOTCHOSEN",
+            "GC_NANO",       # group 1, sub 1
+            "GC_MICRO",      # group 1, sub 2
+            "GC_SMALL",      # group 1, sub 3
+            "GC_REGULAR",    # group 1, sub 4
+            "GC_LARGE",      # group 1, sub 5
+            "GC_EARTH",      # group 2, 'E'
+            "GC_LAB",        # group 2, 'L'
+            "GC_OTHER",      # group 2, 'O'
+            "GC_VIRTUAL",    # group 2, 'V'
+            "GC_NOTCHOSEN",  # group 3
         ]
 
     def test_descending_sort_reverses(self):
@@ -271,13 +288,14 @@ class TestContainerSortEdgeCases:
     """Verify edge cases don't break sorting."""
 
     def test_virtual_cache_with_empty_container(self):
-        """Real GPX data: Virtual Cache with no container value should still sort first."""
+        """Real GPX data: Virtual Cache with no container value still sorts as 'V'."""
         caches = [
             FakeCache("GC_NANO", "Nano"),
             FakeCache("GC_VIRT", None, cache_type="Virtual Cache"),
         ]
         caches.sort(key=lambda c: _container_sort_key(c.container, c.cache_type))
-        assert caches[0].gc_code == "GC_VIRT"
+        # Nano (group 1) comes before Virtual (group 2 'V')
+        assert [c.gc_code for c in caches] == ["GC_NANO", "GC_VIRT"]
 
     def test_only_not_chosen_caches(self):
         """List of only 'Not chosen' caches shouldn't crash."""

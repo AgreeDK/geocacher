@@ -106,72 +106,88 @@ def _gc_sort_key(gc_code: GcCode) -> str:
 
 # ── Issue #90: Container size sort order ─────────────────────────────────────
 #
-# Container values are sorted by logical "size" rather than alphabetically.
-# Non-physical container types (Virtual, EarthCache, Lab) are placed first
-# because they have no physical size — these are detected via cache_type, not
-# container, since Groundspeak GPX files set container="Other" or "Not chosen"
-# for these types.
+# Container values are sorted by visual grouping:
 #
-# Sort order:
-#   1  Virtual / EarthCache / Lab    (no physical container — by cache_type)
-#   2  Nano
-#   3  Micro
-#   4  Small
-#   5  Regular
-#   6  Large
-#   7  Other                          (unknown size)
-#   8  Not chosen / empty             (incomplete data, sorts last)
+#   Group 1: Physical containers (smallest → largest)
+#            Nano → Micro → Small → Regular → Large
 #
-_CONTAINER_SORT_ORDER = {
-    "nano":        2,
-    "micro":       3,
-    "small":       4,
-    "regular":     5,
-    "large":       6,
-    "other":       7,
-    "not chosen":  8,
-    "":            8,
+#   Group 2: Empty bars + letter (sorted alphabetically by the letter)
+#            EarthCache  → 'E'
+#            Lab Cache   → 'L'
+#            Other       → 'O'
+#            Virtual     → 'V'
+#
+#   Group 3: Empty bars, no letter
+#            Not chosen / empty
+#
+# This grouping mirrors the visual layout: caches that show filled bars come
+# first (sorted by physical size), then caches that show a letter (sorted
+# alphabetically by the letter — predictable and easy to extend), then
+# caches with no information at all.
+#
+# Non-physical cache types (Virtual, EarthCache, Lab) are detected via
+# cache_type because Groundspeak GPX files typically set container='Other'
+# or empty for these types.
+#
+_CONTAINER_PHYSICAL_ORDER = {
+    "nano":     1,
+    "micro":    2,
+    "small":    3,
+    "regular":  4,
+    "large":    5,
 }
 
-# Cache types that have no physical container — these sort first (group 1)
-_NON_PHYSICAL_TYPES = {
-    "virtual cache",
-    "earthcache",
-    "lab cache",
-    "locationless (reverse) cache",
+# Cache types that have no physical container — sort by their display letter
+# in group 2 (the same letter shown in SizeBarDelegate). New non-physical
+# types can be added here and they'll slot in alphabetically by their letter.
+_NON_PHYSICAL_TYPE_LETTERS = {
+    "earthcache":                   "E",
+    "lab cache":                    "L",
+    "virtual cache":                "V",
+    "locationless (reverse) cache": "R",
 }
+
+# Empty / unknown markers — group 3 (sorts last)
+_EMPTY_CONTAINERS = {"", "not chosen"}
 
 
 def _container_sort_key(container: str | None, cache_type: str | None = None) -> tuple:
     """Return sort key tuple for the Container column.
 
-    Returns a (group, sub_key) tuple so:
-    - Primary sort is by logical container size group (1-8)
-    - Within group 1 (non-physical types), secondary sort is alphabetic
-      on cache_type so 'EarthCache' → 'Lab Cache' → 'Virtual Cache' stay
-      grouped together (and any future non-physical type slots in
-      alphabetically without code changes).
-    - Within other groups, sub_key is empty so Python's stable sort
-      preserves the existing order (e.g. distance sort).
+    Returns a (group, sub_key) tuple where:
+      group 1 = physical container, sub_key = size order (1-5)
+      group 2 = empty bars + letter, sub_key = the letter ('E', 'L', 'O', 'V')
+      group 3 = empty (no letter), sub_key = ''
 
-    Used by the Container column to sort by logical size instead of
-    alphabetically. Non-physical cache types (Virtual, EarthCache, Lab)
-    are detected by cache_type since they typically have container='Other'
-    or empty in GPX data.
+    Within group 1 the sub_key gives smallest → largest. Within group 2 the
+    sub_key gives alphabetic order. Within group 3 sub_key is empty so
+    Python's stable sort preserves existing order (e.g. distance sort).
 
-    Unknown values fall back to the same group as 'Other' so they don't
-    disappear at the very end.
+    Non-physical types (Virtual / Earth / Lab) are detected via cache_type
+    since their container value is typically 'Other' or empty in GPX data.
     """
-    # Non-physical types come first (group 1), sorted alphabetically by type
+    # Group 2a: Non-physical cache types take precedence over container value
+    # (a Virtual Cache with container='Other' should sort by 'V', not 'O')
     if cache_type:
         ct = cache_type.strip().lower()
-        if ct in _NON_PHYSICAL_TYPES:
-            return (1, ct)
-    # Physical containers — sub_key empty so stable sort preserves order
-    if container is None:
-        return (_CONTAINER_SORT_ORDER[""], "")
-    key = container.strip().lower()
-    return (_CONTAINER_SORT_ORDER.get(key, 7), "")  # unknown → group 7
+        letter = _NON_PHYSICAL_TYPE_LETTERS.get(ct)
+        if letter is not None:
+            return (2, letter)
+
+    # Normalise container value
+    key = (container or "").strip().lower()
+
+    # Group 1: Physical containers (smallest → largest)
+    if key in _CONTAINER_PHYSICAL_ORDER:
+        return (1, _CONTAINER_PHYSICAL_ORDER[key])
+
+    # Group 3: Empty / not chosen — no letter, sorts last
+    if key in _EMPTY_CONTAINERS:
+        return (3, "")
+
+    # Group 2b: Anything else with a container value = 'Other'-like (shows 'O')
+    # Includes the literal 'other' value and any unknown future container types
+    return (2, "O")
 
 
 from PySide6.QtWidgets import QStyledItemDelegate, QApplication
@@ -185,9 +201,10 @@ class SizeBarDelegate(QStyledItemDelegate):
     5 firkantede segmenter fylder op fra venstre:
       Nano=1, Micro=2, Small=3, Regular=4, Large=5
     Special visning (tomme segmenter + bogstav i sidste segment):
-      Other        → 'O'   (ukendt fysisk størrelse)
-      Virtual Cache → 'V'  (ingen fysisk container — by cache_type)
-      EarthCache   → 'E'   (ingen fysisk container — by cache_type)
+      Other         → 'O'   (ukendt fysisk størrelse)
+      Virtual Cache → 'V'   (ingen fysisk container — by cache_type)
+      EarthCache    → 'E'   (ingen fysisk container — by cache_type)
+      Lab Cache     → 'L'   (ingen fysisk container — by cache_type)
     Not chosen og tom → 5 tomme segmenter, intet bogstav
     """
 
@@ -210,6 +227,7 @@ class SizeBarDelegate(QStyledItemDelegate):
     _LABEL_TYPES = {
         "virtual cache": "V",
         "earthcache":    "E",
+        "lab cache":     "L",
     }
 
     _SEG_COUNT   = 5
