@@ -219,6 +219,12 @@ def monkey_window(qtbot, tmp_path, monkeypatch):
 
     yield window
 
+    # Luk vinduet eksplicit så vores closeEvent på MapWidget og
+    # CacheDetailPanel kører og rydder QWebEnginePage op FØR
+    # QWebEngineProfile slettes. Uden dette klager Qt med
+    # 'Release of profile requested but WebEnginePage still not deleted'.
+    window.close()
+    qtbot.wait(200)
     mgr_module._manager = None
 
 
