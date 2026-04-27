@@ -42,7 +42,10 @@ def _build_caches(tmp_path):
     with get_session() as session:
         return (
             session.query(Cache)
-            .options(joinedload(Cache.user_note))
+            .options(
+                joinedload(Cache.user_note),
+                joinedload(Cache.logs),   # generate_gpx also accesses cache.logs
+            )
             .all()
         )
 
