@@ -539,7 +539,10 @@ class CacheTableModel(QAbstractTableModel):
                     return latest.log_date.strftime("%d.%m.%Y")
             return ""
         if col == "log_count":
-            return str(len(cache.logs)) if cache.logs is not None else "0"
+            # Issue #87: use cached log_count column instead of len(cache.logs)
+            # because logs are noload'ed for performance and would always be
+            # an empty list here. log_count is maintained on import.
+            return str(cache.log_count or 0)
         if col == "dnf":
             return "DNF" if cache.dnf else ""
         if col == "premium_only":
@@ -615,8 +618,9 @@ class CacheTableModel(QAbstractTableModel):
                 reverse=reverse,
             )
         elif col == "log_count":
+            # Issue #87: sort on cached log_count column (logs are noload'ed)
             self._caches.sort(
-                key=lambda c: len(c.logs) if c.logs else 0, reverse=reverse
+                key=lambda c: c.log_count or 0, reverse=reverse
             )
         elif col == "hidden_date":
             self._caches.sort(

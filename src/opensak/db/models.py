@@ -120,6 +120,12 @@ class Cache(Base):
     # Community favourite points count (API-only — None until API available)
     favorite_points: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
 
+    # ── Issue #87: Cached log count ──────────────────────────────────────────
+    # Number of logs in this cache, cached as a column so the UI can display
+    # the count without loading the logs relationship (which is noload'ed
+    # for performance). Updated automatically on import in _upsert_cache().
+    log_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
     # Metadata
     imported_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     source_file: Mapped[Optional[str]] = mapped_column(String(512))  # which GPX this came from
