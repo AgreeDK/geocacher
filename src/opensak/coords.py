@@ -72,6 +72,50 @@ def format_coords(lat: float, lon: float, fmt: CoordFormat) -> str:
     return _dd_to_dmm(lat, lon)   # default: DMM
 
 
+# ── Single-axis formatters (used by table columns) ───────────────────────────
+
+def format_lat(lat: float, fmt: CoordFormat) -> str:
+    """Format only the latitude part in the requested format.
+
+    Used by the cache list's Latitude column so the value matches the
+    user's chosen coordinate format (DD / DMM / DMS).
+    """
+    h = "N" if lat >= 0 else "S"
+    a = abs(lat)
+    if fmt == CoordFormat.DD:
+        return f"{lat:.6f}"
+    if fmt == CoordFormat.DMS:
+        deg = int(a)
+        m = int((a - deg) * 60)
+        s = (a - deg - m / 60) * 3600
+        return f"{h}{deg:02d}° {m:02d}' {s:05.2f}\""
+    # default: DMM (geocaching standard)
+    deg = int(a)
+    m = (a - deg) * 60
+    return f"{h}{deg:02d} {m:06.3f}"
+
+
+def format_lon(lon: float, fmt: CoordFormat) -> str:
+    """Format only the longitude part in the requested format.
+
+    Used by the cache list's Longitude column so the value matches the
+    user's chosen coordinate format (DD / DMM / DMS).
+    """
+    h = "E" if lon >= 0 else "W"
+    a = abs(lon)
+    if fmt == CoordFormat.DD:
+        return f"{lon:.6f}"
+    if fmt == CoordFormat.DMS:
+        deg = int(a)
+        m = int((a - deg) * 60)
+        s = (a - deg - m / 60) * 3600
+        return f"{h}{deg:03d}° {m:02d}' {s:05.2f}\""
+    # default: DMM (geocaching standard)
+    deg = int(a)
+    m = (a - deg) * 60
+    return f"{h}{deg:03d} {m:06.3f}"
+
+
 # ── Parsing ───────────────────────────────────────────────────────────────────
 
 def parse_coords(text: str) -> Coordinate | None:

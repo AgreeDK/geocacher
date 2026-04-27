@@ -39,6 +39,9 @@ _ALL_COLUMNS_DEF = [
     ("dnf",          "col_dnf",          36, False),
     ("premium_only", "col_premium",      36, False),
     ("archived",     "col_archived",     36, False),
+    # ── Issue #84: Latitude og Longitude ──────────────────────────────────────
+    ("latitude",     "col_latitude",     95, False),
+    ("longitude",    "col_longitude",    95, False),
     # ── Issue #33: GSAK-compatible fields ─────────────────────────────────────
     ("found_date",     "col_found_date",    90, False),
     ("dnf_date",       "col_dnf_date",      90, False),

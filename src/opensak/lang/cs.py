@@ -379,7 +379,10 @@ STRINGS: dict[str, str] = {
     "col_premium":      "Premium",
     "col_archived":     "Archivováno",
     "col_favorite":     "Oblíbené ★",
-
+    "col_latitude":               "Zeměpisná šířka",
+    "col_longitude":              "Zeměpisná délka",
+    "col_coord_tooltip_original": "Původní souřadnice",
+    "col_coord_tooltip_corrected":"Opravené souřadnice",
     "col_dnf_date":          "Datum DNF",
     "col_found_date":       "Datum nálezu",
     "col_first_to_find":     "FTF",

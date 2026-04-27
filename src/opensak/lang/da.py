@@ -378,7 +378,10 @@ STRINGS: dict[str, str] = {
     "col_premium":      "Premium",
     "col_archived":     "Arkiveret",
     "col_favorite":     "Favorit ★",
-
+    "col_latitude":               "Bredde",
+    "col_longitude":              "Længde",
+    "col_coord_tooltip_original": "Originale koordinater",
+    "col_coord_tooltip_corrected":"Korrigerede koordinater",
     "col_dnf_date":          "DNF dato",
     "col_found_date":       "Fundet dato",
     "col_first_to_find":     "FTF",

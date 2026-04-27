@@ -15,7 +15,7 @@ from PySide6.QtWidgets import QTableView, QHeaderView, QAbstractItemView, QMenu,
 from opensak.db.models import Cache
 from opensak.filters.engine import _haversine_km
 from opensak.gui.settings import get_settings
-from opensak.coords import format_coords
+from opensak.coords import format_coords, format_lat, format_lon, format_lat, format_lon
 from opensak.lang import tr
 from opensak.utils.types import GcCode
 from opensak.gui.icon_provider import get_cache_type_icon, get_cache_size_icon
@@ -63,6 +63,9 @@ def get_column_defs() -> dict:
         "archived":     (tr("col_archived"),          70),
         "favorite":     (tr("col_favorite"),          60),
         "corrected":    (tr("col_corrected"),         40),
+        # ── Issue #84: Latitude og Longitude ──────────────────────────────
+        "latitude":     (tr("col_latitude"),         110),
+        "longitude":    (tr("col_longitude"),        110),
         # ── Issue #33: GSAK-compatible fields ─────────────────────────────
         "found_date":      (tr("col_found_date"),      90),
         "dnf_date":        (tr("col_dnf_date"),        90),
@@ -284,7 +287,8 @@ class CacheTableModel(QAbstractTableModel):
             if col in ("difficulty", "terrain", "distance", "found",
                        "dnf", "premium_only", "archived", "log_count",
                        "corrected", "first_to_find", "user_flag", "bearing",
-                       "user_sort", "favorite_points"):
+                       "user_sort", "favorite_points",
+                       "latitude", "longitude"):
                 return Qt.AlignmentFlag.AlignCenter
             return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
 
@@ -310,6 +314,12 @@ class CacheTableModel(QAbstractTableModel):
                     fmt = get_settings().coord_format
                     coords = format_coords(note.corrected_lat, note.corrected_lon, fmt)
                     return tr("col_corrected_tooltip", coords=coords)
+            if col in ("latitude", "longitude"):
+                # Vis tooltip der angiver om koordinaterne er korrigerede
+                note = cache.user_note
+                if note and note.is_corrected:
+                    return tr("col_coord_tooltip_corrected")
+                return tr("col_coord_tooltip_original")
 
         if role == Qt.ItemDataRole.DecorationRole:
             return self._decoration_value(cache, col)
@@ -387,6 +397,20 @@ class CacheTableModel(QAbstractTableModel):
             return get_cache_size_icon(self._size_icon_key(cache), size=20)
         return None
 
+    @staticmethod
+    def _effective_coords(cache: Cache) -> tuple[float | None, float | None]:
+        """Returnér de effektive koordinater (corrected hvis sat, ellers original).
+
+        Bruges af latitude/longitude-kolonnerne så visningen matcher kortet,
+        som også viser corrected hvis tilgængelige.
+        """
+        note = cache.user_note
+        if (note and note.is_corrected
+                and note.corrected_lat is not None
+                and note.corrected_lon is not None):
+            return note.corrected_lat, note.corrected_lon
+        return cache.latitude, cache.longitude
+
     def _display_value(self, cache: Cache, col: str) -> str:
         if col == "gc_code":
             return cache.gc_code or ""
@@ -447,6 +471,19 @@ class CacheTableModel(QAbstractTableModel):
         if col == "corrected":
             note = cache.user_note
             return "📍" if (note and note.is_corrected) else ""
+        # ── Issue #84: Latitude og Longitude (i brugerens valgte format) ──────
+        if col == "latitude":
+            lat, _ = self._effective_coords(cache)
+            if lat is None:
+                return ""
+            fmt = get_settings().coord_format
+            return format_lat(lat, fmt)
+        if col == "longitude":
+            _, lon = self._effective_coords(cache)
+            if lon is None:
+                return ""
+            fmt = get_settings().coord_format
+            return format_lon(lon, fmt)
         # ── Issue #33: GSAK-compatible fields ─────────────────────────────────
         if col == "found_date":
             return cache.found_date.strftime("%d.%m.%Y") if cache.found_date else ""
@@ -521,6 +558,22 @@ class CacheTableModel(QAbstractTableModel):
             self._caches.sort(key=lambda c: c.user_sort if c.user_sort is not None else 999999, reverse=reverse)
         elif col == "favorite_points":
             self._caches.sort(key=lambda c: c.favorite_points or 0, reverse=reverse)
+        elif col == "latitude":
+            # Numerisk sortering på rå float — ikke formateret tekst
+            # Bruger effektive koordinater (corrected hvis sat)
+            self._caches.sort(
+                key=lambda c: (self._effective_coords(c)[0]
+                               if self._effective_coords(c)[0] is not None
+                               else -999.0),
+                reverse=reverse,
+            )
+        elif col == "longitude":
+            self._caches.sort(
+                key=lambda c: (self._effective_coords(c)[1]
+                               if self._effective_coords(c)[1] is not None
+                               else -999.0),
+                reverse=reverse,
+            )
         elif col == "name":
             self._caches.sort(
                 key=lambda c: (c.name or "").lower(), reverse=reverse
