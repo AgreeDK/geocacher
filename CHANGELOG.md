@@ -14,6 +14,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.4] — 2026-04-27
+### Fixed
+- **Version number mismatch** — fixed `__init__.py` to correctly report version 1.11.4 (the v1.11.3 tag was created with `__version__` still set to "1.11.2"; this release brings the version string in sync with the release tag).
+
+---
+
+## [1.11.3] — 2026-04-27
+### Fixed
+- **Description and map not displayed on Windows 11** — fixed QWebEnginePage profile lifecycle issue that caused the description and map panels to remain blank on Windows 11 (fixes #93).
+- **Qt warning at shutdown** — eliminated "Release of profile requested but WebEnginePage still not deleted" warning by ensuring proper destruction order via QApplication.aboutToQuit signal.
+
+---
+
 ## [1.11.2] — 2026-04-26
 ### Fixed
 - **Add GC search to Name search field** — Name search field now support both Namr and GC code search (fixes #80).
