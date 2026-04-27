@@ -9,13 +9,25 @@ Covers:
 - Invalid input keeps OK disabled
 """
 
-from __future__ import annotations
-
 import pytest
 
 pytest.importorskip("pytestqt")
 
-from PySide6.QtCore import Qt
+
+def _auto_accept_dialog(lat: float, lon: float):
+    """Return a CorrectedCoordsDialog subclass that auto-accepts with fixed coords."""
+    from opensak.gui.dialogs.corrected_coords_dialog import CorrectedCoordsDialog
+
+    class _D(CorrectedCoordsDialog):
+        def exec(self):
+            self._lat = lat
+            self._lon = lon
+            return True
+
+        def get_coords(self):
+            return self._lat, self._lon
+
+    return _D
 
 
 # ── CorrectedCoordsDialog unit-level ──────────────────────────────────────────
@@ -124,41 +136,23 @@ def _select_cache(window, qtbot, gc_code: str) -> None:
 
 def test_save_corrected_coords_persists_to_db(seeded_window, qtbot, monkeypatch):
     """
-    Saving corrected coords via the detail panel's _edit_corrected_coords method
-    writes the values to the database and updates the UI.
+    Saving corrected coords via the detail panel writes the values to the
+    database and updates the UI.
     """
     from opensak.db.database import get_session
     from opensak.db.models import Cache as CacheModel
-    from opensak.gui.dialogs.corrected_coords_dialog import CorrectedCoordsDialog
 
     window = seeded_window
     _select_cache(window, qtbot, "GC12345")
 
-    panel = window._detail_panel
-
-    # Monkeypatch the dialog to auto-accept with known coords
-    accepted_coords = {"lat": 55.0, "lon": 12.0}
-
-    class _AutoDialog(CorrectedCoordsDialog):
-        def exec(self):
-            self._lat = accepted_coords["lat"]
-            self._lon = accepted_coords["lon"]
-            return True  # QDialog.Accepted
-
-        def get_coords(self):
-            return self._lat, self._lon
-
-    # The import inside _edit_corrected_coords resolves against the class's own
-    # module, so we patch it there (not on cache_detail which has no module attr).
     monkeypatch.setattr(
         "opensak.gui.dialogs.corrected_coords_dialog.CorrectedCoordsDialog",
-        _AutoDialog,
+        _auto_accept_dialog(55.0, 12.0),
     )
 
-    panel._edit_corrected_coords()
+    window._detail_panel._edit_corrected_coords()
     qtbot.wait(100)
 
-    # Verify persistence in DB
     with get_session() as session:
         row = session.query(CacheModel).filter_by(gc_code="GC12345").first()
         note = row.user_note if row else None
@@ -176,40 +170,25 @@ def test_clear_corrected_coords_removes_from_db(seeded_window, qtbot, monkeypatc
     """
     from opensak.db.database import get_session
     from opensak.db.models import Cache as CacheModel
-    from opensak.gui.dialogs.corrected_coords_dialog import CorrectedCoordsDialog
 
     window = seeded_window
     _select_cache(window, qtbot, "GC12345")
 
-    panel = window._detail_panel
-
-    class _AutoDialog(CorrectedCoordsDialog):
-        def exec(self):
-            self._lat = 55.0
-            self._lon = 12.0
-            return True
-
-        def get_coords(self):
-            return self._lat, self._lon
-
     monkeypatch.setattr(
         "opensak.gui.dialogs.corrected_coords_dialog.CorrectedCoordsDialog",
-        _AutoDialog,
+        _auto_accept_dialog(55.0, 12.0),
     )
 
-    # Save first
-    panel._edit_corrected_coords()
+    window._detail_panel._edit_corrected_coords()
     qtbot.wait(100)
 
-    # Now clear
-    panel._clear_corrected_coords()
+    window._detail_panel._clear_corrected_coords()
     qtbot.wait(100)
 
     with get_session() as session:
         row = session.query(CacheModel).filter_by(gc_code="GC12345").first()
         note = row.user_note if row else None
 
-    # After clearing, values should be None (note row may still exist)
     if note is not None:
         assert note.corrected_lat is None
         assert note.corrected_lon is None

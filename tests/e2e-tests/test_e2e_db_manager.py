@@ -8,8 +8,6 @@ Covers:
 - The info panel reflects the selected entry
 """
 
-from __future__ import annotations
-
 import pytest
 
 pytest.importorskip("pytestqt")

@@ -12,17 +12,24 @@ Covers:
 - DistanceBearingDialog: two points produce a distance label
 """
 
-from __future__ import annotations
+from contextlib import contextmanager
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch
 
 pytest.importorskip("pytestqt")
 
 
+@contextmanager
+def _patch_settings(module_path: str):
+    """Patch get_settings() for dialogs that read use_miles on construction."""
+    settings = MagicMock()
+    settings.use_miles = False
+    with patch(f"{module_path}.get_settings", return_value=settings):
+        yield
+
+
 # ── CoordConverterDialog ───────────────────────────────────────────────────────
-# Output rows are tuples: (container_widget, QLineEdit, copy_QPushButton)
-# Access the text via row[1].text()
 
 
 def test_coord_converter_prefilled_populates_all_outputs(qtbot):
@@ -112,27 +119,15 @@ def test_checksum_dialog_opens_without_coords(qtbot):
     qtbot.addWidget(dlg)
     dlg.show()
     qtbot.waitExposed(dlg)
-    # No crash; total starts at the placeholder value
     assert dlg._total_lbl is not None
 
 
 # ── ProjectionDialog ───────────────────────────────────────────────────────────
-# Calculation is live: triggered when _start_input text or _bearing/_distance
-# spinboxes change.  Access result via _result_lat/_result_lon or _dmm_row[1].
 
 
 def test_projection_dialog_computes_result(qtbot):
-    """
-    Entering a start coord plus bearing/distance produces a non-None result.
-    The projection is purely geometric — no Garmin device needed.
-    """
-    mock_settings = MagicMock()
-    mock_settings.use_miles = False
-
-    with patch(
-        "opensak.gui.dialogs.projection_dialog.get_settings",
-        return_value=mock_settings,
-    ):
+    """Entering a start coord plus bearing/distance produces a non-None result."""
+    with _patch_settings("opensak.gui.dialogs.projection_dialog"):
         from opensak.gui.dialogs.projection_dialog import ProjectionDialog
 
         dlg = ProjectionDialog(lat=55.6761, lon=12.5683)
@@ -140,26 +135,18 @@ def test_projection_dialog_computes_result(qtbot):
         dlg.show()
         qtbot.waitExposed(dlg)
 
-        # Pre-filled from constructor; set a bearing and distance to trigger calc
-        dlg._bearing.setValue(90.0)    # East
-        dlg._distance.setValue(1000.0) # 1 000 m
+        dlg._bearing.setValue(90.0)
+        dlg._distance.setValue(1000.0)
         qtbot.wait(50)
 
         assert dlg._result_lat is not None
         assert dlg._result_lon is not None
-        # Result DMM row should be populated
         assert dlg._dmm_row[1].text() != ""
 
 
 def test_projection_result_is_east_of_origin(qtbot):
     """A bearing of 90° (East) must produce a result with a higher longitude."""
-    mock_settings = MagicMock()
-    mock_settings.use_miles = False
-
-    with patch(
-        "opensak.gui.dialogs.projection_dialog.get_settings",
-        return_value=mock_settings,
-    ):
+    with _patch_settings("opensak.gui.dialogs.projection_dialog"):
         from opensak.gui.dialogs.projection_dialog import ProjectionDialog
 
         dlg = ProjectionDialog(lat=55.0, lon=12.0)
@@ -168,7 +155,7 @@ def test_projection_result_is_east_of_origin(qtbot):
         qtbot.waitExposed(dlg)
 
         dlg._bearing.setValue(90.0)
-        dlg._distance.setValue(10_000.0)  # 10 km East
+        dlg._distance.setValue(10_000.0)
         qtbot.wait(50)
 
         assert dlg._result_lon is not None
@@ -176,15 +163,13 @@ def test_projection_result_is_east_of_origin(qtbot):
 
 
 # ── MidpointDialog ─────────────────────────────────────────────────────────────
-# Calculation is live on textChanged.  Output in _result_lat/_result_lon
-# and _dmm_row[1].text().
 
 
 def test_midpoint_dialog_computes_midpoint(qtbot):
     """Two valid coordinates produce a midpoint between them."""
     from opensak.gui.dialogs.midpoint_dialog import MidpointDialog
 
-    dlg = MidpointDialog(lat=55.0, lon=12.0)  # pre-fills point A
+    dlg = MidpointDialog(lat=55.0, lon=12.0)
     qtbot.addWidget(dlg)
     dlg.show()
     qtbot.waitExposed(dlg)
@@ -194,7 +179,6 @@ def test_midpoint_dialog_computes_midpoint(qtbot):
 
     assert dlg._result_lat is not None
     assert dlg._result_lon is not None
-    # Midpoint latitude must lie between the two input latitudes
     assert 55.0 < dlg._result_lat < 56.0
     assert dlg._dmm_row[1].text() != ""
 
@@ -217,18 +201,11 @@ def test_midpoint_dialog_invalid_b_clears_result(qtbot):
 
 
 # ── DistanceBearingDialog ──────────────────────────────────────────────────────
-# Calculation triggered on textChanged.  _dist_lbl shows the distance string.
 
 
 def test_distance_bearing_dialog_computes_distance(qtbot):
     """Two valid points produce a non-empty, non-placeholder distance label."""
-    mock_settings = MagicMock()
-    mock_settings.use_miles = False
-
-    with patch(
-        "opensak.gui.dialogs.distance_bearing_dialog.get_settings",
-        return_value=mock_settings,
-    ):
+    with _patch_settings("opensak.gui.dialogs.distance_bearing_dialog"):
         from opensak.gui.dialogs.distance_bearing_dialog import DistanceBearingDialog
 
         dlg = DistanceBearingDialog(lat=55.0, lon=12.0)
@@ -246,13 +223,7 @@ def test_distance_bearing_dialog_computes_distance(qtbot):
 
 def test_distance_bearing_same_point_is_zero(qtbot):
     """Distance from a point to itself is effectively zero."""
-    mock_settings = MagicMock()
-    mock_settings.use_miles = False
-
-    with patch(
-        "opensak.gui.dialogs.distance_bearing_dialog.get_settings",
-        return_value=mock_settings,
-    ):
+    with _patch_settings("opensak.gui.dialogs.distance_bearing_dialog"):
         from opensak.gui.dialogs.distance_bearing_dialog import DistanceBearingDialog
 
         dlg = DistanceBearingDialog(lat=55.0, lon=12.0)

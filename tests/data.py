@@ -163,3 +163,35 @@ def make_zip(tmp_path: Path, name: str, files: dict[str, str | Path]) -> Path:
                 p.write_text(content, encoding="utf-8")
                 zf.write(p, archive_name)
     return z
+
+
+def make_fake_manager(db_path: Path, name: str = "E2ETest"):
+    """Return a lightweight DatabaseManager stand-in for monkeypatching."""
+    from opensak.db.manager import DatabaseInfo
+
+    class _FakeManager:
+        def __init__(self):
+            self._info = DatabaseInfo(name, db_path)
+
+        @property
+        def active(self):
+            return self._info
+
+        @property
+        def active_path(self):
+            return self._info.path
+
+        @property
+        def databases(self):
+            return [self._info]
+
+        def ensure_active_initialised(self):
+            pass
+
+        def switch_to(self, db_info):
+            pass
+
+        def new_database(self, _name, path=None):
+            raise RuntimeError("new_database called during e2e test")
+
+    return _FakeManager()

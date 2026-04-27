@@ -7,8 +7,6 @@ Covers:
 - The written GPX contains the GC codes of the exported caches
 """
 
-from __future__ import annotations
-
 import pytest
 
 pytest.importorskip("pytestqt")
@@ -20,9 +18,8 @@ def _build_caches(tmp_path):
     """
     Return a list of Cache ORM objects from the SAMPLE_GPX fixture.
 
-    user_note is eagerly loaded so objects remain usable after the session
-    closes — generate_gpx() accesses cache.user_note on detached instances,
-    which would raise DetachedInstanceError for lazy-loaded relationships.
+    user_note and logs are eagerly loaded so objects remain usable after the
+    session closes — generate_gpx() accesses both on detached instances.
     """
     from opensak.db.database import init_db, get_session
     from opensak.importer import import_gpx
@@ -44,7 +41,7 @@ def _build_caches(tmp_path):
             session.query(Cache)
             .options(
                 joinedload(Cache.user_note),
-                joinedload(Cache.logs),   # generate_gpx also accesses cache.logs
+                joinedload(Cache.logs),
             )
             .all()
         )
@@ -57,40 +54,14 @@ def test_gps_dialog_opens_and_shows_cache_count(qtbot, tmp_path, monkeypatch):
     """GpsExportDialog opens and its header label reflects the number of caches passed in."""
     import opensak.db.manager as mgr_module
     from opensak.db.database import init_db
-    from opensak.db.manager import DatabaseInfo
     from opensak.lang import load_language
+    from tests.data import make_fake_manager
 
     load_language("en")
 
     db_path = tmp_path / "gps_dlg.db"
     init_db(db_path=db_path)
-
-    class _FakeManager:
-        def __init__(self):
-            self._info = DatabaseInfo("GPSTest", db_path)
-
-        @property
-        def active(self):
-            return self._info
-
-        @property
-        def active_path(self):
-            return self._info.path
-
-        @property
-        def databases(self):
-            return [self._info]
-
-        def ensure_active_initialised(self):
-            pass
-
-        def switch_to(self, db_info):
-            pass
-
-        def new_database(self, name, path=None):
-            raise RuntimeError
-
-    monkeypatch.setattr(mgr_module, "_manager", _FakeManager())
+    monkeypatch.setattr(mgr_module, "_manager", make_fake_manager(db_path, name="GPSTest"))
 
     caches = _build_caches(tmp_path)
     assert len(caches) == 2
@@ -102,11 +73,8 @@ def test_gps_dialog_opens_and_shows_cache_count(qtbot, tmp_path, monkeypatch):
     dlg.show()
     qtbot.waitExposed(dlg)
 
-    # The dialog's title bar or layout should reference the cache count
     assert dlg._caches is not None
     assert len(dlg._caches) == 2
-
-    mgr_module._manager = None
 
 
 # ── File-mode export ───────────────────────────────────────────────────────────
@@ -119,40 +87,14 @@ def test_gps_export_file_mode_writes_gpx(qtbot, tmp_path, monkeypatch):
     """
     import opensak.db.manager as mgr_module
     from opensak.db.database import init_db
-    from opensak.db.manager import DatabaseInfo
     from opensak.lang import load_language
+    from tests.data import make_fake_manager
 
     load_language("en")
 
     db_path = tmp_path / "gps_export.db"
     init_db(db_path=db_path)
-
-    class _FakeManager:
-        def __init__(self):
-            self._info = DatabaseInfo("GPSExport", db_path)
-
-        @property
-        def active(self):
-            return self._info
-
-        @property
-        def active_path(self):
-            return self._info.path
-
-        @property
-        def databases(self):
-            return [self._info]
-
-        def ensure_active_initialised(self):
-            pass
-
-        def switch_to(self, db_info):
-            pass
-
-        def new_database(self, name, path=None):
-            raise RuntimeError
-
-    monkeypatch.setattr(mgr_module, "_manager", _FakeManager())
+    monkeypatch.setattr(mgr_module, "_manager", make_fake_manager(db_path, name="GPSExport"))
 
     caches = _build_caches(tmp_path)
     from opensak.gui.dialogs.gps_dialog import GpsExportDialog
@@ -162,7 +104,6 @@ def test_gps_export_file_mode_writes_gpx(qtbot, tmp_path, monkeypatch):
     dlg.show()
     qtbot.waitExposed(dlg)
 
-    # Configure file-mode export
     out_dir = tmp_path / "gpx_out"
     out_dir.mkdir()
     dlg._rb_file.setChecked(True)
@@ -172,7 +113,6 @@ def test_gps_export_file_mode_writes_gpx(qtbot, tmp_path, monkeypatch):
 
     qtbot.mouseClick(dlg._export_btn, Qt.MouseButton.LeftButton)
 
-    # Wait for the background ExportWorker thread to finish (up to 10 s)
     qtbot.waitUntil(
         lambda: (out_dir / "e2e_export.gpx").exists(),
         timeout=10_000,
@@ -184,8 +124,6 @@ def test_gps_export_file_mode_writes_gpx(qtbot, tmp_path, monkeypatch):
     content = gpx_path.read_text(encoding="utf-8")
     assert "GC12345" in content
     assert "GC99999" in content
-
-    mgr_module._manager = None
 
 
 # ── Direct export_to_file function test ───────────────────────────────────────
@@ -199,37 +137,11 @@ def test_export_to_file_writes_valid_gpx(tmp_path, monkeypatch):
     """
     import opensak.db.manager as mgr_module
     from opensak.db.database import init_db
-    from opensak.db.manager import DatabaseInfo
+    from tests.data import make_fake_manager
 
     db_path = tmp_path / "direct_export.db"
     init_db(db_path=db_path)
-
-    class _FakeManager:
-        def __init__(self):
-            self._info = DatabaseInfo("DirectExport", db_path)
-
-        @property
-        def active(self):
-            return self._info
-
-        @property
-        def active_path(self):
-            return self._info.path
-
-        @property
-        def databases(self):
-            return [self._info]
-
-        def ensure_active_initialised(self):
-            pass
-
-        def switch_to(self, db_info):
-            pass
-
-        def new_database(self, name, path=None):
-            raise RuntimeError
-
-    monkeypatch.setattr(mgr_module, "_manager", _FakeManager())
+    monkeypatch.setattr(mgr_module, "_manager", make_fake_manager(db_path, name="DirectExport"))
 
     caches = _build_caches(tmp_path)
 
@@ -243,5 +155,3 @@ def test_export_to_file_writes_valid_gpx(tmp_path, monkeypatch):
     assert "GC12345" in content
     assert "GC99999" in content
     assert result.cache_count == 2
-
-    mgr_module._manager = None

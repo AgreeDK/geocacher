@@ -9,22 +9,27 @@ Covers:
 - Selecting a different cache updates the detail panel
 """
 
-from __future__ import annotations
-
 import pytest
 
 pytest.importorskip("pytestqt")
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QAbstractItemView
-
 
 def _select_row(window, qtbot, row: int = 0) -> None:
-    """Select *row* in the cache table and wait for the detail panel to populate."""
     view = window._cache_table
-    model = view.model()
-    view.setCurrentIndex(model.index(row, 0))
+    view.setCurrentIndex(view.model().index(row, 0))
     qtbot.wait(100)
+
+
+def _select_by_gc(window, qtbot, gc_code: str) -> None:
+    table = window._cache_table
+    model = table.model()
+    for row in range(model.rowCount()):
+        cache = model.cache_at(row)
+        if cache and cache.gc_code == gc_code:
+            table.setCurrentIndex(model.index(row, 0))
+            qtbot.wait(100)
+            return
+    pytest.fail(f"{gc_code} not found in table")
 
 
 # ── Detail panel population ────────────────────────────────────────────────────
@@ -37,28 +42,13 @@ def test_selecting_cache_shows_name_in_title(seeded_window, qtbot):
 
     title = window._detail_panel._title.text()
     assert title != ""
-    # Title is one of the seeded names (not the placeholder)
     assert title not in ("Select a cache", "Vælg en cache")
 
 
 def test_detail_panel_shows_gc_code(seeded_window, qtbot):
     """After selecting GC12345 the detail panel GC-code label reads 'GC12345'."""
     window = seeded_window
-
-    # Locate the row for GC12345
-    table = window._cache_table
-    model = table.model()
-    target_row = None
-    for row in range(model.rowCount()):
-        cache = model.cache_at(row)
-        if cache and cache.gc_code == "GC12345":
-            target_row = row
-            break
-    assert target_row is not None, "GC12345 not found in table"
-
-    table.setCurrentIndex(model.index(target_row, 0))
-    qtbot.wait(100)
-
+    _select_by_gc(window, qtbot, "GC12345")
     assert window._detail_panel._gc_code_lbl.text() == "GC12345"
 
 
@@ -92,34 +82,19 @@ def test_detail_panel_clears_between_caches(seeded_window, qtbot):
 # ── Hint tab ───────────────────────────────────────────────────────────────────
 
 
-def _select_gc12345(window, qtbot):
-    table = window._cache_table
-    model = table.model()
-    for row in range(model.rowCount()):
-        cache = model.cache_at(row)
-        if cache and cache.gc_code == "GC12345":
-            table.setCurrentIndex(model.index(row, 0))
-            qtbot.wait(100)
-            return
-    pytest.fail("GC12345 not found in table")
-
-
 def test_hint_tab_shows_raw_encoded_text(seeded_window, qtbot):
     """The hint browser initially shows the raw (ROT13-encoded) hint text."""
     window = seeded_window
-    _select_gc12345(window, qtbot)
+    _select_by_gc(window, qtbot, "GC12345")
 
     raw = window._detail_panel._hint_browser.toPlainText()
     assert raw == "Under a rock."
 
 
 def test_decode_button_rot13_decodes_hint(seeded_window, qtbot):
-    """
-    Clicking 'Decode' translates 'Under a rock.' via ROT13 to 'Haqre n ebpx.'
-    and updates the button label.
-    """
+    """Clicking 'Decode' translates 'Under a rock.' via ROT13 to 'Haqre n ebpx.'."""
     window = seeded_window
-    _select_gc12345(window, qtbot)
+    _select_by_gc(window, qtbot, "GC12345")
 
     panel = window._detail_panel
     assert not panel._hint_decoded
@@ -128,19 +103,18 @@ def test_decode_button_rot13_decodes_hint(seeded_window, qtbot):
     qtbot.wait(50)
 
     assert panel._hint_decoded
-    decoded = panel._hint_browser.toPlainText()
-    assert decoded == "Haqre n ebpx."
+    assert panel._hint_browser.toPlainText() == "Haqre n ebpx."
 
 
 def test_encode_button_restores_raw_hint(seeded_window, qtbot):
     """Clicking 'Encode' after 'Decode' restores the original hint text."""
     window = seeded_window
-    _select_gc12345(window, qtbot)
+    _select_by_gc(window, qtbot, "GC12345")
 
     panel = window._detail_panel
-    panel._decode_btn.click()  # decode
+    panel._decode_btn.click()
     qtbot.wait(30)
-    panel._decode_btn.click()  # encode back
+    panel._decode_btn.click()
     qtbot.wait(30)
 
     assert not panel._hint_decoded
@@ -151,15 +125,11 @@ def test_encode_button_restores_raw_hint(seeded_window, qtbot):
 
 
 def test_log_search_filters_visible_log_entries(seeded_window, qtbot):
-    """
-    Typing in the log search field re-renders logs; content with the search term
-    should be present while unrelated log text should not appear.
-    """
+    """Typing in the log search field re-renders logs to show only matching entries."""
     window = seeded_window
-    _select_gc12345(window, qtbot)
+    _select_by_gc(window, qtbot, "GC12345")
 
     panel = window._detail_panel
-    # GC12345 has two logs: 'TFTC! Great hide.' and 'Could not find it.'
     panel._log_search.setText("TFTC")
     qtbot.wait(50)
 
@@ -171,7 +141,7 @@ def test_log_search_filters_visible_log_entries(seeded_window, qtbot):
 def test_log_search_clear_restores_all_logs(seeded_window, qtbot):
     """Clearing the log search field shows all log entries again."""
     window = seeded_window
-    _select_gc12345(window, qtbot)
+    _select_by_gc(window, qtbot, "GC12345")
 
     panel = window._detail_panel
     panel._log_search.setText("TFTC")

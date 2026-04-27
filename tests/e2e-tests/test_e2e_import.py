@@ -8,8 +8,6 @@ Covers:
 - ImportDialog background worker succeeds and updates the log
 """
 
-from __future__ import annotations
-
 import pytest
 
 pytest.importorskip("pytestqt")
@@ -96,42 +94,15 @@ def test_import_dialog_worker_succeeds(qtbot, tmp_path, monkeypatch):
     """
     import opensak.db.manager as mgr_module
     from opensak.db.database import init_db
-    from opensak.db.manager import DatabaseInfo
     from opensak.lang import load_language
     from opensak.gui.dialogs.import_dialog import ImportDialog
-    from tests.data import SAMPLE_GPX
+    from tests.data import SAMPLE_GPX, make_fake_manager
 
     load_language("en")
 
     db_path = tmp_path / "dlg_import.db"
     init_db(db_path=db_path)
-
-    class _FakeManager:
-        def __init__(self):
-            self._info = DatabaseInfo("DlgTest", db_path)
-
-        @property
-        def active(self):
-            return self._info
-
-        @property
-        def active_path(self):
-            return self._info.path
-
-        @property
-        def databases(self):
-            return [self._info]
-
-        def ensure_active_initialised(self):
-            pass
-
-        def switch_to(self, db_info):
-            pass
-
-        def new_database(self, name, path=None):
-            raise RuntimeError("new_database called during test")
-
-    monkeypatch.setattr(mgr_module, "_manager", _FakeManager())
+    monkeypatch.setattr(mgr_module, "_manager", make_fake_manager(db_path, name="DlgTest"))
 
     gpx_file = tmp_path / "dlg_sample.gpx"
     gpx_file.write_text(SAMPLE_GPX, encoding="utf-8")
@@ -141,7 +112,6 @@ def test_import_dialog_worker_succeeds(qtbot, tmp_path, monkeypatch):
     dlg.show()
     qtbot.waitExposed(dlg)
 
-    # Inject path directly — bypasses QFileDialog
     from PySide6.QtWidgets import QListWidgetItem
     dlg._selected_paths.append(gpx_file)
     dlg._file_list.addItem(QListWidgetItem(gpx_file.name))
@@ -152,6 +122,4 @@ def test_import_dialog_worker_succeeds(qtbot, tmp_path, monkeypatch):
 
     assert dlg._any_success
     log_text = dlg._log.toPlainText()
-    assert "GC12345" in log_text or "2" in log_text  # at least 2 caches imported
-
-    mgr_module._manager = None
+    assert "GC12345" in log_text or "2" in log_text
