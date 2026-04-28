@@ -25,6 +25,7 @@ from opensak.coords import format_coords
 from opensak.gui.settings import get_settings
 from opensak.lang import tr
 from opensak.utils.types import GcCode
+from opensak.updater import UpdateCheckWorker, RELEASES_PAGE
 
 
 class InfoBar(QFrame):
@@ -160,6 +161,8 @@ class MainWindow(QMainWindow):
         self._reload_home_combo()
         # Load caches after UI is ready
         QTimer.singleShot(100, self._refresh_cache_list)
+        # Tjek for opdateringer i baggrunden (5 sek forsinkelse — GUI er klar)
+        QTimer.singleShot(5000, self._check_update_background)
 
     # ── UI setup ──────────────────────────────────────────────────────────────
 
@@ -360,6 +363,10 @@ class MainWindow(QMainWindow):
         act_about = QAction(tr("action_about"), self)
         act_about.triggered.connect(self._show_about)
         help_menu.addAction(act_about)
+
+        act_check_update = QAction(tr("action_check_update"), self)
+        act_check_update.triggered.connect(self._check_update_manual)
+        help_menu.addAction(act_check_update)
 
         # ── Vis-dropdown i menulinjen ─────────────────────────────────────────
         menubar.addSeparator()
@@ -1201,3 +1208,53 @@ class MainWindow(QMainWindow):
             tr("about_title"),
             tr("about_text", version=__version__),
         )
+
+    # ── Opdateringsstjek ───────────────────────────────────────────────────────
+
+    def _check_update_background(self) -> None:
+        """Kald ved opstart — tjekker lydløst i baggrunden."""
+        from opensak import __version__
+        self._update_worker = UpdateCheckWorker(__version__, parent=self)
+        self._update_worker.update_available.connect(self._on_update_available)
+        self._update_worker.start()
+
+    def _check_update_manual(self) -> None:
+        """Kald fra menuen — viser resultat uanset om der er opdatering."""
+        from opensak import __version__
+        self._manual_update_worker = UpdateCheckWorker(__version__, parent=self)
+        self._manual_update_worker.update_available.connect(
+            lambda tag, url: self._on_update_available(tag, url, manual=True)
+        )
+        self._manual_update_worker.check_done.connect(
+            self._on_manual_check_done
+        )
+        self._manual_update_worker.start()
+        self._manual_found_update = False
+
+    def _on_manual_check_done(self) -> None:
+        """Vises kun ved manuel tjek — hvis ingen opdatering fundet."""
+        if not getattr(self, "_manual_found_update", False):
+            QMessageBox.information(
+                self,
+                tr("update_uptodate_title"),
+                tr("update_uptodate_msg"),
+            )
+
+    def _on_update_available(
+        self, latest_tag: str, url: str, *, manual: bool = False
+    ) -> None:
+        """Vis notifikationsdialog om ny version."""
+        self._manual_found_update = True
+        from opensak import __version__
+        msg = QMessageBox(self)
+        msg.setWindowTitle(tr("update_available_title"))
+        msg.setText(tr("update_available_msg", latest=latest_tag, current=__version__))
+        msg.setInformativeText(tr("update_available_info"))
+        btn_open = msg.addButton(tr("update_open_releases"), QMessageBox.ButtonRole.AcceptRole)
+        msg.addButton(tr("update_later"), QMessageBox.ButtonRole.RejectRole)
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.exec()
+        if msg.clickedButton() == btn_open:
+            import webbrowser
+            webbrowser.open(url)
+

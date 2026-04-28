@@ -14,6 +14,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.8] — 2026-04-28
+### Added
+- **Check for latest release** when loading program, its check to see if a new version exist.
+  - Check for updates have been added to the Help menu.
+
+---
+
 ## [1.11.7] — 2026-04-28
 ### Added
 - **GSAK-style info bar** between cache list and detail/map panel (fixes #116):

@@ -75,6 +75,7 @@ STRINGS: dict[str, str] = {
 
     # Help menu
     "action_about":                 "About &OpenSAK…",
+    "action_check_update":          "Check for updates…",
 
     # ── Geocaching Tools menu ─────────────────────────────────────────────────
     "menu_gc_tools":                "&Tools",
@@ -207,6 +208,14 @@ STRINGS: dict[str, str] = {
 
     # ── About dialog ──────────────────────────────────────────────────────────
     "about_title":                  "About OpenSAK",
+    # ── Update check ──────────────────────────────────────────────────────────
+    "update_available_title":       "New version available",
+    "update_available_msg":         "OpenSAK {latest} is available — you are running {current}.",
+    "update_available_info":        "Click 'Download' to open the GitHub releases page and get the latest version.",
+    "update_open_releases":         "Download new version",
+    "update_later":                 "Later",
+    "update_uptodate_title":        "No update found",
+    "update_uptodate_msg":          "You are running the latest version of OpenSAK.",
     "about_text":
         "<h3>OpenSAK {version}</h3>"
         "<p>An open source geocaching management tool "
