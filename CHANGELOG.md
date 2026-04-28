@@ -14,6 +14,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.9] — 2026-04-28
+### Fixed
+- Fixed crash when deleting caches: child records (logs, attributes, trackables, waypoints, user notes) are now deleted before the parent cache to prevent FOREIGN KEY constraint errors and orphaned data
+- Fixed GPX/PQ re-import failing with UNIQUE constraint errors on logs when importing into a database with existing data — caused by orphaned log records from previous cache deletions
+- Import now uses SAVEPOINT per cache so a single failing cache no longer rolls back the entire batch
+- Fixed RuntimeError in terminal when closing the import dialog after import completes (C++ worker object already deleted)
+
+---
+
 ## [1.11.8] — 2026-04-28
 ### Added
 - **Check for latest release** when loading program, its check to see if a new version exist.

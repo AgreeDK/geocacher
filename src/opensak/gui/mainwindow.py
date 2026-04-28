@@ -973,11 +973,7 @@ class MainWindow(QMainWindow):
         )
         if reply == QMessageBox.StandardButton.Yes:
             gc_codes = [c.gc_code for c in caches]
-            from opensak.db.models import Cache as CacheModel
-            with get_session() as session:
-                session.query(CacheModel).filter(
-                    CacheModel.gc_code.in_(gc_codes)
-                ).delete(synchronize_session=False)
+            self._bulk_delete_caches(gc_codes)
             self._detail_panel.clear()
             self._act_wp_edit.setEnabled(False)
             self._act_wp_delete.setEnabled(False)
@@ -1005,11 +1001,7 @@ class MainWindow(QMainWindow):
         )
         if reply == QMessageBox.StandardButton.Yes:
             gc_codes = [c.gc_code for c in caches]
-            from opensak.db.models import Cache as CacheModel
-            with get_session() as session:
-                session.query(CacheModel).filter(
-                    CacheModel.gc_code.in_(gc_codes)
-                ).delete(synchronize_session=False)
+            self._bulk_delete_caches(gc_codes)
             self._detail_panel.clear()
             self._act_wp_edit.setEnabled(False)
             self._act_wp_delete.setEnabled(False)
@@ -1017,6 +1009,26 @@ class MainWindow(QMainWindow):
             self._statusbar.showMessage(
                 tr("status_deleted_count", count=len(gc_codes)), 3000
             )
+
+    def _bulk_delete_caches(self, gc_codes: list[str]) -> None:
+        """Delete caches and all child records by GC codes (bulk SQL)."""
+        from opensak.db.models import (
+            Cache as CacheModel, Log, Attribute, Trackable, Waypoint, UserNote,
+        )
+        with get_session() as session:
+            cache_ids = [
+                row[0] for row in
+                session.query(CacheModel.id).filter(
+                    CacheModel.gc_code.in_(gc_codes)
+                ).all()
+            ]
+            if cache_ids:
+                session.query(Log).filter(Log.cache_id.in_(cache_ids)).delete(synchronize_session=False)
+                session.query(Attribute).filter(Attribute.cache_id.in_(cache_ids)).delete(synchronize_session=False)
+                session.query(Trackable).filter(Trackable.cache_id.in_(cache_ids)).delete(synchronize_session=False)
+                session.query(Waypoint).filter(Waypoint.cache_id.in_(cache_ids)).delete(synchronize_session=False)
+                session.query(UserNote).filter(UserNote.cache_id.in_(cache_ids)).delete(synchronize_session=False)
+                session.query(CacheModel).filter(CacheModel.id.in_(cache_ids)).delete(synchronize_session=False)
 
     def _clear_all_flags(self) -> None:
         """Fjern alle flag (user_flag=False) på alle caches i aktiv database."""

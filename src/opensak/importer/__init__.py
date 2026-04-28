@@ -512,10 +512,10 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
         # flush() is required immediately after delete so SQLite sees the
         # deletions before the new rows are added in the same batch —
         # otherwise the UNIQUE constraint on logs.log_id will fire.
-        session.query(Log).filter_by(cache_id=cache.id).delete()
-        session.query(Attribute).filter_by(cache_id=cache.id).delete()
-        session.query(Trackable).filter_by(cache_id=cache.id).delete()
-        session.query(Waypoint).filter_by(cache_id=cache.id).delete()
+        session.query(Log).filter_by(cache_id=cache.id).delete(synchronize_session="fetch")
+        session.query(Attribute).filter_by(cache_id=cache.id).delete(synchronize_session="fetch")
+        session.query(Trackable).filter_by(cache_id=cache.id).delete(synchronize_session="fetch")
+        session.query(Waypoint).filter_by(cache_id=cache.id).delete(synchronize_session="fetch")
         session.flush()
 
     # Scalar fields
@@ -824,12 +824,20 @@ def import_gpx(
                     data = _parse_wpt(elem)
                     
                     if data is not None:
-                        # Perform Upsert safely (using Query, not exists())
-                        _, created = _upsert_cache(db_session, data, source)
-                        if created:
-                            result.created += 1
-                        else:
-                            result.updated += 1
+                        # Use a SAVEPOINT so a failure in one cache does NOT
+                        # roll back the entire batch — only this single cache.
+                        nested = db_session.begin_nested()
+                        try:
+                            _, created = _upsert_cache(db_session, data, source)
+                            nested.commit()
+                            if created:
+                                result.created += 1
+                            else:
+                                result.updated += 1
+                        except Exception as e:
+                            nested.rollback()
+                            result.errors.append(f"Error in {source}: {e}")
+                            result.skipped += 1
                         
                         processed_count += 1
                         if progress_cb:
@@ -848,7 +856,6 @@ def import_gpx(
                         db_session.expunge_all()
 
                 except Exception as e:
-                    db_session.rollback()
                     result.errors.append(f"Error in {source}: {e}")
                     result.skipped += 1
                 finally:
@@ -944,14 +951,16 @@ def import_zip(zip_path: Path, session: Session | None = None, progress_cb=None)
                 source = gpx_path.name
 
                 for data in caches:
+                    nested = db_session.begin_nested()
                     try:
                         _, created = _upsert_cache(db_session, data, source)
+                        nested.commit()
                         if created:
                             overall_result.created += 1
                         else:
                             overall_result.updated += 1
                     except Exception as e:
-                        db_session.rollback()
+                        nested.rollback()
                         overall_result.errors.append(f"DB error for {data.get('gc_code', '?')}: {e}")
                         overall_result.skipped += 1
 

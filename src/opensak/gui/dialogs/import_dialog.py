@@ -258,8 +258,13 @@ class ImportDialog(QDialog):
             self.import_completed.emit()
 
     def closeEvent(self, event) -> None:
-        if self._worker and self._worker.isRunning():
-            self._worker.wait()
+        try:
+            if self._worker and self._worker.isRunning():
+                self._worker.wait()
+        except RuntimeError:
+            # C++ object already deleted by deleteLater — safe to ignore
+            pass
+        self._worker = None
         super().closeEvent(event)
 
     # ── Log helpers ───────────────────────────────────────────────────────────
