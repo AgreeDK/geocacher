@@ -702,4 +702,14 @@ STRINGS: dict[str, str] = {
     "gc_info_trackables":           "Zobrazuje, které Travel Bugs jsou aktuálně v keši",
     "gc_info_finds":                "Automaticky synchronizuje historii vašich nálezů",
     "gc_api_not_configured":        "⚠  Přístup k API čeká na schválení od Geocaching HQ. Přihlášení je zakázáno, dokud nebude přístup udělen.",
+    # ── Issue #116: Info bar (GSAK-style status bar) ────────────────────
+    "infobar_filter":                    "Filtr",
+    "infobar_filter_none":               "Žádný",
+    "infobar_total":                     "keší v databázi",
+    "infobar_center":                    "Středový bod",
+    "infobar_count_label":               "Počet:",
+    "infobar_found_tooltip":             "Nalezené keše",
+    "infobar_all_tooltip":               "Všechny keše ve filtru",
+    "infobar_inactive_tooltip":          "Archivované + Deaktivované",
+    "infobar_owned_tooltip":             "Vaše keše",
 }

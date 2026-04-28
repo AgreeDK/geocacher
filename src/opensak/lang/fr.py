@@ -706,4 +706,14 @@ STRINGS: dict[str, str] = {
     "gc_info_trackables":           "Affiche les Travel Bugs actuellement présents dans une cache",
     "gc_info_finds":                "Synchronise automatiquement votre historique de trouvailles",
     "gc_api_not_configured":        "⚠  L'accès à l'API est en attente d'approbation de Geocaching HQ. La connexion est désactivée jusqu'à l'obtention de l'accès.",
+    # ── Issue #116: Info bar (GSAK-style status bar) ────────────────────
+    "infobar_filter":                    "Filtre",
+    "infobar_filter_none":               "Aucun",
+    "infobar_total":                     "caches dans la base",
+    "infobar_center":                    "Point central",
+    "infobar_count_label":               "Total :",
+    "infobar_found_tooltip":             "Caches trouvées",
+    "infobar_all_tooltip":               "Toutes les caches du filtre",
+    "infobar_inactive_tooltip":          "Archivées + Désactivées",
+    "infobar_owned_tooltip":             "Vos caches",
 }

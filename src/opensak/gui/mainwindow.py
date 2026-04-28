@@ -27,6 +27,122 @@ from opensak.lang import tr
 from opensak.utils.types import GcCode
 
 
+class InfoBar(QFrame):
+    """GSAK-style info bar between cache list and detail/map panel (issue #116).
+
+    Shows (left to right):
+      Filter name | Total caches in DB | Flagged count | Center point
+      ... spacer ...
+      Count label:  Found (yellow)  All-in-filter (white)  Inactive (red)  Owned (green)
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFrameShape(QFrame.Shape.StyledPanel)
+        self.setFrameShadow(QFrame.Shadow.Sunken)
+        self.setFixedHeight(24)
+        self.setStyleSheet(
+            "InfoBar {"
+            "  background-color: palette(window);"
+            "  border: 1px solid palette(mid);"
+            "  padding: 0 2px;"
+            "}"
+        )
+
+        row = QHBoxLayout(self)
+        row.setContentsMargins(6, 0, 6, 0)
+        row.setSpacing(0)
+
+        small = "font-size: 11px;"
+
+        # ── Left side ─────────────────────────────────────────────────────────
+        self._filter_lbl = QLabel("")
+        self._filter_lbl.setStyleSheet(f"{small} color: palette(text);")
+        row.addWidget(self._filter_lbl)
+
+        row.addWidget(self._sep())
+
+        self._total_lbl = QLabel("")
+        self._total_lbl.setStyleSheet(small)
+        row.addWidget(self._total_lbl)
+
+        row.addWidget(self._sep())
+
+        self._flag_lbl = QLabel("")
+        self._flag_lbl.setStyleSheet(small)
+        row.addWidget(self._flag_lbl)
+
+        row.addWidget(self._sep())
+
+        self._center_lbl = QLabel("")
+        self._center_lbl.setStyleSheet(f"{small} color: palette(text);")
+        row.addWidget(self._center_lbl)
+
+        # ── Spacer ────────────────────────────────────────────────────────────
+        row.addStretch()
+
+        # ── Right side: color-coded counts ────────────────────────────────────
+        count_style = f"{small} font-weight: bold; padding: 0 3px;"
+
+        lbl_prefix = QLabel(tr("infobar_count_label"))
+        lbl_prefix.setStyleSheet(f"{small} padding: 0 4px;")
+        row.addWidget(lbl_prefix)
+
+        self._found_lbl = QLabel("0")
+        self._found_lbl.setStyleSheet(f"{count_style} color: #b8860b;")
+        self._found_lbl.setToolTip(tr("infobar_found_tooltip"))
+        row.addWidget(self._found_lbl)
+
+        self._all_lbl = QLabel("0")
+        self._all_lbl.setStyleSheet(f"{count_style} color: palette(text);")
+        self._all_lbl.setToolTip(tr("infobar_all_tooltip"))
+        row.addWidget(self._all_lbl)
+
+        self._inactive_lbl = QLabel("0")
+        self._inactive_lbl.setStyleSheet(f"{count_style} color: #c62828;")
+        self._inactive_lbl.setToolTip(tr("infobar_inactive_tooltip"))
+        row.addWidget(self._inactive_lbl)
+
+        self._owned_lbl = QLabel("0")
+        self._owned_lbl.setStyleSheet(f"{count_style} color: #2e7d32;")
+        self._owned_lbl.setToolTip(tr("infobar_owned_tooltip"))
+        row.addWidget(self._owned_lbl)
+
+    @staticmethod
+    def _sep() -> QFrame:
+        s = QFrame()
+        s.setFrameShape(QFrame.Shape.VLine)
+        s.setFrameShadow(QFrame.Shadow.Sunken)
+        s.setFixedWidth(16)
+        return s
+
+    def update_counts(
+        self,
+        filter_name: str,
+        total_in_db: int,
+        flagged: int,
+        center_name: str,
+        found: int,
+        all_in_filter: int,
+        inactive: int,
+        owned: int,
+    ) -> None:
+        self._filter_lbl.setText(
+            f"{tr('infobar_filter')}: {filter_name}" if filter_name
+            else f"{tr('infobar_filter')}: {tr('infobar_filter_none')}"
+        )
+        self._total_lbl.setText(f"{total_in_db} {tr('infobar_total')}")
+        self._flag_lbl.setText(f"🚩 = {flagged}")
+        self._center_lbl.setText(
+            f"{tr('infobar_center')}: {center_name}" if center_name
+            else f"{tr('infobar_center')}: —"
+        )
+        self._found_lbl.setText(str(found))
+        self._all_lbl.setText(str(all_in_filter))
+        self._inactive_lbl.setText(str(inactive))
+        self._owned_lbl.setText(str(owned))
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -54,7 +170,7 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(4, 4, 4, 4)
         main_layout.setSpacing(4)
 
-        # ── Main splitter: cache list (top) | bottom panel (below) ───────────
+        # ── Main splitter: cache list (top) | info bar + bottom panel (below) ─
         self._splitter = QSplitter(Qt.Orientation.Vertical)
         self._splitter.setObjectName("main_splitter")
 
@@ -65,7 +181,17 @@ class MainWindow(QMainWindow):
         self._cache_table.sort_changed.connect(self._on_sort_changed)
         self._splitter.addWidget(self._cache_table)
 
-        # Bottom: horisontal splitter — detaljer til venstre, kort til højre
+        # Bottom container: info bar (fixed) + horisontal splitter (resizable)
+        bottom_container = QWidget()
+        bottom_layout = QVBoxLayout(bottom_container)
+        bottom_layout.setContentsMargins(0, 0, 0, 0)
+        bottom_layout.setSpacing(0)
+
+        # Info bar (GSAK-style, issue #116)
+        self._info_bar = InfoBar()
+        bottom_layout.addWidget(self._info_bar)
+
+        # Horisontal splitter — detaljer til venstre, kort til højre
         self._bottom_splitter = QSplitter(Qt.Orientation.Horizontal)
         self._bottom_splitter.setObjectName("bottom_splitter")
 
@@ -81,7 +207,9 @@ class MainWindow(QMainWindow):
         self._bottom_splitter.addWidget(self._map_widget)
 
         self._bottom_splitter.setSizes([560, 540])
-        self._splitter.addWidget(self._bottom_splitter)
+        bottom_layout.addWidget(self._bottom_splitter)
+
+        self._splitter.addWidget(bottom_container)
         self._splitter.setSizes([380, 400])
 
         main_layout.addWidget(self._splitter)
@@ -525,6 +653,51 @@ class MainWindow(QMainWindow):
             self._count_lbl.setText(tr("count_cache_single"))
         else:
             self._count_lbl.setText(tr("count_caches", count=count))
+        self._update_info_bar()
+
+    def _update_info_bar(self) -> None:
+        """Recalculate and update the GSAK-style info bar (issue #116)."""
+        s = get_settings()
+        caches = self._cache_table.get_all_caches()
+
+        # Total caches in database (not just filtered)
+        with get_session() as session:
+            total_in_db = session.query(Cache).count()
+
+        # Filter name
+        filter_name = self._active_filter_name
+
+        # Flagged count
+        flagged = sum(1 for c in caches if c.user_flag)
+
+        # Center point name
+        center_name = s.active_home_name or ""
+
+        # Color-coded counts (from filtered caches)
+        found = sum(1 for c in caches if c.found)
+        all_in_filter = len(caches)
+        inactive = sum(1 for c in caches if c.archived or not c.available)
+
+        # Owned: match placed_by against stored GC username
+        gc_user = s.gc_username.strip().lower() if s.gc_username else ""
+        if gc_user:
+            owned = sum(
+                1 for c in caches
+                if c.placed_by and c.placed_by.strip().lower() == gc_user
+            )
+        else:
+            owned = 0
+
+        self._info_bar.update_counts(
+            filter_name=filter_name,
+            total_in_db=total_in_db,
+            flagged=flagged,
+            center_name=center_name,
+            found=found,
+            all_in_filter=all_in_filter,
+            inactive=inactive,
+            owned=owned,
+        )
 
     def _build_current_filterset(self) -> FilterSet:
         """Build a FilterSet from the current quick filter + search box."""
@@ -864,6 +1037,7 @@ class MainWindow(QMainWindow):
             self._statusbar.showMessage(
                 tr("status_flagged_count", flagged=flagged, total=total), 3000
             )
+        self._update_info_bar()
 
     def _on_sort_changed(self, col_id: str, ascending: bool) -> None:
         """Kaldes når brugeren klikker en kolonneheader i tabellen."""
@@ -925,6 +1099,7 @@ class MainWindow(QMainWindow):
         else:
             self._count_lbl.setText(tr("count_caches", count=count))
         self._statusbar.showMessage(tr("status_filter_result", count=count), 3000)
+        self._update_info_bar()
 
     def _clear_filter(self) -> None:
         self._current_filterset = FilterSet()

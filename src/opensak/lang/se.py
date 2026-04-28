@@ -706,4 +706,14 @@ STRINGS: dict[str, str] = {
     "gc_info_trackables":           "Visar vilka  Travel Bugs som finns i en cache",
     "gc_info_finds":                "Synkar automatisk dina hittade",
     "gc_api_not_configured":        "⚠  API åtkomst väntar på tillstånd från Geocaching HQ. Inloggning är inte möjligt innan dess..",
+    # ── Issue #116: Info bar (GSAK-style status bar) ────────────────────
+    "infobar_filter":                    "Filter",
+    "infobar_filter_none":               "Inget",
+    "infobar_total":                     "cacher i databasen",
+    "infobar_center":                    "Mittpunkt",
+    "infobar_count_label":               "Antal:",
+    "infobar_found_tooltip":             "Hittade cacher",
+    "infobar_all_tooltip":               "Alla cacher i filtret",
+    "infobar_inactive_tooltip":          "Arkiverade + Inaktiverade",
+    "infobar_owned_tooltip":             "Dina cacher",
 }
