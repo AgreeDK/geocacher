@@ -14,6 +14,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.7] — 2026-04-28
+### Added
+- **GSAK-style info bar** between cache list and detail/map panel (fixes #116):
+  - Active filter name or "None"
+  - Total caches in the current database
+  - Number of flagged (🚩) caches
+  - Active center/home point name
+  - Color-coded counts: Found (yellow), All in filter (white), Archived + Deactivated (red), User-owned caches (green)
+  - Updates automatically on filter change, database switch, import, and flag toggle
+  - Owned cache count matches `placed_by` against stored GC username
+- 9 new translation keys added to all 7 language files (da, en, fr, de, cs, pt, se) with proper translations
+
+---
+
 ## [1.11.6] — 2026-04-27
 
 ### Fixed 
