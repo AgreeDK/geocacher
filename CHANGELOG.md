@@ -12,6 +12,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Multi-threading import performance (PR #30, planned for v1.10.0)
 - Main window layout redesign: full-width cache list on top, details + map below (issue #33)
 
+
+---
+
+## [1.11.12] — 2026-04-29
+### Fixed
+- issuex #112: Cache selection highlight is now consistent across all platforms. On Windows 10/11 the selected row was shown in gray (system default), making it hard to distinguish from archived caches. The highlight color is now always light blue, matching the appearance on Linux and macOS.
+- issue #121: Creating a new database in a custom folder now works correctly. The folder browser has been changed from a "Save file" dialog to a "Select folder" dialog, eliminating the confusion where nothing happened if no filename was typed. The full file path (folder + database name + .db) is now shown as a live preview while typing the name.
+
 ---
 
 ## [1.11.11] — 2026-04-29
