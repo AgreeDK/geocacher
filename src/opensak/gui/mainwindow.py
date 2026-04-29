@@ -656,8 +656,29 @@ class MainWindow(QMainWindow):
     # ── Cache list ────────────────────────────────────────────────────────────
 
     def _refresh_cache_list(self) -> None:
-        """Reload caches from DB applying current filters."""
-        fs = self._build_current_filterset()
+        """Reload caches from DB applying current filters.
+
+        Combines the advanced filter (self._current_filterset, set via the
+        filter dialog) with the quick-filter / search-box filters so that
+        returning from Settings or any other dialog never discards the active
+        filter (fixes #128).
+        """
+        quick_fs = self._build_current_filterset()
+
+        # Wrap both filtersets in a top-level AND so they work together.
+        # If _current_filterset is empty it has no effect (FilterSet.matches()
+        # returns True for an empty set), so this is safe in all cases.
+        if len(self._current_filterset) > 0 or len(quick_fs) > 0:
+            from opensak.filters.engine import FilterSet as _FS
+            combined = _FS(mode="AND")
+            if len(self._current_filterset) > 0:
+                combined.add(self._current_filterset)
+            if len(quick_fs) > 0:
+                combined.add(quick_fs)
+            fs = combined
+        else:
+            fs = quick_fs
+
         with get_session() as session:
             caches = apply_filters(session, fs, self._current_sort)
 
