@@ -33,6 +33,7 @@ class NewDatabaseDialog(QDialog):
 
         self._name_edit = QLineEdit()
         self._name_edit.setPlaceholderText("f.eks. Sjælland, Bornholm 2026…")
+        self._name_edit.textChanged.connect(self._update_path_preview)
         form.addRow(tr("db_name_label"), self._name_edit)
 
         layout.addLayout(form)
@@ -45,7 +46,7 @@ class NewDatabaseDialog(QDialog):
         self._path_edit.setReadOnly(True)
         path_row.addWidget(self._path_edit)
         browse_btn = QPushButton(tr("gps_browse"))
-        browse_btn.setMaximumWidth(70)
+        browse_btn.setMaximumWidth(80)
         browse_btn.clicked.connect(self._browse)
         path_row.addWidget(browse_btn)
         layout.addLayout(path_row)
@@ -62,14 +63,21 @@ class NewDatabaseDialog(QDialog):
 
     def _browse(self) -> None:
         from opensak.config import get_app_data_dir
-        path, _ = QFileDialog.getSaveFileName(
+        folder = QFileDialog.getExistingDirectory(
             self, tr("db_browse_title"),
             str(get_app_data_dir()),
-            tr("db_file_filter")
+            QFileDialog.Option.ShowDirsOnly,
         )
-        if path:
-            self._custom_path = Path(path)
-            self._path_edit.setText(str(self._custom_path))
+        if folder:
+            self._custom_path = Path(folder)
+            self._update_path_preview()
+
+    def _update_path_preview(self) -> None:
+        """Vis fuld filsti (mappe + navn + .db) i sti-feltet."""
+        name = self._name_edit.text().strip()
+        if self._custom_path:
+            filename = f"{name}.db" if name else "(<navn>.db)"
+            self._path_edit.setText(str(self._custom_path / filename))
 
     def _validate(self) -> None:
         name = self._name_edit.text().strip()
@@ -84,7 +92,16 @@ class NewDatabaseDialog(QDialog):
 
     @property
     def custom_path(self) -> Path | None:
-        return self._custom_path
+        """Returner fuld filsti (mappe + navn.db), eller None for default placering."""
+        if self._custom_path is None:
+            return None
+        name = self._name_edit.text().strip()
+        if not name:
+            return self._custom_path  # _validate() fanger dette
+        safe_name = "".join(
+            c if c.isalnum() or c in "-_ " else "_" for c in name
+        ).strip()
+        return self._custom_path / f"{safe_name}.db"
 
 
 class DatabaseManagerDialog(QDialog):
