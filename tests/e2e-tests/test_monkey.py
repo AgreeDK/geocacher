@@ -77,7 +77,7 @@ def _dismiss_modal(app: QApplication) -> None:
 
 def _close_stray_windows(main_window: QWidget) -> None:
     """Close any top-level window that isn't the main window (e.g. trip planner)."""
-    for w in QApplication.topLevelWidgets():
+    for w in list(QApplication.topLevelWidgets()):
         if w is not main_window and w.isVisible() and isinstance(w, QWidget):
             w.close()
 
