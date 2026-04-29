@@ -237,6 +237,7 @@ class SizeBarDelegate(QStyledItemDelegate):
     _LABEL_COLOR = QColor("#4a72b0")   # bogstav-farve (mørkere blå)
 
     def paint(self, painter: QPainter, option, index) -> None:
+        from PySide6.QtWidgets import QStyle
         data = index.data(Qt.ItemDataRole.UserRole + 10) or {}
         size_key  = data.get("size", "").lower()  if isinstance(data, dict) else ""
         cache_type = data.get("type", "").lower() if isinstance(data, dict) else ""
@@ -248,6 +249,14 @@ class SizeBarDelegate(QStyledItemDelegate):
 
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Tegn standard baggrund (inkl. selection-highlight) inden vi tegner søjlerne
+        is_selected = bool(option.state & QStyle.StateFlag.State_Selected)
+        if is_selected:
+            painter.fillRect(option.rect, QColor("#3daee9"))
+        else:
+            # Lad standard delegate håndtere alternating rows mv.
+            super().paint(painter, option, index)
 
         rect = option.rect
         margin_x, margin_y = 4, 3
@@ -729,6 +738,13 @@ class CacheTableView(QTableView):
         self.selectionModel().currentRowChanged.connect(self._on_row_changed)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
+        # Ensartet selection-farve på alle platforme (Windows bruger ellers grå)
+        self.setStyleSheet("""
+            QTableView {
+                selection-background-color: #3daee9;
+                selection-color: black;
+            }
+        """)
 
     def mousePressEvent(self, event) -> None:
         """Klik på user_flag-kolonnen toggler flaget direkte."""
