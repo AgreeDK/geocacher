@@ -12,8 +12,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Multi-threading import performance (PR #30, planned for v1.10.0)
 - Main window layout redesign: full-width cache list on top, details + map below (issue #33)
 
-
 ---
+
+## [1.11.13] — 2026-04-29
+### Fixed
+---
+- issue 128: Filter no longer dropped when returning from Settings (#128)
+When an advanced filter was active and the user opened and closed the Settings or Preferences dialog, the cache list was refreshed without reapplying the active filter — causing it to appear dropped even though it was still selected in the filter dialog.
+
+The root cause was that _refresh_cache_list() only considered the quick-filter and search fields when rebuilding the filter, ignoring _current_filterset entirely. The fix combines both the advanced filter and the quick-filter/search into a single AND-condition on every refresh, so the active filter is always preserved regardless of what triggers the reload.
 
 ## [1.11.12] — 2026-04-29
 ### Fixed
