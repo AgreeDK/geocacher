@@ -14,6 +14,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.14] — 2026-04-29
+### Fixed
+- issue #130: Deleting a database on Windows no longer fails with WinError 32 ("file in use by another process"). SQLite WAL-mode keeps .db, .db-shm and .db-wal files locked as long as the SQLAlchemy connection pool is open. The fix disposes the engine and releases all file handles before attempting deletion, then forces garbage collection and a short delay to give Windows time to free the handles.
+
+---
+
 ## [1.11.13] — 2026-04-29
 ### Fixed
 ---

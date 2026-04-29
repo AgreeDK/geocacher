@@ -7,7 +7,9 @@ Gemmer liste over kendte databaser i QSettings.
 
 from __future__ import annotations
 
+import gc
 import shutil
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -296,6 +298,9 @@ class DatabaseManager:
         """Fjern database fra listen uden at slette filen."""
         if db_info == self._active:
             raise ValueError(tr("db_err_remove_active"))
+        # Luk engine så SQLite WAL-filer frigives korrekt på Windows
+        from opensak.db.database import dispose_engine
+        dispose_engine(db_info.path)
         self._databases.remove(db_info)
         self._save_to_settings()
 
@@ -305,6 +310,14 @@ class DatabaseManager:
             raise ValueError(
                 tr("db_err_delete_active")
             )
+
+        # Luk SQLAlchemy engine for denne database FØR sletning.
+        # På Windows holder WAL-mode (.db-shm / .db-wal) filerne låst
+        # så længe connection pool er åben → WinError 32.
+        from opensak.db.database import dispose_engine
+        dispose_engine(db_info.path)
+        gc.collect()       # tving garbage collection af evt. resterende refs
+        time.sleep(0.1)    # giv Windows tid til at frigive file handles
 
         errors: list[str] = []
         db_path = db_info.path

@@ -255,6 +255,37 @@ def _run_migrations(engine: Engine) -> None:
             print(f"Migration: tilføjede caches.log_count og opdaterede {result.rowcount} caches")
 
 
+def dispose_engine(db_path: Path | None = None) -> None:
+    """
+    Luk og frigiv SQLAlchemy connection pool for en given database-sti.
+
+    Nødvendigt på Windows før sletning af .db/.db-shm/.db-wal filer —
+    SQLite WAL-mode holder filerne låst (WinError 32) så længe pool er åben.
+    Kaldes automatisk af DatabaseManager.delete_database() og remove_from_list().
+
+    Hvis db_path er None, disposes den aktive engine uanset sti.
+    """
+    global _engine, _SessionLocal
+    if _engine is None:
+        return  # Intet at frigive
+
+    if db_path is not None:
+        # Sammenlign stier — normaliser separatorer for Windows-kompatibilitet
+        engine_url = str(_engine.url).replace("sqlite:///", "")
+        engine_path = Path(engine_url).resolve()
+        try:
+            target_path = db_path.resolve()
+        except OSError:
+            target_path = db_path
+
+        if engine_path != target_path:
+            return  # Denne engine peger ikke på den ønskede database
+
+    _engine.dispose()
+    _engine = None
+    _SessionLocal = None
+
+
 def get_engine() -> Engine:
     """Return the current engine, raising if init_db() hasn't been called."""
     if _engine is None:
