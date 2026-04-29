@@ -54,6 +54,7 @@ def _make_splash(app) -> "QSplashScreen":
     from PySide6.QtWidgets import QSplashScreen
     from PySide6.QtGui import QPixmap, QPainter, QColor, QFont
     from PySide6.QtCore import Qt
+    from opensak import __version__
 
     # Tegn splash pixmap programmatisk — ingen billedfil nødvendig
     W, H = 420, 220
@@ -78,6 +79,13 @@ def _make_splash(app) -> "QSplashScreen":
     painter.setPen(QColor("#7ab8f5"))
     painter.drawText(0, 85, W, 40, Qt.AlignmentFlag.AlignCenter,
                      "Open Source Swiss Army Knife")
+
+    # Versionsnummer
+    font_ver = QFont("Sans Serif", 9)
+    painter.setFont(font_ver)
+    painter.setPen(QColor("#4a9eff"))
+    painter.drawText(0, 120, W, 30, Qt.AlignmentFlag.AlignCenter,
+                     f"v{__version__}")
 
     # Loading tekst placeholder (opdateres via showMessage)
     painter.end()
@@ -104,7 +112,8 @@ def main() -> None:
     app = QApplication(sys.argv)
     app.setWindowIcon(get_app_icon())
     app.setApplicationName("OpenSAK")
-    app.setApplicationVersion("0.1.0")
+    from opensak import __version__ as _ver
+    app.setApplicationVersion(_ver)
     app.setOrganizationName("OpenSAK Project")
     app.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
 

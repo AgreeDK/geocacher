@@ -526,6 +526,7 @@ class MainWindow(QMainWindow):
 
         # GC-nummer label + felt
         gc_lbl = QLabel(tr("search_gc_label") + ":")
+        gc_lbl.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         row.addWidget(gc_lbl)
 
         self._search_gc = QLineEdit()
@@ -543,6 +544,7 @@ class MainWindow(QMainWindow):
 
         # Navn label + felt
         name_lbl = QLabel(tr("col_name") + ":")
+        name_lbl.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
         row.addWidget(name_lbl)
 
         self._search_box = QLineEdit()
@@ -551,6 +553,9 @@ class MainWindow(QMainWindow):
         self._search_box.setClearButtonEnabled(True)
         self._search_box.textChanged.connect(self._on_search_changed)
         row.addWidget(self._search_box)
+
+        # Spacer — skubber felterne til venstre (issue #125)
+        row.addStretch()
 
         container_action = QWidgetAction(self)
         container_action.setDefaultWidget(container)
@@ -577,13 +582,16 @@ class MainWindow(QMainWindow):
         QTimer.singleShot(0, self._restore_splitter_ratios)
 
     def _update_title(self) -> None:
-        """Opdatér vinduestitel med aktiv database navn."""
+        """Opdatér vinduestitel med aktiv database navn og versionsnummer."""
+        from opensak import __version__
         from opensak.db.manager import get_db_manager
         manager = get_db_manager()
         if manager.active:
-            self.setWindowTitle(tr("window_title_with_db", db_name=manager.active.name))
+            self.setWindowTitle(
+                tr("window_title_with_db", db_name=manager.active.name) + f"  v{__version__}"
+            )
         else:
-            self.setWindowTitle(tr("window_title"))
+            self.setWindowTitle(tr("window_title") + f"  v{__version__}")
 
     def _open_db_manager(self) -> None:
         from opensak.gui.dialogs.database_dialog import DatabaseManagerDialog
