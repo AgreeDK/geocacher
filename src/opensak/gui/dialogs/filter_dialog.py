@@ -603,32 +603,16 @@ class FilterDialog(QDialog):
         return outer
 
     def _build_where_tab(self) -> QWidget:
-        """Where filter fane — tre SQL-felter (General, Dates, Attributes)."""
+        """Where filter fane — SQL WHERE clause editor."""
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setSpacing(6)
         layout.setContentsMargins(10, 10, 10, 10)
 
-        for label_key, attr in (
-            ("filter_tab_general",    "_where_sql_general"),
-            ("filter_tab_dates",      "_where_sql_dates"),
-            ("filter_tab_attributes", "_where_sql_attributes"),
-        ):
-            toggle = QPushButton(tr(label_key))
-            toggle.setCheckable(True)
-            toggle.setFlat(True)
-            toggle.setStyleSheet("text-align: left; font-weight: bold;")
-            layout.addWidget(toggle)
+        self._where_sql_general = QPlainTextEdit()
+        self._where_sql_general.setPlaceholderText(tr("filter_where_sql_placeholder"))
+        layout.addWidget(self._where_sql_general)
 
-            editor = QPlainTextEdit()
-            editor.setPlaceholderText(tr("filter_where_sql_placeholder"))
-            editor.setMaximumHeight(90)
-            editor.setVisible(False)
-            toggle.toggled.connect(editor.setVisible)
-            layout.addWidget(editor)
-            setattr(self, attr, editor)
-
-        layout.addStretch()
         return widget
 
     # ── Slots ─────────────────────────────────────────────────────────────────
@@ -680,8 +664,7 @@ class FilterDialog(QDialog):
     def _reset_current_tab(self) -> None:
         tab = self._tabs.currentWidget()
         if tab is self._where_tab:
-            for attr in ("_where_sql_general", "_where_sql_dates", "_where_sql_attributes"):
-                getattr(self, attr).clear()
+            self._where_sql_general.clear()
         elif tab is self._general_tab:
             self._reset_general()
         elif tab is self._dates_tab:
