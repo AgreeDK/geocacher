@@ -14,6 +14,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.11] — 2026-04-29
+### Fixed
+
+- GC Code and Name search fields now sit directly next to their labels
+- no more blank space between label and input box.
+
+### Improved
+
+- Version number is now shown in the splash screen at startup.
+- Version number is now shown in the main window title bar.
+- app.setApplicationVersion now uses the actual version from __version__ instead of a hardcoded value.
+
+---
+
 ## [1.11.10] — 2026-04-29
 ### Fixed
 - Fix: database delete removes shm/wal files (#120) , translate all error messages
