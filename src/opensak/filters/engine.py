@@ -427,6 +427,27 @@ class AttributeFilter(BaseFilter):
         return cls(data["attribute_id"], data.get("is_on", True))
 
 
+class WhereClauseFilter(BaseFilter):
+    """Raw SQL WHERE clause evaluated directly against the SQLite caches table."""
+    filter_type = "where_clause"
+
+    def __init__(self, sql: str):
+        self.sql = sql.strip()
+        self._matching_ids: Optional[set] = None  # populated by apply_filters
+
+    def matches(self, cache: Cache) -> bool:
+        if self._matching_ids is None:
+            return True  # no pre-run done — pass all
+        return cache.id in self._matching_ids
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "sql": self.sql}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "WhereClauseFilter":
+        return cls(data.get("sql", ""))
+
+
 class HasTrackableFilter(BaseFilter):
     """Keep only caches that currently have at least one trackable."""
     filter_type = "has_trackable"
@@ -486,6 +507,7 @@ FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
     "has_trackable": HasTrackableFilter,
     "premium":       PremiumFilter,
     "non_premium":   NonPremiumFilter,
+    "where_clause":  WhereClauseFilter,
 }
 
 
@@ -634,6 +656,17 @@ def annotate_distances(
     }
 
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+def _iter_filters(filterset: "FilterSet"):
+    """Yield all leaf BaseFilter instances from a FilterSet (recursively)."""
+    for f in filterset._filters:
+        if isinstance(f, FilterSet):
+            yield from _iter_filters(f)
+        else:
+            yield f
+
+
 # ── Main apply function ───────────────────────────────────────────────────────
 
 def apply_filters(
@@ -659,6 +692,20 @@ def apply_filters(
     -------
     List of Cache objects that match all filters, in sorted order.
     """
+    # Pre-populate WhereClauseFilter matching IDs by running the raw SQL against SQLite.
+    # This must happen before the Python-level filter loop below.
+    if filterset:
+        from sqlalchemy import text as _sa_text
+        for _f in _iter_filters(filterset):
+            if isinstance(_f, WhereClauseFilter) and _f.sql:
+                try:
+                    _result = session.execute(
+                        _sa_text(f"SELECT id FROM caches WHERE ({_f.sql})")
+                    )
+                    _f._matching_ids = {row[0] for row in _result}
+                except Exception:
+                    _f._matching_ids = set()  # invalid SQL → no matches
+
     # Load caches med kun de relationer der bruges i filtrene.
     # logs, waypoints og user_note loader vi IKKE her — de hentes
     # on-demand når brugeren klikker på en enkelt cache.

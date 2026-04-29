@@ -149,7 +149,11 @@ STRINGS: dict[str, str] = {
     "filter_tab_dates":             "Datum",
     "filter_tab_attributes":        "Attribut",
     "filter_tab_where":             "Where",
-    "filter_where_sql_placeholder": "Skriv en SQL WHERE-sats…",
+    "filter_where_description":     "Filtrera geocacher med en SQL WHERE-sats direkt mot tabellen caches.",
+    "filter_where_sql_placeholder": "t.ex.  difficulty >= 4 AND terrain >= 4",
+    "filter_where_info_tooltip":    "Visa tillgängliga kolumner och exempel",
+    "filter_where_info_title":      "SQL-kolumnreferens",
+    "filter_where_error_prefix":    "SQL-fel:",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Skicka till GPS",

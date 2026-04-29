@@ -36,6 +36,7 @@ from opensak.filters.engine import (
     PlacedByFilter, DistanceFilter,
     AttributeFilter, HasTrackableFilter,
     PremiumFilter, NonPremiumFilter,
+    WhereClauseFilter,
     FilterProfile,
 )
 
@@ -606,14 +607,120 @@ class FilterDialog(QDialog):
         """Where filter fane — SQL WHERE clause editor."""
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setSpacing(6)
+        layout.setSpacing(8)
         layout.setContentsMargins(10, 10, 10, 10)
 
+        # Description row with info button
+        header_row = QHBoxLayout()
+        desc_label = QLabel(tr("filter_where_description"))
+        desc_label.setWordWrap(True)
+        desc_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        header_row.addWidget(desc_label)
+
+        info_btn = QPushButton("ⓘ")
+        info_btn.setMaximumWidth(32)
+        info_btn.setFlat(True)
+        info_btn.setToolTip(tr("filter_where_info_tooltip"))
+        info_btn.clicked.connect(self._show_where_info)
+        header_row.addWidget(info_btn, alignment=Qt.AlignmentFlag.AlignTop)
+        layout.addLayout(header_row)
+
+        # SQL text area
         self._where_sql_general = QPlainTextEdit()
         self._where_sql_general.setPlaceholderText(tr("filter_where_sql_placeholder"))
         layout.addWidget(self._where_sql_general)
 
+        # Error label (hidden until a SQL error occurs)
+        self._where_error_label = QLabel()
+        self._where_error_label.setWordWrap(True)
+        self._where_error_label.setStyleSheet("color: #cc0000;")
+        self._where_error_label.hide()
+        layout.addWidget(self._where_error_label)
+
         return widget
+
+    def _show_where_info(self) -> None:
+        """Show a dialog with the available SQL column reference."""
+        from PySide6.QtWidgets import QScrollArea as _QScrollArea
+
+        dlg = QDialog(self)
+        dlg.setWindowTitle(tr("filter_where_info_title"))
+        dlg.resize(560, 480)
+
+        outer = QVBoxLayout(dlg)
+
+        scroll = _QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        content = QLabel()
+        content.setTextFormat(Qt.TextFormat.RichText)
+        content.setWordWrap(True)
+        content.setContentsMargins(8, 8, 8, 8)
+        content.setText(
+            "<b>SQL WHERE clause — column reference</b><br><br>"
+            "Write standard SQLite expressions. The clause is evaluated against the "
+            "<code>caches</code> table. Booleans are stored as <code>1</code> (true) "
+            "or <code>0</code> (false).<br><br>"
+            "<table cellspacing='4'>"
+            "<tr><th align='left'>Column</th><th align='left'>Type</th>"
+            "<th align='left'>Notes / values</th></tr>"
+            "<tr><td><code>gc_code</code></td><td>text</td><td>e.g. <code>'GC12345'</code></td></tr>"
+            "<tr><td><code>name</code></td><td>text</td><td>Cache name</td></tr>"
+            "<tr><td><code>cache_type</code></td><td>text</td>"
+            "<td><code>'Traditional Cache'</code>, <code>'Multi-cache'</code>, "
+            "<code>'Mystery Cache'</code>, …</td></tr>"
+            "<tr><td><code>container</code></td><td>text</td>"
+            "<td><code>'Nano'</code>, <code>'Micro'</code>, <code>'Small'</code>, "
+            "<code>'Regular'</code>, <code>'Large'</code></td></tr>"
+            "<tr><td><code>difficulty</code></td><td>decimal</td><td>1.0 – 5.0</td></tr>"
+            "<tr><td><code>terrain</code></td><td>decimal</td><td>1.0 – 5.0</td></tr>"
+            "<tr><td><code>placed_by</code></td><td>text</td><td>Owner username</td></tr>"
+            "<tr><td><code>country</code></td><td>text</td><td>e.g. <code>'Denmark'</code></td></tr>"
+            "<tr><td><code>state</code></td><td>text</td><td>Region / state</td></tr>"
+            "<tr><td><code>county</code></td><td>text</td><td>County</td></tr>"
+            "<tr><td><code>hidden_date</code></td><td>datetime</td>"
+            "<td>e.g. <code>'2020-06-15'</code></td></tr>"
+            "<tr><td><code>available</code></td><td>boolean</td><td>1 or 0</td></tr>"
+            "<tr><td><code>archived</code></td><td>boolean</td><td>1 or 0</td></tr>"
+            "<tr><td><code>found</code></td><td>boolean</td><td>1 = found by me</td></tr>"
+            "<tr><td><code>premium_only</code></td><td>boolean</td><td>1 or 0</td></tr>"
+            "<tr><td><code>favorite_points</code></td><td>integer</td>"
+            "<td>Community favourite points (API)</td></tr>"
+            "<tr><td><code>log_count</code></td><td>integer</td><td>Total number of logs</td></tr>"
+            "<tr><td><code>distance</code></td><td>decimal</td>"
+            "<td>Distance from home point in km</td></tr>"
+            "<tr><td><code>user_data_1</code> – <code>user_data_4</code></td>"
+            "<td>text</td><td>Personal user fields</td></tr>"
+            "</table><br>"
+            "<b>Examples:</b><br>"
+            "<code>difficulty &gt;= 4 AND terrain &gt;= 4</code><br>"
+            "<code>cache_type = 'Traditional Cache' AND country = 'Denmark'</code><br>"
+            "<code>favorite_points &gt; 100</code><br>"
+            "<code>found = 0 AND available = 1</code><br>"
+            "<code>name LIKE '%night%'</code><br>"
+            "<code>hidden_date &gt; '2023-01-01'</code>"
+        )
+
+        scroll.setWidget(content)
+        outer.addWidget(scroll)
+
+        close_btn = QPushButton(tr("close"))
+        close_btn.clicked.connect(dlg.accept)
+        outer.addWidget(close_btn, alignment=Qt.AlignmentFlag.AlignRight)
+
+        dlg.exec()
+
+    def _validate_where_sql(self, sql: str) -> Optional[str]:
+        """Return an error message if the SQL is invalid, or None if valid."""
+        try:
+            from opensak.db.database import get_session
+            from sqlalchemy import text as _sa_text
+            with get_session() as session:
+                session.execute(_sa_text(f"SELECT 1 FROM caches WHERE ({sql}) LIMIT 0"))
+            return None
+        except Exception as exc:
+            return str(exc)
 
     # ── Slots ─────────────────────────────────────────────────────────────────
 
@@ -660,11 +767,15 @@ class FilterDialog(QDialog):
         self._reset_general()
         self._reset_dates()
         self._reset_attributes()
+        if self._where_tab is not None:
+            self._where_sql_general.clear()
+            self._where_error_label.hide()
 
     def _reset_current_tab(self) -> None:
         tab = self._tabs.currentWidget()
         if tab is self._where_tab:
             self._where_sql_general.clear()
+            self._where_error_label.hide()
         elif tab is self._general_tab:
             self._reset_general()
         elif tab is self._dates_tab:
@@ -805,6 +916,12 @@ class FilterDialog(QDialog):
                 for af in attr_filters:
                     attr_or.add(af)
                 fs.add(attr_or)
+
+        # WHERE clause
+        if self._where_tab is not None:
+            sql = self._where_sql_general.toPlainText().strip()
+            if sql:
+                fs.add(WhereClauseFilter(sql))
 
         return fs
 
@@ -957,11 +1074,28 @@ class FilterDialog(QDialog):
                         ja_cb.setChecked(True)
                     else:
                         nej_cb.setChecked(True)
+            elif ftype == "where_clause":
+                if self._where_tab is not None:
+                    self._where_sql_general.setPlainText(getattr(f, "sql", ""))
             # Andre/inline filtre ignoreres stille (fx gammel hidden_date)
 
     # ── Apply ─────────────────────────────────────────────────────────────────
 
     def _apply(self) -> None:
+        # Validate WHERE clause SQL before applying
+        if self._where_tab is not None:
+            sql = self._where_sql_general.toPlainText().strip()
+            if sql:
+                error = self._validate_where_sql(sql)
+                if error:
+                    self._where_error_label.setText(
+                        f"{tr('filter_where_error_prefix')} {error}"
+                    )
+                    self._where_error_label.show()
+                    self._tabs.setCurrentWidget(self._where_tab)
+                    return
+            self._where_error_label.hide()
+
         fs = self._build_filterset()
         profile_name = (
             self._profile_combo.currentText()
