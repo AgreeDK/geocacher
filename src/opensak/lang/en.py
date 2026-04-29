@@ -290,6 +290,18 @@ STRINGS: dict[str, str] = {
     "db_rename_label":              "New name:",
     "db_open_browse_title":         "Open database",
 
+    # ── Database error messages ──────────────────────────────────────────────
+    "db_err_name_exists":           "A database named '{name}' already exists.",
+    "db_err_mkdir_failed":          "Cannot create folder:\n{path}",
+    "db_err_dir_not_found":         "Folder does not exist:\n{path}",
+    "db_err_no_write_permission":   "No write permission for folder:\n{path}",
+    "db_err_create_failed":         "Could not create the database.",
+    "db_err_file_not_found":        "Database file not found:\n{path}",
+    "db_err_remove_active":         "Cannot remove the active database from the list.",
+    "db_err_delete_active":         "Cannot delete the active database — switch to another one first.",
+    "db_err_delete_partial":        "The database was removed from the list, but some files could not be deleted:",
+    "db_delete_active_error":       "Cannot delete '{name}' because it is the active database.\n\nSwitch to another database first.",
+
     # ── Column dialog ─────────────────────────────────────────────────────────
     "column_dialog_hint":           "Select which columns to show in the cache list.\nGC Code and Name cannot be hidden.",
     "column_select_all":            "Select all",

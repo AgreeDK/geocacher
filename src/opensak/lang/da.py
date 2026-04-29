@@ -290,6 +290,18 @@ STRINGS: dict[str, str] = {
     "db_rename_label":              "Nyt navn:",
     "db_open_browse_title":         "Åbn database",
 
+    # ── Database fejlbeskeder ────────────────────────────────────────────────
+    "db_err_name_exists":           "En database med navnet '{name}' eksisterer allerede.",
+    "db_err_mkdir_failed":          "Kan ikke oprette mappen:\n{path}",
+    "db_err_dir_not_found":         "Mappen eksisterer ikke:\n{path}",
+    "db_err_no_write_permission":   "Ingen skriverettigheder til mappen:\n{path}",
+    "db_err_create_failed":         "Kunne ikke oprette databasen.",
+    "db_err_file_not_found":        "Databasefilen blev ikke fundet:\n{path}",
+    "db_err_remove_active":         "Kan ikke fjerne den aktive database fra listen.",
+    "db_err_delete_active":         "Kan ikke slette den aktive database — skift til en anden først.",
+    "db_err_delete_partial":        "Databasen er fjernet fra listen, men nogle filer kunne ikke slettes:",
+    "db_delete_active_error":       "Kan ikke slette '{name}' fordi den er den aktive database.\n\nSkift til en anden database først.",
+
     # ── Kolonne dialog ────────────────────────────────────────────────────────
     "column_dialog_hint":           "Vælg hvilke kolonner der skal vises i cachelisten.\nGC Kode og Navn kan ikke skjules.",
     "column_select_all":            "Vælg alle",

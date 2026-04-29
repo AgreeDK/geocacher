@@ -253,7 +253,7 @@ class DatabaseManagerDialog(QDialog):
                     tr("db_created_msg", name=db.name)
                 )
             except ValueError as e:
-                QMessageBox.warning(self, "Fejl", str(e))
+                QMessageBox.warning(self, tr("warning"), str(e))
 
     def _open_database(self) -> None:
         from opensak.config import get_app_data_dir
@@ -271,7 +271,7 @@ class DatabaseManagerDialog(QDialog):
                     tr("db_opened_msg", name=db.name)
                 )
             except Exception as e:
-                QMessageBox.warning(self, "Fejl", str(e))
+                QMessageBox.warning(self, tr("warning"), str(e))
 
     def _copy_database(self) -> None:
         db = self._selected_db()
@@ -291,7 +291,7 @@ class DatabaseManagerDialog(QDialog):
                     tr("db_copied_msg", new_name=new_db.name, orig_name=db.name)
                 )
             except Exception as e:
-                QMessageBox.warning(self, "Fejl", str(e))
+                QMessageBox.warning(self, tr("warning"), str(e))
 
     def _rename_database(self) -> None:
         db = self._selected_db()
@@ -303,7 +303,7 @@ class DatabaseManagerDialog(QDialog):
                 self._manager.rename(db, name)
                 self._refresh_list()
             except ValueError as e:
-                QMessageBox.warning(self, "Fejl", str(e))
+                QMessageBox.warning(self, tr("warning"), str(e))
 
     def _remove_from_list(self) -> None:
         db = self._selected_db()
@@ -319,7 +319,7 @@ class DatabaseManagerDialog(QDialog):
                 self._manager.remove_from_list(db)
                 self._refresh_list()
             except ValueError as e:
-                QMessageBox.warning(self, "Fejl", str(e))
+                QMessageBox.warning(self, tr("warning"), str(e))
 
     def _delete_database(self) -> None:
         db = self._selected_db()
@@ -345,8 +345,12 @@ class DatabaseManagerDialog(QDialog):
             try:
                 self._manager.delete_database(db)
                 self._refresh_list()
+            except OSError as e:
+                # Filer kunne ikke slettes, men db er fjernet fra listen
+                self._refresh_list()
+                QMessageBox.warning(self, tr("warning"), str(e))
             except ValueError as e:
-                QMessageBox.warning(self, "Fejl", str(e))
+                QMessageBox.warning(self, tr("warning"), str(e))
 
     def _simple_input(self, title: str, label: str,
                       default: str = "") -> tuple[str, bool]:

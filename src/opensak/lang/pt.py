@@ -290,6 +290,18 @@ STRINGS: dict[str, str] = {
     "db_rename_label":              "Novo nome:",
     "db_open_browse_title":         "Abrir base de dados",
 
+    # ── Mensagens de erro de base de dados ───────────────────────────────────
+    "db_err_name_exists":           "Já existe uma base de dados com o nome '{name}'.",
+    "db_err_mkdir_failed":          "Não foi possível criar a pasta:\n{path}",
+    "db_err_dir_not_found":         "A pasta não existe:\n{path}",
+    "db_err_no_write_permission":   "Sem permissão de escrita na pasta:\n{path}",
+    "db_err_create_failed":         "Não foi possível criar a base de dados.",
+    "db_err_file_not_found":        "Ficheiro de base de dados não encontrado:\n{path}",
+    "db_err_remove_active":         "Não é possível remover a base de dados ativa da lista.",
+    "db_err_delete_active":         "Não é possível eliminar a base de dados ativa — mude primeiro para outra.",
+    "db_err_delete_partial":        "A base de dados foi removida da lista, mas alguns ficheiros não puderam ser eliminados:",
+    "db_delete_active_error":       "Não é possível eliminar '{name}' porque é a base de dados ativa.\n\nMude primeiro para outra base de dados.",
+
     # ── Column dialog ─────────────────────────────────────────────────────────
     "column_dialog_hint":           "Selecione quais as colunas a mostrar na lista de caches.\nO Código GC e o Nome não podem ser ocultados.",
     "column_select_all":            "Selecionar tudo",

@@ -290,6 +290,18 @@ STRINGS: dict[str, str] = {
     "db_rename_label":              "Neuer Name:",
     "db_open_browse_title":         "Datenbank öffnen",
 
+    # ── Datenbank-Fehlermeldungen ────────────────────────────────────────────
+    "db_err_name_exists":           "Eine Datenbank mit dem Namen '{name}' existiert bereits.",
+    "db_err_mkdir_failed":          "Der Ordner konnte nicht erstellt werden:\n{path}",
+    "db_err_dir_not_found":         "Der Ordner existiert nicht:\n{path}",
+    "db_err_no_write_permission":   "Keine Schreibberechtigung für den Ordner:\n{path}",
+    "db_err_create_failed":         "Die Datenbank konnte nicht erstellt werden.",
+    "db_err_file_not_found":        "Datenbankdatei nicht gefunden:\n{path}",
+    "db_err_remove_active":         "Die aktive Datenbank kann nicht aus der Liste entfernt werden.",
+    "db_err_delete_active":         "Die aktive Datenbank kann nicht gelöscht werden — wechseln Sie zuerst zu einer anderen.",
+    "db_err_delete_partial":        "Die Datenbank wurde aus der Liste entfernt, aber einige Dateien konnten nicht gelöscht werden:",
+    "db_delete_active_error":       "'{name}' kann nicht gelöscht werden, da es die aktive Datenbank ist.\n\nWechseln Sie zuerst zu einer anderen Datenbank.",
+
     # ── Column dialog ─────────────────────────────────────────────────────────
     "column_dialog_hint":           "Wähle, welche SPalten in der Cacheliste angezeigt werden sollen.\nGC-Code und Name können nicht ausgeblendet werden.",
     "column_select_all":            "Alle auswählen",

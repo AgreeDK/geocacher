@@ -290,6 +290,18 @@ STRINGS: dict[str, str] = {
     "db_rename_label":              "Nouveau nom:",
     "db_open_browse_title":         "Ouvrir la base de données",
 
+    # ── Messages d'erreur de base de données ─────────────────────────────────
+    "db_err_name_exists":           "Une base de données nommée '{name}' existe déjà.",
+    "db_err_mkdir_failed":          "Impossible de créer le dossier :\n{path}",
+    "db_err_dir_not_found":         "Le dossier n'existe pas :\n{path}",
+    "db_err_no_write_permission":   "Pas de permission d'écriture pour le dossier :\n{path}",
+    "db_err_create_failed":         "Impossible de créer la base de données.",
+    "db_err_file_not_found":        "Fichier de base de données introuvable :\n{path}",
+    "db_err_remove_active":         "Impossible de retirer la base de données active de la liste.",
+    "db_err_delete_active":         "Impossible de supprimer la base de données active — basculez d'abord vers une autre.",
+    "db_err_delete_partial":        "La base de données a été retirée de la liste, mais certains fichiers n'ont pas pu être supprimés :",
+    "db_delete_active_error":       "Impossible de supprimer '{name}' car c'est la base de données active.\n\nBasculez d'abord vers une autre base de données.",
+
     # ── Column dialog ─────────────────────────────────────────────────────────
     "column_dialog_hint":           "Sélectionnez les colonnes à afficher dans la liste de caches.\nLe code GC et le nom ne peuvent pas être masqués.",
     "column_select_all":            "Tout sélectionner",

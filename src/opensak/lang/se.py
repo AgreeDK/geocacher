@@ -290,6 +290,18 @@ STRINGS: dict[str, str] = {
     "db_rename_label":              "Nytt namn:",
     "db_open_browse_title":         "Öppna databas",
 
+    # ── Databasfelmeddelanden ────────────────────────────────────────────────
+    "db_err_name_exists":           "En databas med namnet '{name}' finns redan.",
+    "db_err_mkdir_failed":          "Kunde inte skapa mappen:\n{path}",
+    "db_err_dir_not_found":         "Mappen finns inte:\n{path}",
+    "db_err_no_write_permission":   "Ingen skrivbehörighet för mappen:\n{path}",
+    "db_err_create_failed":         "Kunde inte skapa databasen.",
+    "db_err_file_not_found":        "Databasfilen hittades inte:\n{path}",
+    "db_err_remove_active":         "Den aktiva databasen kan inte tas bort från listan.",
+    "db_err_delete_active":         "Den aktiva databasen kan inte raderas — byt till en annan först.",
+    "db_err_delete_partial":        "Databasen har tagits bort från listan, men vissa filer kunde inte raderas:",
+    "db_delete_active_error":       "Kan inte radera '{name}' eftersom det är den aktiva databasen.\n\nByt till en annan databas först.",
+
     # ── Column dialog ─────────────────────────────────────────────────────────
     "column_dialog_hint":           "Välj vilka kolumner som ska visas i cachelistan.\nGC Kod och Namn visas alltid.",
     "column_select_all":            "Välj alla",

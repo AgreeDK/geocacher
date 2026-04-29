@@ -290,6 +290,18 @@ STRINGS: dict[str, str] = {
     "db_rename_label":              "Nový název:",
     "db_open_browse_title":         "Otevřít databázi",
 
+    # ── Chybové zprávy databáze ──────────────────────────────────────────────
+    "db_err_name_exists":           "Databáze s názvem '{name}' již existuje.",
+    "db_err_mkdir_failed":          "Nelze vytvořit složku:\n{path}",
+    "db_err_dir_not_found":         "Složka neexistuje:\n{path}",
+    "db_err_no_write_permission":   "Nemáte oprávnění k zápisu do složky:\n{path}",
+    "db_err_create_failed":         "Nepodařilo se vytvořit databázi.",
+    "db_err_file_not_found":        "Soubor databáze nebyl nalezen:\n{path}",
+    "db_err_remove_active":         "Aktivní databázi nelze odebrat ze seznamu.",
+    "db_err_delete_active":         "Aktivní databázi nelze smazat — nejprve přepněte na jinou.",
+    "db_err_delete_partial":        "Databáze byla odebrána ze seznamu, ale některé soubory se nepodařilo smazat:",
+    "db_delete_active_error":       "Nelze smazat '{name}', protože je to aktivní databáze.\n\nNejprve přepněte na jinou databázi.",
+
     # ── Column dialog ─────────────────────────────────────────────────────────
     "column_dialog_hint":           "Vyberte, které sloupce zobrazit v seznamu keší.\\nGC kód a Název nelze skrýt.",
     "column_select_all":            "Vybrat vše",

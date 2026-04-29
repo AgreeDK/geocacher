@@ -14,6 +14,8 @@ from typing import Optional
 
 from PySide6.QtCore import QSettings
 
+from opensak.lang import tr
+
 
 class DatabaseInfo:
     """Metadata om en enkelt database."""
@@ -187,7 +189,7 @@ class DatabaseManager:
     def new_database(self, name: str, path: Optional[Path] = None) -> "DatabaseInfo":
         """Opret en ny tom database."""
         if self._find_by_name(name):
-            raise ValueError(f"En database med navnet '{name}' eksisterer allerede")
+            raise ValueError(tr("db_err_name_exists", name=name))
 
         if path is None:
             from opensak.config import get_app_data_dir
@@ -197,8 +199,34 @@ class DatabaseManager:
             path = get_app_data_dir() / f"{safe_name}.db"
 
         path = Path(path)
+
+        # Sørg for at mappen eksisterer og er skrivbar
+        parent = path.parent
+        try:
+            parent.mkdir(parents=True, exist_ok=True)
+        except OSError as e:
+            raise ValueError(
+                tr("db_err_mkdir_failed", path=parent) + f"\n{e}"
+            )
+
+        if not parent.is_dir():
+            raise ValueError(tr("db_err_dir_not_found", path=parent))
+
+        # Tjek skriverettigheder ved at prøve at oprette en midlertidig fil
+        test_file = parent / f".opensak_write_test_{name}"
+        try:
+            test_file.touch()
+            test_file.unlink()
+        except OSError:
+            raise ValueError(tr("db_err_no_write_permission", path=parent))
+
         from opensak.db.database import init_db
-        init_db(db_path=path)
+        try:
+            init_db(db_path=path)
+        except Exception as e:
+            raise ValueError(
+                tr("db_err_create_failed") + f"\n{e}"
+            )
 
         # Genaktiver den nuværende database bagefter
         if self._active:
@@ -213,7 +241,7 @@ class DatabaseManager:
         """Åbn en eksisterende .db fil og tilføj til listen."""
         path = Path(path)
         if not path.exists():
-            raise FileNotFoundError(f"Database ikke fundet: {path}")
+            raise FileNotFoundError(tr("db_err_file_not_found", path=path))
 
         existing = self._find_by_path(path)
         if existing:
@@ -241,7 +269,7 @@ class DatabaseManager:
     def rename(self, db_info: "DatabaseInfo", new_name: str) -> None:
         """Omdøb en database (kun navnet)."""
         if self._find_by_name(new_name) and new_name != db_info.name:
-            raise ValueError(f"En database med navnet '{new_name}' eksisterer allerede")
+            raise ValueError(tr("db_err_name_exists", name=new_name))
         db_info.name = new_name
         self._save_to_settings()
 
@@ -249,7 +277,7 @@ class DatabaseManager:
                       new_path: Optional[Path] = None) -> "DatabaseInfo":
         """Lav en kopi af en database."""
         if self._find_by_name(new_name):
-            raise ValueError(f"En database med navnet '{new_name}' eksisterer allerede")
+            raise ValueError(tr("db_err_name_exists", name=new_name))
 
         if new_path is None:
             from opensak.config import get_app_data_dir
@@ -267,18 +295,37 @@ class DatabaseManager:
     def remove_from_list(self, db_info: "DatabaseInfo") -> None:
         """Fjern database fra listen uden at slette filen."""
         if db_info == self._active:
-            raise ValueError("Kan ikke fjerne den aktive database fra listen")
+            raise ValueError(tr("db_err_remove_active"))
         self._databases.remove(db_info)
         self._save_to_settings()
 
     def delete_database(self, db_info: "DatabaseInfo") -> None:
-        """Slet database permanent."""
+        """Slet database permanent (inkl. -shm og -wal filer)."""
         if db_info == self._active:
             raise ValueError(
-                "Kan ikke slette den aktive database — skift til en anden først"
+                tr("db_err_delete_active")
             )
-        if db_info.path.exists():
-            db_info.path.unlink()
+
+        errors: list[str] = []
+        db_path = db_info.path
+
+        # Slet hovedfilen + WAL/SHM sidekick-filer
+        for suffix in ("", "-shm", "-wal"):
+            f = Path(str(db_path) + suffix)
+            if f.exists():
+                try:
+                    f.unlink()
+                except OSError as e:
+                    errors.append(f"{f.name}: {e}")
+
+        if errors:
+            # Fjern alligevel fra listen, men fortæl brugeren
+            self._databases.remove(db_info)
+            self._save_to_settings()
+            raise OSError(
+                tr("db_err_delete_partial") + "\n" + "\n".join(errors)
+            )
+
         self._databases.remove(db_info)
         self._save_to_settings()
 
