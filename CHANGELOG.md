@@ -14,6 +14,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.10] — 2026-04-29
+### Fixed
+- Fix: database delete removes shm/wal files (#120) , translate all error messages
+- Fix: validate path permissions (#121)
+- translate all error messages
+
+---
+
 ## [1.11.9] — 2026-04-28
 ### Fixed
 - Fixed crash when deleting caches: child records (logs, attributes, trackables, waypoints, user notes) are now deleted before the parent cache to prevent FOREIGN KEY constraint errors and orphaned data
