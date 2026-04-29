@@ -148,6 +148,8 @@ STRINGS: dict[str, str] = {
     "filter_tab_general":           "Général",
     "filter_tab_dates":             "Dates",
     "filter_tab_attributes":        "Attributs",
+    "filter_tab_where":             "Where",
+    "filter_where_sql_placeholder": "Saisir une clause SQL WHERE…",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Envoyer au GPS",

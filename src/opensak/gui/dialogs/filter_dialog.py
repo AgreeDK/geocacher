@@ -20,11 +20,12 @@ from PySide6.QtWidgets import (
     QComboBox, QDoubleSpinBox, QTabWidget, QWidget,
     QGroupBox, QScrollArea, QGridLayout,
     QDialogButtonBox, QMessageBox, QInputDialog,
-    QDateEdit, QSizePolicy, QFrame
+    QDateEdit, QSizePolicy, QFrame, QPlainTextEdit
 )
 from PySide6.QtCore import QDate
 
 from opensak.lang import tr
+from opensak.utils import flags
 from opensak.filters.engine import (
     FilterSet, SortSpec,
     CacheTypeFilter, ContainerFilter,
@@ -257,9 +258,16 @@ class FilterDialog(QDialog):
 
         # ── Faneblade ─────────────────────────────────────────────────────────
         self._tabs = QTabWidget()
-        self._tabs.addTab(self._build_general_tab(), tr("filter_tab_general"))
-        self._tabs.addTab(self._build_dates_tab(), tr("filter_tab_dates"))
-        self._tabs.addTab(self._build_attributes_tab(), tr("filter_tab_attributes"))
+        self._where_tab = None
+        if flags.where_filter:
+            self._where_tab = self._build_where_tab()
+            self._tabs.addTab(self._where_tab, tr("filter_tab_where"))
+        self._general_tab = self._build_general_tab()
+        self._dates_tab = self._build_dates_tab()
+        self._attributes_tab = self._build_attributes_tab()
+        self._tabs.addTab(self._general_tab, tr("filter_tab_general"))
+        self._tabs.addTab(self._dates_tab, tr("filter_tab_dates"))
+        self._tabs.addTab(self._attributes_tab, tr("filter_tab_attributes"))
         layout.addWidget(self._tabs)
 
         # ── Knapper ───────────────────────────────────────────────────────────
@@ -594,6 +602,35 @@ class FilterDialog(QDialog):
         outer_layout.addWidget(scroll)
         return outer
 
+    def _build_where_tab(self) -> QWidget:
+        """Where filter fane — tre SQL-felter (General, Dates, Attributes)."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+        layout.setSpacing(6)
+        layout.setContentsMargins(10, 10, 10, 10)
+
+        for label_key, attr in (
+            ("filter_tab_general",    "_where_sql_general"),
+            ("filter_tab_dates",      "_where_sql_dates"),
+            ("filter_tab_attributes", "_where_sql_attributes"),
+        ):
+            toggle = QPushButton(tr(label_key))
+            toggle.setCheckable(True)
+            toggle.setFlat(True)
+            toggle.setStyleSheet("text-align: left; font-weight: bold;")
+            layout.addWidget(toggle)
+
+            editor = QPlainTextEdit()
+            editor.setPlaceholderText(tr("filter_where_sql_placeholder"))
+            editor.setMaximumHeight(90)
+            editor.setVisible(False)
+            toggle.toggled.connect(editor.setVisible)
+            layout.addWidget(editor)
+            setattr(self, attr, editor)
+
+        layout.addStretch()
+        return widget
+
     # ── Slots ─────────────────────────────────────────────────────────────────
 
     def _on_dist_toggled(self, checked: bool) -> None:
@@ -641,12 +678,15 @@ class FilterDialog(QDialog):
         self._reset_attributes()
 
     def _reset_current_tab(self) -> None:
-        idx = self._tabs.currentIndex()
-        if idx == 0:
+        tab = self._tabs.currentWidget()
+        if tab is self._where_tab:
+            for attr in ("_where_sql_general", "_where_sql_dates", "_where_sql_attributes"):
+                getattr(self, attr).clear()
+        elif tab is self._general_tab:
             self._reset_general()
-        elif idx == 1:
+        elif tab is self._dates_tab:
             self._reset_dates()
-        elif idx == 2:
+        elif tab is self._attributes_tab:
             self._reset_attributes()
 
     # ── Byg FilterSet fra UI ──────────────────────────────────────────────────

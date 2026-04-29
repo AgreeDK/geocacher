@@ -148,6 +148,8 @@ STRINGS: dict[str, str] = {
     "filter_tab_general":           "Obecné",
     "filter_tab_dates":             "Data",
     "filter_tab_attributes":        "Atributy",
+    "filter_tab_where":             "Where",
+    "filter_where_sql_placeholder": "Napište SQL klauzuli WHERE…",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Odeslat do GPS",
