@@ -149,7 +149,11 @@ STRINGS: dict[str, str] = {
     "filter_tab_dates":             "Datum",
     "filter_tab_attributes":        "Attribute",
     "filter_tab_where":             "Where",
-    "filter_where_sql_placeholder": "SQL-WHERE-Klausel eingeben…",
+    "filter_where_description":     "Geocaches mit einer SQL-WHERE-Klausel gegen die caches-Tabelle filtern.",
+    "filter_where_sql_placeholder": "z. B.  difficulty >= 4 AND terrain >= 4",
+    "filter_where_info_tooltip":    "Verfügbare Spalten und Beispiele anzeigen",
+    "filter_where_info_title":      "SQL-Spaltenreferenz",
+    "filter_where_error_prefix":    "SQL-Fehler:",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "An GPS senden",

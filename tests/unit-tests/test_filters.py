@@ -20,8 +20,9 @@ from opensak.filters.engine import (
     CountryFilter, StateFilter, CountyFilter, NameFilter, GcCodeFilter, PlacedByFilter,
     DistanceFilter, AttributeFilter, HasTrackableFilter,
     PremiumFilter, NonPremiumFilter,
+    WhereClauseFilter,
     # Helpers
-    _haversine_km, FILTER_REGISTRY, SORT_FIELDS,
+    _haversine_km, _iter_filters, FILTER_REGISTRY, SORT_FIELDS,
 )
 
 
@@ -494,3 +495,206 @@ def test_limit(tmp_db):
     with get_session() as s:
         results = apply_filters(s, limit=3)
     assert len(results) == 3
+
+
+# ── WhereClauseFilter — class behaviour (pure, no DB) ─────────────────────────
+
+class TestWhereClauseFilterClass:
+    def test_in_registry(self):
+        assert "where_clause" in FILTER_REGISTRY
+        assert FILTER_REGISTRY["where_clause"] is WhereClauseFilter
+
+    def test_to_dict(self):
+        f = WhereClauseFilter("difficulty >= 3")
+        assert f.to_dict() == {"filter_type": "where_clause", "sql": "difficulty >= 3"}
+
+    def test_from_dict(self):
+        f = WhereClauseFilter.from_dict({"filter_type": "where_clause", "sql": "terrain < 2"})
+        assert f.sql == "terrain < 2"
+
+    def test_roundtrip(self):
+        f = WhereClauseFilter("difficulty >= 3 AND country = 'Denmark'")
+        restored = FILTER_REGISTRY["where_clause"].from_dict(f.to_dict())
+        assert restored.to_dict() == f.to_dict()
+
+    def test_empty_sql_roundtrip(self):
+        f = WhereClauseFilter("")
+        restored = WhereClauseFilter.from_dict(f.to_dict())
+        assert restored.sql == ""
+
+    def test_sql_is_stripped_on_init(self):
+        f = WhereClauseFilter("  difficulty >= 3  ")
+        assert f.sql == "difficulty >= 3"
+
+    def test_matches_returns_true_when_no_prerun(self, make_cache):
+        """_matching_ids is None before any apply_filters call — pass everything."""
+        f = WhereClauseFilter("difficulty >= 3")
+        assert f._matching_ids is None
+        assert f.matches(make_cache()) is True
+
+    def test_matches_true_when_id_in_set(self):
+        f = WhereClauseFilter("difficulty >= 3")
+        f._matching_ids = {42}
+        c = Cache(id=42, gc_code="GC00001", name="X",
+                  cache_type="Traditional Cache", latitude=0.0, longitude=0.0)
+        assert f.matches(c) is True
+
+    def test_matches_false_when_id_not_in_set(self):
+        f = WhereClauseFilter("difficulty >= 3")
+        f._matching_ids = {42}
+        c = Cache(id=99, gc_code="GC00002", name="Y",
+                  cache_type="Traditional Cache", latitude=0.0, longitude=0.0)
+        assert f.matches(c) is False
+
+    def test_empty_set_excludes_all(self):
+        f = WhereClauseFilter("difficulty >= 99")
+        f._matching_ids = set()
+        c = Cache(id=1, gc_code="GC00001", name="X",
+                  cache_type="Traditional Cache", latitude=0.0, longitude=0.0)
+        assert f.matches(c) is False
+
+    def test_filter_type_constant(self):
+        assert WhereClauseFilter.filter_type == "where_clause"
+
+    def test_serialisation_in_global_roundtrip(self):
+        """WhereClauseFilter participates correctly in the global serialisation test."""
+        f = WhereClauseFilter("placed_by = 'OwnerA'")
+        data = f.to_dict()
+        ftype = data["filter_type"]
+        assert ftype in FILTER_REGISTRY
+        restored = FILTER_REGISTRY[ftype].from_dict(data)
+        assert restored.to_dict() == data
+
+
+# ── _iter_filters helper ───────────────────────────────────────────────────────
+
+class TestIterFilters:
+    def test_flat_yields_all_leaves(self):
+        f1 = CacheTypeFilter(["Traditional Cache"])
+        f2 = DifficultyFilter(max_difficulty=3.0)
+        fs = FilterSet(mode="AND")
+        fs.add(f1)
+        fs.add(f2)
+        assert list(_iter_filters(fs)) == [f1, f2]
+
+    def test_nested_yields_all_leaves_recursively(self):
+        f1 = CacheTypeFilter(["Traditional Cache"])
+        f2 = DifficultyFilter(max_difficulty=3.0)
+        f3 = FoundFilter()
+        inner = FilterSet(mode="OR")
+        inner.add(f2)
+        inner.add(f3)
+        outer = FilterSet(mode="AND")
+        outer.add(f1)
+        outer.add(inner)
+        assert list(_iter_filters(outer)) == [f1, f2, f3]
+
+    def test_empty_filterset_yields_nothing(self):
+        assert list(_iter_filters(FilterSet())) == []
+
+    def test_where_clause_found_inside_nested(self):
+        wf = WhereClauseFilter("difficulty >= 3")
+        inner = FilterSet(mode="OR")
+        inner.add(wf)
+        outer = FilterSet(mode="AND")
+        outer.add(CacheTypeFilter(["Traditional Cache"]))
+        outer.add(inner)
+        result = list(_iter_filters(outer))
+        assert wf in result
+        assert len(result) == 2
+
+    def test_deeply_nested(self):
+        f1 = FoundFilter()
+        f2 = ArchivedFilter()
+        f3 = PremiumFilter()
+        level3 = FilterSet()
+        level3.add(f3)
+        level2 = FilterSet()
+        level2.add(f2)
+        level2.add(level3)
+        level1 = FilterSet()
+        level1.add(f1)
+        level1.add(level2)
+        assert list(_iter_filters(level1)) == [f1, f2, f3]
+
+
+# ── WhereClauseFilter integration with apply_filters ─────────────────────────
+
+def test_where_clause_valid_sql_filters(tmp_db):
+    """Valid SQL narrows results; only caches whose difficulty >= 4.0 pass."""
+    with get_session() as s:
+        fs = FilterSet().add(WhereClauseFilter("difficulty >= 4.0"))
+        results = apply_filters(s, fs)
+    codes = {c.gc_code for c in results}
+    assert "GC00002" in codes      # D=5.0
+    assert "GC00001" not in codes  # D=1.5
+    assert "GC00003" not in codes  # D=3.0
+
+
+def test_where_clause_string_column(tmp_db):
+    """String column filter: country = 'Germany' returns only GC00005."""
+    with get_session() as s:
+        fs = FilterSet().add(WhereClauseFilter("country = 'Germany'"))
+        results = apply_filters(s, fs)
+    codes = {c.gc_code for c in results}
+    assert "GC00005" in codes
+    assert len(codes) == 1
+
+
+def test_where_clause_invalid_sql_returns_empty(tmp_db):
+    """Invalid SQL silently produces zero matches (no exception raised)."""
+    with get_session() as s:
+        fs = FilterSet().add(WhereClauseFilter("this is NOT valid SQL!!!"))
+        results = apply_filters(s, fs)
+    assert results == []
+
+
+def test_where_clause_empty_sql_passes_all(tmp_db):
+    """Empty SQL string skips the pre-run; _matching_ids stays None → all pass."""
+    with get_session() as s:
+        all_results = apply_filters(s)
+        filtered = apply_filters(s, FilterSet().add(WhereClauseFilter("")))
+    assert len(filtered) == len(all_results)
+
+
+def test_where_clause_combined_with_type_filter(tmp_db):
+    """WhereClauseFilter AND CacheTypeFilter: both constraints must be satisfied."""
+    with get_session() as s:
+        fs = FilterSet(mode="AND")
+        fs.add(CacheTypeFilter(["Traditional Cache"]))
+        fs.add(WhereClauseFilter("difficulty <= 2.0"))
+        results = apply_filters(s, fs)
+    codes = {c.gc_code for c in results}
+    assert "GC00001" in codes      # Traditional, D=1.5
+    assert "GC00004" in codes      # Traditional, D=2.0 (archived but matches both)
+    assert "GC00005" in codes      # Traditional, D=1.0
+    assert "GC00002" not in codes  # Unknown Cache — excluded by type filter
+    assert "GC00003" not in codes  # Multi-cache — excluded by type filter
+
+
+def test_where_clause_in_nested_filterset(tmp_db):
+    """_iter_filters reaches WhereClauseFilter nested inside another FilterSet."""
+    with get_session() as s:
+        inner = FilterSet(mode="AND")
+        inner.add(WhereClauseFilter("difficulty >= 4.0"))
+        outer = FilterSet(mode="AND")
+        outer.add(inner)
+        results = apply_filters(s, outer)
+    codes = {c.gc_code for c in results}
+    assert "GC00002" in codes      # D=5.0
+    assert "GC00001" not in codes  # D=1.5
+
+
+def test_where_clause_profile_save_load(tmp_path):
+    """FilterProfile containing WhereClauseFilter round-trips the SQL through JSON."""
+    sql = "difficulty >= 3 AND terrain <= 4"
+    fs = FilterSet()
+    fs.add(WhereClauseFilter(sql))
+    saved = FilterProfile("where-test", fs).save(profiles_dir=tmp_path)
+    loaded = FilterProfile.load(saved)
+    where_filters = [
+        f for f in _iter_filters(loaded.filterset)
+        if isinstance(f, WhereClauseFilter)
+    ]
+    assert len(where_filters) == 1
+    assert where_filters[0].sql == sql

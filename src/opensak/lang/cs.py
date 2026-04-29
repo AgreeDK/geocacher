@@ -149,7 +149,11 @@ STRINGS: dict[str, str] = {
     "filter_tab_dates":             "Data",
     "filter_tab_attributes":        "Atributy",
     "filter_tab_where":             "Where",
-    "filter_where_sql_placeholder": "Napište SQL klauzuli WHERE…",
+    "filter_where_description":     "Filtrujte cache pomocí SQL klauzule WHERE přímo nad tabulkou caches.",
+    "filter_where_sql_placeholder": "např.  difficulty >= 4 AND terrain >= 4",
+    "filter_where_info_tooltip":    "Zobrazit dostupné sloupce a příklady",
+    "filter_where_info_title":      "Přehled SQL sloupců",
+    "filter_where_error_prefix":    "Chyba SQL:",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_dialog_title":             "Odeslat do GPS",

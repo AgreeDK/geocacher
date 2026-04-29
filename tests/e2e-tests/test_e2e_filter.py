@@ -165,3 +165,178 @@ def test_clear_filter_removes_advanced_filter(seeded_window, qtbot):
 
     assert window._cache_table.row_count() == TOTAL
     assert window._filter_lbl.text() == ""
+
+
+# ── WhereClauseFilter integration via _on_filter_applied ──────────────────────
+
+
+def test_where_clause_filter_reduces_row_count(seeded_window, qtbot):
+    """WhereClauseFilter passed to _on_filter_applied narrows the visible rows.
+
+    Seeded DB: GC12345 (D=2.0), GC99999 (D=4.0), GCAAA01 (D=2.0), GCAAA02 (D=4.0).
+    difficulty >= 4.0 should keep GC99999 and GCAAA02 only.
+    """
+    from opensak.filters.engine import FilterSet, SortSpec, WhereClauseFilter
+
+    window = seeded_window
+    assert window._cache_table.row_count() == TOTAL
+
+    fs = FilterSet()
+    fs.add(WhereClauseFilter("difficulty >= 4.0"))
+    window._on_filter_applied(fs, SortSpec("name", ascending=True), "High D")
+    qtbot.wait(50)
+
+    assert window._cache_table.row_count() == 2
+
+
+def test_where_clause_invalid_sql_hides_all_rows(seeded_window, qtbot):
+    """Invalid SQL produces zero matches — the table empties without crashing."""
+    from opensak.filters.engine import FilterSet, SortSpec, WhereClauseFilter
+
+    window = seeded_window
+
+    fs = FilterSet()
+    fs.add(WhereClauseFilter("NOT VALID SQL @@@"))
+    window._on_filter_applied(fs, SortSpec("name"), "Bad SQL")
+    qtbot.wait(50)
+
+    assert window._cache_table.row_count() == 0
+
+
+def test_where_clause_clear_restores_full_count(seeded_window, qtbot):
+    """After applying a WHERE filter, _clear_filter restores all rows."""
+    from opensak.filters.engine import FilterSet, SortSpec, WhereClauseFilter
+
+    window = seeded_window
+
+    fs = FilterSet()
+    fs.add(WhereClauseFilter("difficulty >= 4.0"))
+    window._on_filter_applied(fs, SortSpec("name"), "High D")
+    qtbot.wait(50)
+    assert window._cache_table.row_count() == 2
+
+    window._clear_filter()
+    qtbot.wait(50)
+
+    assert window._cache_table.row_count() == TOTAL
+
+
+# ── FilterDialog WHERE tab (requires where_filter flag) ───────────────────────
+
+
+def test_where_tab_absent_when_flag_disabled(seeded_window, qtbot, monkeypatch):
+    """FilterDialog has no WHERE tab when flags.where_filter is False."""
+    from opensak.utils import flags
+    from opensak.gui.dialogs.filter_dialog import FilterDialog
+
+    monkeypatch.setattr(flags, "where_filter", False)
+
+    dialog = FilterDialog(parent=seeded_window)
+    qtbot.addWidget(dialog)
+
+    assert dialog._where_tab is None
+    dialog.close()
+
+
+def test_where_tab_present_when_flag_enabled(seeded_window, qtbot, monkeypatch):
+    """FilterDialog shows a WHERE tab when flags.where_filter is True."""
+    from opensak.utils import flags
+    from opensak.gui.dialogs.filter_dialog import FilterDialog
+
+    monkeypatch.setattr(flags, "where_filter", True)
+
+    dialog = FilterDialog(parent=seeded_window)
+    qtbot.addWidget(dialog)
+
+    assert dialog._where_tab is not None
+    tab_labels = [dialog._tabs.tabText(i) for i in range(dialog._tabs.count())]
+    assert any("where" in t.lower() or "sql" in t.lower() for t in tab_labels)
+    dialog.close()
+
+
+def test_where_tab_builds_where_clause_filter(seeded_window, qtbot, monkeypatch):
+    """Entering SQL in the WHERE tab produces a WhereClauseFilter in the FilterSet."""
+    from opensak.utils import flags
+    from opensak.gui.dialogs.filter_dialog import FilterDialog
+    from opensak.filters.engine import WhereClauseFilter, _iter_filters
+
+    monkeypatch.setattr(flags, "where_filter", True)
+
+    dialog = FilterDialog(parent=seeded_window)
+    qtbot.addWidget(dialog)
+
+    dialog._where_sql_general.setPlainText("difficulty >= 3")
+    fs = dialog._build_filterset()
+
+    where_filters = [f for f in _iter_filters(fs) if isinstance(f, WhereClauseFilter)]
+    assert len(where_filters) == 1
+    assert where_filters[0].sql == "difficulty >= 3"
+    dialog.close()
+
+
+def test_where_tab_empty_sql_adds_no_filter(seeded_window, qtbot, monkeypatch):
+    """An empty WHERE text field does not add a WhereClauseFilter to the set."""
+    from opensak.utils import flags
+    from opensak.gui.dialogs.filter_dialog import FilterDialog
+    from opensak.filters.engine import WhereClauseFilter, _iter_filters
+
+    monkeypatch.setattr(flags, "where_filter", True)
+
+    dialog = FilterDialog(parent=seeded_window)
+    qtbot.addWidget(dialog)
+
+    dialog._where_sql_general.setPlainText("")
+    fs = dialog._build_filterset()
+
+    where_filters = [f for f in _iter_filters(fs) if isinstance(f, WhereClauseFilter)]
+    assert len(where_filters) == 0
+    dialog.close()
+
+
+def test_where_tab_reset_clears_sql(seeded_window, qtbot, monkeypatch):
+    """_reset_all() empties the WHERE SQL field and hides the error label."""
+    from opensak.utils import flags
+    from opensak.gui.dialogs.filter_dialog import FilterDialog
+
+    monkeypatch.setattr(flags, "where_filter", True)
+
+    dialog = FilterDialog(parent=seeded_window)
+    qtbot.addWidget(dialog)
+
+    dialog._where_sql_general.setPlainText("difficulty >= 3")
+    dialog._reset_all()
+
+    assert dialog._where_sql_general.toPlainText() == ""
+    assert not dialog._where_error_label.isVisible()
+    dialog.close()
+
+
+def test_where_tab_validate_valid_sql_returns_none(seeded_window, qtbot, monkeypatch):
+    """_validate_where_sql returns None for syntactically valid SQL."""
+    from opensak.utils import flags
+    from opensak.gui.dialogs.filter_dialog import FilterDialog
+
+    monkeypatch.setattr(flags, "where_filter", True)
+
+    dialog = FilterDialog(parent=seeded_window)
+    qtbot.addWidget(dialog)
+
+    error = dialog._validate_where_sql("difficulty >= 3")
+    assert error is None
+    dialog.close()
+
+
+def test_where_tab_validate_invalid_sql_returns_error(seeded_window, qtbot, monkeypatch):
+    """_validate_where_sql returns a non-empty error string for bad SQL."""
+    from opensak.utils import flags
+    from opensak.gui.dialogs.filter_dialog import FilterDialog
+
+    monkeypatch.setattr(flags, "where_filter", True)
+
+    dialog = FilterDialog(parent=seeded_window)
+    qtbot.addWidget(dialog)
+
+    error = dialog._validate_where_sql("NOT VALID SQL @@@")
+    assert error is not None
+    assert len(error) > 0
+    dialog.close()
