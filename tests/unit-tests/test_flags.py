@@ -2,41 +2,9 @@
 tests/unit-tests/test_flags.py — Feature flag resolution tests.
 """
 
-import json
-
 import pytest
 
 import opensak.utils.flags as flags_module
-
-
-@pytest.fixture(autouse=True)
-def reset_flags():
-    """Re-run _load() after each test so state doesn't bleed between tests."""
-    yield
-    flags_module._flags = flags_module._load()
-    flags_module.where_filter = flags_module._flags["where-filter"]
-
-
-@pytest.fixture()
-def patch_features_file(tmp_path, monkeypatch):
-    """Write a tmp features.json and reload flags."""
-
-    def _write(data: dict):
-        f = tmp_path / "features.json"
-        f.write_text(json.dumps(data), encoding="utf-8")
-        monkeypatch.setattr(flags_module, "_FEATURES_FILE", f)
-        flags_module._flags = flags_module._load()
-        flags_module.where_filter = flags_module._flags["where-filter"]
-
-    return _write
-
-
-@pytest.fixture()
-def no_features_file(tmp_path, monkeypatch):
-    """Point the module at a path where features.json does not exist."""
-    monkeypatch.setattr(flags_module, "_FEATURES_FILE", tmp_path / "features.json")
-    flags_module._flags = flags_module._load()
-    flags_module.where_filter = flags_module._flags["where-filter"]
 
 
 # ── _load() ───────────────────────────────────────────────────────────────────
@@ -86,41 +54,28 @@ class TestWhereFilter:
 
 
 class TestParseArgv:
-    def _reload(self, monkeypatch, argv, tmp_path):
-        """Helper: set sys.argv, point at empty features file, reload."""
-        monkeypatch.setattr("sys.argv", ["run.py"] + argv)
-        monkeypatch.setattr(flags_module, "_FEATURES_FILE", tmp_path / "features.json")
-        flags_module._flags = flags_module._load()
-        flags_module.where_filter = flags_module._flags["where-filter"]
-
-    def test_space_separated_true(self, monkeypatch, tmp_path, no_features_file):
+    def test_space_separated_true(self, monkeypatch, no_features_file):
         monkeypatch.setattr("sys.argv", ["run.py", "--feature", "where-filter=true"])
-        result = flags_module._parse_argv()
-        assert result == {"where-filter": True}
+        assert flags_module._parse_argv() == {"where-filter": True}
 
     def test_space_separated_false(self, monkeypatch, no_features_file):
         monkeypatch.setattr("sys.argv", ["run.py", "--feature", "where-filter=false"])
-        result = flags_module._parse_argv()
-        assert result == {"where-filter": False}
+        assert flags_module._parse_argv() == {"where-filter": False}
 
     def test_equals_form(self, monkeypatch, no_features_file):
         monkeypatch.setattr("sys.argv", ["run.py", "--feature=where-filter=true"])
-        result = flags_module._parse_argv()
-        assert result == {"where-filter": True}
+        assert flags_module._parse_argv() == {"where-filter": True}
 
-    def test_multiple_features(self, monkeypatch, no_features_file):
+    def test_multiple_features_last_wins(self, monkeypatch, no_features_file):
         monkeypatch.setattr(
             "sys.argv",
             ["run.py", "--feature", "where-filter=true", "--feature", "where-filter=false"],
         )
-        result = flags_module._parse_argv()
-        # last one wins
-        assert result == {"where-filter": False}
+        assert flags_module._parse_argv() == {"where-filter": False}
 
     def test_unknown_flag_name_ignored(self, monkeypatch, no_features_file):
         monkeypatch.setattr("sys.argv", ["run.py", "--feature", "nonexistent=true"])
-        result = flags_module._parse_argv()
-        assert result == {}
+        assert flags_module._parse_argv() == {}
 
     def test_argv_overrides_features_file(self, monkeypatch, patch_features_file):
         patch_features_file({"where-filter": False})
@@ -132,11 +87,9 @@ class TestParseArgv:
     def test_falsy_values(self, monkeypatch, no_features_file):
         for val in ("0", "false", "no", "False", "NO"):
             monkeypatch.setattr("sys.argv", ["run.py", "--feature", f"where-filter={val}"])
-            result = flags_module._parse_argv()
-            assert result == {"where-filter": False}, f"failed for value '{val}'"
+            assert flags_module._parse_argv() == {"where-filter": False}, f"failed for '{val}'"
 
     def test_truthy_values(self, monkeypatch, no_features_file):
         for val in ("1", "true", "yes", "True", "YES", "on"):
             monkeypatch.setattr("sys.argv", ["run.py", "--feature", f"where-filter={val}"])
-            result = flags_module._parse_argv()
-            assert result == {"where-filter": True}, f"failed for value '{val}'"
+            assert flags_module._parse_argv() == {"where-filter": True}, f"failed for '{val}'"
