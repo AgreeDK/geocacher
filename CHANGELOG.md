@@ -14,6 +14,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.17] — 2026-04-30
+### Added
+- **Where-filter** (closes #17) — a powerful SQL-based OR filter that mirrors GSAK's
+  "Where" functionality. Instead of chaining multiple passes through the database,
+  a single filter expression combines any number of conditions (cache type, D/T,
+  hidden date, size, attributes, …) into one efficient query. Contributed by Fabio.
+- **Database switcher dropdown** in the toolbar (closes #17) — switch between databases
+  directly from the toolbar without opening the Database Manager dialog. The active
+  database is always pre-selected; choosing another entry switches immediately.
+  Contributed by Fabio.
+
+---
+
 ## [1.11.16] — 2026-04-30
 ### Added
 - **Custom Waypoint support** (fixes #141) — the Add/Edit cache dialog now supports

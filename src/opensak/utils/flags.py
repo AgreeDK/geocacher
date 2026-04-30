@@ -28,8 +28,8 @@ from pathlib import Path
 _FEATURES_FILE: Path = Path(__file__).parent.parent.parent.parent / "features.json"
 
 _RELEASE_DEFAULTS: dict[str, bool] = {
-    "where-filter": False,
-    "db-combo": False,
+    "where-filter": True,
+    "db-combo": True,
 }
 
 
