@@ -255,6 +255,20 @@ def _run_migrations(engine: Engine) -> None:
             print(f"Migration: tilføjede caches.log_count og opdaterede {result.rowcount} caches")
 
 
+        # ── Migration 7: Nano → Micro (data normalisation) ───────────────────
+        # "Nano" is not an official Geocaching.com container size — it is an
+        # informal community term for very small Micro caches (< 10 ml).
+        # Geocaching.com exports these as "Micro" in GPX/PQ files. Only GSAK
+        # databases may contain "Nano". We convert silently so the filter
+        # dialog and sort order work correctly without re-importing.
+        result = conn.execute(text(
+            "UPDATE caches SET container = 'Micro' WHERE container = 'Nano'"
+        ))
+        if result.rowcount:
+            conn.commit()
+            print(f"Migration: konverterede {result.rowcount} 'Nano' container værdier til 'Micro'")
+
+
 def dispose_engine(db_path: Path | None = None) -> None:
     """
     Luk og frigiv SQLAlchemy connection pool for en given database-sti.

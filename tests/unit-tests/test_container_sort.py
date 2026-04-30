@@ -4,7 +4,7 @@ tests/unit-tests/test_container_sort.py — Tests for issue #90.
 Verifies that the Container column sorts by visual grouping:
 
   Group 1: Physical containers (smallest → largest)
-           Nano → Micro → Small → Regular → Large
+           Micro → Small → Regular → Large
 
   Group 2: Empty bars + letter (alphabetic by the letter)
            EarthCache  → 'E'
@@ -46,25 +46,25 @@ class TestContainerSortKey:
 
     def test_returns_tuple(self):
         """Sort key must always be a tuple for stable composite ordering."""
-        result = _container_sort_key("Nano")
+        result = _container_sort_key("Micro")
         assert isinstance(result, tuple)
         assert len(result) == 2
 
     def test_physical_containers_in_size_order(self):
         """Physical containers must be ordered from smallest to largest."""
         order = [
-            _container_sort_key("Nano"),
+            
             _container_sort_key("Micro"),
             _container_sort_key("Small"),
             _container_sort_key("Regular"),
             _container_sort_key("Large"),
         ]
         assert order == sorted(order)
-        assert len(set(order)) == 5  # all distinct
+        assert len(set(order)) == 4  # all distinct
 
     def test_physical_containers_in_group_1(self):
         """All physical containers should be in group 1."""
-        for size in ("Nano", "Micro", "Small", "Regular", "Large"):
+        for size in ("Micro", "Small", "Regular", "Large"):
             assert _container_sort_key(size)[0] == 1
 
     def test_letter_types_in_group_2(self):
@@ -194,7 +194,7 @@ class TestSortStability:
             FakeCache("FAR_LARGE",    "Large"),    # 10km
         ]
         caches.sort(key=lambda c: _container_sort_key(c.container, c.cache_type))
-        # Small (sub_key 3) caches first, then Large (sub_key 5) — both group 1
+        # Small (sub_key 2) caches first, then Large (sub_key 4) — both group 1
         # Within each: distance order preserved (CLOSE before MID before FAR)
         assert [c.gc_code for c in caches] == [
             "CLOSE_SMALL",
@@ -223,7 +223,7 @@ class TestContainerSorting:
     """Verify that sorting a list of caches produces the expected order."""
 
     def test_ascending_sort_full_set(self):
-        """Mixed list produces: Nano → … → Large → E → L → O → V → Not chosen."""
+        """Mixed list produces: Micro → … → Large → E → L → O → V → Not chosen."""
         caches = [
             FakeCache("GC_LARGE",       "Large"),
             FakeCache("GC_MICRO",       "Micro"),
@@ -231,7 +231,6 @@ class TestContainerSorting:
             FakeCache("GC_VIRTUAL",     "Other",  cache_type="Virtual Cache"),
             FakeCache("GC_REGULAR",     "Regular"),
             FakeCache("GC_OTHER",       "Other"),
-            FakeCache("GC_NANO",        "Nano"),
             FakeCache("GC_EARTH",       "",       cache_type="EarthCache"),
             FakeCache("GC_LAB",         "Other",  cache_type="Lab Cache"),
             FakeCache("GC_SMALL",       "Small"),
@@ -241,11 +240,11 @@ class TestContainerSorting:
         # Group 1 (physical, smallest first), then group 2 (letters
         # alphabetically: E, L, O, V), then group 3 (empty/not chosen)
         assert order == [
-            "GC_NANO",       # group 1, sub 1
-            "GC_MICRO",      # group 1, sub 2
-            "GC_SMALL",      # group 1, sub 3
-            "GC_REGULAR",    # group 1, sub 4
-            "GC_LARGE",      # group 1, sub 5
+            
+            "GC_MICRO",      # group 1, sub 1
+            "GC_SMALL",      # group 1, sub 2
+            "GC_REGULAR",    # group 1, sub 3
+            "GC_LARGE",      # group 1, sub 4
             "GC_EARTH",      # group 2, 'E'
             "GC_LAB",        # group 2, 'L'
             "GC_OTHER",      # group 2, 'O'
@@ -256,7 +255,6 @@ class TestContainerSorting:
     def test_descending_sort_reverses(self):
         """Descending sort should produce the exact reverse order."""
         caches = [
-            FakeCache("GC_NANO",   "Nano"),
             FakeCache("GC_MICRO",  "Micro"),
             FakeCache("GC_LARGE",  "Large"),
         ]
@@ -264,7 +262,7 @@ class TestContainerSorting:
             key=lambda c: _container_sort_key(c.container, c.cache_type),
             reverse=True,
         )
-        assert [c.gc_code for c in caches] == ["GC_LARGE", "GC_MICRO", "GC_NANO"]
+        assert [c.gc_code for c in caches] == ["GC_LARGE", "GC_MICRO"]
 
     def test_string_sort_was_wrong(self):
         """Demonstrate why we needed this fix.
@@ -272,12 +270,12 @@ class TestContainerSorting:
         Pure alphabetical sorting puts Large before Micro, which is wrong:
         Large is the BIGGEST physical container, not smaller than Micro.
         """
-        sizes = ["Large", "Micro", "Nano", "Regular", "Small"]
+        sizes = ["Large", "Micro", "Regular", "Small"]
         # Old (wrong) behaviour — alphabetical
-        assert sorted(sizes) == ["Large", "Micro", "Nano", "Regular", "Small"]
+        assert sorted(sizes) == ["Large", "Micro", "Regular", "Small"]
         # New (correct) behaviour — by physical size
         new_order = sorted(sizes, key=lambda s: _container_sort_key(s))
-        assert new_order == ["Nano", "Micro", "Small", "Regular", "Large"]
+        assert new_order == ["Micro", "Small", "Regular", "Large"]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -290,12 +288,12 @@ class TestContainerSortEdgeCases:
     def test_virtual_cache_with_empty_container(self):
         """Real GPX data: Virtual Cache with no container value still sorts as 'V'."""
         caches = [
-            FakeCache("GC_NANO", "Nano"),
-            FakeCache("GC_VIRT", None, cache_type="Virtual Cache"),
+            FakeCache("GC_MICRO", "Micro"),
+            FakeCache("GC_VIRT",  None, cache_type="Virtual Cache"),
         ]
         caches.sort(key=lambda c: _container_sort_key(c.container, c.cache_type))
-        # Nano (group 1) comes before Virtual (group 2 'V')
-        assert [c.gc_code for c in caches] == ["GC_NANO", "GC_VIRT"]
+        # Micro (group 1) comes before Virtual (group 2 'V')
+        assert [c.gc_code for c in caches] == ["GC_MICRO", "GC_VIRT"]
 
     def test_only_not_chosen_caches(self):
         """List of only 'Not chosen' caches shouldn't crash."""
@@ -310,7 +308,7 @@ class TestContainerSortEdgeCases:
         assert len(caches) == 4
 
     @pytest.mark.parametrize("container,cache_type", [
-        ("Nano", None),
+        
         ("Micro", "Traditional Cache"),
         ("Other", "Mystery Cache"),
         ("", "Virtual Cache"),

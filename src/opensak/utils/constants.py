@@ -37,7 +37,6 @@ CACHE_TYPES: list[str] = [
 # ── Container sizes ───────────────────────────────────────────────────────────
 
 CONTAINER_SIZES: list[str] = [
-    "Nano",
     "Micro",
     "Small",
     "Regular",

@@ -109,7 +109,7 @@ def _gc_sort_key(gc_code: GcCode) -> str:
 # Container values are sorted by visual grouping:
 #
 #   Group 1: Physical containers (smallest → largest)
-#            Nano → Micro → Small → Regular → Large
+#            Micro → Small → Regular → Large
 #
 #   Group 2: Empty bars + letter (sorted alphabetically by the letter)
 #            EarthCache  → 'E'
@@ -129,12 +129,16 @@ def _gc_sort_key(gc_code: GcCode) -> str:
 # cache_type because Groundspeak GPX files typically set container='Other'
 # or empty for these types.
 #
+# Note: "Nano" is not an official Geocaching.com container size. It is an
+# informal community term for very small Micro caches (< 10 ml). Databases
+# imported from GSAK may contain "Nano" — migration #7 converts these to
+# "Micro" automatically.
+#
 _CONTAINER_PHYSICAL_ORDER = {
-    "nano":     1,
-    "micro":    2,
-    "small":    3,
-    "regular":  4,
-    "large":    5,
+    "micro":    1,
+    "small":    2,
+    "regular":  3,
+    "large":    4,
 }
 
 # Cache types that have no physical container — sort by their display letter
@@ -210,11 +214,10 @@ class SizeBarDelegate(QStyledItemDelegate):
 
     # Antal fyldte segmenter per størrelse (ud af 5)
     _SEGMENTS = {
-        "nano":       1,
-        "micro":      2,
-        "small":      3,
-        "regular":    4,
-        "large":      5,
+        "micro":      1,
+        "small":      2,
+        "regular":    3,
+        "large":      4,
         "other":      0,    # tom — bogstav vises i stedet (issue #90)
         "not chosen": 0,
         "":           0,
@@ -482,7 +485,6 @@ class CacheTableModel(QAbstractTableModel):
     def _size_icon_key(cache: Cache) -> str:
         """Map container string to icon_provider size key."""
         mapping = {
-            "nano":       "nano",
             "micro":      "micro",
             "small":      "small",
             "regular":    "regular",
