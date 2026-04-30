@@ -660,6 +660,8 @@ STRINGS: dict[str, str] = {
     "settings_hp_name_required":               "Por favor, insira um nome para o ponto.",
     "settings_hp_coord_required":              "Por favor, insira as coordenadas.",
     "settings_hp_coord_invalid":               "Formato de coordenada inválido — tente ex: N38 42.000 W009 08.000",
+    "toolbar_db_combo_tooltip":                "Alternar base de dados ativa",
+    "toolbar_db_no_databases":                 "(Sem bases de dados)",
     "toolbar_home_combo_tooltip":              "Alternar ponto de casa ativo",
     "toolbar_home_no_points":                  "(Sem pontos de casa)",
     "status_home_changed":                     "Ponto de casa: {name}",
