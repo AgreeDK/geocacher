@@ -8,18 +8,30 @@ waypoint prefixes, colour mappings, and shared numeric constants.
 # ── Cache types (Groundspeak standard) ────────────────────────────────────────
 
 CACHE_TYPES: list[str] = [
+    # Common types
     "Traditional Cache",
     "Multi-cache",
     "Unknown Cache",
     "Letterbox Hybrid",
     "Wherigo Cache",
-    "Event Cache",
-    "Mega-Event Cache",
-    "Giga-Event Cache",
     "Earthcache",
     "Virtual Cache",
     "Webcam Cache",
+    # Event types
+    "Event Cache",
+    "Cache In Trash Out Event",
+    "Mega-Event Cache",
+    "Giga-Event Cache",
+    "Community Celebration Event",
+    "Geocaching HQ Celebration",
+    "Geocaching HQ Block Party",
+    # Special / HQ types
+    "Geocaching HQ Cache",
     "GPS Adventures Maze",
+    "Lab Cache",
+    "Project A.P.E. Cache",
+    # Legacy / rare types
+    "Locationless (Reverse) Cache",
 ]
 
 # ── Container sizes ───────────────────────────────────────────────────────────
