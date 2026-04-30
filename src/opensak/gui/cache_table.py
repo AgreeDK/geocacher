@@ -428,7 +428,7 @@ class CacheTableModel(QAbstractTableModel):
                 # Vis tooltip der angiver om koordinaterne er korrigerede
                 note = cache.user_note
                 if note and note.is_corrected:
-                    return tr("col_coord_tooltip_corrected")
+                    return tr("detail_corrected_coords")
                 return tr("col_coord_tooltip_original")
 
         if role == Qt.ItemDataRole.DecorationRole:

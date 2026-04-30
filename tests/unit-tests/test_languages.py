@@ -92,3 +92,26 @@ def test_no_duplicate_keys(lang_file):
             break 
 
     assert found_strings_dict, f"Could not find STRINGS dictionary in {lang_file.name}"
+
+
+def test_no_globally_redundant_values():
+    """No two keys should share the same translation value across ALL supported languages.
+
+    A pair (k1, k2) is redundant when strings[k1] == strings[k2] in every language
+    file simultaneously — meaning they represent one concept split into two keys for
+    no reason.  Context-dependent keys that differ in at least one language are allowed.
+    """
+    all_langs = {f.stem: load_strings(f) for f in [ref_file] + lang_files}
+    all_keys = list(ref_strings.keys())
+
+    redundant_pairs = []
+    for i, k1 in enumerate(all_keys):
+        for k2 in all_keys[i + 1:]:
+            if all(strings.get(k1) == strings.get(k2) for strings in all_langs.values()):
+                redundant_pairs.append((k1, k2, ref_strings[k1]))
+
+    assert not redundant_pairs, (
+        "The following key pairs have identical translations in every language "
+        "and should be merged into a single key:\n"
+        + "\n".join(f"  '{k1}' == '{k2}'  ({repr(v)})" for k1, k2, v in redundant_pairs)
+    )

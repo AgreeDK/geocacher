@@ -85,10 +85,10 @@ class CacheDetailPanel(QWidget):
         self._coords_lbl.mousePressEvent = self._open_in_maps
 
         for lbl, caption in [
-            (self._gc_code_lbl,   tr("detail_gc_code")),
+            (self._gc_code_lbl,   tr("col_gc_code")),
             (self._type_lbl,      tr("col_type")),
             (self._dt_lbl,        tr("detail_dt")),
-            (self._container_lbl, tr("detail_container")),
+            (self._container_lbl, tr("col_container")),
             (self._country_lbl,   tr("col_country")),
             (self._coords_lbl,    tr("detail_coords")),
         ]:

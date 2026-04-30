@@ -88,7 +88,6 @@ STRINGS: dict[str, str] = {
     # ── Toolbar ───────────────────────────────────────────────────────────────
     "toolbar_filter":               "Filter",
     "toolbar_clear_filter":         "Nulstil filter",
-    "toolbar_gps":                  "Send til GPS",
     "toolbar_refresh":              "Opdater",
 
     # ── Statusbar ─────────────────────────────────────────────────────────────
@@ -117,7 +116,6 @@ STRINGS: dict[str, str] = {
     "delete_filtered_title":        "Slet alle caches i filter",
     "delete_filtered_none":         "Ingen caches i det aktive filter.",
     "delete_filtered_msg":          "Er du sikker på at du vil slette ALLE {count} caches i filteret?\nDenne handling kan ikke fortrydes.",
-    "clear_flags_title":            "Fjern alle flag",
     "clear_flags_msg":              "Fjern flag fra alle caches i den aktive database?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
@@ -145,7 +143,6 @@ STRINGS: dict[str, str] = {
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Sæt filter",
-    "filter_tab_general":           "Generelt",
     "filter_tab_dates":             "Datoer",
     "filter_tab_attributes":        "Attributter",
     "filter_tab_where":             "Where",
@@ -231,7 +228,6 @@ STRINGS: dict[str, str] = {
         "github.com/AgreeDK/opensak</a></p>",
     # ── Waypoint dialog — validering ──────────────────────────────────────────
     "wp_tab_basic":                 "Grundlæggende",
-    "wp_tab_details":               "Detaljer",
     "wp_tab_status":                "Status",
     "wp_val_gc_required":           "GC Kode er påkrævet.",
     "wp_val_gc_invalid":            "GC Kode skal starte med 'GC'.",
@@ -336,8 +332,6 @@ STRINGS: dict[str, str] = {
     "filter_cache_type_group":      "Cache type",
     "filter_container_group":       "Container størrelse",
     "filter_dt_group":              "Sværhedsgrad / Terræn",
-    "filter_difficulty_label":      "Sværhedsgrad:",
-    "filter_terrain_label":         "Terræn:",
     "filter_from":                  "Fra:",
     "filter_to":                    "Til:",
     "filter_found_group":           "Fundet status",
@@ -347,7 +341,6 @@ STRINGS: dict[str, str] = {
     "filter_distance_group":        "Afstand fra centerpunkt",
     "filter_enable":                "Aktiver",
     "filter_max":                   "Max:",
-    "filter_premium_group":         "Premium",
     "filter_premium_only":          "Kun premium",
     "filter_not_premium":           "Ikke premium",
     "filter_trackables_group":      "Trackables",
@@ -368,9 +361,7 @@ STRINGS: dict[str, str] = {
     "filter_load_error":            "Kunne ikke indlæse profil:\n{error}",
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Vælg en cache fra listen",
-    "detail_gc_code":               "GC Kode",
     "detail_dt":                    "D / T",
-    "detail_container":             "Container",
     "detail_coords":                "Koordinater",
     "detail_gc_tooltip":            "Klik for at åbne på geocaching.com",
     "detail_coords_tooltip":        "Klik for at åbne i Google Maps",
@@ -416,7 +407,6 @@ STRINGS: dict[str, str] = {
     "col_latitude":               "Bredde",
     "col_longitude":              "Længde",
     "col_coord_tooltip_original": "Originale koordinater",
-    "col_coord_tooltip_corrected":"Korrigerede koordinater",
     "col_dnf_date":          "DNF dato",
     "col_found_date":       "Fundet dato",
     "col_first_to_find":     "FTF",
@@ -464,8 +454,6 @@ STRINGS: dict[str, str] = {
     "wp_ph_short_desc":             "Kort beskrivelse...",
     "wp_ph_long_desc":              "Lang beskrivelse...",
     "wp_ph_hint":                   "Hint til cachen",
-    "wp_cb_available":              "Tilgængelig",
-    "wp_cb_archived":               "Arkiveret",
     "wp_cb_premium":                "Kun premium medlemmer",
     "wp_cb_found":                  "Fundet af mig",
     "wp_cb_dnf":                    "DNF (Did Not Find)",
@@ -490,7 +478,6 @@ STRINGS: dict[str, str] = {
     "proj_start_hint":              "Skriv startkoordinat i DMM, DMS eller DD format",
     "proj_params_group":            "Retning og afstand",
     "proj_bearing_label":           "Retning (azimut):",
-    "proj_distance_label":          "Afstand:",
     "proj_unit_m":                  "meter",
     "proj_unit_ft":                 "fod",
     "proj_result_group":            "Beregnet koordinat",
@@ -499,7 +486,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Tjeksum-beregner",
     "chk_input_group":              "Koordinat",
     "chk_input_hint":               "Skriv eller indsæt et koordinat — alle cifre summeres automatisk",
-    "chk_result_group":             "Resultater",
     "chk_total_label":              "Total sum:",
     "chk_ns_label":                 "N/S del:",
     "chk_ew_label":                 "E/W del:",
@@ -684,7 +670,6 @@ STRINGS: dict[str, str] = {
     "trip_corridor_label":                     "Korridor-bredde (max afstand fra ruten):",
     "trip_route_points_group":                 "Rutepunkter (max {max})",
     "trip_route_add_group":                    "Tilføj punkt",
-    "trip_route_point_name":                   "Navn:",
     "trip_route_name_placeholder":             "f.eks. Hotel, Rasteplads…",
     "trip_route_coord_label":                  "Koordinat:",
     "trip_route_add_btn":                      "Tilføj punkt",
@@ -734,7 +719,6 @@ STRINGS: dict[str, str] = {
     "gc_login_waiting":             "Venter på login...",
     "gc_logout_btn":                "Log ud",
     "gc_refresh_btn":               "Opdater",
-    "gc_logout_title":              "Log ud",
     "gc_logout_confirm":            "Er du sikker på at du vil logge ud af Geocaching.com?\nDine data i OpenSAK slettes ikke.",
     "gc_login_error_title":         "Login fejlede",
     "gc_login_unavailable_title":   "API ikke konfigureret",

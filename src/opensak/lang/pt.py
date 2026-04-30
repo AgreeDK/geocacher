@@ -88,7 +88,6 @@ STRINGS: dict[str, str] = {
     # ── Toolbar ───────────────────────────────────────────────────────────────
     "toolbar_filter":               "Filtro",
     "toolbar_clear_filter":         "Limpar filtro",
-    "toolbar_gps":                  "Enviar para o GPS",
     "toolbar_refresh":              "Atualizar",
 
     # ── Status bar ────────────────────────────────────────────────────────────
@@ -117,7 +116,6 @@ STRINGS: dict[str, str] = {
     "delete_filtered_title":        "Excluir todos os caches no filtro",
     "delete_filtered_none":         "Nenhum cache no filtro ativo.",
     "delete_filtered_msg":          "Tem certeza que deseja excluir TODOS os {count} caches no filtro?\nEsta ação não pode ser desfeita.",
-    "clear_flags_title":            "Limpar todos os marcadores",
     "clear_flags_msg":              "Limpar marcadores de todos os caches na base de dados ativa?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
@@ -145,7 +143,6 @@ STRINGS: dict[str, str] = {
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Definir filtro",
-    "filter_tab_general":           "Geral",
     "filter_tab_dates":             "Datas",
     "filter_tab_attributes":        "Atributos",
     "filter_tab_where":             "Where",
@@ -231,7 +228,6 @@ STRINGS: dict[str, str] = {
         "github.com/AgreeDK/opensak</a></p>",
     # ── Waypoint dialog — validation ──────────────────────────────────────────
     "wp_tab_basic":                 "Básico",
-    "wp_tab_details":               "Detalhes",
     "wp_tab_status":                "Estado",
     "wp_val_gc_required":           "O Código GC é obrigatório.",
     "wp_val_gc_invalid":            "O Código GC deve começar por 'GC'.",
@@ -336,8 +332,6 @@ STRINGS: dict[str, str] = {
     "filter_cache_type_group":      "Tipo de cache",
     "filter_container_group":       "Tamanho do contentor",
     "filter_dt_group":              "Dificuldade / Terreno",
-    "filter_difficulty_label":      "Dificuldade:",
-    "filter_terrain_label":         "Terreno:",
     "filter_from":                  "De:",
     "filter_to":                    "Até:",
     "filter_found_group":           "Estado de encontrada",
@@ -347,7 +341,6 @@ STRINGS: dict[str, str] = {
     "filter_distance_group":        "Distância do ponto central",
     "filter_enable":                "Ativar",
     "filter_max":                   "Máx:",
-    "filter_premium_group":         "Premium",
     "filter_premium_only":          "Apenas Premium",
     "filter_not_premium":           "Não Premium",
     "filter_trackables_group":      "Trackables",
@@ -369,9 +362,7 @@ STRINGS: dict[str, str] = {
 
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Selecione uma cache da lista",
-    "detail_gc_code":               "Código GC",
     "detail_dt":                    "D / T",
-    "detail_container":             "Contentor",
     "detail_coords":                "Coordenadas",
     "detail_gc_tooltip":            "Clique para abrir em geocaching.com",
     "detail_coords_tooltip":        "Clique para abrir no Google Maps",
@@ -417,7 +408,6 @@ STRINGS: dict[str, str] = {
     "col_latitude":               "Latitude",
     "col_longitude":              "Longitude",
     "col_coord_tooltip_original": "Coordenadas originais",
-    "col_coord_tooltip_corrected":"Coordenadas corrigidas",
     "col_dnf_date":          "Data DNF",
     "col_found_date":       "Data encontrada",
     "col_first_to_find":     "FTF",
@@ -465,8 +455,6 @@ STRINGS: dict[str, str] = {
     "wp_ph_short_desc":             "Descrição curta...",
     "wp_ph_long_desc":              "Descrição longa...",
     "wp_ph_hint":                   "Dica da cache",
-    "wp_cb_available":              "Disponível",
-    "wp_cb_archived":               "Arquivada",
     "wp_cb_premium":                "Apenas para membros Premium",
     "wp_cb_found":                  "Encontrada por mim",
     "wp_cb_dnf":                    "DNF (Não Encontrada)",
@@ -491,7 +479,6 @@ STRINGS: dict[str, str] = {
     "proj_start_hint":              "Introduza a coordenada inicial no formato DMM, DMS ou DD",
     "proj_params_group":            "Azimute e distância",
     "proj_bearing_label":           "Azimute:",
-    "proj_distance_label":          "Distância:",
     "proj_unit_m":                  "metros",
     "proj_unit_ft":                 "pés",
     "proj_result_group":            "Coordenada projetada",
@@ -500,7 +487,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Soma de Verificação (Checksum)",
     "chk_input_group":              "Coordenada",
     "chk_input_hint":               "Escreva ou cole uma coordenada — todos os dígitos são somados automaticamente",
-    "chk_result_group":             "Resultados",
     "chk_total_label":              "Soma total:",
     "chk_ns_label":                 "Parte N/S:",
     "chk_ew_label":                 "Parte E/W:",
@@ -685,7 +671,6 @@ STRINGS: dict[str, str] = {
     "trip_corridor_label":                     "Largura do corredor (distância máx. da rota):",
     "trip_route_points_group":                 "Pontos da rota (máx {max})",
     "trip_route_add_group":                    "Adicionar ponto",
-    "trip_route_point_name":                   "Nome:",
     "trip_route_name_placeholder":             "ex: Hotel, Área de serviço…",
     "trip_route_coord_label":                  "Coordenada:",
     "trip_route_add_btn":                      "Adicionar ponto",
@@ -735,7 +720,6 @@ STRINGS: dict[str, str] = {
     "gc_login_waiting":             "A aguardar início de sessão...",
     "gc_logout_btn":                "Terminar sessão",
     "gc_refresh_btn":               "Atualizar",
-    "gc_logout_title":              "Terminar sessão",
     "gc_logout_confirm":            "Tem a certeza de que deseja terminar a sessão no Geocaching.com?\nOs seus dados no OpenSAK não serão eliminados.",
     "gc_login_error_title":         "Falha no início de sessão",
     "gc_login_unavailable_title":   "API não configurada",

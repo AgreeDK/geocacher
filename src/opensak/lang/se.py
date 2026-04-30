@@ -88,7 +88,6 @@ STRINGS: dict[str, str] = {
     # ── Toolbar ───────────────────────────────────────────────────────────────
     "toolbar_filter":               "Filtrera",
     "toolbar_clear_filter":         "Rensa filter",
-    "toolbar_gps":                  "Skicka till GPS",
     "toolbar_refresh":              "Uppdatera",
 
     # ── Status bar ────────────────────────────────────────────────────────────
@@ -117,7 +116,6 @@ STRINGS: dict[str, str] = {
     "delete_filtered_title":        "Ta bort alla cachar i filtret",
     "delete_filtered_none":         "Inga cachar i det aktiva filtret.",
     "delete_filtered_msg":          "Är du säker på att du vill ta bort ALLA {count} cachar i filtret?\nDenna åtgärd kan inte ångras.",
-    "clear_flags_title":            "Rensa alla flaggor",
     "clear_flags_msg":              "Rensa flaggor från alla cachar i den aktiva databasen?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
@@ -145,7 +143,6 @@ STRINGS: dict[str, str] = {
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Sätt filter",
-    "filter_tab_general":           "Allmänt",
     "filter_tab_dates":             "Datum",
     "filter_tab_attributes":        "Attribut",
     "filter_tab_where":             "Where",
@@ -231,7 +228,6 @@ STRINGS: dict[str, str] = {
         "github.com/AgreeDK/opensak</a></p>",
     # ── Waypoint dialog — validation ──────────────────────────────────────────
     "wp_tab_basic":                 "Grund",
-    "wp_tab_details":               "Detaljer",
     "wp_tab_status":                "Status",
     "wp_val_gc_required":           "GC kod krävs.",
     "wp_val_gc_invalid":            "GC Code måste börja med 'GC'.",
@@ -336,8 +332,6 @@ STRINGS: dict[str, str] = {
     "filter_cache_type_group":      "Cache typ",
     "filter_container_group":       "Storlek",
     "filter_dt_group":              "Svårighet / Terräng",
-    "filter_difficulty_label":      "Svårighet:",
-    "filter_terrain_label":         "Terräng:",
     "filter_from":                  "Från:",
     "filter_to":                    "Till:",
     "filter_found_group":           "Hittad status",
@@ -347,7 +341,6 @@ STRINGS: dict[str, str] = {
     "filter_distance_group":        "Avstånd från centrumpunkten",
     "filter_enable":                "Aktivera",
     "filter_max":                   "Maximum:",
-    "filter_premium_group":         "Premium",
     "filter_premium_only":          "Endast Premium",
     "filter_not_premium":           "Ej premium",
     "filter_trackables_group":      "Spårbara",
@@ -368,9 +361,7 @@ STRINGS: dict[str, str] = {
     "filter_load_error":            "Kunde inte ladda profil:\n{error}",
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Välj en cache från listan",
-    "detail_gc_code":               "GC Kod",
     "detail_dt":                    "D / T",
-    "detail_container":             "Behållare",
     "detail_coords":                "Koordinater",
     "detail_gc_tooltip":            "Klicka för att öppna på geocaching.com",
     "detail_coords_tooltip":        "Klicka för att öppna i Google Maps",
@@ -416,7 +407,6 @@ STRINGS: dict[str, str] = {
     "col_latitude":               "Latitud",
     "col_longitude":              "Longitud",
     "col_coord_tooltip_original": "Ursprungliga koordinater",
-    "col_coord_tooltip_corrected":"Korrigerade koordinater",
     "col_dnf_date":          "DNF-datum",
     "col_found_date":       "Hittad datum",
     "col_first_to_find":     "FTF",
@@ -464,8 +454,6 @@ STRINGS: dict[str, str] = {
     "wp_ph_short_desc":             "Kort beskrivning...",
     "wp_ph_long_desc":              "Lång beskrivning...",
     "wp_ph_hint":                   "Ledtråd till cachen",
-    "wp_cb_available":              "Tillgänglig",
-    "wp_cb_archived":               "Arkiverad",
     "wp_cb_premium":                "Endast premium medlemmar",
     "wp_cb_found":                  "Hittad av mig",
     "wp_cb_dnf":                    "DNF (Did Not Find)",
@@ -490,7 +478,6 @@ STRINGS: dict[str, str] = {
     "proj_start_hint":              "Ange startkoordinat i DMM, DMS eller DD format",
     "proj_params_group":            "Bäring och avstånd",
     "proj_bearing_label":           "Bäring (azimuth):",
-    "proj_distance_label":          "Avstånd:",
     "proj_unit_m":                  "meter",
     "proj_unit_ft":                 "fot",
     "proj_result_group":            "Projicerade koordinater",
@@ -499,7 +486,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Kontrollsumma",
     "chk_input_group":              "Koordinat",
     "chk_input_hint":               "Skriv eller klistra in en koordinat — alla siffor summeras automatiskt",
-    "chk_result_group":             "Resultat",
     "chk_total_label":              "Total summma:",
     "chk_ns_label":                 "N/S delen:",
     "chk_ew_label":                 "E/W delen:",
@@ -684,7 +670,6 @@ STRINGS: dict[str, str] = {
     "trip_corridor_label":                     "Korridor bredd (max avstånd från rutten):",
     "trip_route_points_group":                 "Ruttpunkter (max {max})",
     "trip_route_add_group":                    "Lägg till punkt",
-    "trip_route_point_name":                   "Namn:",
     "trip_route_name_placeholder":             "t.r.x. Hotell, rastplats…",
     "trip_route_coord_label":                  "Koordinat:",
     "trip_route_add_btn":                      "Lägg till punkt",
@@ -734,7 +719,6 @@ STRINGS: dict[str, str] = {
     "gc_login_waiting":             "Väntar på inloggning...",
     "gc_logout_btn":                "Logga ut",
     "gc_refresh_btn":               "Uppdatera",
-    "gc_logout_title":              "Logga ut",
     "gc_logout_confirm":            "Är du säker på att du vill logga ut hos Geocaching.com?\nDina data i OpenSAK kommer inte att tas bort.",
     "gc_login_error_title":         "Inloggning felade",
     "gc_login_unavailable_title":   "API inte konfigurerad",

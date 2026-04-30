@@ -449,8 +449,8 @@ class MainWindow(QMainWindow):
         tb.addSeparator()
 
         # GPS
-        gps_act = QAction(f"📤  {tr('toolbar_gps')}", self)
-        gps_act.setToolTip(tr("toolbar_gps") + " (Ctrl+G)")
+        gps_act = QAction(f"📤  {tr('gps_dialog_title')}", self)
+        gps_act.setToolTip(tr("gps_dialog_title") + " (Ctrl+G)")
         gps_act.triggered.connect(self._open_gps_export)
         tb.addAction(gps_act)
 
@@ -1137,7 +1137,7 @@ class MainWindow(QMainWindow):
         """Fjern alle flag (user_flag=False) på alle caches i aktiv database."""
         reply = QMessageBox.question(
             self,
-            tr("clear_flags_title"),
+            tr("action_clear_flags"),
             tr("clear_flags_msg"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,

@@ -106,7 +106,7 @@ class WaypointDialog(QDialog):
         self._tabs = QTabWidget()
 
         self._tabs.addTab(self._build_basic_tab(),   tr("wp_tab_basic"))
-        self._tabs.addTab(self._build_details_tab(), tr("wp_tab_details"))
+        self._tabs.addTab(self._build_details_tab(), tr("db_details_group"))
         self._tabs.addTab(self._build_status_tab(),  tr("wp_tab_status"))
 
         layout.addWidget(self._tabs)
@@ -273,11 +273,11 @@ class WaypointDialog(QDialog):
         form = QFormLayout(status)
         form.setSpacing(8)
 
-        self._available = QCheckBox(tr("wp_cb_available"))
+        self._available = QCheckBox(tr("filter_available"))
         self._available.setChecked(True)
         form.addRow(tr("wp_label_status"), self._available)
 
-        self._archived = QCheckBox(tr("wp_cb_archived"))
+        self._archived = QCheckBox(tr("col_archived"))
         form.addRow("", self._archived)
 
         self._premium = QCheckBox(tr("wp_cb_premium"))

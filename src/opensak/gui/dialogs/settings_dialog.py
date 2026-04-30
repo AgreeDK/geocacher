@@ -408,7 +408,7 @@ class SettingsDialog(QDialog):
     def _on_gc_logout(self) -> None:
         reply = QMessageBox.question(
             self,
-            tr("gc_logout_title"),
+            tr("gc_logout_btn"),
             tr("gc_logout_confirm"),
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             QMessageBox.StandardButton.No,

@@ -139,7 +139,7 @@ class DatabaseManagerDialog(QDialog):
         right = QVBoxLayout()
 
         # Detaljer
-        info_group = QGroupBox(tr("db_details_group"))
+        info_group = QGroupBox(tr("wp_tab_details"))
         info_form = QFormLayout(info_group)
         self._info_name  = QLabel("—")
         self._info_path  = QLabel("—")
