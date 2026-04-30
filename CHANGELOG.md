@@ -14,6 +14,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.18] — 2026-04-30
+### Added
+- **Fix** version bump to 1.11.18 (1.11.16 was not updated)
+
+---
+
 ## [1.11.17] — 2026-04-30
 ### Added
 - **Where-filter** (closes #17) — a powerful SQL-based OR filter that mirrors GSAK's
