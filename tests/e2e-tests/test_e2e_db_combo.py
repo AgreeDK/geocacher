@@ -54,6 +54,35 @@ def _make_two_db_manager(db_path_a, db_path_b):
 
 
 @pytest.fixture
+def no_combo_window(qtbot, tmp_path, monkeypatch):
+    """MainWindow with flags.db_combo=False — combo widget must be absent."""
+    import opensak.db.manager as mgr_module
+    from opensak.db.database import init_db
+    from opensak.lang import load_language
+    from opensak.utils import flags
+    from tests.data import make_fake_manager
+
+    load_language("en")
+    monkeypatch.setattr(flags, "db_combo", False)
+
+    db_path = tmp_path / "no_combo.db"
+    init_db(db_path=db_path)
+    monkeypatch.setattr(mgr_module, "_manager", make_fake_manager(db_path))
+
+    from opensak.gui.mainwindow import MainWindow
+
+    window = MainWindow()
+    qtbot.addWidget(window)
+    window.show()
+    qtbot.waitExposed(window)
+    qtbot.wait(200)
+
+    yield window
+
+    mgr_module._manager = None
+
+
+@pytest.fixture
 def combo_window(qtbot, tmp_path, monkeypatch):
     """MainWindow with flags.db_combo=True and a single-database manager."""
     import opensak.db.manager as mgr_module
@@ -116,9 +145,9 @@ def two_db_combo_window(qtbot, tmp_path, monkeypatch):
 # ── Flag off ───────────────────────────────────────────────────────────────────
 
 
-def test_db_combo_absent_when_flag_disabled(seeded_window, qtbot, monkeypatch):
+def test_db_combo_absent_when_flag_disabled(no_combo_window, qtbot):
     """When flags.db_combo is False the toolbar combo is never created."""
-    assert not hasattr(seeded_window, "_db_combo")
+    assert not hasattr(no_combo_window, "_db_combo")
 
 
 # ── Flag on — presence and population ─────────────────────────────────────────
