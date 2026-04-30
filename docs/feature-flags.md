@@ -46,13 +46,15 @@ in `features.json`.
 
 ```bash
 # Enable a flag that is off in features.json
+opensak --feature where-filter=true
+# or
 python run.py --feature where-filter=true
 
 # Disable a flag that is on in features.json
-python run.py --feature where-filter=false
+opensak --feature where-filter=false
 
 # Override multiple flags at once
-python run.py --feature where-filter=true --feature other-flag=false
+opensak --feature where-filter=true --feature other-flag=false
 ```
 
 Accepted truthy values: `1`, `true`, `yes`, `on` (case-insensitive).  

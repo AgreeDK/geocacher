@@ -97,10 +97,65 @@ def _make_splash(app) -> "QSplashScreen":
     return splash
 
 
+def _apply_version_override() -> None:
+    """Handle --version[=X] from sys.argv.
+
+    --version          → print current version and exit
+    --version=1.2.3    → run the code from git tag v1.2.3 via a worktree
+                         subprocess; if the tag does not exist, falls back
+                         to running the current checkout (main)
+    """
+    import subprocess
+    import tempfile
+    import opensak
+    from pathlib import Path
+
+    args = sys.argv[1:]
+    for arg in args:
+        if arg == "--version":
+            print(opensak.__version__)
+            sys.exit(0)
+
+        if arg.startswith("--version="):
+            version = arg[len("--version="):]
+            tag = f"v{version}"
+            repo_root = Path(__file__).resolve().parents[3]
+
+            # Validate tag exists — fall back to main if not
+            check = subprocess.run(
+                ["git", "tag", "-l", tag],
+                capture_output=True, text=True, cwd=repo_root,
+            )
+            if not check.stdout.strip():
+                print(f"Error: version '{version}' not found. Use 'git tag -l' to see available releases.", file=sys.stderr)
+                sys.exit(1)
+
+            # Run that version in an isolated worktree
+            with tempfile.TemporaryDirectory() as tmpdir:
+                subprocess.run(
+                    ["git", "worktree", "add", "--detach", tmpdir, tag],
+                    cwd=repo_root, check=True, capture_output=True,
+                )
+                try:
+                    other_args = [a for a in sys.argv[1:] if not a.startswith("--version")]
+                    subprocess.run(
+                        [sys.executable, str(Path(tmpdir) / "run.py")] + other_args,
+                        cwd=tmpdir,
+                    )
+                finally:
+                    subprocess.run(
+                        ["git", "worktree", "remove", "--force", tmpdir],
+                        cwd=repo_root, capture_output=True,
+                    )
+            sys.exit(0)
+
+
 def main() -> None:
     import os
     from PySide6.QtWidgets import QApplication
     from PySide6.QtCore import Qt
+
+    _apply_version_override()
 
     # Disable GPU acceleration for QtWebEngine — prevents black rendering
     # on Windows systems where GPU/OpenGL drivers are incomplete or virtual.
