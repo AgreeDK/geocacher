@@ -655,6 +655,8 @@ STRINGS: dict[str, str] = {
     "settings_hp_name_required":               "Angiv et navn til punktet.",
     "settings_hp_coord_required":              "Angiv koordinater.",
     "settings_hp_coord_invalid":               "Ugyldigt koordinatformat — prøv f.eks. N55 47.250 E012 25.000",
+    "toolbar_db_combo_tooltip":                "Skift aktiv database",
+    "toolbar_db_no_databases":                 "(Ingen databaser)",
     "toolbar_home_combo_tooltip":              "Skift aktivt hjemmepunkt",
     "toolbar_home_no_points":                  "(Ingen hjemmepunkter)",
     "status_home_changed":                     "Hjemmepunkt: {name}",

@@ -653,6 +653,8 @@ STRINGS: dict[str, str] = {
     "settings_hp_name_required":               "Zadejte prosím název bodu.",
     "settings_hp_coord_required":              "Zadejte prosím souřadnice.",
     "settings_hp_coord_invalid":               "Neplatný formát souřadnic — zkuste např. N50 47.750 E014 21.450",
+    "toolbar_db_combo_tooltip":                "Přepnout aktivní databázi",
+    "toolbar_db_no_databases":                 "(Žádné databáze)",
     "toolbar_home_combo_tooltip":              "Přepnout aktivní domácí bod",
     "toolbar_home_no_points":                  "(Žádné domácí body)",
     "status_home_changed":                     "Domácí bod: {name}",

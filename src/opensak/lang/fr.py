@@ -655,6 +655,8 @@ STRINGS: dict[str, str] = {
     "settings_hp_name_required":               "Veuillez saisir un nom pour le point.",
     "settings_hp_coord_required":              "Veuillez saisir des coordonnées.",
     "settings_hp_coord_invalid":               "Format de coordonnée invalide — essayez ex. N55 47.250 E012 25.000",
+    "toolbar_db_combo_tooltip":                "Changer la base de données active",
+    "toolbar_db_no_databases":                 "(Aucune base de données)",
     "toolbar_home_combo_tooltip":              "Changer le point de départ actif",
     "toolbar_home_no_points":                  "(Aucun point de départ)",
     "status_home_changed":                     "Point de départ : {name}",

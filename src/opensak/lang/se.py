@@ -655,6 +655,8 @@ STRINGS: dict[str, str] = {
     "settings_hp_name_required":               "Ange ett namn på punkten.",
     "settings_hp_coord_required":              "Ange koordinater.",
     "settings_hp_coord_invalid":               "Otillåtet koordinatformat — försök t.e.x. N59 49.250 E017 37.000",
+    "toolbar_db_combo_tooltip":                "Byt aktiv databas",
+    "toolbar_db_no_databases":                 "(Inga databaser)",
     "toolbar_home_combo_tooltip":              "Byt aktiv hemmapunkt",
     "toolbar_home_no_points":                  "(Inga hemmapunkter)",
     "status_home_changed":                     "Hemmapunkt: {name}",

@@ -29,6 +29,7 @@ _FEATURES_FILE: Path = Path(__file__).parent.parent.parent.parent / "features.js
 
 _RELEASE_DEFAULTS: dict[str, bool] = {
     "where-filter": False,
+    "db-combo": False,
 }
 
 
@@ -70,3 +71,4 @@ _flags = _load()
 # ── Public flag attributes ────────────────────────────────────────────────────
 
 where_filter: bool = _flags["where-filter"]
+db_combo: bool = _flags["db-combo"]
