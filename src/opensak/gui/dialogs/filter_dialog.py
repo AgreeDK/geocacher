@@ -263,7 +263,7 @@ class FilterDialog(QDialog):
         self._general_tab = self._build_general_tab()
         self._dates_tab = self._build_dates_tab()
         self._attributes_tab = self._build_attributes_tab()
-        self._tabs.addTab(self._general_tab, tr("filter_tab_general"))
+        self._tabs.addTab(self._general_tab, tr("settings_tab_general"))
         self._tabs.addTab(self._dates_tab, tr("filter_tab_dates"))
         self._tabs.addTab(self._attributes_tab, tr("filter_tab_attributes"))
         if flags.where_filter:
@@ -360,7 +360,7 @@ class FilterDialog(QDialog):
         d_row.addWidget(QLabel(tr("filter_to")))
         d_row.addWidget(self._diff_max)
         d_row.addStretch()
-        dt_layout.addRow(tr("filter_difficulty_label"), d_row)
+        dt_layout.addRow(tr("wp_label_difficulty"), d_row)
 
         t_row = QHBoxLayout()
         self._terr_min = DTSpinBox()
@@ -371,7 +371,7 @@ class FilterDialog(QDialog):
         t_row.addWidget(QLabel(tr("filter_to")))
         t_row.addWidget(self._terr_max)
         t_row.addStretch()
-        dt_layout.addRow(tr("filter_terrain_label"), t_row)
+        dt_layout.addRow(tr("wp_label_terrain"), t_row)
         layout.addRow(dt_group)
 
         # Fundet status
@@ -418,7 +418,7 @@ class FilterDialog(QDialog):
         layout.addRow(dist_group)
 
         # Premium
-        prem_group = QGroupBox(tr("filter_premium_group"))
+        prem_group = QGroupBox(tr("col_premium"))
         prem_layout = QHBoxLayout(prem_group)
         self._prem_yes = QCheckBox(tr("filter_premium_only"))
         self._prem_yes.setChecked(True)

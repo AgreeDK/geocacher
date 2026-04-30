@@ -123,7 +123,7 @@ class ProjectionDialog(QDialog):
 
         dist_container = QFrame()
         dist_container.setLayout(dist_row)
-        params_form.addRow(tr("proj_distance_label"), dist_container)
+        params_form.addRow(tr("dist_distance_label"), dist_container)
 
         layout.addWidget(params_group)
 

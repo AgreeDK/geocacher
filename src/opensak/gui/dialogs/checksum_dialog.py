@@ -91,7 +91,7 @@ class ChecksumDialog(QDialog):
         layout.addWidget(in_group)
 
         # ── Resultater ────────────────────────────────────────────────────────
-        res_group = QGroupBox(tr("chk_result_group"))
+        res_group = QGroupBox(tr("dist_result_group"))
         res_form = QFormLayout(res_group)
         res_form.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
 
