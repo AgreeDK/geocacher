@@ -236,6 +236,14 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "GC kód je povinný.",
     "wp_val_gc_invalid":            "GC kód musí začínat 'GC'.",
     "wp_val_name_required":         "Název je povinný.",
+    "wp_mode_label":                           "Typ:",
+    "wp_mode_geocache":                        "Geocache",
+    "wp_mode_custom":                          "Vlastní waybod",
+    "wp_label_cw_id":                          "ID waybodu:",
+    "wp_label_parent_gc":                      "Patří ke kešce:",
+    "wp_ph_parent_gc":                         "např. GC12345 (volitelné)",
+    "wp_val_dt_invalid":                       "Neplatná hodnota D/T: {value}. Platné hodnoty: 1,0; 1,5; 2,0 … 5,0",
+    "wp_val_parent_gc_invalid":                "'Patří ke kešce' musí začínat 'GC'.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_log_placeholder":          "Stav se zobrazí zde…",

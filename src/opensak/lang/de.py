@@ -236,6 +236,14 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "GC-Code erforderlich.",
     "wp_val_gc_invalid":            "GC-Code muss mit 'GC' beginnen.",
     "wp_val_name_required":         "Name ist erforderlich.",
+    "wp_mode_label":                           "Typ:",
+    "wp_mode_geocache":                        "Geocache",
+    "wp_mode_custom":                          "Benutzerdefinierter Wegpunkt",
+    "wp_label_cw_id":                          "Wegpunkt-ID:",
+    "wp_label_parent_gc":                      "Gehört zu Cache:",
+    "wp_ph_parent_gc":                         "z.B. GC12345 (optional)",
+    "wp_val_dt_invalid":                       "Ungültiger D/T-Wert: {value}. Gültige Werte: 1,0; 1,5; 2,0 … 5,0",
+    "wp_val_parent_gc_invalid":                "'Gehört zu Cache' muss mit 'GC' beginnen.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_log_placeholder":          "Status wird hier angezeigt…",

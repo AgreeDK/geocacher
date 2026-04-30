@@ -962,11 +962,30 @@ class MainWindow(QMainWindow):
                 )
                 break
 
+    def _next_cw_id(self) -> str:
+        """Return the next available CWnnn id for the active database."""
+        from opensak.db.database import get_session
+        from opensak.db.models import Cache
+        import re
+        with get_session() as session:
+            rows = (
+                session.query(Cache.gc_code)
+                .filter(Cache.gc_code.like("CW%"))
+                .all()
+            )
+        nums = []
+        for (gc,) in rows:
+            m = re.fullmatch(r"CW(\d+)", gc or "")
+            if m:
+                nums.append(int(m.group(1)))
+        nxt = max(nums, default=0) + 1
+        return f"CW{nxt:03d}"
+
     def _add_waypoint(self) -> None:
         from opensak.gui.dialogs.waypoint_dialog import WaypointDialog
         from opensak.db.database import get_session
         from opensak.db.models import Cache
-        dlg = WaypointDialog(self)
+        dlg = WaypointDialog(self, next_cw_id=self._next_cw_id())
         if dlg.exec():
             data = dlg.get_data()
             with get_session() as session:

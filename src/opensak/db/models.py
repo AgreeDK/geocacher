@@ -126,6 +126,11 @@ class Cache(Base):
     # for performance). Updated automatically on import in _upsert_cache().
     log_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
+    # Custom waypoint link (issue #141)
+    # For CW... entries: optionally links to a parent geocache's gc_code.
+    # NULL for all real geocaches imported from GPX/PQ.
+    parent_gc_code: Mapped[Optional[str]] = mapped_column(String(16), nullable=True, index=True)
+
     # Metadata
     imported_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
     source_file: Mapped[Optional[str]] = mapped_column(String(512))  # which GPX this came from

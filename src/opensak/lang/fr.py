@@ -236,6 +236,14 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "Le code GC est requis.",
     "wp_val_gc_invalid":            "Le code GC doit commencer par 'GC'.",
     "wp_val_name_required":         "Le nom est requis.",
+    "wp_mode_label":                           "Type :",
+    "wp_mode_geocache":                        "Géocache",
+    "wp_mode_custom":                          "Point personnalisé",
+    "wp_label_cw_id":                          "ID du point :",
+    "wp_label_parent_gc":                      "Appartient à la cache :",
+    "wp_ph_parent_gc":                         "ex. GC12345 (optionnel)",
+    "wp_val_dt_invalid":                       "Valeur D/T invalide : {value}. Valeurs valides : 1,0 ; 1,5 ; 2,0 … 5,0",
+    "wp_val_parent_gc_invalid":                "'Appartient à la cache' doit commencer par 'GC'.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_log_placeholder":          "Le statut sera affiché ici…",

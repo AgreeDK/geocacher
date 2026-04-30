@@ -32,6 +32,28 @@ CACHE_TYPES: list[str] = [
     "Project A.P.E. Cache",
     # Legacy / rare types
     "Locationless (Reverse) Cache",
+    # Custom waypoint types (issue #141) — created manually by the user
+    "Waypoint",
+    "Hotel/POI",
+]
+
+# ── Valid D/T rating values (Groundspeak standard) ────────────────────────────
+# D/T must be one of these — 1.7, 2.3 etc. are not valid geocache ratings.
+
+VALID_DT: set[float] = {1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0}
+
+# ── Custom waypoint types shown in the dialog when mode = "Custom Waypoint" ───
+# Displayed in the Type dropdown; maps display-label → internal cache_type value.
+
+CUSTOM_WP_TYPES: list[str] = [
+    "Parking Area",
+    "Trailhead",
+    "Stage",
+    "Final Location",
+    "Reference Point",
+    "Waypoint",
+    "Hotel/POI",
+    "Custom",
 ]
 
 # ── Container sizes ───────────────────────────────────────────────────────────

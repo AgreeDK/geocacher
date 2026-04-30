@@ -236,6 +236,14 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "GC Kode er påkrævet.",
     "wp_val_gc_invalid":            "GC Kode skal starte med 'GC'.",
     "wp_val_name_required":         "Navn er påkrævet.",
+    "wp_mode_label":                           "Type:",
+    "wp_mode_geocache":                        "Geocache",
+    "wp_mode_custom":                          "Custom Waypoint",
+    "wp_label_cw_id":                          "Waypoint ID:",
+    "wp_label_parent_gc":                      "Tilhører cache:",
+    "wp_ph_parent_gc":                         "f.eks. GC12345 (valgfrit)",
+    "wp_val_dt_invalid":                       "Ugyldig D/T værdi: {value}. Gyldige værdier: 1.0, 1.5, 2.0 ... 5.0",
+    "wp_val_parent_gc_invalid":                "'Tilhører cache' skal starte med 'GC'.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_log_placeholder":          "Status vises her…",

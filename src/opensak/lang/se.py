@@ -236,6 +236,14 @@ STRINGS: dict[str, str] = {
     "wp_val_gc_required":           "GC kod krävs.",
     "wp_val_gc_invalid":            "GC Code måste börja med 'GC'.",
     "wp_val_name_required":         "Namn krävs.",
+    "wp_mode_label":                           "Typ:",
+    "wp_mode_geocache":                        "Geocache",
+    "wp_mode_custom":                          "Anpassad waypoint",
+    "wp_label_cw_id":                          "Waypoint-ID:",
+    "wp_label_parent_gc":                      "Tillhör cache:",
+    "wp_ph_parent_gc":                         "t.ex. GC12345 (valfritt)",
+    "wp_val_dt_invalid":                       "Ogiltigt D/T-värde: {value}. Giltiga värden: 1,0; 1,5; 2,0 … 5,0",
+    "wp_val_parent_gc_invalid":                "'Tillhör cache' måste börja med 'GC'.",
 
     # ── GPS dialog ────────────────────────────────────────────────────────────
     "gps_log_placeholder":          "Status visas här…",

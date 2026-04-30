@@ -269,6 +269,21 @@ def _run_migrations(engine: Engine) -> None:
             print(f"Migration: konverterede {result.rowcount} 'Nano' container værdier til 'Micro'")
 
 
+        # ── Migration 8: parent_gc_code (issue #141) ─────────────────────────
+        # Custom waypoints (CW...) can optionally reference a parent geocache.
+        # NULL for all real geocaches — added silently, no data backfill needed.
+        existing_caches = [
+            row[1]
+            for row in conn.execute(text("PRAGMA table_info(caches)")).fetchall()
+        ]
+        if "parent_gc_code" not in existing_caches:
+            conn.execute(text(
+                "ALTER TABLE caches ADD COLUMN parent_gc_code VARCHAR(16)"
+            ))
+            conn.commit()
+            print("Migration: tilføjede caches.parent_gc_code")
+
+
 def dispose_engine(db_path: Path | None = None) -> None:
     """
     Luk og frigiv SQLAlchemy connection pool for en given database-sti.
