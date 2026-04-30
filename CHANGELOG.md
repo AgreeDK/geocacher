@@ -14,6 +14,40 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.11.15] — 2026-04-30
+### Fixed
+- **Missing cache types in filter dialog** (fixes #132) — Cache In Trash Out Event, Lab Cache,
+  Community Celebration Event, Geocaching HQ Cache, Geocaching HQ Celebration,
+  Geocaching HQ Block Party, Project A.P.E. Cache and Locationless (Reverse) Cache
+  were missing from the cache type filter. All 21 official Groundspeak cache types
+  are now listed.
+- **Corrected coordinates not imported from GSAK** (fixes #129) — Corrected coordinates
+  saved in GSAK (`<gsak:LatN>` / `<gsak:LongE>` inside `<gsak:wptExtension>`) are now
+  read during GPX import and stored in the cache's UserNote. A value of 0.0/0.0 (GSAK's
+  default when no correction is set) is correctly ignored. Existing corrected coordinates
+  survive a re-import from a plain geocaching.com GPX file.
+- **Container sort order** (fixes #133) — Container column now sorts logically by physical
+  size (Micro → Small → Regular → Large) rather than alphabetically. Non-physical types
+  (EarthCache, Lab Cache, Virtual, Other) follow in alphabetical letter order (E → L → O → V),
+  with empty/not-chosen last.
+- **Trip Planner opens multiple windows** (fixes #134) — Opening the Trip Planner while it
+  is already visible no longer opens a second window. The existing window is brought to
+  the front instead.
+- **Missing geocache attributes** (fixes #139) — Eight attribute IDs missing from the
+  attributes list have been added: First Aid nearby (38), Livestock nearby (39),
+  Flashlight required (42), Fuel nearby (54), Food nearby (55), Wireless Beacon (56),
+  Significant Hike (59) and Tourist Friendly (61). IDs 42, 54, 55, 59 and 61 are legacy
+  GPX IDs that map to existing attributes; 38, 39 and 56 are new entries with translations
+  in all 7 languages.
+
+### Changed
+- **Nano container size removed** — "Nano" is not an official Geocaching.com container size
+  (it is an informal term for very small Micro caches < 10 ml). Geocaching.com always exports
+  these as "Micro". Migration #7 automatically converts any existing `container = 'Nano'`
+  values to `'Micro'` in all databases on first launch.
+
+---
+
 ## [1.11.14] — 2026-04-29
 ### Fixed
 - issue #130: Deleting a database on Windows no longer fails with WinError 32 ("file in use by another process"). SQLite WAL-mode keeps .db, .db-shm and .db-wal files locked as long as the SQLAlchemy connection pool is open. The fix disposes the engine and releases all file handles before attempting deletion, then forces garbage collection and a short delay to give Windows time to free the handles.
