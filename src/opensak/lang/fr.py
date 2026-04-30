@@ -637,6 +637,7 @@ STRINGS: dict[str, str] = {
 
     # Toolbar & menu
     "action_trip_planner":          "🗺️  &Planificateur de sortie…",
+    "trip_planner_close_first":      "Fermez le Planificateur de sortie avant d'ouvrir une autre fenêtre",
     "toolbar_trip":                 "Planificateur",
     "toolbar_trip_tooltip":         "Planifier une sortie geocaching",
     "toolbar_home_tooltip":         "Centrer la carte sur le point de départ",

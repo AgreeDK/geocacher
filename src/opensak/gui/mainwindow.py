@@ -607,6 +607,9 @@ class MainWindow(QMainWindow):
             self.setWindowTitle(tr("window_title") + f"  v{__version__}")
 
     def _open_db_manager(self) -> None:
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.database_dialog import DatabaseManagerDialog
         dlg = DatabaseManagerDialog(self)
         dlg.database_switched.connect(self._on_database_switched)
@@ -882,6 +885,9 @@ class MainWindow(QMainWindow):
         self._refresh_cache_list()
 
     def _open_import_dialog(self) -> None:
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.import_dialog import ImportDialog
         dlg = ImportDialog(self)
         dlg.import_completed.connect(self._refresh_after_import)
@@ -911,6 +917,9 @@ class MainWindow(QMainWindow):
         )
 
     def _open_settings(self) -> None:
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.settings_dialog import SettingsDialog
         dlg = SettingsDialog(self)
         if dlg.exec():
@@ -1167,7 +1176,29 @@ class MainWindow(QMainWindow):
         if hasattr(self, "_cache_table"):
             self._cache_table.apply_sort(field, ascending)
 
+    # ── Trip Planner guard ────────────────────────────────────────────────────
+
+    def _trip_planner_active(self) -> bool:
+        """Returnerer True hvis Trip Planner vinduet er åbent."""
+        return (
+            hasattr(self, "_trip_planner_win")
+            and self._trip_planner_win is not None
+            and self._trip_planner_win.isVisible()
+        )
+
+    def _warn_trip_planner_active(self) -> None:
+        """Bringer Trip Planner i forgrunden og viser en statusbar-besked."""
+        if self._trip_planner_win is not None:
+            self._trip_planner_win.raise_()
+            self._trip_planner_win.activateWindow()
+        self._statusbar.showMessage(tr("trip_planner_close_first"), 3000)
+
+    # ── Dialog åbne-metoder ────────────────────────────────────────────────────
+
     def _open_filter_dialog(self) -> None:
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.filter_dialog import FilterDialog
         dlg = FilterDialog(self, self._current_filterset, self._active_filter_name)
         dlg.filter_applied.connect(self._on_filter_applied)
@@ -1204,12 +1235,18 @@ class MainWindow(QMainWindow):
         self._statusbar.showMessage(tr("status_filter_reset"), 3000)
 
     def _open_column_chooser(self) -> None:
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.column_dialog import ColumnChooserDialog
         dlg = ColumnChooserDialog(self)
         if dlg.exec():
             self._cache_table.reload_columns()
 
     def _open_gps_export(self) -> None:
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.gps_dialog import GpsExportDialog
         caches = [
             self._cache_table._model.cache_at(i)
@@ -1244,6 +1281,9 @@ class MainWindow(QMainWindow):
         self._trip_planner_win.activateWindow()
 
     def _open_found_updater(self) -> None:
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.found_dialog import FoundUpdaterDialog
         dlg = FoundUpdaterDialog(self)
         dlg.update_completed.connect(self._refresh_cache_list)
@@ -1251,6 +1291,9 @@ class MainWindow(QMainWindow):
 
     def _open_coord_converter(self) -> None:
         """Åbn koordinatkonverter — præ-udfyld med valgt cache hvis mulig."""
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.coord_converter_dialog import CoordConverterDialog
         cache = self._cache_table.selected_cache()
         if cache and cache.latitude and cache.longitude:
@@ -1261,6 +1304,9 @@ class MainWindow(QMainWindow):
 
     def _open_projection(self) -> None:
         """Åbn koordinatprojektions-dialog — præ-udfyld med valgt cache hvis mulig."""
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.projection_dialog import ProjectionDialog
         cache = self._cache_table.selected_cache()
         if cache and cache.latitude and cache.longitude:
@@ -1271,6 +1317,9 @@ class MainWindow(QMainWindow):
 
     def _open_checksum(self) -> None:
         """Åbn tjeksum-beregner — præ-udfyld med valgt cache hvis mulig."""
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.checksum_dialog import ChecksumDialog
         cache = self._cache_table.selected_cache()
         if cache and cache.latitude and cache.longitude:
@@ -1281,6 +1330,9 @@ class MainWindow(QMainWindow):
 
     def _open_midpoint(self) -> None:
         """Åbn midtpunkt-beregner — præ-udfyld punkt A med valgt cache hvis mulig."""
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.midpoint_dialog import MidpointDialog
         cache = self._cache_table.selected_cache()
         if cache and cache.latitude and cache.longitude:
@@ -1291,6 +1343,9 @@ class MainWindow(QMainWindow):
 
     def _open_dist_bearing(self) -> None:
         """Åbn afstand & retning — præ-udfyld punkt A med valgt cache hvis mulig."""
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
         from opensak.gui.dialogs.distance_bearing_dialog import DistanceBearingDialog
         cache = self._cache_table.selected_cache()
         if cache and cache.latitude and cache.longitude:

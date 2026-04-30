@@ -638,6 +638,7 @@ STRINGS: dict[str, str] = {
 
     # Toolbar & menu
     "action_trip_planner":          "🗺️  &Planeador de Viagem…",
+    "trip_planner_close_first":      "Feche o Planeador de Viagem antes de abrir outra janela",
     "toolbar_trip":                 "Planeador de Viagem",
     "toolbar_trip_tooltip":         "Planear uma viagem de geocaching",
     "toolbar_home_tooltip":         "Ir para as coordenadas de casa",
