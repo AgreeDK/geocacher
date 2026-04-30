@@ -1,3 +1,4 @@
 {
-  "where-filter": false
+  "where-filter": false,
+  "db-combo": false
 }
