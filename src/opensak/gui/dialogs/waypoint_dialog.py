@@ -277,7 +277,7 @@ class WaypointDialog(QDialog):
         self._available.setChecked(True)
         form.addRow(tr("wp_label_status"), self._available)
 
-        self._archived = QCheckBox(tr("wp_cb_archived"))
+        self._archived = QCheckBox(tr("col_archived"))
         form.addRow("", self._archived)
 
         self._premium = QCheckBox(tr("wp_cb_premium"))

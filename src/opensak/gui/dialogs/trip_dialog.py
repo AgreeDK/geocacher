@@ -589,7 +589,7 @@ class TripPlannerDialog(_PreviewMixin, QDialog):
         add_layout = QVBoxLayout(add_group)
 
         name_row = QHBoxLayout()
-        name_row.addWidget(QLabel(tr("trip_route_point_name")))
+        name_row.addWidget(QLabel(tr("settings_hp_name_label")))
         self._pt_name = QLineEdit()
         self._pt_name.setPlaceholderText(tr("trip_route_name_placeholder"))
         self._pt_name.setMaximumWidth(160)
