@@ -1,7 +1,7 @@
 """
-tests/unit-tests/test_doctor.py — Phase 4: doctor utility tests.
+tests/unit-tests/test_doctor.py — doctor utility tests.
 
-check_python, check_dependencies, check_config_dir, load_pyproject.
+check_python, check_dependencies, check_config_dir, _project_metadata.
 """
 
 import importlib
@@ -15,7 +15,7 @@ from opensak.utils.doctor import (
     check_config_dir,
     check_dependencies,
     check_python,
-    load_pyproject,
+    _project_metadata,
 )
 
 
@@ -104,46 +104,55 @@ class TestCheckDependencies:
 
 
 class TestCheckConfigDir:
-    def test_creates_directory_under_home(self, monkeypatch, tmp_path):
-        monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        expected = tmp_path / ".opensak"
+    def test_returns_ok_and_existing_path(self, monkeypatch, tmp_path):
+        monkeypatch.setattr("opensak.config.get_app_data_dir", lambda: tmp_path / "opensak")
         name, ok, path_str = check_config_dir()
         assert name == "Config dir"
         assert ok is True
-        assert expected.exists()
+        assert (tmp_path / "opensak").exists()
 
-    def test_returned_path_contains_opensak(self, monkeypatch, tmp_path):
-        monkeypatch.setattr(Path, "home", lambda: tmp_path)
+    def test_returned_path_matches_app_data_dir(self, monkeypatch, tmp_path):
+        expected = tmp_path / "opensak"
+        monkeypatch.setattr("opensak.config.get_app_data_dir", lambda: expected)
         _, _, path_str = check_config_dir()
-        assert ".opensak" in path_str
+        assert path_str == str(expected)
 
     def test_idempotent_when_dir_already_exists(self, monkeypatch, tmp_path):
-        monkeypatch.setattr(Path, "home", lambda: tmp_path)
-        (tmp_path / ".opensak").mkdir()
+        target = tmp_path / "opensak"
+        target.mkdir()
+        monkeypatch.setattr("opensak.config.get_app_data_dir", lambda: target)
         _, ok, _ = check_config_dir()
         assert ok is True
 
+    def test_fails_when_dir_not_writable(self, monkeypatch, tmp_path):
+        def _raise():
+            raise PermissionError("no write")
+        monkeypatch.setattr("opensak.config.get_app_data_dir", _raise)
+        _, ok, _ = check_config_dir()
+        assert ok is False
 
-# ── load_pyproject ────────────────────────────────────────────────────────────
+
+# ── _project_metadata ─────────────────────────────────────────────────────────
 
 
-class TestLoadPyproject:
+class TestProjectMetadata:
     def test_returns_dict(self):
-        data = load_pyproject()
+        data = _project_metadata()
         assert isinstance(data, dict)
 
-    def test_contains_project_section(self):
-        data = load_pyproject()
-        assert "project" in data
+    def test_contains_requires_python(self):
+        data = _project_metadata()
+        assert "requires-python" in data
 
-    def test_project_name_is_opensak(self):
-        data = load_pyproject()
-        assert data["project"]["name"] == "opensak"
+    def test_contains_dependencies(self):
+        data = _project_metadata()
+        assert "dependencies" in data
 
-    def test_project_has_dependencies_key(self):
-        data = load_pyproject()
-        assert "dependencies" in data["project"]
+    def test_dependencies_is_list(self):
+        data = _project_metadata()
+        assert isinstance(data["dependencies"], list)
 
-    def test_requires_python_field_present(self):
-        data = load_pyproject()
-        assert "requires-python" in data["project"]
+    def test_dev_dependencies_excluded(self):
+        data = _project_metadata()
+        for dep in data["dependencies"]:
+            assert "extra ==" not in dep

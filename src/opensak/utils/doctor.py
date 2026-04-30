@@ -81,13 +81,13 @@ def check_venv():
 
 
 def check_config_dir():
-    from opensak.config import get_app_data_dir
-    path = get_app_data_dir()
     try:
+        from opensak.config import get_app_data_dir
+        path = get_app_data_dir()
         path.mkdir(parents=True, exist_ok=True)
         return "Config dir", True, str(path)
-    except Exception:
-        return "Config dir", False, f"not writable: {path}"
+    except Exception as e:
+        return "Config dir", False, str(e)
 
 
 def check_git():
