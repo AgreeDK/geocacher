@@ -258,16 +258,33 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
                 "name": _text(tb_el, "gs:name", NS),
             })
 
-    # ── GSAK FTF flag (issue #58) ─────────────────────────────────────────────
-    # GSAK exports a <gsak:FirstToFind> element inside <gsak:wptExtension>.
-    # Values: "true"/"false" or "True"/"False".
+    # ── GSAK extensions (issue #58, #129) ─────────────────────────────────────
+    # GSAK exports extra data inside <gsak:wptExtension>:
+    #   <gsak:FirstToFind>  — FTF flag ("true"/"false")
+    #   <gsak:LatN>         — corrected latitude  (decimal degrees, float)
+    #   <gsak:LongE>        — corrected longitude (decimal degrees, float)
+    # LatN/LongE are only present when the user has saved corrected coords in GSAK.
     gsak_ftf: Optional[bool] = None
+    gsak_corrected_lat: Optional[float] = None
+    gsak_corrected_lon: Optional[float] = None
     for gsak_uri in _GSAK_NAMESPACES:
         gsak_ext = wpt_el.find(f"{{{gsak_uri}}}wptExtension")
         if gsak_ext is not None:
             ftf_el = gsak_ext.find(f"{{{gsak_uri}}}FirstToFind")
             if ftf_el is not None and ftf_el.text:
                 gsak_ftf = ftf_el.text.strip().lower() == "true"
+            lat_el = gsak_ext.find(f"{{{gsak_uri}}}LatN")
+            lon_el = gsak_ext.find(f"{{{gsak_uri}}}LongE")
+            if lat_el is not None and lon_el is not None:
+                try:
+                    parsed_lat = float(lat_el.text.strip())
+                    parsed_lon = float(lon_el.text.strip())
+                    # GSAK writes 0.0/0.0 when no corrected coords are set
+                    if parsed_lat != 0.0 or parsed_lon != 0.0:
+                        gsak_corrected_lat = parsed_lat
+                        gsak_corrected_lon = parsed_lon
+                except (ValueError, AttributeError):
+                    pass
             break
 
     return {
@@ -296,6 +313,8 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
         "logs":              logs,
         "trackables":        trackables,
         "gsak_ftf":          gsak_ftf,
+        "gsak_corrected_lat": gsak_corrected_lat,
+        "gsak_corrected_lon": gsak_corrected_lon,
     }
 
 
@@ -659,6 +678,25 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
         else:
             # User has NOT found this cache — FTF is not applicable
             cache.first_to_find = False
+
+    # ── GSAK corrected coordinates (issue #129) ───────────────────────────────
+    # Corrected coords are stored in UserNote (user data), not on Cache itself.
+    # Only write if GSAK actually exported them (non-zero values).
+    # We never overwrite existing corrected coords with None so that manually
+    # entered corrections survive a re-import.
+    gsak_clat = data.get("gsak_corrected_lat")
+    gsak_clon = data.get("gsak_corrected_lon")
+    if gsak_clat is not None and gsak_clon is not None:
+        if cache.user_note is None:
+            # Flush so cache gets a PK before we reference it in UserNote
+            session.flush()
+            note = UserNote(cache_id=cache.id)
+            session.add(note)
+            session.flush()
+            cache.user_note = note
+        cache.user_note.corrected_lat = gsak_clat
+        cache.user_note.corrected_lon = gsak_clon
+        cache.user_note.is_corrected  = True
 
     return cache, created
 
