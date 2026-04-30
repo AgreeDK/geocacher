@@ -159,9 +159,6 @@ class MainWindow(QMainWindow):
         self._restore_state()
         self._update_title()
         self._reload_home_combo()
-        from opensak.utils import flags
-        if flags.db_combo:
-            self._reload_db_combo()
         # Load caches after UI is ready
         QTimer.singleShot(100, self._refresh_cache_list)
         # Tjek for opdateringer i baggrunden (5 sek forsinkelse — GUI er klar)
@@ -422,17 +419,6 @@ class MainWindow(QMainWindow):
         self._act_db_manager.setToolTip(tr("action_db_manager") + " (Ctrl+D)")
         tb.addAction(self._act_db_manager)
 
-        from opensak.utils import flags
-        if flags.db_combo:
-            self._db_combo = QComboBox()
-            self._db_combo.setMinimumWidth(140)
-            self._db_combo.setMaximumWidth(220)
-            self._db_combo.setToolTip(tr("toolbar_db_combo_tooltip"))
-            self._db_combo.currentIndexChanged.connect(self._on_db_combo_changed)
-            db_combo_action = QWidgetAction(self)
-            db_combo_action.setDefaultWidget(self._db_combo)
-            tb.addAction(db_combo_action)
-
         # Importer
         self._act_import.setText(tr("action_import"))
         self._act_import.setToolTip(tr("action_import") + " (Ctrl+I)")
@@ -481,6 +467,7 @@ class MainWindow(QMainWindow):
         tb.addSeparator()
 
         # Hjem-dropdown
+        from PySide6.QtWidgets import QComboBox, QWidgetAction
         self._home_combo = QComboBox()
         self._home_combo.setMinimumWidth(130)
         self._home_combo.setMaximumWidth(180)
@@ -615,46 +602,12 @@ class MainWindow(QMainWindow):
     def _on_database_switched(self, db_info) -> None:
         """Kaldes når brugeren skifter aktiv database."""
         self._update_title()
-        from opensak.utils import flags
-        if flags.db_combo:
-            self._reload_db_combo()
         self._detail_panel.clear()
         self._load_sort_for_active_db()
         self._refresh_cache_list()
         self._statusbar.showMessage(
             tr("status_db_name", db_name=db_info.name), 4000
         )
-
-    def _reload_db_combo(self) -> None:
-        """Genindlæs database-dropdown fra manager."""
-        from opensak.db.manager import get_db_manager
-        manager = get_db_manager()
-        self._db_combo.blockSignals(True)
-        self._db_combo.clear()
-        databases = manager.databases
-        if not databases:
-            self._db_combo.addItem(tr("toolbar_db_no_databases"), None)
-        else:
-            for db in databases:
-                label = f"✓ {db.name}" if db == manager.active else db.name
-                self._db_combo.addItem(label, db)
-            for i in range(self._db_combo.count()):
-                if self._db_combo.itemData(i) == manager.active:
-                    self._db_combo.setCurrentIndex(i)
-                    break
-        self._db_combo.blockSignals(False)
-
-    def _on_db_combo_changed(self, index: int) -> None:
-        """Skift aktiv database fra dropdown uden at åbne dialogen."""
-        from opensak.db.manager import get_db_manager
-        db = self._db_combo.itemData(index)
-        if not db:
-            return
-        manager = get_db_manager()
-        if db == manager.active:
-            return
-        manager.switch_to(db)
-        self._on_database_switched(db)
 
     def _restore_splitter_ratios(self) -> None:
         """Gendan splitter-størrelser fra gemte procentandele (issue #62).
@@ -1222,6 +1175,17 @@ class MainWindow(QMainWindow):
 
     def _open_trip_planner(self) -> None:
         from opensak.gui.dialogs.trip_dialog import TripPlannerDialog
+        # Issue #134: only one Trip Planner window at a time — if already open,
+        # just bring it to the front instead of opening a second instance.
+        if (
+            hasattr(self, "_trip_planner_win")
+            and self._trip_planner_win is not None
+            and self._trip_planner_win.isVisible()
+        ):
+            self._trip_planner_win.raise_()
+            self._trip_planner_win.activateWindow()
+            return
+
         caches = [
             self._cache_table._model.cache_at(i)
             for i in range(self._cache_table.row_count())
