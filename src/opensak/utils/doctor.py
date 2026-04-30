@@ -18,6 +18,7 @@ from pathlib import Path
 
 
 def _project_metadata() -> dict:
+    # Prefer installed package metadata (works in any install mode)
     try:
         meta = importlib.metadata.metadata("opensak")
         return {
@@ -28,7 +29,24 @@ def _project_metadata() -> dict:
             ],
         }
     except importlib.metadata.PackageNotFoundError:
-        return {}
+        pass
+
+    # Fall back to pyproject.toml for source-only / CI environments
+    try:
+        import tomllib
+        pyproject = Path(__file__).resolve().parents[3] / "pyproject.toml"
+        if pyproject.exists():
+            with open(pyproject, "rb") as f:
+                data = tomllib.load(f)
+            project = data.get("project", {})
+            return {
+                "requires-python": project.get("requires-python", ""),
+                "dependencies": project.get("dependencies", []),
+            }
+    except Exception:
+        pass
+
+    return {}
 
 
 def extract_package_name(dep: str) -> str:
