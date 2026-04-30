@@ -88,7 +88,6 @@ STRINGS: dict[str, str] = {
     # ── Toolbar ───────────────────────────────────────────────────────────────
     "toolbar_filter":               "Filtr",
     "toolbar_clear_filter":         "Zrušit filtr",
-    "toolbar_gps":                  "Odeslat do GPS",
     "toolbar_refresh":              "Obnovit",
 
     # ── Status bar ────────────────────────────────────────────────────────────
@@ -117,7 +116,6 @@ STRINGS: dict[str, str] = {
     "delete_filtered_title":        "Smazat všechny keše ve filtru",
     "delete_filtered_none":         "Žádné keše v aktivním filtru.",
     "delete_filtered_msg":          "Opravdu chcete smazat VŠECHNY {count} keše ve filtru?\nTuto akci nelze vrátit.",
-    "clear_flags_title":            "Odebrat všechny příznaky",
     "clear_flags_msg":              "Odebrat příznaky ze všech kešů v aktivní databázi?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
@@ -145,7 +143,6 @@ STRINGS: dict[str, str] = {
     
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Nastavit filtr",
-    "filter_tab_general":           "Obecné",
     "filter_tab_dates":             "Data",
     "filter_tab_attributes":        "Atributy",
     "filter_tab_where":             "Where",
@@ -231,7 +228,6 @@ STRINGS: dict[str, str] = {
         "github.com/AgreeDK/opensak</a></p>",
     # ── Waypoint dialog — validation ──────────────────────────────────────────
     "wp_tab_basic":                 "Základní",
-    "wp_tab_details":               "Podrobnosti",
     "wp_tab_status":                "Stav",
     "wp_val_gc_required":           "GC kód je povinný.",
     "wp_val_gc_invalid":            "GC kód musí začínat 'GC'.",
@@ -336,8 +332,6 @@ STRINGS: dict[str, str] = {
     "filter_cache_type_group":      "Typ keše",
     "filter_container_group":       "Velikost schránky",
     "filter_dt_group":              "Obtížnost / Terén",
-    "filter_difficulty_label":      "Obtížnost:",
-    "filter_terrain_label":         "Terén:",
     "filter_from":                  "Od:",
     "filter_to":                    "Do:",
     "filter_found_group":           "Stav nálezu",
@@ -347,7 +341,6 @@ STRINGS: dict[str, str] = {
     "filter_distance_group":        "Vzdálenost od středového bodu",
     "filter_enable":                "Povolit",
     "filter_max":                   "Max:",
-    "filter_premium_group":         "Premium",
     "filter_premium_only":          "Pouze premium",
     "filter_not_premium":           "Není premium",
     "filter_trackables_group":      "Trackables",
@@ -369,9 +362,7 @@ STRINGS: dict[str, str] = {
 
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Vyberte keš ze seznamu",
-    "detail_gc_code":               "GC kód",
     "detail_dt":                    "D / T",
-    "detail_container":             "Schránka",
     "detail_coords":                "Souřadnice",
     "detail_gc_tooltip":            "Kliknutím otevřete na geocaching.com",
     "detail_coords_tooltip":        "Kliknutím otevřete v Google Maps",
@@ -417,7 +408,6 @@ STRINGS: dict[str, str] = {
     "col_latitude":               "Zeměpisná šířka",
     "col_longitude":              "Zeměpisná délka",
     "col_coord_tooltip_original": "Původní souřadnice",
-    "col_coord_tooltip_corrected":"Opravené souřadnice",
     "col_dnf_date":          "Datum DNF",
     "col_found_date":       "Datum nálezu",
     "col_first_to_find":     "FTF",
@@ -465,7 +455,6 @@ STRINGS: dict[str, str] = {
     "wp_ph_short_desc":             "Krátký popis...",
     "wp_ph_long_desc":              "Dlouhý popis...",
     "wp_ph_hint":                   "Nápověda k keši",
-    "wp_cb_available":              "Dostupné",
     "wp_cb_archived":               "Archivováno",
     "wp_cb_premium":                "Pouze pro premium členy",
     "wp_cb_found":                  "Nalezeno mnou",
@@ -491,7 +480,6 @@ STRINGS: dict[str, str] = {
     "proj_start_hint":              "Zadejte výchozí souřadnici ve formátu DMM, DMS nebo DD",
     "proj_params_group":            "Azimut a vzdálenost",
     "proj_bearing_label":           "Azimut:",
-    "proj_distance_label":          "Vzdálenost:",
     "proj_unit_m":                  "metry",
     "proj_unit_ft":                 "stopy",
     "proj_result_group":            "Vypočtená souřadnice",
@@ -500,7 +488,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Ciferný součet",
     "chk_input_group":              "Souřadnice",
     "chk_input_hint":               "Zadejte nebo vložte souřadnici — všechny číslice jsou automaticky sečteny",
-    "chk_result_group":             "Výsledky",
     "chk_total_label":              "Celkový součet:",
     "chk_ns_label":                 "Část N/S:",
     "chk_ew_label":                 "Část E/W:",
@@ -730,7 +717,6 @@ STRINGS: dict[str, str] = {
     "gc_login_waiting":             "Čekám na přihlášení...",
     "gc_logout_btn":                "Odhlásit se",
     "gc_refresh_btn":               "Obnovit",
-    "gc_logout_title":              "Odhlásit se",
     "gc_logout_confirm":            "Opravdu se chcete odhlásit z Geocaching.com?\\nVaše data v OpenSAK nebudou smazána.",
     "gc_login_error_title":         "Přihlášení selhalo",
     "gc_login_unavailable_title":   "API není nakonfigurováno",

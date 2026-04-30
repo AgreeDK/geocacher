@@ -88,7 +88,6 @@ STRINGS: dict[str, str] = {
     # ── Toolbar ───────────────────────────────────────────────────────────────
     "toolbar_filter":               "Filtre",
     "toolbar_clear_filter":         "Effacer le filtre",
-    "toolbar_gps":                  "Envoyer au GPS",
     "toolbar_refresh":              "Rafraîchir",
 
     # ── Status bar ────────────────────────────────────────────────────────────
@@ -117,7 +116,6 @@ STRINGS: dict[str, str] = {
     "delete_filtered_title":        "Supprimer tous les caches du filtre",
     "delete_filtered_none":         "Aucun cache dans le filtre actif.",
     "delete_filtered_msg":          "Voulez-vous vraiment supprimer TOUS les {count} caches du filtre ?\nCette action est irréversible.",
-    "clear_flags_title":            "Effacer tous les drapeaux",
     "clear_flags_msg":              "Effacer les drapeaux de tous les caches de la base active ?",
 
     # ── Import dialog ─────────────────────────────────────────────────────────
@@ -145,7 +143,6 @@ STRINGS: dict[str, str] = {
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Définir le filtre",
-    "filter_tab_general":           "Général",
     "filter_tab_dates":             "Dates",
     "filter_tab_attributes":        "Attributs",
     "filter_tab_where":             "Where",
@@ -231,7 +228,6 @@ STRINGS: dict[str, str] = {
         "github.com/AgreeDK/opensak</a></p>",
     # ── Waypoint dialog — validation ──────────────────────────────────────────
     "wp_tab_basic":                 "Basique",
-    "wp_tab_details":               "Détails",
     "wp_tab_status":                "Statut",
     "wp_val_gc_required":           "Le code GC est requis.",
     "wp_val_gc_invalid":            "Le code GC doit commencer par 'GC'.",
@@ -336,8 +332,6 @@ STRINGS: dict[str, str] = {
     "filter_cache_type_group":      "Type de cache",
     "filter_container_group":       "Taille du conteneur",
     "filter_dt_group":              "Difficulté / Terrain",
-    "filter_difficulty_label":      "Difficulté:",
-    "filter_terrain_label":         "Terrain:",
     "filter_from":                  "De:",
     "filter_to":                    "À:",
     "filter_found_group":           "Status de la découverte",
@@ -347,7 +341,6 @@ STRINGS: dict[str, str] = {
     "filter_distance_group":        "Distance du point central",
     "filter_enable":                "Activer",
     "filter_max":                   "Max:",
-    "filter_premium_group":         "Premium",
     "filter_premium_only":          "Premium seulement",
     "filter_not_premium":           "Non premium",
     "filter_trackables_group":      "Trackables",
@@ -368,9 +361,7 @@ STRINGS: dict[str, str] = {
     "filter_load_error":            "Impossible de charger le profil:\n{error}",
     # ── Cache detail panel ────────────────────────────────────────────────────
     "detail_select_cache":          "Sélectionnez une cache dans la liste",
-    "detail_gc_code":               "Code GC",
     "detail_dt":                    "D / T",
-    "detail_container":             "Conteneur",
     "detail_coords":                "Coordonnées",
     "detail_gc_tooltip":            "Cliquez pour ouvrir sur geocaching.com",
     "detail_coords_tooltip":        "Cliquez pour ouvrir dans Google Maps",
@@ -416,7 +407,6 @@ STRINGS: dict[str, str] = {
     "col_latitude":               "Latitude",
     "col_longitude":              "Longitude",
     "col_coord_tooltip_original": "Coordonnées originales",
-    "col_coord_tooltip_corrected":"Coordonnées corrigées",
     "col_dnf_date":          "Date DNF",
     "col_found_date":       "Date trouvée",
     "col_first_to_find":     "FTF",
@@ -464,7 +454,6 @@ STRINGS: dict[str, str] = {
     "wp_ph_short_desc":             "Description courte...",
     "wp_ph_long_desc":              "Description longue...",
     "wp_ph_hint":                   "Indice de la cache",
-    "wp_cb_available":              "Disponible",
     "wp_cb_archived":               "Archivée",
     "wp_cb_premium":                "Membres premium uniquement",
     "wp_cb_found":                  "Trouvée par moi",
@@ -490,7 +479,6 @@ STRINGS: dict[str, str] = {
     "proj_start_hint":              "Entrez les coordonnées de départ au format DMM, DMS ou DD",
     "proj_params_group":            "Cap et distance",
     "proj_bearing_label":           "Cap (azimut):",
-    "proj_distance_label":          "Distance:",
     "proj_unit_m":                  "mètres",
     "proj_unit_ft":                 "pieds",
     "proj_result_group":            "Coordonnées projetées",
@@ -499,7 +487,6 @@ STRINGS: dict[str, str] = {
     "chk_title":                    "Somme des chiffres",
     "chk_input_group":              "Coordonnées",
     "chk_input_hint":               "Saisissez ou collez des coordonnées — tous les chiffres sont additionnés automatiquement",
-    "chk_result_group":             "Résultats",
     "chk_total_label":              "Somme totale:",
     "chk_ns_label":                 "Partie N/S:",
     "chk_ew_label":                 "Partie E/W:",
@@ -734,7 +721,6 @@ STRINGS: dict[str, str] = {
     "gc_login_waiting":             "En attente de connexion...",
     "gc_logout_btn":                "Se déconnecter",
     "gc_refresh_btn":               "Actualiser",
-    "gc_logout_title":              "Se déconnecter",
     "gc_logout_confirm":            "Êtes-vous sûr de vouloir vous déconnecter de Geocaching.com ?\nVos données dans OpenSAK ne seront pas supprimées.",
     "gc_login_error_title":         "Échec de la connexion",
     "gc_login_unavailable_title":   "API non configurée",
