@@ -577,6 +577,7 @@ STRINGS: dict[str, str] = {
     "attr_partnership":        "Partnerská keš",
     "attr_geotour":            "GeoTour",
     "attr_solution_checker":   "Kontrola řešení geocaching.com",
+    "attr_wireless_beacon":    "Bezdrátový maják",
     # Equipment
     "attr_fee":                "Vstupné nebo parkovné",
     "attr_rappelling":         "Potřeba horolezeckého vybavení",
@@ -596,6 +597,8 @@ STRINGS: dict[str, str] = {
     "attr_hunting":            "Oblast lovu",
     "attr_dangerous_area":     "Nebezpečná oblast",
     "attr_thorns":             "Trny",
+    "attr_first_aid":          "První pomoc v blízkosti",
+    "attr_livestock":          "Pozor na dobytek",
     # Facilities
     "attr_wheelchair":         "Přístupné pro vozíčkáře",
     "attr_parking":            "Parkoviště v blízkosti",

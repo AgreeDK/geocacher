@@ -577,6 +577,7 @@ STRINGS: dict[str, str] = {
     "attr_partnership":        "Cache de parceria",
     "attr_geotour":            "GeoTour",
     "attr_solution_checker":   "Verificador de solução do geocaching.com",
+    "attr_wireless_beacon":    "Beacon sem fio",
     # Equipment
     "attr_fee":                "Taxa de acesso",
     "attr_rappelling":         "Equipamento de escalada necessário",
@@ -596,6 +597,8 @@ STRINGS: dict[str, str] = {
     "attr_hunting":            "Zona de caça",
     "attr_dangerous_area":     "Zona perigosa",
     "attr_thorns":             "Espinhos",
+    "attr_first_aid":          "Primeiros socorros próximos",
+    "attr_livestock":          "Atenção ao gado",
     # Facilities
     "attr_wheelchair":         "Acessível a cadeiras de rodas",
     "attr_parking":            "Estacionamento próximo",

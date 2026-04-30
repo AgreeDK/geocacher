@@ -93,6 +93,7 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (69, "attr_partnership"),
     (70, "attr_geotour"),
     (74, "attr_solution_checker"),
+    (56, "attr_wireless_beacon"),    # Wireless Beacon
 
     # Equipment
     (2,  "attr_fee"),
@@ -100,6 +101,7 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (4,  "attr_boat"),
     (5,  "attr_scuba"),
     (51, "attr_flashlight"),
+    (42, "attr_flashlight"),         # Flashlight (old GPX ID — same attribute)
     (50, "attr_uv"),
     (41, "attr_snowshoes"),
     (58, "attr_ski"),
@@ -114,6 +116,8 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (52, "attr_hunting"),
     (26, "attr_dangerous_area"),
     (28, "attr_thorns"),
+    (38, "attr_first_aid"),          # First Aid nearby
+    (39, "attr_livestock"),          # Livestock / Watch for cattle
 
     # Facilities
     (24, "attr_wheelchair"),
@@ -125,7 +129,13 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (47, "attr_camping"),
     (63, "attr_stroller"),
     (66, "attr_fuel"),
+    (54, "attr_fuel"),               # Fuel (old GPX ID — same attribute)
     (31, "attr_food"),
+    (55, "attr_food"),               # Food (old GPX ID — same attribute)
+
+    # Conditions (legacy IDs mapping to existing attributes)
+    (59, "attr_hiking"),             # Significant Hike (old GPX ID — same as 9)
+    (61, "attr_tourist"),            # Tourist Friendly (old GPX ID — same as 22)
 ]
 
 # ── Waypoint prefix registries ────────────────────────────────────────────────
