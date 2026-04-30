@@ -12,7 +12,7 @@ import opensak.utils.flags as flags_module
 
 class TestLoad:
     def test_absent_file_returns_release_defaults(self, no_features_file):
-        assert flags_module._flags == {"where-filter": False}
+        assert flags_module._flags == {"where-filter": False, "db-combo": False}
 
     def test_present_file_overrides_defaults(self, patch_features_file):
         patch_features_file({"where-filter": True})
@@ -23,7 +23,7 @@ class TestLoad:
         f.write_text("{ not valid", encoding="utf-8")
         monkeypatch.setattr(flags_module, "_FEATURES_FILE", f)
         result = flags_module._load()
-        assert result == {"where-filter": False}
+        assert result == {"where-filter": False, "db-combo": False}
 
     def test_unknown_keys_in_file_are_ignored(self, patch_features_file):
         patch_features_file({"where-filter": True, "future-flag": True})
