@@ -119,9 +119,18 @@ def _apply_version_override() -> None:
         if arg.startswith("--version="):
             version = arg[len("--version="):]
             tag = f"v{version}"
-            repo_root = Path(__file__).resolve().parents[3]
 
-            # Validate tag exists — fall back to main if not
+            # Locate the git repo from the current working directory
+            root_result = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"],
+                capture_output=True, text=True,
+            )
+            if root_result.returncode != 0:
+                print("Error: not inside a git repository.", file=sys.stderr)
+                sys.exit(1)
+            repo_root = Path(root_result.stdout.strip())
+
+            # Validate tag exists
             check = subprocess.run(
                 ["git", "tag", "-l", tag],
                 capture_output=True, text=True, cwd=repo_root,
