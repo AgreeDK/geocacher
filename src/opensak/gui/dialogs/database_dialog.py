@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QSizePolicy
 )
 
+from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from opensak.db.manager import DatabaseManager, DatabaseInfo, get_db_manager
 from opensak.lang import tr
 

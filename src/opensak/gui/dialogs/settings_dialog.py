@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QHeaderView, QAbstractItemView, QTabWidget, QWidget,
     QFrame, QSizePolicy
 )
+from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from PySide6.QtGui import QPixmap, QFont
 from opensak.gui.settings import get_settings, HomePoint
 from opensak.lang import tr, AVAILABLE_LANGUAGES, current_language

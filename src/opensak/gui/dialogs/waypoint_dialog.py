@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QFrame,
 )
 
+from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from opensak.db.models import Cache
 from opensak.lang import tr
 from opensak.coords import format_coords, parse_coords

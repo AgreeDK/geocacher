@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QSizePolicy, QMessageBox, QWidgetAction
 )
 
+from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from opensak.db.database import get_session, db_health_check
 from opensak.db.models import Cache
 from opensak.filters.engine import (

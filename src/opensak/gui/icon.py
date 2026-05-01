@@ -6,6 +6,10 @@ Cross-platform icon loader for OpenSAK.
 Usage (in app.py or mainwindow.py):
     from opensak.gui.icon import get_app_icon
     app.setWindowIcon(get_app_icon())
+
+QMessageBox med OpenSAK-ikon:
+    from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
+    QMessageBox.information(self, "Titel", "Besked")   # samme API som før
 """
 
 from __future__ import annotations
@@ -14,6 +18,7 @@ import sys
 from pathlib import Path
 
 from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import QMessageBox
 
 
 def _icon_dir() -> Path:
@@ -25,20 +30,15 @@ def _icon_dir() -> Path:
     2. PyInstaller bundle:     sys._MEIPASS/assets/icons/
     3. Linux system install:   /usr/share/pixmaps/ or XDG hicolor
     """
-    # PyInstaller sets sys._MEIPASS to the temp extraction dir
     if hasattr(sys, "_MEIPASS"):
         return Path(sys._MEIPASS) / "assets" / "icons"
 
-    # Running from source — find repo root relative to this file
-    # this file is at src/opensak/gui/icon.py
-    # repo root is 4 levels up
     this_file = Path(__file__).resolve()
     repo_root = this_file.parent.parent.parent.parent
     candidate = repo_root / "assets" / "icons"
     if candidate.exists():
         return candidate
 
-    # Fallback: same directory as this file
     return this_file.parent
 
 
@@ -51,7 +51,6 @@ def get_app_icon() -> QIcon:
     icon = QIcon()
 
     if sys.platform == "win32":
-        # Windows: prefer .ico (embeds all sizes)
         ico_path = icon_dir / "opensak.ico"
         if ico_path.exists():
             icon = QIcon(str(ico_path))
@@ -59,21 +58,19 @@ def get_app_icon() -> QIcon:
                 return icon
 
     elif sys.platform == "darwin":
-        # macOS: .icns via QIcon, or fall through to PNGs
         icns_path = icon_dir / "opensak.icns"
         if icns_path.exists():
             icon = QIcon(str(icns_path))
             if not icon.isNull():
                 return icon
 
-    # Linux + fallback: load individual PNGs into QIcon for best quality
     png_files = {
         16:   icon_dir / "opensak_16.png",
         32:   icon_dir / "opensak_32.png",
         48:   icon_dir / "opensak_48.png",
         64:   icon_dir / "opensak_64.png",
         128:  icon_dir / "opensak_128.png",
-        256:  icon_dir / "opensak.png",        # primary / 256px
+        256:  icon_dir / "opensak.png",
         512:  icon_dir / "opensak_512.png",
     }
 
@@ -86,7 +83,6 @@ def get_app_icon() -> QIcon:
                 added += 1
 
     if added == 0:
-        # Last resort: try any .png in the icon dir
         for png in sorted(icon_dir.glob("opensak*.png")):
             pixmap = QPixmap(str(png))
             if not pixmap.isNull():
@@ -102,3 +98,76 @@ def set_taskbar_icon(window) -> None:
     """
     icon = get_app_icon()
     window.setWindowIcon(icon)
+
+
+# ── QMessageBox med OpenSAK-ikon ──────────────────────────────────────────────
+
+def _make_msgbox(parent, title: str, text: str,
+                 box_icon: QMessageBox.Icon,
+                 buttons: QMessageBox.StandardButton,
+                 default_button: QMessageBox.StandardButton) -> QMessageBox:
+    """Intern hjælpefunktion: opret en QMessageBox med OpenSAK windowIcon."""
+    msg = QMessageBox(parent)
+    msg.setWindowTitle(title)
+    msg.setText(text)
+    msg.setIcon(box_icon)
+    msg.setStandardButtons(buttons)
+    msg.setWindowIcon(get_app_icon())
+    if default_button != QMessageBox.StandardButton.NoButton:
+        msg.setDefaultButton(default_button)
+    return msg
+
+
+class OpenSAKMessageBox(QMessageBox):
+    """
+    Drop-in erstatning for QMessageBox der automatisk bruger OpenSAK-ikonet.
+
+    Brug:
+        from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
+
+    Alle eksisterende kald virker uændret — både statiske og instans-kald.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setWindowIcon(get_app_icon())
+
+    @staticmethod
+    def information(parent, title, text,
+                    buttons=QMessageBox.StandardButton.Ok,
+                    default_button=QMessageBox.StandardButton.NoButton):
+        msg = _make_msgbox(parent, title, text,
+                           QMessageBox.Icon.Information, buttons, default_button)
+        return msg.exec()
+
+    @staticmethod
+    def warning(parent, title, text,
+                buttons=QMessageBox.StandardButton.Ok,
+                default_button=QMessageBox.StandardButton.NoButton):
+        msg = _make_msgbox(parent, title, text,
+                           QMessageBox.Icon.Warning, buttons, default_button)
+        return msg.exec()
+
+    @staticmethod
+    def critical(parent, title, text,
+                 buttons=QMessageBox.StandardButton.Ok,
+                 default_button=QMessageBox.StandardButton.NoButton):
+        msg = _make_msgbox(parent, title, text,
+                           QMessageBox.Icon.Critical, buttons, default_button)
+        return msg.exec()
+
+    @staticmethod
+    def question(parent, title, text,
+                 buttons=QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                 default_button=QMessageBox.StandardButton.NoButton):
+        msg = _make_msgbox(parent, title, text,
+                           QMessageBox.Icon.Question, buttons, default_button)
+        return msg.exec()
+
+    @staticmethod
+    def about(parent, title, text):
+        msg = _make_msgbox(parent, title, text,
+                           QMessageBox.Icon.Information,
+                           QMessageBox.StandardButton.Ok,
+                           QMessageBox.StandardButton.NoButton)
+        msg.exec()

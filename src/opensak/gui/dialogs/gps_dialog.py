@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 
+from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 class DeleteWorker(QThread):
     """Kører sletning af GPX filer i baggrundstråd."""
     finished = Signal(object)
@@ -279,7 +280,7 @@ class GpsExportDialog(QDialog):
 
             msg = QMessageBox(self)
             msg.setWindowTitle(tr("gps_confirm_delete_title"))
-            msg.setIcon(QMessageBox.Warning)
+            msg.setIcon(QMessageBox.Icon.Warning)
             if count > 0:
                 msg.setText(
                     tr("gps_confirm_delete_msg", count=count)
@@ -290,9 +291,9 @@ class GpsExportDialog(QDialog):
                 msg.setText(
                     tr("gps_confirm_no_files_msg")
                 )
-            msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-            msg.setDefaultButton(QMessageBox.Cancel)
-            if msg.exec() != QMessageBox.Ok:
+            msg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel)
+            msg.setDefaultButton(QMessageBox.StandardButton.Cancel)
+            if msg.exec() != QMessageBox.StandardButton.Ok:
                 return
 
         self._export_btn.setEnabled(False)

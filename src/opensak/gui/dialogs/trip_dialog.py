@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
     QListWidgetItem, QFrame
 )
 
+from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from opensak.lang import tr
 from opensak.gui.settings import get_settings
 from opensak.filters.engine import _haversine_km

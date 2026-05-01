@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox, QMessageBox, QInputDialog,
     QDateEdit, QSizePolicy, QFrame, QPlainTextEdit
 )
+from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from PySide6.QtCore import QDate
 
 from opensak.lang import tr
