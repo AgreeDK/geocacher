@@ -687,6 +687,7 @@ class FilterDialog(QDialog):
             "<th align='left'>Notes / values</th></tr>"
             "<tr><td><code>gc_code</code></td><td>text</td><td>e.g. <code>'GC12345'</code></td></tr>"
             "<tr><td><code>name</code></td><td>text</td><td>Cache name</td></tr>"
+            "<tr><td><code>long_description</code></td><td>text</td><td>Full cache description (HTML)</td></tr>"
             "<tr><td><code>cache_type</code></td><td>text</td>"
             "<td><code>'Traditional Cache'</code>, <code>'Multi-cache'</code>, "
             "<code>'Mystery Cache'</code>, …</td></tr>"
