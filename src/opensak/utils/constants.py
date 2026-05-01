@@ -75,7 +75,8 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (1,  "attr_dogs"),
     (32, "attr_bicycles"),
     (33, "attr_motorcycles"),
-    (34, "attr_atv"),
+    (34, "attr_atv"),                # Quads (ATV)
+    (46, "attr_jeeps"),              # Off-road vehicles / Jeeps
     (35, "attr_snowmobile"),
     (36, "attr_horses"),
     (16, "attr_campfires"),
@@ -94,7 +95,7 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (15, "attr_winter"),
     (40, "attr_stealth"),
     (68, "attr_needs_maintenance"),
-    (18, "attr_dangerous_animals"),
+    (39, "attr_cow"),                # Livestock nearby (Groundspeak: "cow" icon)
     (49, "attr_field_puzzle"),
     (37, "attr_nightcache"),
     (53, "attr_park_and_grab"),
@@ -104,7 +105,7 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (45, "attr_long_hike"),
     (62, "attr_seasonal"),
     (22, "attr_tourist"),
-    (46, "attr_private"),
+    (76, "attr_private"),            # Yard / Private property
     (60, "attr_teamwork"),
     (71, "attr_challenge"),
     (72, "attr_power_trail"),
@@ -115,7 +116,6 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (69, "attr_partnership"),
     (70, "attr_geotour"),
     (74, "attr_solution_checker"),
-    (56, "attr_wireless_beacon"),    # Wireless Beacon
 
     # Equipment
     (2,  "attr_fee"),
@@ -129,9 +129,11 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (58, "attr_ski"),
     (25, "attr_special_tool"),
     (64, "attr_tree_climbing"),
+    (56, "attr_wireless_beacon"),    # Wireless Beacon
 
     # Hazards
     (17, "attr_poisonous_plants"),
+    (18, "attr_dangerous_animals"),  # Dangerous animals (moved from Conditions)
     (19, "attr_ticks"),
     (20, "attr_mine"),
     (21, "attr_cliff"),
@@ -139,7 +141,6 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (26, "attr_dangerous_area"),
     (28, "attr_thorns"),
     (38, "attr_first_aid"),          # First Aid nearby
-    (39, "attr_livestock"),          # Livestock / Watch for cattle
 
     # Facilities
     (24, "attr_wheelchair"),
@@ -147,7 +148,8 @@ ATTRIBUTES: list[tuple[int, str]] = [
     (27, "attr_public_transport"),
     (29, "attr_restrooms"),
     (30, "attr_telephone"),
-    (48, "attr_picnic"),
+    (48, "attr_water"),              # Drinking water nearby
+    (75, "attr_picnic"),             # Picnic tables nearby
     (47, "attr_camping"),
     (63, "attr_stroller"),
     (66, "attr_fuel"),
