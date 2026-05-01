@@ -539,20 +539,28 @@ class FilterDialog(QDialog):
         grid.setSpacing(2)
         grid.setContentsMargins(6, 6, 6, 6)
 
-        # Header
+        # Header — venstre kolonne
         for col, txt in enumerate([tr("filter_attr_col_name"), tr("yes"), tr("no"), tr("filter_none_short")]):
             lbl = QLabel(f"<b>{txt}</b>")
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             grid.addWidget(lbl, 0, col)
 
-        # Separator
+        # Separator under header — venstre kolonne
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
         grid.addWidget(line, 1, 0, 1, 4)
 
+        # Fjern duplikerede nøgler (behold kun første forekomst per attr_key)
+        seen_keys: set[str] = set()
+        unique_attrs: list[tuple[int, str]] = []
+        for attr_id, attr_key in ATTRIBUTES:
+            if attr_key not in seen_keys:
+                seen_keys.add(attr_key)
+                unique_attrs.append((attr_id, attr_key))
+
         # Attributter i to kolonner
-        half = (len(ATTRIBUTES) + 1) // 2
-        for i, (attr_id, attr_key) in enumerate(ATTRIBUTES):
+        half = (len(unique_attrs) + 1) // 2
+        for i, (attr_id, attr_key) in enumerate(unique_attrs):
             # To-kolonne layout: venstre og højre halvdel
             col_offset = 0 if i < half else 5
             row = (i % half) + 2
@@ -594,10 +602,21 @@ class FilterDialog(QDialog):
 
             self._attr_boxes[attr_id] = (ja_cb, nej_cb, ingen_cb)
 
-        # Separator mellem de to kolonner
+        # Vertikal separator mellem de to kolonner
         vsep = QFrame()
         vsep.setFrameShape(QFrame.Shape.VLine)
         grid.addWidget(vsep, 0, 4, half + 2, 1)
+
+        # Header — højre kolonne
+        for col, txt in enumerate([tr("filter_attr_col_name"), tr("yes"), tr("no"), tr("filter_none_short")]):
+            lbl = QLabel(f"<b>{txt}</b>")
+            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            grid.addWidget(lbl, 0, col + 5)
+
+        # Separator under header — højre kolonne
+        line_r = QFrame()
+        line_r.setFrameShape(QFrame.Shape.HLine)
+        grid.addWidget(line_r, 1, 5, 1, 4)
 
         scroll.setWidget(content)
         outer_layout.addWidget(scroll)
