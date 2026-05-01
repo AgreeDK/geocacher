@@ -62,8 +62,9 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(tr("settings_dialog_title"))
         self.setMinimumWidth(520)
-        self._oauth_worker   = None
-        self._profile_worker = None
+        self._oauth_worker        = None
+        self._profile_worker      = None
+        self._editing_original_name: str | None = None   # Issue #157
         self._setup_ui()
         self._load()
 
@@ -541,8 +542,10 @@ class SettingsDialog(QDialog):
         if not p:
             return
         fmt = get_settings().coord_format
+        self._editing_original_name = p.name   # Issue #157: gem originalt navn
         self._new_name.setText(p.name)
         self._new_coord.setText(format_coords(p.lat, p.lon, fmt))
+        self._btn_add.setText(tr("save"))       # Issue #157: vis at vi redigerer
         self._new_name.setFocus()
 
     def _on_coord_changed(self, text: str) -> None:
@@ -582,11 +585,21 @@ class SettingsDialog(QDialog):
 
         s = get_settings()
         point = HomePoint(name, lat, lon)
+
+        # Issue #157: hvis vi redigerer og har ændret navn, fjern det gamle punkt
+        if self._editing_original_name and self._editing_original_name != name:
+            was_active = s.active_home_name == self._editing_original_name
+            s.remove_home_point(self._editing_original_name)
+            if was_active:
+                s.set_active_home(point)
+
         s.add_or_update_home_point(point)
 
         if len(s.home_points) == 1 or not s.active_home_name:
             s.set_active_home(point)
 
+        self._editing_original_name = None
+        self._btn_add.setText(tr("settings_hp_add_btn"))   # Issue #157: nulstil knaptekst
         self._new_name.clear()
         self._new_coord.clear()
         self._coord_hint.setText("")
