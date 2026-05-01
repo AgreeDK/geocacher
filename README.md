@@ -165,5 +165,5 @@ MIT License — see [LICENSE](LICENSE) for details.
 - [Leaflet.js](https://leafletjs.com) for the map library
 - [PySide6 / Qt](https://www.qt.io) for the GUI framework
 - [SQLAlchemy](https://www.sqlalchemy.org) for the database layer
-- [@theyoungstone](https://github.com/theyoungstone) (Pierre LEJEUNE) for the French translation
+- [OpenSAK Contributors](CONTRIBUTORS.md)
 - Everyone who has tested the app and provided feedback!
