@@ -744,7 +744,7 @@ class CacheTableView(QTableView):
         self.setStyleSheet("""
             QTableView {
                 selection-background-color: #3daee9;
-                selection-color: black;
+                selection-color: white;
             }
         """)
 

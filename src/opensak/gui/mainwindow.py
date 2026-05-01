@@ -405,7 +405,7 @@ class MainWindow(QMainWindow):
         menubar.addAction(spacer_action)
 
         self._count_lbl = QLabel(tr("count_caches", count=0))
-        self._count_lbl.setStyleSheet("color: gray; padding: 0 8px;")
+        self._count_lbl.setStyleSheet("color: palette(mid); padding: 0 8px;")
         count_action = QWidgetAction(self)
         count_action.setDefaultWidget(self._count_lbl)
         menubar.addAction(count_action)
@@ -940,8 +940,7 @@ class MainWindow(QMainWindow):
             self._home_combo.addItem(tr("toolbar_home_no_points"), None)
         else:
             for p in points:
-                label = f"★ {p.name}" if p.name == active else p.name
-                self._home_combo.addItem(label, p.name)
+                self._home_combo.addItem(p.name, p.name)
             # Sæt aktiv
             for i in range(self._home_combo.count()):
                 if self._home_combo.itemData(i) == active:
