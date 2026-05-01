@@ -93,11 +93,16 @@ class AppSettings:
 
     @property
     def active_home_name(self) -> str:
-        """Navn på det aktive hjemmepunkt (globalt)."""
+        """Navn på det aktive hjemmepunkt (per database, med global fallback)."""
+        per_db = self._s.value(self._db_key("active_home_name"), None)
+        if per_db is not None:
+            return per_db
         return self._s.value("homepoints/active_name", "")
 
     @active_home_name.setter
     def active_home_name(self, value: str) -> None:
+        # Gem per database OG opdatér global fallback
+        self._s.setValue(self._db_key("active_home_name"), value)
         self._s.setValue("homepoints/active_name", value)
 
     def set_active_home(self, point: HomePoint) -> None:

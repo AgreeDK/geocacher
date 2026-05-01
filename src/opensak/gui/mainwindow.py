@@ -624,6 +624,8 @@ class MainWindow(QMainWindow):
         self._detail_panel.clear()
         self._load_sort_for_active_db()
         self._refresh_cache_list()
+        self._reload_home_combo()
+        self._map_widget.update_home()
         self._statusbar.showMessage(
             tr("status_db_name", db_name=db_info.name), 4000
         )

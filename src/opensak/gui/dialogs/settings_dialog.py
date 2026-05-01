@@ -516,9 +516,15 @@ class SettingsDialog(QDialog):
         has = self._points_table.currentRow() >= 0 and bool(
             self._points_table.selectedItems()
         )
-        self._btn_activate.setEnabled(has)
         self._btn_edit.setEnabled(has)
         self._btn_delete.setEnabled(has)
+        # Aktivér skal kun være aktiv hvis det valgte punkt IKKE allerede er aktivt
+        if has:
+            p = self._selected_point()
+            already_active = p is not None and p.name == get_settings().active_home_name
+            self._btn_activate.setEnabled(not already_active)
+        else:
+            self._btn_activate.setEnabled(False)
 
     def _activate_point(self) -> None:
         p = self._selected_point()
