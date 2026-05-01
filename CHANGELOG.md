@@ -4,13 +4,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [Unreleased] — In development
-- HTML/PDF reports and statistics
-- Improved GPS auto-detection on all Linux distros
-- More languages (generated via Claude API, community proofread)
-- Favourite points (requires Geocaching.com API)
-- Multi-threading import performance (PR #30, planned for v1.10.0)
-- Main window layout redesign: full-width cache list on top, details + map below (issue #33)
+## [Unreleased]
+
+For planned features and known issues see the [GitHub Issues list](https://github.com/AgreeDK/opensak/issues).
 
 ---
 
@@ -49,8 +45,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## [1.11.18] — 2026-04-30
-### Added
-- **Fix** version bump to 1.11.18 (1.11.16 was not updated)
+### Fixed
+- Version string bump to 1.11.18 (1.11.16 was not updated)
 
 ---
 
@@ -140,16 +136,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [1.11.13] — 2026-04-29
 ### Fixed
----
-- issue 128: Filter no longer dropped when returning from Settings (#128)
-When an advanced filter was active and the user opened and closed the Settings or Preferences dialog, the cache list was refreshed without reapplying the active filter — causing it to appear dropped even though it was still selected in the filter dialog.
-
-The root cause was that _refresh_cache_list() only considered the quick-filter and search fields when rebuilding the filter, ignoring _current_filterset entirely. The fix combines both the advanced filter and the quick-filter/search into a single AND-condition on every refresh, so the active filter is always preserved regardless of what triggers the reload.
+- **Active filter dropped on Settings close** (fixes #128) — When an advanced filter was active
+  and the user opened and closed the Settings dialog, the cache list was refreshed without
+  reapplying the filter. The root cause was that `_refresh_cache_list()` only considered the
+  quick-filter and search fields, ignoring `_current_filterset` entirely. The fix combines both
+  into a single AND-condition on every refresh.
 
 ## [1.11.12] — 2026-04-29
 ### Fixed
-- issuex #112: Cache selection highlight is now consistent across all platforms. On Windows 10/11 the selected row was shown in gray (system default), making it hard to distinguish from archived caches. The highlight color is now always light blue, matching the appearance on Linux and macOS.
-- issue #121: Creating a new database in a custom folder now works correctly. The folder browser has been changed from a "Save file" dialog to a "Select folder" dialog, eliminating the confusion where nothing happened if no filename was typed. The full file path (folder + database name + .db) is now shown as a live preview while typing the name.
+- **Cache selection highlight inconsistent on Windows** (fixes #112) — The selected row was shown
+  in gray on Windows 10/11, making it hard to distinguish from archived caches. The highlight
+  colour is now always light blue, matching Linux and macOS.
+- **New database in custom folder not created** (fixes #121) — The folder browser was a "Save
+  file" dialog, causing nothing to happen if no filename was typed. Changed to a "Select folder"
+  dialog with a live path preview (folder + database name + `.db`) while typing the name.
 
 ---
 
@@ -169,9 +169,11 @@ The root cause was that _refresh_cache_list() only considered the quick-filter a
 
 ## [1.11.10] — 2026-04-29
 ### Fixed
-- Fix: database delete removes shm/wal files (#120) , translate all error messages
-- Fix: validate path permissions (#121)
-- translate all error messages
+- **Database delete leaves shm/wal files behind** (fixes #120) — All three SQLite files
+  (`.db`, `.db-shm`, `.db-wal`) are now removed on deletion.
+- **Missing path permission validation** (fixes #121) — Write permissions are now checked
+  before creating a new database file.
+- All error messages are now translated via `tr()`.
 
 ---
 
@@ -186,8 +188,8 @@ The root cause was that _refresh_cache_list() only considered the quick-filter a
 
 ## [1.11.8] — 2026-04-28
 ### Added
-- **Check for latest release** when loading program, its check to see if a new version exist.
-  - Check for updates have been added to the Help menu.
+- **Check for latest release on startup** — OpenSAK now checks for a newer release when the
+  application loads. A manual check is also available via the Help menu.
 
 ---
 
@@ -356,13 +358,13 @@ The root cause was that _refresh_cache_list() only considered the quick-filter a
 
 ## [1.4.6] — 2026-04-04
 ### Added
-- **Icons** app Icons added
+- **App icons** — application icon added for all platforms
 
 ---
 
 ## [1.4.5] — 2026-04-04
-### Added
-- **Fixed** import result dialog now uses i18n strings (fixes #7)
+### Fixed
+- **Import result dialog hardcoded strings** (fixes #7) — dialog now uses `tr()` throughout
 
 ---
 
