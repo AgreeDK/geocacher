@@ -263,6 +263,7 @@ STRINGS: dict[str, str] = {
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Ny databas",
     "db_name_label":                "Namn:",
+    "db_name_placeholder":          "t.ex. Skåne, Stockholm 2026…",
     "db_new_info":                  "Databasen sparas automatiskt i mappen app.\nDu kan ändra målet nedan (frivilligt).",
     "db_default_path":              "(standard plats)",
     "db_name_required":             "Ange ett namn för den nya databasen.",

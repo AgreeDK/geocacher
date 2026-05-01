@@ -263,6 +263,7 @@ STRINGS: dict[str, str] = {
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Nova base de dados",
     "db_name_label":                "Nome:",
+    "db_name_placeholder":          "ex. Lisboa, Porto 2026…",
     "db_new_info":                  "A base de dados é guardada automaticamente na pasta da aplicação.\nPode alterar a localização abaixo (opcional).",
     "db_default_path":              "(localização predefinida)",
     "db_name_required":             "Por favor, insira um nome para a base de dados.",

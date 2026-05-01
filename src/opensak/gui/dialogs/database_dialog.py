@@ -32,7 +32,7 @@ class NewDatabaseDialog(QDialog):
         form = QFormLayout()
 
         self._name_edit = QLineEdit()
-        self._name_edit.setPlaceholderText("f.eks. Sjælland, Bornholm 2026…")
+        self._name_edit.setPlaceholderText(tr("db_name_placeholder"))
         self._name_edit.textChanged.connect(self._update_path_preview)
         form.addRow(tr("db_name_label"), self._name_edit)
 
@@ -60,6 +60,7 @@ class NewDatabaseDialog(QDialog):
         layout.addWidget(buttons)
 
         self._custom_path: Path | None = None
+        self._update_path_preview()
 
     def _browse(self) -> None:
         from opensak.config import get_app_data_dir
@@ -73,11 +74,14 @@ class NewDatabaseDialog(QDialog):
             self._update_path_preview()
 
     def _update_path_preview(self) -> None:
-        """Vis fuld filsti (mappe + navn + .db) i sti-feltet."""
+        """Vis filsti i sti-feltet: kun mappe som default, fuld sti når navn er tastet."""
+        from opensak.config import get_app_data_dir
         name = self._name_edit.text().strip()
-        if self._custom_path:
-            filename = f"{name}.db" if name else "(<navn>.db)"
-            self._path_edit.setText(str(self._custom_path / filename))
+        folder = self._custom_path or get_app_data_dir()
+        if name:
+            self._path_edit.setText(str(folder / f"{name}.db"))
+        else:
+            self._path_edit.setText(str(folder))
 
     def _validate(self) -> None:
         name = self._name_edit.text().strip()
@@ -139,7 +143,7 @@ class DatabaseManagerDialog(QDialog):
         right = QVBoxLayout()
 
         # Detaljer
-        info_group = QGroupBox(tr("wp_tab_details"))
+        info_group = QGroupBox(tr("db_details_group"))
         info_form = QFormLayout(info_group)
         self._info_name  = QLabel("—")
         self._info_path  = QLabel("—")
@@ -202,9 +206,12 @@ class DatabaseManagerDialog(QDialog):
         right.addLayout(btn_layout)
         layout.addLayout(right)
 
-    def _refresh_list(self) -> None:
+    def _refresh_list(self, select_db: "DatabaseInfo | None" = None) -> None:
+        # Husk hvilken der var valgt (eller brug select_db hvis angivet)
+        current = select_db or self._selected_db()
         self._list.clear()
         active = self._manager.active
+        select_item = None
         for db in self._manager.databases:
             item = QListWidgetItem(db.name)
             item.setData(Qt.ItemDataRole.UserRole, db)
@@ -217,6 +224,10 @@ class DatabaseManagerDialog(QDialog):
                 item.setForeground(Qt.GlobalColor.gray)
                 item.setToolTip(tr("db_file_not_found"))
             self._list.addItem(item)
+            if current and db.path == current.path:
+                select_item = item
+        if select_item:
+            self._list.setCurrentItem(select_item)
 
     def _selected_db(self) -> DatabaseInfo | None:
         item = self._list.currentItem()
@@ -252,7 +263,7 @@ class DatabaseManagerDialog(QDialog):
         if not db or db == self._manager.active:
             return
         self._manager.switch_to(db)
-        self._refresh_list()
+        self._refresh_list(select_db=db)
         self.database_switched.emit(db)
         QMessageBox.information(
             self, tr("db_switched_title"),

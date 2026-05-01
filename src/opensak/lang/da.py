@@ -263,6 +263,7 @@ STRINGS: dict[str, str] = {
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Ny database",
     "db_name_label":                "Navn:",
+    "db_name_placeholder":          "f.eks. Sjælland, Bornholm 2026…",
     "db_new_info":                  "Databasen gemmes automatisk i app-mappen.\nDu kan ændre placeringen nedenfor (valgfrit).",
     "db_default_path":              "(standard placering)",
     "db_name_required":             "Indtast et navn til databasen.",
