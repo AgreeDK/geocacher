@@ -59,7 +59,7 @@ When you open OpenSAK for the first time, you will see an empty three-panel layo
 
 Before importing, it is a good idea to set your **home coordinates**. This is used as the centre point for distance calculations.
 
-1. Go to **Settings → Preferences**
+1. Go to **Settings → Settings…**
 2. Enter your home coordinates (decimal degrees, e.g. `55.6761, 12.5683`)
 3. Click **Save**
 
@@ -128,7 +128,7 @@ Click any pin to highlight that cache in the list and show its details.
 Filters let you narrow down the cache list to exactly what you want to see. OpenSAK supports 18 filter types with AND/OR logic.
 
 ### Opening the Filter Dialog
-Click **Filters → Edit Filters** (or press `Ctrl+F`).
+Click **View → Set filter…** (or press `Ctrl+F`).
 
 ### Common filter examples
 
@@ -149,7 +149,7 @@ Once you have set up a useful combination of filters, save it as a profile:
 4. Load it any time from the **Filters** menu
 
 ### Clearing Filters
-Click **Filters → Clear Filters** to show all caches again.
+Click **View → Clear filter** to show all caches again.
 
 ---
 
@@ -190,7 +190,7 @@ Right-click the cache in the list → **Mark as Found**.
 For the most accurate found status, use a **My Finds Pocket Query**:
 1. On geocaching.com, go to **Play → Pocket Queries**
 2. Find the **My Finds** query and download it
-3. In OpenSAK, go to **Database → Update Found Status**
+3. In OpenSAK, go to **Settings → Update finds from reference database…**
 4. Select your My Finds `.zip` file
 5. OpenSAK will mark all matching caches as found
 
@@ -220,13 +220,13 @@ The caches will be written as a GPX file to your Garmin's `Garmin/GPX/` folder.
 OpenSAK supports multiple separate databases — useful if you geocache in different regions or want to keep work and leisure caches separate.
 
 ### Creating a New Database
-1. Go to **Database → Manage Databases**
+1. Go to **File → Manage databases…**
 2. Click **New Database**
 3. Give it a name and set a centre point (home coordinates for that region)
 4. Click **Create**
 
 ### Switching Between Databases
-Go to **Database → Manage Databases** and double-click any database to switch to it.
+Go to **File → Manage databases…** and double-click any database to switch to it.
 
 Each database has its own:
 - Cache list and import history

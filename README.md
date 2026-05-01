@@ -2,7 +2,7 @@
 
 A modern, cross-platform geocaching management tool for **Linux**, **Windows** and **macOS** — a free, open source successor to GSAK, built in Python.
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![Python](https://img.shields.io/badge/Python-3.11+-blue)
 ![PySide6](https://img.shields.io/badge/GUI-PySide6-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 ![Status](https://img.shields.io/badge/Status-Beta-orange)
@@ -74,7 +74,7 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 - All tools open pre-filled with the currently selected cache's coordinates
 
 ### Language Support
-- 🌍 **Danish, English, French and Portuguese** built in
+- 🌍 **Danish, English, French, Portuguese, German, Czech and Swedish** built in
 - 🔧 **Easy to add new languages** — copy one file, translate, done
 
 ---
@@ -95,7 +95,7 @@ A modern, cross-platform geocaching management tool for **Linux**, **Windows** a
 | **Linux** | Ubuntu 20.04+ / Linux Mint 20+ / Debian 11+ |
 | **Windows** | Windows 10 or newer |
 | **macOS** | macOS 11 (Big Sur) or newer |
-| **Python** | 3.10 or newer |
+| **Python** | 3.11 or newer |
 | **Disk space** | ~500 MB (including PySide6) |
 
 ---
@@ -176,7 +176,7 @@ opensak # or python run.py
 
 #### Windows (manual)
 
-Install **Python 3.10+** from [python.org](https://www.python.org/downloads/) — make sure to check **"Add Python to PATH"**
+Install **Python 3.11+** from [python.org](https://www.python.org/downloads/) — make sure to check **"Add Python to PATH"**
 
 Install **Git** from [git-scm.com](https://git-scm.com/download/win)
 
@@ -277,10 +277,10 @@ What it checks:
 2. Select your language in the **Language** section
 3. Restart OpenSAK — the new language takes effect on next startup
 
-Currently supported: **Danish (da)**, **English (en)**, **French (fr)**, **Portuguese (pt)**
+Currently supported: **Danish (da)**, **English (en)**, **French (fr)**, **Portuguese (pt)**, **German (de)**, **Czech (cs)**, **Swedish (se)**
 
 ### Adding a New Language
-1. Copy `src/opensak/lang/en.py` to e.g. `src/opensak/lang/de.py`
+1. Copy `src/opensak/lang/en.py` to e.g. `src/opensak/lang/fi.py`
 2. Translate the string values (keys must not be changed)
 3. Register the language in `src/opensak/lang/__init__.py`:
    ```python
@@ -288,7 +288,11 @@ Currently supported: **Danish (da)**, **English (en)**, **French (fr)**, **Portu
        "da": "Dansk",
        "en": "English",
        "fr": "Français",
-       "de": "Deutsch",   # ← add this line
+       "pt": "Português",
+       "cs": "Čeština",
+       "se": "Svenska",
+       "de": "Deutsch",
+       "fi": "Suomi",   # ← add this line
    }
    ```
 4. Submit a Pull Request — contributions welcome!
@@ -424,10 +428,25 @@ opensak/
 │           ├── midpoint_dialog.py          # Geocaching tool: midpoint calculator
 │           └── distance_bearing_dialog.py  # Geocaching tool: distance & bearing
 └── tests/
-    ├── test_db.py                  # 13 tests
-    ├── test_importer.py            # 11 tests
-    ├── test_languages.py           # 3 tests
-    └── test_filters.py             # 39 tests
+    └── unit-tests/
+        ├── test_db.py
+        ├── test_db_manager.py
+        ├── test_importer.py
+        ├── test_importer_loc.py
+        ├── test_filters.py
+        ├── test_languages.py
+        ├── test_utils.py
+        ├── test_coords.py
+        ├── test_config.py
+        ├── test_flags.py
+        ├── test_doctor.py
+        ├── test_found_updater.py
+        ├── test_garmin.py
+        ├── test_geocaching_api.py
+        ├── test_gsak_corrected_coords.py
+        ├── test_container_sort.py
+        ├── test_log_count.py
+        └── test_dialogs.py
 ```
 
 ---
@@ -437,13 +456,14 @@ opensak/
 - [ ] HTML/PDF reports and statistics
 - [ ] GPS export — improve auto-detection on all Linux distros
 - [ ] Favourite points (requires Geocaching.com API)
-- [ ] More languages (German, Swedish, …)
+- [ ] More languages (Dutch, Finnish, …)
 - [x] **Trip Planner** — radius and multi-point route corridor with map preview
 - [x] **Home points list** — named locations with toolbar quick-switch
 - [x] **Corrected coordinates** — store and use solved puzzle coordinates
 - [x] Geocaching Tools menu — coordinate converter, projection, checksum, midpoint, distance & bearing
 - [x] Coordinate format preference (DMM / DMS / DD)
 - [x] French language — contributed by @theyoungstone
+- [x] German, Czech and Swedish languages added
 - [x] Windows installer (.exe) — built automatically via GitHub Actions
 - [x] Linux AppImage — built automatically via GitHub Actions
 - [x] macOS installer (.dmg) — arm64 and x86_64, built automatically via GitHub Actions
