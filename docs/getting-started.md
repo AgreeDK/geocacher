@@ -16,9 +16,11 @@
 6. [Cache Details and Hints](#6-cache-details-and-hints)
 7. [Waypoints](#7-waypoints)
 8. [Marking Caches as Found](#8-marking-caches-as-found)
-9. [Exporting to GPS](#9-exporting-to-gps)
-10. [Multiple Databases](#10-multiple-databases)
-11. [Getting Help](#11-getting-help)
+9. [Updating Finds from "My Finds"](#9-updating-finds-from-my-finds)
+10. [Exporting to GPS](#10-exporting-to-gps)
+11. [Multiple Databases](#11-multiple-databases)
+12. [Changing the Language](#12-changing-the-language)
+13. [Getting Help](#13-getting-help)
 
 ---
 
@@ -198,7 +200,22 @@ This method works even if you have found caches that are not in your current dat
 
 ---
 
-## 9. Exporting to GPS
+## 9. Updating Finds from "My Finds"
+
+For the most accurate found status across all your databases, use a **My Finds Pocket Query** from Geocaching.com.
+
+1. On geocaching.com, go to **Play → Pocket Queries**
+2. Find the **My Finds** query and download it as a `.zip` file
+3. In OpenSAK, create a new database called "My Finds" (**File → Manage databases…**)
+4. Import the My Finds ZIP into that database
+5. Switch back to the database you want to update
+6. Go to **Settings → Update finds from reference database…** and select the "My Finds" database
+
+OpenSAK will mark all matching caches as found, even caches that are not in the current database.
+
+---
+
+## 10. Exporting to GPS
 
 OpenSAK can export your filtered cache list directly to a Garmin GPS device connected via USB.
 
@@ -215,7 +232,7 @@ The caches will be written as a GPX file to your Garmin's `Garmin/GPX/` folder.
 
 ---
 
-## 10. Multiple Databases
+## 11. Multiple Databases
 
 OpenSAK supports multiple separate databases — useful if you geocache in different regions or want to keep work and leisure caches separate.
 
@@ -235,7 +252,19 @@ Each database has its own:
 
 ---
 
-## 11. Getting Help
+## 12. Changing the Language
+
+1. Go to **Settings → Settings…**
+2. Select your language in the **Language** section
+3. Restart OpenSAK — the new language takes effect on next startup
+
+Currently supported: **Danish (da)**, **English (en)**, **French (fr)**, **Portuguese (pt)**, **German (de)**, **Czech (cs)**, **Swedish (se)**
+
+Want to add a new language? See [CONTRIBUTING.md](https://github.com/AgreeDK/opensak/blob/main/CONTRIBUTING.md) for the step-by-step guide — it only requires translating one file.
+
+---
+
+## 13. Getting Help
 
 **Found a bug or have a feature request?**
 → [github.com/AgreeDK/opensak/issues](https://github.com/AgreeDK/opensak/issues)
