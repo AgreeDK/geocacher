@@ -14,6 +14,40 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.12.0] — 2026-05-01
+
+### Fixed
+
+- **Attribute filter duplicates and missing header** (fixes #139) — The right-hand column in
+  the attribute filter now has a proper section header. Duplicate entries that appeared when
+  the filter dialog was opened more than once have been removed.
+- **Missing geocache attributes** (fixes #139) — Three additional attribute IDs were missing
+  after the initial fix: Jeeps (jeep tours), Drinking Water, and Livestock. All three are now
+  present with translations in all 7 languages.
+- **Database dialog — hardcoded strings** (fixes #149) — Several labels and button captions in
+  the Database Manager dialog were hardcoded in English and are now fully translated via `tr()`.
+- **Database dialog — path preview missing** (fixes #150) — The live path preview (folder +
+  database name + `.db`) was not shown when creating a new database. It now updates as you type.
+- **Database dialog — details label** (fixes #152) — The details/description label in the
+  Database Manager was untranslated. Now uses `tr()` correctly.
+- **Database dialog — selection lost on switch** (fixes #153) — Switching databases in the
+  Database Manager dialog caused the selection highlight to be lost. The active database is now
+  kept selected after a switch.
+- **Home point — Activate button not disabled** (fixes #162) — The *Activate* button was enabled
+  even when the selected home point was already the active one. It is now disabled when the point
+  is already active. Home points are also stored per database, so switching databases restores
+  the correct home point for that database.
+- **Status icon showed 'C' on macOS** (fixes #156) — A spurious `C` icon appeared in the status
+  column on macOS due to a platform-specific rendering difference. The icon is no longer shown.
+- **Home dropdown — duplicate marker** (fixes #163) — The home point dropdown in the toolbar
+  showed a double marker (★★) for the active entry. The selection colour was also hardcoded gray
+  instead of following the system theme. Both issues are now fixed.
+- **Edit home waypoint creates duplicate** (fixes #157) — Editing the name of an existing home
+  waypoint and saving created a new entry instead of updating the existing one. The save logic
+  now correctly identifies the existing record and updates it in place.
+
+---
+
 ## [1.11.18] — 2026-04-30
 ### Added
 - **Fix** version bump to 1.11.18 (1.11.16 was not updated)
