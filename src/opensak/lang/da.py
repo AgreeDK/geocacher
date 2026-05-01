@@ -154,7 +154,6 @@ STRINGS: dict[str, str] = {
     "filter_where_help_heading":    "SQL WHERE-klausul — kolonnereference",
     "filter_where_help_intro":      "Skriv standard SQLite-udtryk. Klausulen evalueres mod tabellen <code>caches</code>. Booleans gemmes som <code>1</code> (sand) eller <code>0</code> (falsk).",
     "filter_where_col_header":      "Kolonne",
-    "filter_where_type_header":     "Type",
     "filter_where_notes_header":    "Noter / værdier",
     "filter_where_note_name":       "Cache-navn",
     "filter_where_note_long_desc":  "Fuld cache-beskrivelse (HTML)",

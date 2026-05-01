@@ -154,7 +154,6 @@ STRINGS: dict[str, str] = {
     "filter_where_help_heading":    "SQL klauzule WHERE — přehled sloupců",
     "filter_where_help_intro":      "Pište standardní SQLite výrazy. Klauzule je vyhodnocována proti tabulce <code>caches</code>. Booleany jsou uloženy jako <code>1</code> (pravda) nebo <code>0</code> (nepravda).",
     "filter_where_col_header":      "Sloupec",
-    "filter_where_type_header":     "Typ",
     "filter_where_notes_header":    "Poznámky / hodnoty",
     "filter_where_note_name":       "Název cache",
     "filter_where_note_long_desc":  "Úplný popis cache (HTML)",

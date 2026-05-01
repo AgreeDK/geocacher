@@ -682,7 +682,7 @@ class FilterDialog(QDialog):
             f"{tr('filter_where_help_intro')}<br><br>"
             "<table cellspacing='4'>"
             f"<tr><th align='left'>{tr('filter_where_col_header')}</th>"
-            f"<th align='left'>{tr('filter_where_type_header')}</th>"
+            f"<th align='left'>{tr('col_type')}</th>"
             f"<th align='left'>{tr('filter_where_notes_header')}</th></tr>"
             "<tr><td><code>gc_code</code></td><td>text</td><td>e.g. <code>'GC12345'</code></td></tr>"
             f"<tr><td><code>name</code></td><td>text</td><td>{tr('filter_where_note_name')}</td></tr>"

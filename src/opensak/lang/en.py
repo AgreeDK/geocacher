@@ -154,7 +154,6 @@ STRINGS: dict[str, str] = {
     "filter_where_help_heading":    "SQL WHERE clause — column reference",
     "filter_where_help_intro":      "Write standard SQLite expressions. The clause is evaluated against the <code>caches</code> table. Booleans are stored as <code>1</code> (true) or <code>0</code> (false).",
     "filter_where_col_header":      "Column",
-    "filter_where_type_header":     "Type",
     "filter_where_notes_header":    "Notes / values",
     "filter_where_note_name":       "Cache name",
     "filter_where_note_long_desc":  "Full cache description (HTML)",

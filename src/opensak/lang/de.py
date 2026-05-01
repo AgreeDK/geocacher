@@ -154,7 +154,6 @@ STRINGS: dict[str, str] = {
     "filter_where_help_heading":    "SQL WHERE-Klausel — Spaltenreferenz",
     "filter_where_help_intro":      "Schreibe Standard-SQLite-Ausdrücke. Die Klausel wird gegen die Tabelle <code>caches</code> ausgewertet. Booleans werden als <code>1</code> (wahr) oder <code>0</code> (falsch) gespeichert.",
     "filter_where_col_header":      "Spalte",
-    "filter_where_type_header":     "Typ",
     "filter_where_notes_header":    "Hinweise / Werte",
     "filter_where_note_name":       "Cache-Name",
     "filter_where_note_long_desc":  "Vollständige Cache-Beschreibung (HTML)",
