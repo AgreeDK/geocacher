@@ -278,11 +278,6 @@ class SettingsDialog(QDialog):
         # Ikon + navn i samme række
         top_row = QHBoxLayout()
 
-        self._gc_status_icon = QLabel("○")
-        self._gc_status_icon.setFont(QFont("Sans Serif", 20))
-        self._gc_status_icon.setFixedWidth(36)
-        top_row.addWidget(self._gc_status_icon)
-
         name_col = QVBoxLayout()
         self._gc_username_label = QLabel(tr("gc_not_logged_in"))
         self._gc_username_label.setFont(QFont("Sans Serif", 11, QFont.Weight.Bold))
@@ -394,8 +389,6 @@ class SettingsDialog(QDialog):
         self._gc_refresh_btn.setEnabled(True)
         self._gc_status_label.setText(tr("gc_status_online"))
         self._gc_status_label.setStyleSheet("color: #2e7d32; font-size: 10px;")
-        self._gc_status_icon.setText("●")
-        self._gc_status_icon.setStyleSheet("color: #2e7d32;")
         # Hent profil med det samme
         self._on_gc_refresh_profile()
 
@@ -434,8 +427,6 @@ class SettingsDialog(QDialog):
         self._gc_finds_label.setText(tr("gc_find_count", count=finds))
         self._gc_status_label.setText(tr("gc_status_online"))
         self._gc_status_label.setStyleSheet("color: #2e7d32; font-size: 10px;")
-        self._gc_status_icon.setText("●")
-        self._gc_status_icon.setStyleSheet("color: #2e7d32;")
         self._gc_refresh_btn.setEnabled(True)
         self._gc_login_btn.setEnabled(False)
         self._gc_logout_btn.setEnabled(True)
@@ -450,8 +441,6 @@ class SettingsDialog(QDialog):
         self._gc_finds_label.setText("")
         self._gc_status_label.setText(tr("gc_status_offline"))
         self._gc_status_label.setStyleSheet("color: gray; font-size: 10px;")
-        self._gc_status_icon.setText("○")
-        self._gc_status_icon.setStyleSheet("")
         self._gc_login_btn.setEnabled(True)
         self._gc_logout_btn.setEnabled(False)
         self._gc_refresh_btn.setEnabled(False)
