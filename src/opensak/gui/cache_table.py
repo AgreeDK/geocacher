@@ -893,6 +893,14 @@ class CacheTableView(QTableView):
             act_found = menu.addAction(tr("ctx_mark_found"))
             act_found.triggered.connect(lambda: self._toggle_found(cache, True))
 
+        menu.addSeparator()
+
+        act_update_loc = menu.addAction(tr("ctx_update_location"))
+        gc = cache.gc_code
+        act_update_loc.triggered.connect(
+            lambda checked=False, code=gc: self._update_location(code)
+        )
+
         menu.exec(self.viewport().mapToGlobal(pos))
 
     def _edit_corrected(self, cache: Cache) -> None:
@@ -961,6 +969,16 @@ class CacheTableView(QTableView):
         cache.found = found
         self._model.beginResetModel()
         self._model.endResetModel()
+
+    def _update_location(self, gc_code: str) -> None:
+        """Open UpdateLocationDialog targeted at a single cache."""
+        from opensak.gui.dialogs.update_location_dialog import UpdateLocationDialog
+        dlg = UpdateLocationDialog(self, gc_codes=[gc_code])
+        dlg.location_updated.connect(lambda: (
+            self._model.beginResetModel(),
+            self._model.endResetModel(),
+        ))
+        dlg.exec()
 
     def selected_cache(self) -> Optional[Cache]:
         indexes = self.selectedIndexes()
