@@ -16,9 +16,11 @@
 6. [Cache Details and Hints](#6-cache-details-and-hints)
 7. [Waypoints](#7-waypoints)
 8. [Marking Caches as Found](#8-marking-caches-as-found)
-9. [Exporting to GPS](#9-exporting-to-gps)
-10. [Multiple Databases](#10-multiple-databases)
-11. [Getting Help](#11-getting-help)
+9. [Updating Finds from "My Finds"](#9-updating-finds-from-my-finds)
+10. [Exporting to GPS](#10-exporting-to-gps)
+11. [Multiple Databases](#11-multiple-databases)
+12. [Changing the Language](#12-changing-the-language)
+13. [Getting Help](#13-getting-help)
 
 ---
 
@@ -59,7 +61,7 @@ When you open OpenSAK for the first time, you will see an empty three-panel layo
 
 Before importing, it is a good idea to set your **home coordinates**. This is used as the centre point for distance calculations.
 
-1. Go to **Settings → Preferences**
+1. Go to **Settings → Settings…**
 2. Enter your home coordinates (decimal degrees, e.g. `55.6761, 12.5683`)
 3. Click **Save**
 
@@ -128,7 +130,7 @@ Click any pin to highlight that cache in the list and show its details.
 Filters let you narrow down the cache list to exactly what you want to see. OpenSAK supports 18 filter types with AND/OR logic.
 
 ### Opening the Filter Dialog
-Click **Filters → Edit Filters** (or press `Ctrl+F`).
+Click **View → Set filter…** (or press `Ctrl+F`).
 
 ### Common filter examples
 
@@ -149,7 +151,7 @@ Once you have set up a useful combination of filters, save it as a profile:
 4. Load it any time from the **Filters** menu
 
 ### Clearing Filters
-Click **Filters → Clear Filters** to show all caches again.
+Click **View → Clear filter** to show all caches again.
 
 ---
 
@@ -190,7 +192,7 @@ Right-click the cache in the list → **Mark as Found**.
 For the most accurate found status, use a **My Finds Pocket Query**:
 1. On geocaching.com, go to **Play → Pocket Queries**
 2. Find the **My Finds** query and download it
-3. In OpenSAK, go to **Database → Update Found Status**
+3. In OpenSAK, go to **Settings → Update finds from reference database…**
 4. Select your My Finds `.zip` file
 5. OpenSAK will mark all matching caches as found
 
@@ -198,7 +200,22 @@ This method works even if you have found caches that are not in your current dat
 
 ---
 
-## 9. Exporting to GPS
+## 9. Updating Finds from "My Finds"
+
+For the most accurate found status across all your databases, use a **My Finds Pocket Query** from Geocaching.com.
+
+1. On geocaching.com, go to **Play → Pocket Queries**
+2. Find the **My Finds** query and download it as a `.zip` file
+3. In OpenSAK, create a new database called "My Finds" (**File → Manage databases…**)
+4. Import the My Finds ZIP into that database
+5. Switch back to the database you want to update
+6. Go to **Settings → Update finds from reference database…** and select the "My Finds" database
+
+OpenSAK will mark all matching caches as found, even caches that are not in the current database.
+
+---
+
+## 10. Exporting to GPS
 
 OpenSAK can export your filtered cache list directly to a Garmin GPS device connected via USB.
 
@@ -215,18 +232,18 @@ The caches will be written as a GPX file to your Garmin's `Garmin/GPX/` folder.
 
 ---
 
-## 10. Multiple Databases
+## 11. Multiple Databases
 
 OpenSAK supports multiple separate databases — useful if you geocache in different regions or want to keep work and leisure caches separate.
 
 ### Creating a New Database
-1. Go to **Database → Manage Databases**
+1. Go to **File → Manage databases…**
 2. Click **New Database**
 3. Give it a name and set a centre point (home coordinates for that region)
 4. Click **Create**
 
 ### Switching Between Databases
-Go to **Database → Manage Databases** and double-click any database to switch to it.
+Go to **File → Manage databases…** and double-click any database to switch to it.
 
 Each database has its own:
 - Cache list and import history
@@ -235,7 +252,19 @@ Each database has its own:
 
 ---
 
-## 11. Getting Help
+## 12. Changing the Language
+
+1. Go to **Settings → Settings…**
+2. Select your language in the **Language** section
+3. Restart OpenSAK — the new language takes effect on next startup
+
+Currently supported: **Danish (da)**, **English (en)**, **French (fr)**, **Portuguese (pt)**, **German (de)**, **Czech (cs)**, **Swedish (se)**
+
+Want to add a new language? See [CONTRIBUTING.md](https://github.com/AgreeDK/opensak/blob/main/CONTRIBUTING.md) for the step-by-step guide — it only requires translating one file.
+
+---
+
+## 13. Getting Help
 
 **Found a bug or have a feature request?**
 → [github.com/AgreeDK/opensak/issues](https://github.com/AgreeDK/opensak/issues)

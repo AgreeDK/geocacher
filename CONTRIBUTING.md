@@ -65,7 +65,12 @@ Want to translate OpenSAK into a new language, or update an existing one? It onl
    AVAILABLE_LANGUAGES = {
        "da": "Dansk",
        "en": "English",
-       "de": "Deutsch",   # ← add this line
+       "fr": "Français",
+       "pt": "Português",
+       "cs": "Čeština",
+       "se": "Svenska",
+       "de": "Deutsch",
+       "fi": "Suomi",   # ← add this line
    }
    ```
 
@@ -135,7 +140,7 @@ git push origin main
 
 ## Code Style
 
-- Python 3.10+, PySide6 for the GUI
+- Python 3.11+, PySide6 for the GUI
 - Use `pathlib.Path` for all file paths (cross-platform)
 - Background work runs in `QThread` subclasses — never block the main thread
 - All user-visible strings go through `tr("key")` from `opensak.lang`
