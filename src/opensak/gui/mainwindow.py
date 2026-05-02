@@ -152,6 +152,7 @@ class MainWindow(QMainWindow):
         self._current_filterset = FilterSet()
         self._current_sort = SortSpec("name", ascending=True)
         self._active_filter_name = ""
+        self._db_count: int = 0
         self._search_timer = QTimer(self)
         self._search_timer.setSingleShot(True)
         self._search_timer.timeout.connect(self._refresh_cache_list)
@@ -748,6 +749,7 @@ class MainWindow(QMainWindow):
         # Total caches in database (not just filtered)
         with get_session() as session:
             total_in_db = session.query(Cache).count()
+        self._db_count = total_in_db
 
         # Filter name
         filter_name = self._active_filter_name
@@ -888,11 +890,7 @@ class MainWindow(QMainWindow):
         s = get_settings()
         user_min   = s.search_min_chars
         user_delay = s.search_debounce_ms
-        try:
-            with get_session() as session:
-                count = session.query(Cache).count()
-        except Exception:
-            count = 0
+        count = self._db_count
         if count >= 10_000:
             adaptive_min, adaptive_delay = 3, 600
         elif count >= 1_000:
