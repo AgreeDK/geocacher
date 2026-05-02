@@ -160,9 +160,7 @@ class MainWindow(QMainWindow):
         self._restore_state()
         self._update_title()
         self._reload_home_combo()
-        from opensak.utils import flags
-        if flags.db_combo:
-            self._reload_db_combo()
+        self._reload_db_combo()
         # Load caches after UI is ready
         QTimer.singleShot(100, self._refresh_cache_list)
         # Tjek for opdateringer i baggrunden (5 sek forsinkelse — GUI er klar)
@@ -423,16 +421,14 @@ class MainWindow(QMainWindow):
         self._act_db_manager.setToolTip(tr("action_db_manager") + " (Ctrl+D)")
         tb.addAction(self._act_db_manager)
 
-        from opensak.utils import flags
-        if flags.db_combo:
-            self._db_combo = QComboBox()
-            self._db_combo.setMinimumWidth(140)
-            self._db_combo.setMaximumWidth(220)
-            self._db_combo.setToolTip(tr("toolbar_db_combo_tooltip"))
-            self._db_combo.currentIndexChanged.connect(self._on_db_combo_changed)
-            db_combo_action = QWidgetAction(self)
-            db_combo_action.setDefaultWidget(self._db_combo)
-            tb.addAction(db_combo_action)
+        self._db_combo = QComboBox()
+        self._db_combo.setMinimumWidth(140)
+        self._db_combo.setMaximumWidth(220)
+        self._db_combo.setToolTip(tr("toolbar_db_combo_tooltip"))
+        self._db_combo.currentIndexChanged.connect(self._on_db_combo_changed)
+        db_combo_action = QWidgetAction(self)
+        db_combo_action.setDefaultWidget(self._db_combo)
+        tb.addAction(db_combo_action)
 
         # Importer
         self._act_import.setText(tr("action_import"))
@@ -619,9 +615,7 @@ class MainWindow(QMainWindow):
     def _on_database_switched(self, db_info) -> None:
         """Kaldes når brugeren skifter aktiv database."""
         self._update_title()
-        from opensak.utils import flags
-        if flags.db_combo:
-            self._reload_db_combo()
+        self._reload_db_combo()
         self._detail_panel.clear()
         self._load_sort_for_active_db()
         self._refresh_cache_list()

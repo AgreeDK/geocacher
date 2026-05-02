@@ -2,8 +2,7 @@
 tests/e2e-tests/test_e2e_db_combo.py — Database dropdown toolbar tests.
 
 Covers:
-- Combo is absent when flags.db_combo is False
-- Combo is present and populated when flags.db_combo is True
+- Combo is present and populated on startup
 - Active database is pre-selected in the combo
 - Selecting a different entry calls manager.switch_to and refreshes the combo
 - _on_database_switched (e.g. triggered by the dialog) also refreshes the combo
@@ -54,45 +53,14 @@ def _make_two_db_manager(db_path_a, db_path_b):
 
 
 @pytest.fixture
-def no_combo_window(qtbot, tmp_path, monkeypatch):
-    """MainWindow with flags.db_combo=False — combo widget must be absent."""
-    import opensak.db.manager as mgr_module
-    from opensak.db.database import init_db
-    from opensak.lang import load_language
-    from opensak.utils import flags
-    from tests.data import make_fake_manager
-
-    load_language("en")
-    monkeypatch.setattr(flags, "db_combo", False)
-
-    db_path = tmp_path / "no_combo.db"
-    init_db(db_path=db_path)
-    monkeypatch.setattr(mgr_module, "_manager", make_fake_manager(db_path))
-
-    from opensak.gui.mainwindow import MainWindow
-
-    window = MainWindow()
-    qtbot.addWidget(window)
-    window.show()
-    qtbot.waitExposed(window)
-    qtbot.wait(200)
-
-    yield window
-
-    mgr_module._manager = None
-
-
-@pytest.fixture
 def combo_window(qtbot, tmp_path, monkeypatch):
-    """MainWindow with flags.db_combo=True and a single-database manager."""
+    """MainWindow with a single-database manager."""
     import opensak.db.manager as mgr_module
     from opensak.db.database import init_db
     from opensak.lang import load_language
-    from opensak.utils import flags
     from tests.data import make_fake_manager
 
     load_language("en")
-    monkeypatch.setattr(flags, "db_combo", True)
 
     db_path = tmp_path / "combo.db"
     init_db(db_path=db_path)
@@ -113,14 +81,12 @@ def combo_window(qtbot, tmp_path, monkeypatch):
 
 @pytest.fixture
 def two_db_combo_window(qtbot, tmp_path, monkeypatch):
-    """MainWindow with flags.db_combo=True and a two-database manager."""
+    """MainWindow with a two-database manager."""
     import opensak.db.manager as mgr_module
     from opensak.db.database import init_db
     from opensak.lang import load_language
-    from opensak.utils import flags
 
     load_language("en")
-    monkeypatch.setattr(flags, "db_combo", True)
 
     db_path_a = tmp_path / "alpha.db"
     db_path_b = tmp_path / "beta.db"
@@ -142,19 +108,11 @@ def two_db_combo_window(qtbot, tmp_path, monkeypatch):
     mgr_module._manager = None
 
 
-# ── Flag off ───────────────────────────────────────────────────────────────────
+# ── Presence and population ───────────────────────────────────────────────────
 
 
-def test_db_combo_absent_when_flag_disabled(no_combo_window, qtbot):
-    """When flags.db_combo is False the toolbar combo is never created."""
-    assert not hasattr(no_combo_window, "_db_combo")
-
-
-# ── Flag on — presence and population ─────────────────────────────────────────
-
-
-def test_db_combo_present_when_flag_enabled(combo_window, qtbot):
-    """When flags.db_combo is True the combo widget exists."""
+def test_db_combo_present(combo_window, qtbot):
+    """The toolbar combo widget is always created."""
     assert hasattr(combo_window, "_db_combo")
     assert combo_window._db_combo is not None
 

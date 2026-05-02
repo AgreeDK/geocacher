@@ -26,7 +26,6 @@ from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from PySide6.QtCore import QDate
 
 from opensak.lang import tr
-from opensak.utils import flags
 from opensak.filters.engine import (
     FilterSet, SortSpec,
     CacheTypeFilter, ContainerFilter,
@@ -260,16 +259,14 @@ class FilterDialog(QDialog):
 
         # ── Faneblade ─────────────────────────────────────────────────────────
         self._tabs = QTabWidget()
-        self._where_tab = None
         self._general_tab = self._build_general_tab()
         self._dates_tab = self._build_dates_tab()
         self._attributes_tab = self._build_attributes_tab()
+        self._where_tab = self._build_where_tab()
         self._tabs.addTab(self._general_tab, tr("settings_tab_general"))
         self._tabs.addTab(self._dates_tab, tr("filter_tab_dates"))
         self._tabs.addTab(self._attributes_tab, tr("filter_tab_attributes"))
-        if flags.where_filter:
-            self._where_tab = self._build_where_tab()
-            self._tabs.addTab(self._where_tab, tr("filter_tab_where"))
+        self._tabs.addTab(self._where_tab, tr("filter_tab_where"))
         layout.addWidget(self._tabs)
 
         # ── Knapper ───────────────────────────────────────────────────────────
