@@ -3,6 +3,7 @@ src/opensak/gui/dialogs/column_dialog.py — Vælg synlige kolonner i cacheliste
 """
 
 from __future__ import annotations
+import json
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
@@ -80,6 +81,25 @@ def set_visible_columns(col_ids: list[str]) -> None:
     """Gem liste over synlige kolonne-id'er til QSettings."""
     s = QSettings("OpenSAK Project", "OpenSAK")
     s.setValue("columns/visible", col_ids)
+    s.sync()
+
+
+def get_column_widths() -> dict[str, int]:
+    """Return saved column widths (col_id -> px) from QSettings."""
+    s = QSettings("OpenSAK Project", "OpenSAK")
+    raw = s.value("columns/widths", None)
+    if raw:
+        try:
+            return json.loads(raw)
+        except Exception:
+            pass
+    return {}
+
+
+def set_column_widths(widths: dict[str, int]) -> None:
+    """Persist column widths (col_id -> px) to QSettings."""
+    s = QSettings("OpenSAK Project", "OpenSAK")
+    s.setValue("columns/widths", json.dumps(widths))
     s.sync()
 
 
