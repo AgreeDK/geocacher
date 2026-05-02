@@ -329,6 +329,10 @@ class FilterDialog(QDialog):
         self._owner_filter.setPlaceholderText(tr("filter_contains_placeholder"))
         layout.addRow(tr("filter_owner_name_label"), self._owner_filter)
 
+        spacer = QWidget()
+        spacer.setFixedHeight(6)
+        layout.addRow(spacer)
+
         # Cache type
         type_group = QGroupBox(tr("filter_cache_type_group"))
         type_layout = QGridLayout(type_group)
