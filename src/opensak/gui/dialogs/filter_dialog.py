@@ -540,18 +540,18 @@ class FilterDialog(QDialog):
         grid.setSpacing(2)
         grid.setContentsMargins(6, 6, 6, 6)
 
-        # Header — venstre kolonne
+        # Header
         for col, txt in enumerate([tr("filter_attr_col_name"), tr("yes"), tr("no"), tr("filter_none_short")]):
             lbl = QLabel(f"<b>{txt}</b>")
             lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             grid.addWidget(lbl, 0, col)
 
-        # Separator under header — venstre kolonne
+        # Separator under header
         line = QFrame()
         line.setFrameShape(QFrame.Shape.HLine)
         grid.addWidget(line, 1, 0, 1, 4)
 
-        # Fjern duplikerede nøgler (behold kun første forekomst per attr_key)
+        # Deduplicate keys (keep only first occurrence per attr_key)
         seen_keys: set[str] = set()
         unique_attrs: list[tuple[int, str]] = []
         for attr_id, attr_key in ATTRIBUTES:
@@ -559,25 +559,19 @@ class FilterDialog(QDialog):
                 seen_keys.add(attr_key)
                 unique_attrs.append((attr_id, attr_key))
 
-        # Attributter i to kolonner
-        half = (len(unique_attrs) + 1) // 2
         for i, (attr_id, attr_key) in enumerate(unique_attrs):
-            # To-kolonne layout: venstre og højre halvdel
-            col_offset = 0 if i < half else 5
-            row = (i % half) + 2
+            row = i + 2
 
-            # Hent oversat navn; fald tilbage til nøglen hvis mangler
             attr_name = tr(attr_key)
             name_lbl = QLabel(attr_name)
             name_lbl.setToolTip(f"Attribut ID: {attr_id}")
-            grid.addWidget(name_lbl, row, col_offset)
+            grid.addWidget(name_lbl, row, 0)
 
             ja_cb  = QCheckBox()
             nej_cb = QCheckBox()
             ingen_cb = QCheckBox()
             ingen_cb.setChecked(True)
 
-            # Kun ét valg ad gangen
             def make_exclusive(j, n, ig):
                 def on_ja(v):
                     if v:
@@ -597,27 +591,11 @@ class FilterDialog(QDialog):
 
             make_exclusive(ja_cb, nej_cb, ingen_cb)
 
-            grid.addWidget(ja_cb,    row, col_offset + 1, Qt.AlignmentFlag.AlignCenter)
-            grid.addWidget(nej_cb,   row, col_offset + 2, Qt.AlignmentFlag.AlignCenter)
-            grid.addWidget(ingen_cb, row, col_offset + 3, Qt.AlignmentFlag.AlignCenter)
+            grid.addWidget(ja_cb,    row, 1, Qt.AlignmentFlag.AlignCenter)
+            grid.addWidget(nej_cb,   row, 2, Qt.AlignmentFlag.AlignCenter)
+            grid.addWidget(ingen_cb, row, 3, Qt.AlignmentFlag.AlignCenter)
 
             self._attr_boxes[attr_id] = (ja_cb, nej_cb, ingen_cb)
-
-        # Vertikal separator mellem de to kolonner
-        vsep = QFrame()
-        vsep.setFrameShape(QFrame.Shape.VLine)
-        grid.addWidget(vsep, 0, 4, half + 2, 1)
-
-        # Header — højre kolonne
-        for col, txt in enumerate([tr("filter_attr_col_name"), tr("yes"), tr("no"), tr("filter_none_short")]):
-            lbl = QLabel(f"<b>{txt}</b>")
-            lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            grid.addWidget(lbl, 0, col + 5)
-
-        # Separator under header — højre kolonne
-        line_r = QFrame()
-        line_r.setFrameShape(QFrame.Shape.HLine)
-        grid.addWidget(line_r, 1, 5, 1, 4)
 
         scroll.setWidget(content)
         outer_layout.addWidget(scroll)
