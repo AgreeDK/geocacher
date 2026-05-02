@@ -71,6 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Inställningar…",
     "action_found_update":          "⟳  Uppdatera hittade från referensdatabasen…",
+    "action_update_location":       "🌍  Uppdatera kommun / län / land…",
     "action_gps_export":            "📤  Skicka till GPS…",
 
     # Help menu
@@ -274,6 +275,24 @@ STRINGS: dict[str, str] = {
     "found_active_db":               "Activ databas (uppdatera):",
     "found_completed":               "✓ Uppdatering färdig!",
     "found_errors":                  "Fel:",
+
+    # ── Dialog för uppdatering av plats ───────────────────────────────────────
+    "update_loc_title":             "Uppdatera kommun / län / land",
+    "update_loc_scope_group":       "Omfattning",
+    "update_loc_scope_all":         "Uppdatera alla cacher",
+    "update_loc_scope_missing":     "Endast cacher som saknar platsdata",
+    "update_loc_use_corrected":     "Använd korrigerade koordinater när tillgängliga",
+    "update_loc_start_btn":         "▶  Starta uppdatering",
+    "update_loc_info":              "Platsdata hämtas från OpenStreetMap (Nominatim) — samma källa som project-gc.\n\nBearbetningen är begränsad till en förfrågan per sekund. För stora databaser kan detta ta flera minuter.",
+    "update_loc_progress":          "Uppdaterar {current} / {total}…",
+    "update_loc_done":              "✓ Klart — {updated} uppdaterade, {skipped} hoppade över, {errors} fel",
+    "update_loc_cancelled":         "Avbrutet — {updated} uppdaterade hittills",
+    "update_loc_log_placeholder":   "Resultaten visas här…",
+    "update_loc_no_db":             "Ingen databas är öppen.",
+    "update_loc_nothing_to_do":     "Inga cacher att uppdatera med det valda omfånget.",
+    "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
+    "update_loc_row_error":         "{gc_code}: fel — {msg}",
+    "update_loc_row_skipped":       "{gc_code}: hoppades över (inga koordinater)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Ny databas",

@@ -71,6 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Paramètres…",
     "action_found_update":          "⟳  Mettre à jour les caches trouvées depuis la base de données de référence…",
+    "action_update_location":       "🌍  Mettre à jour département / région / pays…",
     "action_gps_export":            "📤  Envoyer au GPS…",
 
     # Help menu
@@ -274,6 +275,24 @@ STRINGS: dict[str, str] = {
     "found_active_db":                "Base active (à mettre à jour) :",
     "found_completed":                "✓ Mise à jour terminée !",
     "found_errors":                   "Erreurs :",
+
+    # ── Boîte de dialogue mise à jour de la localisation ─────────────────────
+    "update_loc_title":             "Mettre à jour département / région / pays",
+    "update_loc_scope_group":       "Périmètre",
+    "update_loc_scope_all":         "Mettre à jour tous les caches",
+    "update_loc_scope_missing":     "Uniquement les caches sans données de localisation",
+    "update_loc_use_corrected":     "Utiliser les coordonnées corrigées si disponibles",
+    "update_loc_start_btn":         "▶  Lancer la mise à jour",
+    "update_loc_info":              "Les données de localisation sont récupérées depuis OpenStreetMap (Nominatim) — la même source que project-gc.\n\nLe traitement est limité à une requête par seconde. Pour les grandes bases de données, cela peut prendre plusieurs minutes.",
+    "update_loc_progress":          "Mise à jour {current} / {total}…",
+    "update_loc_done":              "✓ Terminé — {updated} mis à jour, {skipped} ignorés, {errors} erreurs",
+    "update_loc_cancelled":         "Annulé — {updated} mis à jour jusqu'ici",
+    "update_loc_log_placeholder":   "Les résultats apparaîtront ici…",
+    "update_loc_no_db":             "Aucune base de données ouverte.",
+    "update_loc_nothing_to_do":     "Aucun cache à mettre à jour avec le périmètre sélectionné.",
+    "update_loc_row":               "{gc_code} : {country} / {state} / {county}",
+    "update_loc_row_error":         "{gc_code} : erreur — {msg}",
+    "update_loc_row_skipped":       "{gc_code} : ignoré (pas de coordonnées)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Nouvelle base de données",

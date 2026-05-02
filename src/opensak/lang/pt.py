@@ -71,6 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Definições…",
     "action_found_update":          "⟳  Atualizar caches encontradas da base de dados de referência…",
+    "action_update_location":       "🌍  Atualizar concelho / estado / país…",
     "action_gps_export":            "📤  Enviar para GPS…",
 
     # Help menu
@@ -274,6 +275,24 @@ STRINGS: dict[str, str] = {
     "found_active_db":                "Base de dados ativa (a atualizar):",
     "found_completed":                "✓ Atualização concluída!",
     "found_errors":                   "Erros:",
+
+    # ── Diálogo de atualização de localização ─────────────────────────────────
+    "update_loc_title":             "Atualizar Concelho / Estado / País",
+    "update_loc_scope_group":       "Âmbito",
+    "update_loc_scope_all":         "Atualizar todas as caches",
+    "update_loc_scope_missing":     "Apenas caches sem dados de localização",
+    "update_loc_use_corrected":     "Usar coordenadas corrigidas quando disponíveis",
+    "update_loc_start_btn":         "▶  Iniciar atualização",
+    "update_loc_info":              "Os dados de localização são obtidos do OpenStreetMap (Nominatim) — a mesma fonte que o project-gc.\n\nO processamento está limitado a um pedido por segundo. Para bases de dados grandes, isto pode demorar vários minutos.",
+    "update_loc_progress":          "A atualizar {current} / {total}…",
+    "update_loc_done":              "✓ Concluído — {updated} atualizados, {skipped} ignorados, {errors} erros",
+    "update_loc_cancelled":         "Cancelado — {updated} atualizados até agora",
+    "update_loc_log_placeholder":   "Os resultados aparecerão aqui…",
+    "update_loc_no_db":             "Nenhuma base de dados aberta.",
+    "update_loc_nothing_to_do":     "Nenhuma cache para atualizar com o âmbito selecionado.",
+    "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
+    "update_loc_row_error":         "{gc_code}: erro — {msg}",
+    "update_loc_row_skipped":       "{gc_code}: ignorado (sem coordenadas)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Nova base de dados",
