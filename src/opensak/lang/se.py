@@ -217,7 +217,7 @@ STRINGS: dict[str, str] = {
     "settings_search_min_chars_label":             "Minsta antal tecken:",
     "settings_search_debounce_label":              "Debounce-fördröjning (ms):",
     "settings_search_auto":                        "Auto",
-    "settings_search_hint":                        "Sätt till 0 (Auto) för adaptiva trösklar baserade på databasstorlek: < 1 000 cacher → 1 tecken / 150 ms, 1 000–10 000 → 1 / 250 ms, > 10 000 → 1 / 400 ms.",
+    "settings_search_hint":                        "Sätt till 0 (Auto) för adaptiva trösklar: minst 2 tecken för alla databasstorlekar, debounce skalas med storlek (150 / 250 / 400 ms). Minsta tecken styr relevans; debounce styr skrivrespons.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Hantera databaser",

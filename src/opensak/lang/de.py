@@ -217,7 +217,7 @@ STRINGS: dict[str, str] = {
     "settings_search_min_chars_label":             "Mindestzeichen:",
     "settings_search_debounce_label":              "Debounce-Verzögerung (ms):",
     "settings_search_auto":                        "Auto",
-    "settings_search_hint":                        "0 (Auto) wählt adaptive Schwellenwerte basierend auf der Datenbankgröße: < 1 000 Caches → 1 Zeichen / 150 ms, 1 000–10 000 → 1 / 250 ms, > 10 000 → 1 / 400 ms.",
+    "settings_search_hint":                        "0 (Auto) wählt adaptive Schwellenwerte: mindestens 2 Zeichen für alle Datenbankgrößen, Debounce skaliert mit der Größe (150 / 250 / 400 ms). Mindestzeichen steuert Relevanz; Debounce steuert Tippreaktion.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Datenbanken verwalten",

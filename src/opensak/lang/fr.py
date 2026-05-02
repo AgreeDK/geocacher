@@ -217,7 +217,7 @@ STRINGS: dict[str, str] = {
     "settings_search_min_chars_label":             "Caractères minimum :",
     "settings_search_debounce_label":              "Délai de debounce (ms) :",
     "settings_search_auto":                        "Auto",
-    "settings_search_hint":                        "Réglez sur 0 (Auto) pour des seuils adaptatifs selon la taille de la base : < 1 000 caches → 1 car. / 150 ms, 1 000–10 000 → 1 / 250 ms, > 10 000 → 1 / 400 ms.",
+    "settings_search_hint":                        "Réglez sur 0 (Auto) pour des seuils adaptatifs : 2 caractères minimum pour toutes les tailles, debounce selon la taille (150 / 250 / 400 ms). Les caractères minimum contrôlent la pertinence ; le debounce contrôle la réactivité.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Gérer les bases de données",

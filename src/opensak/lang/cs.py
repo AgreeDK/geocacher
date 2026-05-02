@@ -217,7 +217,7 @@ STRINGS: dict[str, str] = {
     "settings_search_min_chars_label":             "Minimální počet znaků:",
     "settings_search_debounce_label":              "Zpoždění debounce (ms):",
     "settings_search_auto":                        "Auto",
-    "settings_search_hint":                        "Nastavte 0 (Auto) pro adaptivní prahové hodnoty podle velikosti databáze: < 1 000 keší → 1 znak / 150 ms, 1 000–10 000 → 1 / 250 ms, > 10 000 → 1 / 400 ms.",
+    "settings_search_hint":                        "Nastavte 0 (Auto) pro adaptivní prahy: minimum 2 znaky pro všechny velikosti databáze, debounce se škáluje s velikostí (150 / 250 / 400 ms). Minimální znaky řídí relevanci; debounce řídí odezvu psaní.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Správa databází",

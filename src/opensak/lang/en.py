@@ -217,7 +217,7 @@ STRINGS: dict[str, str] = {
     "settings_search_min_chars_label":             "Minimum characters:",
     "settings_search_debounce_label":              "Debounce delay (ms):",
     "settings_search_auto":                        "Auto",
-    "settings_search_hint":                        "Set to 0 (Auto) for adaptive thresholds that scale with database size: < 1 000 caches → 1 char / 150 ms, 1 000–10 000 → 1 / 250 ms, > 10 000 → 1 / 400 ms.",
+    "settings_search_hint":                        "Set to 0 (Auto) for adaptive thresholds: 2 chars minimum for all database sizes, debounce scales with size (150 / 250 / 400 ms). Minimum characters controls result relevance; debounce controls typing responsiveness.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Manage databases",
