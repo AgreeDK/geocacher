@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QFileDialog, QProgressBar,
     QTextEdit, QListWidget, QListWidgetItem,
-    QAbstractItemView
+    QAbstractItemView, QCheckBox
 )
 
 from opensak.gui.settings import get_settings
@@ -76,6 +76,7 @@ class ImportDialog(QDialog):
         self.setMinimumWidth(540)
         self.setMinimumHeight(420)
         self._worker: ImportWorker | None = None
+        self._geo_worker = None   # ReverseGeocodeWorker, set after import if needed
         self._selected_paths: list[Path] = []
         self._any_success = False
         self._setup_ui()
@@ -119,6 +120,11 @@ class ImportDialog(QDialog):
         btn_row.addWidget(self._close_btn)
 
         layout.addLayout(btn_row)
+
+        # ── Geocode option ────────────────────────────────────────────────────
+        self._cb_geocode = QCheckBox(tr("import_geocode_checkbox"))
+        self._cb_geocode.setChecked(True)
+        layout.addWidget(self._cb_geocode)
 
         # ── Progress ──────────────────────────────────────────────────────────
         self._progress = QProgressBar()
@@ -184,6 +190,7 @@ class ImportDialog(QDialog):
         self._import_btn.setEnabled(False)
         self._browse_btn.setEnabled(False)
         self._remove_btn.setEnabled(False)
+        self._cb_geocode.setEnabled(False)
         self._progress.setVisible(True)
         self._any_success = False
         self._log.clear()
@@ -247,9 +254,6 @@ class ImportDialog(QDialog):
 
     def _on_all_done(self) -> None:
         self._progress.setVisible(False)
-        self._browse_btn.setEnabled(True)
-        self._import_btn.setText(tr("import_again"))
-        self._import_btn.setEnabled(True)
 
         total = self._file_list.count()
         self._append_log(tr("import_all_done", count=total))
@@ -257,14 +261,90 @@ class ImportDialog(QDialog):
         if self._any_success:
             self.import_completed.emit()
 
+        if self._any_success and self._cb_geocode.isChecked():
+            self._start_geocoding()
+        else:
+            self._browse_btn.setEnabled(True)
+            self._import_btn.setText(tr("import_again"))
+            self._import_btn.setEnabled(True)
+            self._cb_geocode.setEnabled(True)
+
+    def _start_geocoding(self) -> None:
+        from opensak.gui.dialogs.update_location_dialog import (
+            ReverseGeocodeWorker, _CacheRow
+        )
+        from opensak.db.database import get_session
+        from opensak.db.models import Cache
+        from sqlalchemy.orm import joinedload
+
+        self._append_log(tr("import_geocode_running"))
+
+        rows = []
+        with get_session() as session:
+            query = session.query(Cache).options(joinedload(Cache.user_note)).filter(
+                (Cache.country == None) | (Cache.country == "") |
+                (Cache.state   == None) | (Cache.state   == "") |
+                (Cache.county  == None) | (Cache.county  == "")
+            )
+            for cache in query.all():
+                lat, lon = cache.latitude, cache.longitude
+                if cache.user_note and cache.user_note.is_corrected:
+                    clat = cache.user_note.corrected_lat
+                    clon = cache.user_note.corrected_lon
+                    if clat is not None and clon is not None:
+                        lat, lon = clat, clon
+                if lat is not None and lon is not None:
+                    rows.append(_CacheRow(gc_code=cache.gc_code, lat=lat, lon=lon))
+
+        if not rows:
+            self._browse_btn.setEnabled(True)
+            self._import_btn.setText(tr("import_again"))
+            self._import_btn.setEnabled(True)
+            self._cb_geocode.setEnabled(True)
+            return
+
+        self._progress.setRange(0, len(rows))
+        self._progress.setValue(0)
+        self._progress.setVisible(True)
+
+        self._geo_worker = ReverseGeocodeWorker(rows)
+        self._geo_worker.progress.connect(lambda cur, tot: self._progress.setValue(cur))
+        self._geo_worker.row_done.connect(lambda _gc, line: self._append_log(line))
+        self._geo_worker.all_done.connect(self._on_geocode_done)
+        self._geo_worker.cancelled.connect(self._on_geocode_done)
+        self._geo_worker.finished.connect(self._geo_worker.deleteLater)
+        self._geo_worker.start()
+
+    def _on_geocode_done(self, result) -> None:
+        self._progress.setVisible(False)
+        summary = tr(
+            "update_loc_done",
+            updated=result.updated,
+            skipped=result.skipped,
+            errors=result.errors,
+        )
+        self._append_log(summary)
+        if result.updated > 0:
+            self.import_completed.emit()
+        self._browse_btn.setEnabled(True)
+        self._import_btn.setText(tr("import_again"))
+        self._import_btn.setEnabled(True)
+        self._cb_geocode.setEnabled(True)
+
     def closeEvent(self, event) -> None:
         try:
             if self._worker and self._worker.isRunning():
                 self._worker.wait()
         except RuntimeError:
-            # C++ object already deleted by deleteLater — safe to ignore
             pass
         self._worker = None
+        try:
+            if self._geo_worker and self._geo_worker.isRunning():
+                self._geo_worker.request_cancel()
+                self._geo_worker.wait(3000)
+        except RuntimeError:
+            pass
+        self._geo_worker = None
         super().closeEvent(event)
 
     # ── Log helpers ───────────────────────────────────────────────────────────
