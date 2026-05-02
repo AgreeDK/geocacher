@@ -152,6 +152,9 @@ class MainWindow(QMainWindow):
         self._current_filterset = FilterSet()
         self._current_sort = SortSpec("name", ascending=True)
         self._active_filter_name = ""
+        self._search_timer = QTimer(self)
+        self._search_timer.setSingleShot(True)
+        self._search_timer.timeout.connect(self._refresh_cache_list)
         self._setup_ui()
         self._setup_menu()
         self._setup_toolbar()
@@ -876,7 +879,29 @@ class MainWindow(QMainWindow):
             self._map_widget.update_cache(full)
 
     def _on_search_changed(self, text: str) -> None:
-        QTimer.singleShot(300, self._refresh_cache_list)
+        min_chars, debounce_ms = self._search_thresholds()
+        if text == "" or len(text) >= min_chars:
+            self._search_timer.start(debounce_ms)
+
+    def _search_thresholds(self) -> tuple[int, int]:
+        """Return (min_chars, debounce_ms), adaptive if not overridden in settings."""
+        s = get_settings()
+        user_min   = s.search_min_chars
+        user_delay = s.search_debounce_ms
+        try:
+            with get_session() as session:
+                count = session.query(Cache).count()
+        except Exception:
+            count = 0
+        if count >= 10_000:
+            adaptive_min, adaptive_delay = 3, 600
+        elif count >= 1_000:
+            adaptive_min, adaptive_delay = 2, 400
+        else:
+            adaptive_min, adaptive_delay = 1, 200
+        min_chars   = user_min   if user_min   > 0 else adaptive_min
+        debounce_ms = user_delay if user_delay > 0 else adaptive_delay
+        return min_chars, debounce_ms
 
     def _on_quick_filter_changed(self, index: int) -> None:
         self._refresh_cache_list()
