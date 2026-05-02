@@ -882,7 +882,15 @@ class MainWindow(QMainWindow):
 
     def _on_search_changed(self, text: str) -> None:
         min_chars, debounce_ms = self._search_thresholds()
-        if text == "" or len(text) >= min_chars:
+        if text == "":
+            # Clearing always fires immediately
+            self._search_timer.stop()
+            self._refresh_cache_list()
+        elif len(text) >= min_chars:
+            # Threshold met — fire quickly to feel responsive
+            self._search_timer.start(80)
+        else:
+            # Below threshold — fire after the full debounce so a pause triggers search
             self._search_timer.start(debounce_ms)
 
     def _search_thresholds(self) -> tuple[int, int]:
@@ -892,11 +900,11 @@ class MainWindow(QMainWindow):
         user_delay = s.search_debounce_ms
         count = self._db_count
         if count >= 10_000:
-            adaptive_min, adaptive_delay = 2, 400
+            adaptive_min, adaptive_delay = 3, 600
         elif count >= 1_000:
-            adaptive_min, adaptive_delay = 2, 250
+            adaptive_min, adaptive_delay = 2, 400
         else:
-            adaptive_min, adaptive_delay = 2, 150
+            adaptive_min, adaptive_delay = 1, 200
         min_chars   = user_min   if user_min   > 0 else adaptive_min
         debounce_ms = user_delay if user_delay > 0 else adaptive_delay
         return min_chars, debounce_ms
