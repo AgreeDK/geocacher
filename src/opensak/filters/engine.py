@@ -750,17 +750,24 @@ def apply_filters(
                 except Exception:
                     _f._matching_ids = set()  # invalid SQL → no matches
 
-    # Load caches med kun de relationer der bruges i filtrene.
-    # logs, waypoints og user_note loader vi IKKE her — de hentes
-    # on-demand når brugeren klikker på en enkelt cache.
-    # Dette er kritisk for performance ved store databaser (50K+ caches).
+    # Determine which relationships are actually needed by the active filters.
+    # Only joinedload what is required — avoids loading thousands of attribute
+    # and trackable rows when the filterset contains only a NameFilter or a
+    # simple quick-filter (the common case during live search).
+    needs_attributes  = filterset is not None and any(
+        isinstance(f, AttributeFilter)    for f in _iter_filters(filterset)
+    )
+    needs_trackables  = filterset is not None and any(
+        isinstance(f, HasTrackableFilter) for f in _iter_filters(filterset)
+    )
+
     from sqlalchemy.orm import joinedload, noload
     query = session.query(Cache).options(
-        joinedload(Cache.attributes),   # bruges i AttributeFilter
-        joinedload(Cache.trackables),   # bruges i TrackableFilter
-        noload(Cache.logs),             # ikke brugt i filtre — load on-demand
-        noload(Cache.waypoints),        # ikke brugt i filtre — load on-demand
-        joinedload(Cache.user_note),    # one-to-one, cheap join; needed for corrected-coords display
+        joinedload(Cache.attributes) if needs_attributes else noload(Cache.attributes),
+        joinedload(Cache.trackables) if needs_trackables else noload(Cache.trackables),
+        noload(Cache.logs),       # load on-demand when user opens a cache
+        noload(Cache.waypoints),  # load on-demand when user opens a cache
+        joinedload(Cache.user_note),  # one-to-one, cheap; needed for corrected-coords
     )
 
     # Push SQL-capable filters into the query before loading rows.
