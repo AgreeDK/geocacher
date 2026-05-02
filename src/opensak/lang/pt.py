@@ -213,6 +213,11 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Nome de utilizador:",
     "settings_gc_username_placeholder":            "O seu nome geocaching.com",
     "settings_gc_username_hint":                   "Usado para identificar os seus próprios registos (ex. FTF)",
+    "settings_group_search":                       "Pesquisa",
+    "settings_search_min_chars_label":             "Caracteres mínimos:",
+    "settings_search_debounce_label":              "Atraso de debounce (ms):",
+    "settings_search_auto":                        "Auto",
+    "settings_search_hint":                        "Defina 0 (Auto) para limiares adaptativos que escalam com o tamanho da base de dados: < 1 000 caches → 1 car. / 200 ms, 1 000–10 000 → 2 / 400 ms, > 10 000 → 3 / 600 ms.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Gerenciar a base de dados",

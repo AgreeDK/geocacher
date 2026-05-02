@@ -213,6 +213,11 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Uživatelské jméno:",
     "settings_gc_username_placeholder":            "Vaše geocaching.com jméno",
     "settings_gc_username_hint":                   "Používá se k rozpoznání vlastních záznamů (např. FTF)",
+    "settings_group_search":                       "Vyhledávání",
+    "settings_search_min_chars_label":             "Minimální počet znaků:",
+    "settings_search_debounce_label":              "Zpoždění debounce (ms):",
+    "settings_search_auto":                        "Auto",
+    "settings_search_hint":                        "Nastavte 0 (Auto) pro adaptivní prahové hodnoty podle velikosti databáze: < 1 000 keší → 1 znak / 200 ms, 1 000–10 000 → 2 / 400 ms, > 10 000 → 3 / 600 ms.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Správa databází",

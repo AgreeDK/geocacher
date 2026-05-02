@@ -213,6 +213,11 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Användarnamn:",
     "settings_gc_username_placeholder":            "Ditt geocaching.com-användarnamn",
     "settings_gc_username_hint":                   "Används för att identifiera egna loggningar (t.ex. FTF)",
+    "settings_group_search":                       "Sökning",
+    "settings_search_min_chars_label":             "Minsta antal tecken:",
+    "settings_search_debounce_label":              "Debounce-fördröjning (ms):",
+    "settings_search_auto":                        "Auto",
+    "settings_search_hint":                        "Sätt till 0 (Auto) för adaptiva trösklar baserade på databasstorlek: < 1 000 cacher → 1 tecken / 200 ms, 1 000–10 000 → 2 / 400 ms, > 10 000 → 3 / 600 ms.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Hantera databaser",
