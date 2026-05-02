@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "filter_contains_placeholder":  "Enthält Text…",
     "filter_gc_label":              "GC-Code:",
     "filter_placed_by_label":       "Versteckt von:",
+    "filter_owner_name_label":      "Eigenname:",
     "filter_cache_type_group":      "Cache-Type",
     "filter_container_group":       "Container-Größe",
     "filter_dt_group":              "Schwierigkeit / Terrain (D/T)",

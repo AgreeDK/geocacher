@@ -297,6 +297,7 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
         "difficulty":        difficulty,
         "terrain":           terrain,
         "placed_by":         placed_by,
+        "owner_name":        owner,
         "owner_id":          owner_id,
         "hidden_date":       _parse_datetime(hidden_raw),
         "available":         available,
@@ -495,6 +496,7 @@ def _parse_loc_waypoint(wpt_el) -> Optional[dict]:
         "difficulty":        None,
         "terrain":           None,
         "placed_by":         None,
+        "owner_name":        None,
         "owner_id":          None,
         "hidden_date":       None,
         "available":         True,
@@ -540,7 +542,7 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
     # Scalar fields
     for field in (
         "name", "cache_type", "container", "latitude", "longitude",
-        "difficulty", "terrain", "placed_by", "owner_id",
+        "difficulty", "terrain", "placed_by", "owner_name", "owner_id",
         "hidden_date", "available", "archived",
         "country", "state", "county",
         "short_description", "short_desc_html",

@@ -34,7 +34,7 @@ from opensak.filters.engine import (
     FoundFilter, NotFoundFilter,
     AvailableFilter, ArchivedFilter, AvailabilityFilter,
     CountryFilter, NameFilter, GcCodeFilter,
-    PlacedByFilter, DistanceFilter,
+    PlacedByFilter, OwnerFilter, DistanceFilter,
     AttributeFilter, HasTrackableFilter,
     PremiumFilter, NonPremiumFilter,
     WhereClauseFilter,
@@ -323,6 +323,11 @@ class FilterDialog(QDialog):
         self._placed_filter = QLineEdit()
         self._placed_filter.setPlaceholderText(tr("filter_contains_placeholder"))
         layout.addRow(tr("filter_placed_by_label"), self._placed_filter)
+
+        # Owner name
+        self._owner_filter = QLineEdit()
+        self._owner_filter.setPlaceholderText(tr("filter_contains_placeholder"))
+        layout.addRow(tr("filter_owner_name_label"), self._owner_filter)
 
         # Cache type
         type_group = QGroupBox(tr("filter_cache_type_group"))
@@ -786,6 +791,10 @@ class FilterDialog(QDialog):
         if self._placed_filter.text().strip():
             fs.add(PlacedByFilter(self._placed_filter.text().strip()))
 
+        # Owner name
+        if self._owner_filter.text().strip():
+            fs.add(OwnerFilter(self._owner_filter.text().strip()))
+
         # Cache type — byg OR gruppe af valgte typer
         selected_types = [t for t, cb in self._type_checks.items() if cb.isChecked()]
         if selected_types and len(selected_types) < len(CACHE_TYPES):
@@ -1006,6 +1015,8 @@ class FilterDialog(QDialog):
                 self._gc_filter.setText(getattr(f, "text", ""))
             elif ftype == "placed_by":
                 self._placed_filter.setText(getattr(f, "text", ""))
+            elif ftype == "owner_name":
+                self._owner_filter.setText(getattr(f, "text", ""))
             elif ftype == "cache_type":
                 types = getattr(f, "types", [])
                 for ct, cb in self._type_checks.items():
