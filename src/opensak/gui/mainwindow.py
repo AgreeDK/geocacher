@@ -280,6 +280,12 @@ class MainWindow(QMainWindow):
         act_clear_flags.triggered.connect(self._clear_all_flags)
         wp_menu.addAction(act_clear_flags)
 
+        wp_menu.addSeparator()
+
+        act_update_location = QAction(tr("action_update_location"), self)
+        act_update_location.triggered.connect(self._open_update_location)
+        wp_menu.addAction(act_update_location)
+
         # ── Vis ───────────────────────────────────────────────────────────────
         view_menu = menubar.addMenu(tr("menu_view"))
 
@@ -318,10 +324,6 @@ class MainWindow(QMainWindow):
         act_found_update = QAction(tr("action_found_update"), self)
         act_found_update.triggered.connect(self._open_found_updater)
         tools_menu.addAction(act_found_update)
-
-        act_update_location = QAction(tr("action_update_location"), self)
-        act_update_location.triggered.connect(self._open_update_location)
-        tools_menu.addAction(act_update_location)
 
         # ── GPS ───────────────────────────────────────────────────────────────
         gps_menu = menubar.addMenu("&GPS")
