@@ -221,29 +221,12 @@ def test_where_clause_clear_restores_full_count(seeded_window, qtbot):
     assert window._cache_table.row_count() == TOTAL
 
 
-# ── FilterDialog WHERE tab (requires where_filter flag) ───────────────────────
+# ── FilterDialog WHERE tab ────────────────────────────────────────────────────
 
 
-def test_where_tab_absent_when_flag_disabled(seeded_window, qtbot, monkeypatch):
-    """FilterDialog has no WHERE tab when flags.where_filter is False."""
-    from opensak.utils import flags
+def test_where_tab_present(seeded_window, qtbot):
+    """FilterDialog always shows a WHERE tab."""
     from opensak.gui.dialogs.filter_dialog import FilterDialog
-
-    monkeypatch.setattr(flags, "where_filter", False)
-
-    dialog = FilterDialog(parent=seeded_window)
-    qtbot.addWidget(dialog)
-
-    assert dialog._where_tab is None
-    dialog.close()
-
-
-def test_where_tab_present_when_flag_enabled(seeded_window, qtbot, monkeypatch):
-    """FilterDialog shows a WHERE tab when flags.where_filter is True."""
-    from opensak.utils import flags
-    from opensak.gui.dialogs.filter_dialog import FilterDialog
-
-    monkeypatch.setattr(flags, "where_filter", True)
 
     dialog = FilterDialog(parent=seeded_window)
     qtbot.addWidget(dialog)
@@ -254,13 +237,10 @@ def test_where_tab_present_when_flag_enabled(seeded_window, qtbot, monkeypatch):
     dialog.close()
 
 
-def test_where_tab_builds_where_clause_filter(seeded_window, qtbot, monkeypatch):
+def test_where_tab_builds_where_clause_filter(seeded_window, qtbot):
     """Entering SQL in the WHERE tab produces a WhereClauseFilter in the FilterSet."""
-    from opensak.utils import flags
     from opensak.gui.dialogs.filter_dialog import FilterDialog
     from opensak.filters.engine import WhereClauseFilter, _iter_filters
-
-    monkeypatch.setattr(flags, "where_filter", True)
 
     dialog = FilterDialog(parent=seeded_window)
     qtbot.addWidget(dialog)
@@ -274,13 +254,10 @@ def test_where_tab_builds_where_clause_filter(seeded_window, qtbot, monkeypatch)
     dialog.close()
 
 
-def test_where_tab_empty_sql_adds_no_filter(seeded_window, qtbot, monkeypatch):
+def test_where_tab_empty_sql_adds_no_filter(seeded_window, qtbot):
     """An empty WHERE text field does not add a WhereClauseFilter to the set."""
-    from opensak.utils import flags
     from opensak.gui.dialogs.filter_dialog import FilterDialog
     from opensak.filters.engine import WhereClauseFilter, _iter_filters
-
-    monkeypatch.setattr(flags, "where_filter", True)
 
     dialog = FilterDialog(parent=seeded_window)
     qtbot.addWidget(dialog)
@@ -293,12 +270,9 @@ def test_where_tab_empty_sql_adds_no_filter(seeded_window, qtbot, monkeypatch):
     dialog.close()
 
 
-def test_where_tab_reset_clears_sql(seeded_window, qtbot, monkeypatch):
+def test_where_tab_reset_clears_sql(seeded_window, qtbot):
     """_reset_all() empties the WHERE SQL field and hides the error label."""
-    from opensak.utils import flags
     from opensak.gui.dialogs.filter_dialog import FilterDialog
-
-    monkeypatch.setattr(flags, "where_filter", True)
 
     dialog = FilterDialog(parent=seeded_window)
     qtbot.addWidget(dialog)
@@ -311,12 +285,9 @@ def test_where_tab_reset_clears_sql(seeded_window, qtbot, monkeypatch):
     dialog.close()
 
 
-def test_where_tab_validate_valid_sql_returns_none(seeded_window, qtbot, monkeypatch):
+def test_where_tab_validate_valid_sql_returns_none(seeded_window, qtbot):
     """_validate_where_sql returns None for syntactically valid SQL."""
-    from opensak.utils import flags
     from opensak.gui.dialogs.filter_dialog import FilterDialog
-
-    monkeypatch.setattr(flags, "where_filter", True)
 
     dialog = FilterDialog(parent=seeded_window)
     qtbot.addWidget(dialog)
@@ -326,12 +297,9 @@ def test_where_tab_validate_valid_sql_returns_none(seeded_window, qtbot, monkeyp
     dialog.close()
 
 
-def test_where_tab_validate_invalid_sql_returns_error(seeded_window, qtbot, monkeypatch):
+def test_where_tab_validate_invalid_sql_returns_error(seeded_window, qtbot):
     """_validate_where_sql returns a non-empty error string for bad SQL."""
-    from opensak.utils import flags
     from opensak.gui.dialogs.filter_dialog import FilterDialog
-
-    monkeypatch.setattr(flags, "where_filter", True)
 
     dialog = FilterDialog(parent=seeded_window)
     qtbot.addWidget(dialog)
