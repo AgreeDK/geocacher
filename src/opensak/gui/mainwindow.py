@@ -319,6 +319,10 @@ class MainWindow(QMainWindow):
         act_found_update.triggered.connect(self._open_found_updater)
         tools_menu.addAction(act_found_update)
 
+        act_update_location = QAction(tr("action_update_location"), self)
+        act_update_location.triggered.connect(self._open_update_location)
+        tools_menu.addAction(act_update_location)
+
         # ── GPS ───────────────────────────────────────────────────────────────
         gps_menu = menubar.addMenu("&GPS")
 
@@ -1302,6 +1306,15 @@ class MainWindow(QMainWindow):
         from opensak.gui.dialogs.found_dialog import FoundUpdaterDialog
         dlg = FoundUpdaterDialog(self)
         dlg.update_completed.connect(self._refresh_cache_list)
+        dlg.exec()
+
+    def _open_update_location(self) -> None:
+        if self._trip_planner_active():
+            self._warn_trip_planner_active()
+            return
+        from opensak.gui.dialogs.update_location_dialog import UpdateLocationDialog
+        dlg = UpdateLocationDialog(self)
+        dlg.location_updated.connect(self._refresh_cache_list)
         dlg.exec()
 
     def _open_coord_converter(self) -> None:
