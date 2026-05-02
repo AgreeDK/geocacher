@@ -351,12 +351,14 @@ class GcCodeFilter(BaseFilter):
     def apply_to_query(self, query):
         from sqlalchemy import func
         self._sql_applied = True
-        return query.filter(func.upper(Cache.gc_code).like(f"%{self.text}%"))
+        # GC codes are always searched from the start (GC12345) — use a prefix
+        # match so SQLite can exploit the existing B-tree index on gc_code.
+        return query.filter(func.upper(Cache.gc_code).like(f"{self.text}%"))
 
     def matches(self, cache: Cache) -> bool:
         if self._sql_applied:
             return True
-        return self.text in (cache.gc_code or "").upper()
+        return (cache.gc_code or "").upper().startswith(self.text)
 
     def to_dict(self) -> dict:
         return {"filter_type": self.filter_type, "text": self.text}
