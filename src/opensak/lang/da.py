@@ -141,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} caches indlæst — klik på en cache for at se kortet",
     "import_log_placeholder":       "Import-resultat vises her…",
     "import_all_done":            "✓ Alle {count} filer er behandlet.",
+    "import_geocode_checkbox":      "🌍  Geokod manglende amt / region / land efter import",
+    "import_geocode_running":       "📍  Geokoder manglende lokationsdata…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Sæt filter",
@@ -465,6 +467,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Koordinatkonverter…",
     "ctx_mark_found":       "☑  Marker som fundet",
     "ctx_mark_not_found":   "☐  Marker som ikke fundet",
+    "ctx_update_location":  "🌍  Opdater lokationsdata…",
 
     # ── Waypoint dialog — feltnavne og placeholders ───────────────────────────
     "wp_label_gc_code":             "GC Kode *:",

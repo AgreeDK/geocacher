@@ -141,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} caches loaded — click a cache to view on map",
     "import_log_placeholder":       "Import results will appear here…",
     "import_all_done":            "✓ All {count} files processed.",
+    "import_geocode_checkbox":      "🌍  Geocode missing county / state / country after import",
+    "import_geocode_running":       "📍  Geocoding missing location data…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Set filter",
@@ -465,6 +467,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Coordinate converter…",
     "ctx_mark_found":       "☑  Mark as found",
     "ctx_mark_not_found":   "☐  Mark as not found",
+    "ctx_update_location":  "🌍  Update location data…",
 
     # ── Waypoint dialog — field labels and placeholders ───────────────────────
     "wp_label_gc_code":             "GC Code *:",

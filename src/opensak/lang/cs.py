@@ -141,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} keší načteno — kliknutím zobrazíte mapu",
     "import_log_placeholder":       "Výsledky importu se zobrazí zde…",
     "import_all_done":            "✓ Všech {count} souborů bylo zpracováno.",
+    "import_geocode_checkbox":      "🌍  Geokódovat chybějící okres / kraj / zemi po importu",
+    "import_geocode_running":       "📍  Geokóduji chybějící údaje o poloze…",
     
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Nastavit filtr",
@@ -466,6 +468,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Převodník souřadnic…",
     "ctx_mark_found":       "☑  Označit jako nalezené",
     "ctx_mark_not_found":   "☐  Označit jako nenalezené",
+    "ctx_update_location":  "🌍  Aktualizovat údaje o poloze…",
 
     # ── Waypoint dialog — field labels and placeholders ───────────────────────
     "wp_label_gc_code":             "GC kód *:",

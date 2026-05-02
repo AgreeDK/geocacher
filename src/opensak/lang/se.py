@@ -141,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} cacher laddade — klicka på en cache för att se den på kartan",
     "import_log_placeholder":       "Resultatet av importen visas här…",
     "import_all_done":            "✓ Alla {count} filer har bearbetats.",
+    "import_geocode_checkbox":      "🌍  Geokoda saknad kommun / län / land efter import",
+    "import_geocode_running":       "📍  Geokoderar saknade platsdata…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Sätt filter",
@@ -465,6 +467,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Koordinatkonverterare…",
     "ctx_mark_found":       "☑  Flagga som hittad",
     "ctx_mark_not_found":   "☐  Flagga som inte hittad",
+    "ctx_update_location":  "🌍  Uppdatera platsdata…",
 
     # ── Waypoint dialog — field labels and placeholders ───────────────────────
     "wp_label_gc_code":             "GC Kod *:",
