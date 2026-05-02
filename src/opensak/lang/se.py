@@ -347,6 +347,8 @@ STRINGS: dict[str, str] = {
     "filter_placed_by_label":       "Utlagd av:",
     "filter_owner_name_label":      "Ägarnamn:",
     "filter_cache_type_group":      "Cache typ",
+    "filter_type_enable_all":       "Aktivera alla",
+    "filter_type_disable_all":      "Avaktivera alla",
     "filter_container_group":       "Storlek",
     "filter_dt_group":              "Svårighet / Terräng",
     "filter_from":                  "Från:",

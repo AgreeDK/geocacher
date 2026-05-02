@@ -347,6 +347,8 @@ STRINGS: dict[str, str] = {
     "filter_placed_by_label":       "Umístil:",
     "filter_owner_name_label":      "Jméno vlastníka:",
     "filter_cache_type_group":      "Typ keše",
+    "filter_type_enable_all":       "Povolit vše",
+    "filter_type_disable_all":      "Zakázat vše",
     "filter_container_group":       "Velikost schránky",
     "filter_dt_group":              "Obtížnost / Terén",
     "filter_from":                  "Od:",
