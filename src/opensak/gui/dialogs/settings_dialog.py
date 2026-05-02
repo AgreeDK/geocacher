@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox, QGroupBox, QComboBox,
     QMessageBox, QTableWidget, QTableWidgetItem,
     QHeaderView, QAbstractItemView, QTabWidget, QWidget,
-    QFrame, QSizePolicy, QSpinBox
+    QFrame, QSizePolicy, QSpinBox, QScrollArea
 )
 from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from PySide6.QtGui import QPixmap, QFont
@@ -92,6 +92,10 @@ class SettingsDialog(QDialog):
     # ── Fane 1: Generelle indstillinger ──────────────────────────────────────
 
     def _build_general_tab(self) -> QWidget:
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+
         tab = QWidget()
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(6, 6, 6, 6)
@@ -291,7 +295,8 @@ class SettingsDialog(QDialog):
         layout.addWidget(search_group)
 
         layout.addStretch()
-        return tab
+        scroll.setWidget(tab)
+        return scroll
 
     # ── Fane 2: Geocaching.com ────────────────────────────────────────────────
 
