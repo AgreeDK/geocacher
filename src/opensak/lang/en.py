@@ -733,6 +733,7 @@ STRINGS: dict[str, str] = {
     # ── Geocaching.com integration ────────────────────────────────────────────
     "settings_tab_general":         "General",
     "settings_tab_geocaching":      "Geocaching.com",
+    "settings_tab_advanced":        "Advanced",
     "gc_not_logged_in":             "Not logged in",
     "gc_status_offline":            "Offline",
     "gc_status_online":             "Connected",
