@@ -359,6 +359,24 @@ class PlacedByFilter(BaseFilter):
         return cls(data["text"])
 
 
+class OwnerFilter(BaseFilter):
+    """Keep caches whose owner name contains *text* (case-insensitive)."""
+    filter_type = "owner_name"
+
+    def __init__(self, text: str):
+        self.text = text.lower()
+
+    def matches(self, cache: Cache) -> bool:
+        return self.text in (cache.owner_name or "").lower()
+
+    def to_dict(self) -> dict:
+        return {"filter_type": self.filter_type, "text": self.text}
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "OwnerFilter":
+        return cls(data["text"])
+
+
 class DistanceFilter(BaseFilter):
     """
     Keep caches within *max_km* kilometres of a reference coordinate.
@@ -502,6 +520,7 @@ FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
     "name":          NameFilter,
     "gc_code":       GcCodeFilter,
     "placed_by":     PlacedByFilter,
+    "owner_name":    OwnerFilter,
     "distance":      DistanceFilter,
     "attribute":     AttributeFilter,
     "has_trackable": HasTrackableFilter,

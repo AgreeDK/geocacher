@@ -283,6 +283,20 @@ def _run_migrations(engine: Engine) -> None:
             conn.commit()
             print("Migration: tilføjede caches.parent_gc_code")
 
+        # ── Migration 9: owner_name (issue #158) ─────────────────────────────
+        # Stores the gs:owner display name separately from placed_by, which may
+        # differ when a cache is adopted or placed under a pseudonym.
+        existing_caches = [
+            row[1]
+            for row in conn.execute(text("PRAGMA table_info(caches)")).fetchall()
+        ]
+        if "owner_name" not in existing_caches:
+            conn.execute(text(
+                "ALTER TABLE caches ADD COLUMN owner_name VARCHAR(128)"
+            ))
+            conn.commit()
+            print("Migration: tilføjede caches.owner_name")
+
 
 def dispose_engine(db_path: Path | None = None) -> None:
     """

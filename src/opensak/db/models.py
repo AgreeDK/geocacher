@@ -67,6 +67,7 @@ class Cache(Base):
 
     # Owner
     placed_by: Mapped[Optional[str]] = mapped_column(String(128))
+    owner_name: Mapped[Optional[str]] = mapped_column(String(128))
     owner_id: Mapped[Optional[str]] = mapped_column(String(64))
 
     # Dates

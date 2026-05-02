@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "filter_contains_placeholder":  "Indeholder tekst…",
     "filter_gc_label":              "GC Kode:",
     "filter_placed_by_label":       "Udlagt af:",
+    "filter_owner_name_label":      "Ejernavn:",
     "filter_cache_type_group":      "Cache type",
     "filter_container_group":       "Container størrelse",
     "filter_dt_group":              "Sværhedsgrad / Terræn",

@@ -345,6 +345,7 @@ STRINGS: dict[str, str] = {
     "filter_contains_placeholder":  "Obsahuje text…",
     "filter_gc_label":              "GC kód:",
     "filter_placed_by_label":       "Umístil:",
+    "filter_owner_name_label":      "Jméno vlastníka:",
     "filter_cache_type_group":      "Typ keše",
     "filter_container_group":       "Velikost schránky",
     "filter_dt_group":              "Obtížnost / Terén",
