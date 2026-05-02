@@ -75,8 +75,9 @@ class SettingsDialog(QDialog):
 
         # Tab-widget med tre faner
         self._tabs = QTabWidget()
-        self._tabs.addTab(self._build_general_tab(),  tr("settings_tab_general"))
-        self._tabs.addTab(self._build_gc_tab(),        tr("settings_tab_geocaching"))
+        self._tabs.addTab(self._build_general_tab(),   tr("settings_tab_general"))
+        self._tabs.addTab(self._build_gc_tab(),         tr("settings_tab_geocaching"))
+        self._tabs.addTab(self._build_advanced_tab(),   tr("settings_tab_advanced"))
 
         layout.addWidget(self._tabs)
 
@@ -262,6 +263,18 @@ class SettingsDialog(QDialog):
 
         layout.addWidget(user_group)
 
+        layout.addStretch()
+        scroll.setWidget(tab)
+        return scroll
+
+    # ── Fane 3: Advanced ─────────────────────────────────────────────────────
+
+    def _build_advanced_tab(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(12)
+
         # ── Search behaviour ──────────────────────────────────────────────────
         search_group = QGroupBox(tr("settings_group_search"))
         search_layout = QVBoxLayout(search_group)
@@ -293,10 +306,8 @@ class SettingsDialog(QDialog):
         search_layout.addWidget(search_hint)
 
         layout.addWidget(search_group)
-
         layout.addStretch()
-        scroll.setWidget(tab)
-        return scroll
+        return tab
 
     # ── Fane 2: Geocaching.com ────────────────────────────────────────────────
 
