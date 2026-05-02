@@ -241,6 +241,26 @@ class AppSettings:
     def bottom_splitter_state(self, value) -> None:
         self._s.setValue("window/bottom_splitter_state", value)
 
+    # ── Search thresholds ──────────────────────────────────────────────────────
+
+    @property
+    def search_min_chars(self) -> int:
+        """Minimum characters before search fires. 0 = adaptive based on DB size."""
+        return int(self._s.value("search/min_chars", 0))
+
+    @search_min_chars.setter
+    def search_min_chars(self, value: int) -> None:
+        self._s.setValue("search/min_chars", value)
+
+    @property
+    def search_debounce_ms(self) -> int:
+        """Debounce delay in milliseconds. 0 = adaptive based on DB size."""
+        return int(self._s.value("search/debounce_ms", 0))
+
+    @search_debounce_ms.setter
+    def search_debounce_ms(self, value: int) -> None:
+        self._s.setValue("search/debounce_ms", value)
+
     # ── Last used paths ───────────────────────────────────────────────────────
 
     @property
