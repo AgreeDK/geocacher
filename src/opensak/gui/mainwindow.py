@@ -892,11 +892,11 @@ class MainWindow(QMainWindow):
         user_delay = s.search_debounce_ms
         count = self._db_count
         if count >= 10_000:
-            adaptive_min, adaptive_delay = 3, 600
+            adaptive_min, adaptive_delay = 1, 400
         elif count >= 1_000:
-            adaptive_min, adaptive_delay = 2, 400
+            adaptive_min, adaptive_delay = 1, 250
         else:
-            adaptive_min, adaptive_delay = 1, 200
+            adaptive_min, adaptive_delay = 1, 150
         min_chars   = user_min   if user_min   > 0 else adaptive_min
         debounce_ms = user_delay if user_delay > 0 else adaptive_delay
         return min_chars, debounce_ms
