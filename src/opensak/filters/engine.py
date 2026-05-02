@@ -55,6 +55,15 @@ class BaseFilter(ABC):
     def matches(self, cache: Cache) -> bool:
         """Return True if *cache* passes this filter."""
 
+    def apply_to_query(self, query):
+        """Optionally push this filter into a SQLAlchemy query before .all().
+
+        Return the updated query if SQL-level filtering is possible, or None
+        to fall back to Python-level matches(). When this returns a query the
+        filter must also return True from matches() to avoid double-filtering.
+        """
+        return None
+
     def to_dict(self) -> dict:
         """Serialise filter to a JSON-safe dict."""
         return {"filter_type": self.filter_type}
@@ -311,8 +320,16 @@ class NameFilter(BaseFilter):
 
     def __init__(self, text: str):
         self.text = text.lower()
+        self._sql_applied = False
+
+    def apply_to_query(self, query):
+        from sqlalchemy import func
+        self._sql_applied = True
+        return query.filter(func.lower(Cache.name).like(f"%{self.text}%"))
 
     def matches(self, cache: Cache) -> bool:
+        if self._sql_applied:
+            return True
         return self.text in (cache.name or "").lower()
 
     def to_dict(self) -> dict:
@@ -329,8 +346,16 @@ class GcCodeFilter(BaseFilter):
 
     def __init__(self, text: str):
         self.text = text.upper()
+        self._sql_applied = False
+
+    def apply_to_query(self, query):
+        from sqlalchemy import func
+        self._sql_applied = True
+        return query.filter(func.upper(Cache.gc_code).like(f"%{self.text}%"))
 
     def matches(self, cache: Cache) -> bool:
+        if self._sql_applied:
+            return True
         return self.text in (cache.gc_code or "").upper()
 
     def to_dict(self) -> dict:
@@ -737,6 +762,16 @@ def apply_filters(
         noload(Cache.waypoints),        # ikke brugt i filtre — load on-demand
         joinedload(Cache.user_note),    # one-to-one, cheap join; needed for corrected-coords display
     )
+
+    # Push SQL-capable filters into the query before loading rows.
+    # This lets SQLite discard non-matching rows before any Python objects
+    # are constructed — critical for NameFilter / GcCodeFilter on large DBs.
+    if filterset:
+        for _f in _iter_filters(filterset):
+            updated = _f.apply_to_query(query)
+            if updated is not None:
+                query = updated
+
     all_caches = query.all()
 
     # Apply filters
