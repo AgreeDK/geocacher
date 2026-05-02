@@ -3,13 +3,16 @@ src/opensak/gui/dialogs/update_location_dialog.py — Update county/state/countr
 
 Runs a background reverse-geocode pass over caches using Nominatim (OSM),
 which is the same boundary data source as project-gc.
+
+Can be opened two ways:
+  - Bulk (no gc_codes): shows scope options, user picks all vs. missing-only.
+  - Single/selection (gc_codes list): hides scope group, targets only those caches.
 """
 
 from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import NamedTuple
 
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
@@ -23,10 +26,13 @@ from opensak.lang import tr
 
 # ── Data types ────────────────────────────────────────────────────────────────
 
-class _CacheRow(NamedTuple):
-    gc_code: str
-    lat: float
-    lon: float
+class _CacheRow:
+    __slots__ = ("gc_code", "lat", "lon")
+
+    def __init__(self, gc_code: str, lat: float, lon: float) -> None:
+        self.gc_code = gc_code
+        self.lat = lat
+        self.lon = lon
 
 
 @dataclass
@@ -46,10 +52,10 @@ class ReverseGeocodeWorker(QThread):
     Rate-limited to 1 req/sec (Nominatim ToS).
     """
 
-    progress    = Signal(int, int)          # (current, total)
-    row_done    = Signal(str, str)          # (gc_code, log_line)
-    all_done    = Signal(object)            # UpdateLocationResult
-    cancelled   = Signal(object)            # UpdateLocationResult
+    progress    = Signal(int, int)   # (current, total)
+    row_done    = Signal(str, str)   # (gc_code, log_line)
+    all_done    = Signal(object)     # UpdateLocationResult
+    cancelled   = Signal(object)     # UpdateLocationResult
 
     def __init__(self, rows: list[_CacheRow], *, parent=None):
         super().__init__(parent)
@@ -114,20 +120,25 @@ class UpdateLocationDialog(QDialog):
     """
     Dialog to update county/state/country via Nominatim reverse geocoding.
 
-    Options:
-    - Scope: all caches / only those with missing location data
-    - Use corrected coordinates when available
+    When gc_codes is None: full bulk mode — scope options are shown.
+    When gc_codes is a list: targeted mode — scope group is hidden and only
+    those specific caches are processed.
     """
 
     location_updated = Signal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, *, gc_codes: list[str] | None = None):
         super().__init__(parent)
+        self._gc_codes = gc_codes
         self.setWindowTitle(tr("update_loc_title"))
         self.setMinimumWidth(520)
         self.setMinimumHeight(480)
         self._worker: ReverseGeocodeWorker | None = None
         self._setup_ui()
+
+        # In targeted mode, hide the scope controls — they don't apply.
+        if gc_codes is not None:
+            self._scope_box.setVisible(False)
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
@@ -141,9 +152,9 @@ class UpdateLocationDialog(QDialog):
         info.setStyleSheet("color: palette(mid);")
         layout.addWidget(info)
 
-        # ── Scope ─────────────────────────────────────────────────────────────
-        scope_box = QGroupBox(tr("update_loc_scope_group"))
-        scope_layout = QVBoxLayout(scope_box)
+        # ── Scope (bulk mode only) ─────────────────────────────────────────────
+        self._scope_box = QGroupBox(tr("update_loc_scope_group"))
+        scope_layout = QVBoxLayout(self._scope_box)
 
         self._rb_all = QRadioButton(tr("update_loc_scope_all"))
         self._rb_missing = QRadioButton(tr("update_loc_scope_missing"))
@@ -151,7 +162,7 @@ class UpdateLocationDialog(QDialog):
         scope_layout.addWidget(self._rb_all)
         scope_layout.addWidget(self._rb_missing)
 
-        layout.addWidget(scope_box)
+        layout.addWidget(self._scope_box)
 
         # ── Options ───────────────────────────────────────────────────────────
         self._cb_corrected = QCheckBox(tr("update_loc_use_corrected"))
@@ -195,12 +206,12 @@ class UpdateLocationDialog(QDialog):
 
         layout.addLayout(btn_row)
 
-    # ── Slot helpers ──────────────────────────────────────────────────────────
+    # ── Row building ──────────────────────────────────────────────────────────
 
     def _build_rows(self) -> list[_CacheRow]:
         """Load cache rows from the active DB, applying scope and coord options."""
         from opensak.db.database import get_session
-        from opensak.db.models import Cache, UserNote
+        from opensak.db.models import Cache
         from sqlalchemy.orm import joinedload
 
         use_corrected = self._cb_corrected.isChecked()
@@ -211,14 +222,18 @@ class UpdateLocationDialog(QDialog):
             query = session.query(Cache)
             if use_corrected:
                 query = query.options(joinedload(Cache.user_note))
-            if only_missing:
+
+            if self._gc_codes is not None:
+                # Targeted mode: restrict to the given gc_codes.
+                query = query.filter(Cache.gc_code.in_(self._gc_codes))
+            elif only_missing:
                 query = query.filter(
                     (Cache.country == None) | (Cache.country == "") |
                     (Cache.state   == None) | (Cache.state   == "") |
                     (Cache.county  == None) | (Cache.county  == "")
                 )
+
             for cache in query.all():
-                # resolve coordinates
                 lat, lon = cache.latitude, cache.longitude
                 if use_corrected and cache.user_note and cache.user_note.is_corrected:
                     clat = cache.user_note.corrected_lat
@@ -232,6 +247,8 @@ class UpdateLocationDialog(QDialog):
 
         return rows
 
+    # ── Actions ───────────────────────────────────────────────────────────────
+
     def _start(self) -> None:
         rows = self._build_rows()
         if not rows:
@@ -239,8 +256,7 @@ class UpdateLocationDialog(QDialog):
             return
 
         self._start_btn.setEnabled(False)
-        self._rb_all.setEnabled(False)
-        self._rb_missing.setEnabled(False)
+        self._scope_box.setEnabled(False)
         self._cb_corrected.setEnabled(False)
         self._cancel_btn.setEnabled(True)
         self._close_btn.setEnabled(False)
@@ -285,15 +301,13 @@ class UpdateLocationDialog(QDialog):
 
     def _on_cancelled(self, result: UpdateLocationResult) -> None:
         self._finalize()
-        summary = tr("update_loc_cancelled", updated=result.updated)
-        self._progress_label.setText(summary)
+        self._progress_label.setText(tr("update_loc_cancelled", updated=result.updated))
         if result.updated > 0:
             self.location_updated.emit()
 
     def _finalize(self) -> None:
         self._start_btn.setEnabled(True)
-        self._rb_all.setEnabled(True)
-        self._rb_missing.setEnabled(True)
+        self._scope_box.setEnabled(True)
         self._cb_corrected.setEnabled(True)
         self._cancel_btn.setEnabled(False)
         self._close_btn.setEnabled(True)
