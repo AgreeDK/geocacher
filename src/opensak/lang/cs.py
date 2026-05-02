@@ -213,7 +213,7 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Uživatelské jméno:",
     "settings_gc_username_placeholder":            "Vaše geocaching.com jméno",
     "settings_gc_username_hint":                   "Používá se k rozpoznání vlastních záznamů (např. FTF)",
-    "settings_group_search":                       "Vyhledávání",
+    "settings_group_search":                       "Vyhledávací engine",
     "settings_search_min_chars_label":             "Minimální počet znaků:",
     "settings_search_debounce_label":              "Zpoždění debounce (ms):",
     "settings_search_auto":                        "Auto",

@@ -213,7 +213,7 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Benutzername:",
     "settings_gc_username_placeholder":            "Dein geocaching.com Benutzername",
     "settings_gc_username_hint":                   "Wird zur Erkennung eigener Logs verwendet (z.B. FTF-Erkennung)",
-    "settings_group_search":                       "Suche",
+    "settings_group_search":                       "Suchmaschine",
     "settings_search_min_chars_label":             "Mindestzeichen:",
     "settings_search_debounce_label":              "Debounce-Verzögerung (ms):",
     "settings_search_auto":                        "Auto",

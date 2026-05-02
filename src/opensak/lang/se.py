@@ -213,7 +213,7 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Användarnamn:",
     "settings_gc_username_placeholder":            "Ditt geocaching.com-användarnamn",
     "settings_gc_username_hint":                   "Används för att identifiera egna loggningar (t.ex. FTF)",
-    "settings_group_search":                       "Sökning",
+    "settings_group_search":                       "Sökmotor",
     "settings_search_min_chars_label":             "Minsta antal tecken:",
     "settings_search_debounce_label":              "Debounce-fördröjning (ms):",
     "settings_search_auto":                        "Auto",
