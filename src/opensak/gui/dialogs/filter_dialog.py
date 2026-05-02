@@ -245,7 +245,7 @@ class FilterDialog(QDialog):
         profile_row.addWidget(self._profile_combo)
 
         save_btn = QPushButton(tr("filter_save_btn"))
-        save_btn.setMaximumWidth(80)
+        save_btn.setMaximumWidth(110)
         save_btn.clicked.connect(self._save_profile)
         profile_row.addWidget(save_btn)
 
