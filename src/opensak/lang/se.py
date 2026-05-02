@@ -292,7 +292,11 @@ STRINGS: dict[str, str] = {
     "update_loc_log_placeholder":   "Resultaten visas här…",
     "update_loc_no_db":             "Ingen databas är öppen.",
     "update_loc_nothing_to_do":     "Inga cacher att uppdatera med det valda omfånget.",
+    "update_loc_phase":             "Fas {phase} av {total}…",
+    "update_loc_phase1_label":      "⚡  Snabb sökning (offline)…",
+    "update_loc_phase2_label":      "🔍  Förfinar kommun via Nominatim…",
     "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
+    "update_loc_county_refined":    "{gc_code}: kommun förfinad → {county}",
     "update_loc_row_error":         "{gc_code}: fel — {msg}",
     "update_loc_row_skipped":       "{gc_code}: hoppades över (inga koordinater)",
 

@@ -14,6 +14,8 @@ dependencies = [
     "alembic>=1.13",
     "lxml>=5.0",
     "PySide6>=6.6",
+    "reverse_geocoder>=1.5",
+    "pycountry>=23.12",
 ]
 
 [project.optional-dependencies]

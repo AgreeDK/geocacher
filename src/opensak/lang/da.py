@@ -292,7 +292,11 @@ STRINGS: dict[str, str] = {
     "update_loc_log_placeholder":   "Resultater vises her…",
     "update_loc_no_db":             "Ingen database åben.",
     "update_loc_nothing_to_do":     "Ingen caches at opdatere med det valgte omfang.",
+    "update_loc_phase":             "Fase {phase} af {total}…",
+    "update_loc_phase1_label":      "⚡  Hurtig opslag (offline)…",
+    "update_loc_phase2_label":      "🔍  Forfiner amt via Nominatim…",
     "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
+    "update_loc_county_refined":    "{gc_code}: amt præciseret → {county}",
     "update_loc_row_error":         "{gc_code}: fejl — {msg}",
     "update_loc_row_skipped":       "{gc_code}: sprunget over (ingen koordinater)",
 

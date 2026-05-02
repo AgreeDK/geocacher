@@ -292,7 +292,11 @@ STRINGS: dict[str, str] = {
     "update_loc_log_placeholder":   "Les résultats apparaîtront ici…",
     "update_loc_no_db":             "Aucune base de données ouverte.",
     "update_loc_nothing_to_do":     "Aucun cache à mettre à jour avec le périmètre sélectionné.",
+    "update_loc_phase":             "Phase {phase} sur {total}…",
+    "update_loc_phase1_label":      "⚡  Recherche rapide (hors ligne)…",
+    "update_loc_phase2_label":      "🔍  Affinage du département via Nominatim…",
     "update_loc_row":               "{gc_code} : {country} / {state} / {county}",
+    "update_loc_county_refined":    "{gc_code} : département affiné → {county}",
     "update_loc_row_error":         "{gc_code} : erreur — {msg}",
     "update_loc_row_skipped":       "{gc_code} : ignoré (pas de coordonnées)",
 

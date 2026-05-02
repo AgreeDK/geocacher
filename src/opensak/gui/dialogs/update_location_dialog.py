@@ -47,15 +47,22 @@ class UpdateLocationResult:
 
 class ReverseGeocodeWorker(QThread):
     """
-    Background thread: iterates caches, calls Nominatim, writes results to DB.
+    Two-phase hybrid geocoding worker.
 
-    Rate-limited to 1 req/sec (Nominatim ToS).
+    Phase 1 — fast (offline, instant):
+        Uses reverse_geocoder KD-tree to fill country + state + county
+        for ALL rows in a single batch call. No network, no rate limit.
+
+    Phase 2 — refinement (online, 1 req/sec):
+        Uses Nominatim to replace the county field with a more accurate
+        polygon-based result. User can cancel between phases.
     """
 
-    progress    = Signal(int, int)   # (current, total)
-    row_done    = Signal(str, str)   # (gc_code, log_line)
-    all_done    = Signal(object)     # UpdateLocationResult
-    cancelled   = Signal(object)     # UpdateLocationResult
+    phase_changed = Signal(int, int)  # (phase_number, total_phases)
+    progress      = Signal(int, int)  # (current, total)  — phase 2 only
+    row_done      = Signal(str, str)  # (gc_code, log_line)
+    all_done      = Signal(object)    # UpdateLocationResult
+    cancelled     = Signal(object)    # UpdateLocationResult
 
     def __init__(self, rows: list[_CacheRow], *, parent=None):
         super().__init__(parent)
@@ -66,12 +73,46 @@ class ReverseGeocodeWorker(QThread):
         self._cancel = True
 
     def run(self) -> None:
-        from opensak.geocoder import reverse_geocode
+        from opensak.geocoder import fast_batch_geocode, nominatim_county
         from opensak.db.database import get_session
         from opensak.db.models import Cache
 
         result = UpdateLocationResult()
         total = len(self._rows)
+
+        # ── Phase 1: fast offline batch ───────────────────────────────────────
+        self.phase_changed.emit(1, 2)
+
+        coords = [(row.lat, row.lon) for row in self._rows]
+        locations = fast_batch_geocode(coords)
+
+        try:
+            with get_session() as session:
+                for row, loc in zip(self._rows, locations):
+                    cache = session.query(Cache).filter_by(gc_code=row.gc_code).first()
+                    if cache:
+                        cache.country = loc.country
+                        cache.state   = loc.state
+                        cache.county  = loc.county
+                        result.updated += 1
+                        line = tr(
+                            "update_loc_row",
+                            gc_code=row.gc_code,
+                            country=loc.country or "–",
+                            state=loc.state or "–",
+                            county=loc.county or "–",
+                        )
+                        self.row_done.emit(row.gc_code, line)
+        except Exception as exc:
+            result.errors += 1
+            self.row_done.emit("", tr("update_loc_row_error", gc_code="batch", msg=str(exc)))
+
+        if self._cancel:
+            self.cancelled.emit(result)
+            return
+
+        # ── Phase 2: Nominatim county refinement ──────────────────────────────
+        self.phase_changed.emit(2, 2)
 
         for i, row in enumerate(self._rows):
             if self._cancel:
@@ -80,32 +121,25 @@ class ReverseGeocodeWorker(QThread):
 
             self.progress.emit(i + 1, total)
 
-            loc = reverse_geocode(row.lat, row.lon)
-            if loc is None:
-                result.errors += 1
-                line = tr("update_loc_row_error", gc_code=row.gc_code, msg="network/parse error")
-                self.row_done.emit(row.gc_code, line)
-            else:
+            county = nominatim_county(row.lat, row.lon)
+            if county is not None:
                 try:
                     with get_session() as session:
                         cache = session.query(Cache).filter_by(gc_code=row.gc_code).first()
                         if cache:
-                            cache.country = loc.country
-                            cache.state   = loc.state
-                            cache.county  = loc.county
-                    result.updated += 1
+                            cache.county = county
                     line = tr(
-                        "update_loc_row",
+                        "update_loc_county_refined",
                         gc_code=row.gc_code,
-                        country=loc.country or "–",
-                        state=loc.state or "–",
-                        county=loc.county or "–",
+                        county=county,
                     )
                     self.row_done.emit(row.gc_code, line)
                 except Exception as exc:
                     result.errors += 1
-                    line = tr("update_loc_row_error", gc_code=row.gc_code, msg=str(exc))
-                    self.row_done.emit(row.gc_code, line)
+                    self.row_done.emit(
+                        row.gc_code,
+                        tr("update_loc_row_error", gc_code=row.gc_code, msg=str(exc)),
+                    )
 
             # Nominatim ToS: max 1 request/second
             if not self._cancel:
@@ -268,6 +302,7 @@ class UpdateLocationDialog(QDialog):
         self._progress_label.setText(tr("update_loc_progress", current=0, total=len(rows)))
 
         self._worker = ReverseGeocodeWorker(rows)
+        self._worker.phase_changed.connect(self._on_phase_changed)
         self._worker.progress.connect(self._on_progress)
         self._worker.row_done.connect(self._on_row_done)
         self._worker.all_done.connect(self._on_done)
@@ -280,6 +315,14 @@ class UpdateLocationDialog(QDialog):
         self._cancel_btn.setEnabled(False)
 
     # ── Worker signals ────────────────────────────────────────────────────────
+
+    def _on_phase_changed(self, phase: int, total: int) -> None:
+        self._progress_label.setText(tr("update_loc_phase", phase=phase, total=total))
+        if phase == 1:
+            self._progress.setRange(0, 0)  # indeterminate during fast batch
+        else:
+            self._progress.setRange(0, len(self._worker._rows))
+            self._progress.setValue(0)
 
     def _on_progress(self, current: int, total: int) -> None:
         self._progress.setValue(current)
