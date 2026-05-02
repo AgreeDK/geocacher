@@ -347,6 +347,8 @@ STRINGS: dict[str, str] = {
     "filter_placed_by_label":       "Udlagt af:",
     "filter_owner_name_label":      "Ejernavn:",
     "filter_cache_type_group":      "Cache type",
+    "filter_type_enable_all":       "Aktiver alle",
+    "filter_type_disable_all":      "Deaktiver alle",
     "filter_container_group":       "Container størrelse",
     "filter_dt_group":              "Sværhedsgrad / Terræn",
     "filter_from":                  "Fra:",

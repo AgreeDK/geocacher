@@ -347,6 +347,8 @@ STRINGS: dict[str, str] = {
     "filter_placed_by_label":       "Placé par:",
     "filter_owner_name_label":      "Nom du propriétaire:",
     "filter_cache_type_group":      "Type de cache",
+    "filter_type_enable_all":       "Tout activer",
+    "filter_type_disable_all":      "Tout désactiver",
     "filter_container_group":       "Taille du conteneur",
     "filter_dt_group":              "Difficulté / Terrain",
     "filter_from":                  "De:",

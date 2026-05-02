@@ -335,13 +335,24 @@ class FilterDialog(QDialog):
 
         # Cache type
         type_group = QGroupBox(tr("filter_cache_type_group"))
-        type_layout = QGridLayout(type_group)
+        type_outer = QVBoxLayout(type_group)
+        type_layout = QGridLayout()
         self._type_checks: dict[str, QCheckBox] = {}
         for i, ct in enumerate(CACHE_TYPES):
             cb = QCheckBox(ct.replace(" Cache", "").replace("Unknown", "Mystery"))
             cb.setChecked(True)
             self._type_checks[ct] = cb
             type_layout.addWidget(cb, i // 3, i % 3)
+        type_outer.addLayout(type_layout)
+        type_btn_row = QHBoxLayout()
+        type_enable_all = QPushButton(tr("filter_type_enable_all"))
+        type_enable_all.clicked.connect(self._enable_all_types)
+        type_disable_all = QPushButton(tr("filter_type_disable_all"))
+        type_disable_all.clicked.connect(self._disable_all_types)
+        type_btn_row.addWidget(type_enable_all)
+        type_btn_row.addWidget(type_disable_all)
+        type_btn_row.addStretch()
+        type_outer.addLayout(type_btn_row)
         layout.addRow(type_group)
 
         # Container
@@ -721,6 +732,14 @@ class FilterDialog(QDialog):
 
     def _on_dist_toggled(self, checked: bool) -> None:
         self._dist_max.setEnabled(checked)
+
+    def _enable_all_types(self) -> None:
+        for cb in self._type_checks.values():
+            cb.setChecked(True)
+
+    def _disable_all_types(self) -> None:
+        for cb in self._type_checks.values():
+            cb.setChecked(False)
 
     def _reset_general(self) -> None:
         self._name_filter.clear()
