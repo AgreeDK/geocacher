@@ -71,6 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Nastavení…",
     "action_found_update":          "⟳  Aktualizovat nálezy z referenční databáze…",
+    "action_update_location":       "🌍  Aktualizovat okres / kraj / zemi…",
     "action_gps_export":            "📤  Odeslat do GPS…",
 
     # Help menu
@@ -140,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} keší načteno — kliknutím zobrazíte mapu",
     "import_log_placeholder":       "Výsledky importu se zobrazí zde…",
     "import_all_done":            "✓ Všech {count} souborů bylo zpracováno.",
+    "import_geocode_checkbox":      "🌍  Geokódovat chybějící okres / kraj / zemi po importu",
+    "import_geocode_running":       "📍  Geokóduji chybějící údaje o poloze…",
     
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Nastavit filtr",
@@ -279,6 +282,24 @@ STRINGS: dict[str, str] = {
     "found_active_db":                "Aktivní databáze (aktualizuje se):",
     "found_completed":                "✓ Aktualizace dokončena!",
     "found_errors":                   "Chyby:",
+
+    # ── Dialog aktualizace polohy ─────────────────────────────────────────────
+    "update_loc_title":             "Aktualizovat okres / kraj / zemi",
+    "update_loc_scope_group":       "Rozsah",
+    "update_loc_scope_all":         "Aktualizovat všechny kešky",
+    "update_loc_scope_missing":     "Pouze kešky s chybějícími údaji o poloze",
+    "update_loc_use_corrected":     "Použít opravené souřadnice, jsou-li k dispozici",
+    "update_loc_start_btn":         "▶  Spustit aktualizaci",
+    "update_loc_info":              "Údaje o poloze jsou vyhledávány offline pomocí dat GeoNames — rychle, bez nutnosti sítě, bez omezení rychlosti.",
+    "update_loc_running":           "Spouštím offline vyhledávání pro {total} keší…",
+    "update_loc_done":              "✓ Hotovo — {updated} aktualizováno, {skipped} přeskočeno, {errors} chyb",
+    "update_loc_cancelled":         "Zrušeno — {updated} aktualizováno doposud",
+    "update_loc_log_placeholder":   "Výsledky se zobrazí zde…",
+    "update_loc_no_db":             "Žádná databáze není otevřena.",
+    "update_loc_nothing_to_do":     "Žádné kešky k aktualizaci s vybraným rozsahem.",
+    "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
+    "update_loc_row_error":         "{gc_code}: chyba — {msg}",
+    "update_loc_row_skipped":       "{gc_code}: přeskočeno (žádné souřadnice)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Nová databáze",
@@ -457,6 +478,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Převodník souřadnic…",
     "ctx_mark_found":       "☑  Označit jako nalezené",
     "ctx_mark_not_found":   "☐  Označit jako nenalezené",
+    "ctx_update_location":  "🌍  Aktualizovat údaje o poloze…",
 
     # ── Waypoint dialog — field labels and placeholders ───────────────────────
     "wp_label_gc_code":             "GC kód *:",

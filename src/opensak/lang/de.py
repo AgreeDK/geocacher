@@ -71,6 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Einstellungen…",
     "action_found_update":          "⟳  Funde aus Referenz-Datenbank aktualisieren",
+    "action_update_location":       "🌍  Landkreis / Bundesland / Land aktualisieren…",
     "action_gps_export":            "📤  An GPS senden…",
 
     # Help menu
@@ -140,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} Caches geladen — einen Cache anklicken, um ihn auf der Karte anzusehen",
     "import_log_placeholder":       "Importergebnisse werden hier angezeigt…",
     "import_all_done":            "✓ Alle {count} Dateien verarbeitet.",
+    "import_geocode_checkbox":      "🌍  Fehlende Landkreis / Bundesland / Land nach Import ermitteln",
+    "import_geocode_running":       "📍  Fehlende Standortdaten werden ermittelt…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Filter einstellen",
@@ -279,6 +282,24 @@ STRINGS: dict[str, str] = {
     "found_active_db":                "Aktive Datenbank (zu Aktualisieren):",
     "found_completed":                "✓ Aktualisierung vollständig!",
     "found_errors":                   "Fehler:",
+
+    # ── Standort aktualisieren Dialog ─────────────────────────────────────────
+    "update_loc_title":             "Landkreis / Bundesland / Land aktualisieren",
+    "update_loc_scope_group":       "Umfang",
+    "update_loc_scope_all":         "Alle Caches aktualisieren",
+    "update_loc_scope_missing":     "Nur Caches mit fehlenden Standortdaten",
+    "update_loc_use_corrected":     "Korrigierte Koordinaten verwenden wenn vorhanden",
+    "update_loc_start_btn":         "▶  Aktualisierung starten",
+    "update_loc_info":              "Standortdaten werden offline anhand von GeoNames-Daten abgerufen — schnell, kein Netzwerk erforderlich, keine Ratenlimitierung.",
+    "update_loc_running":           "Starte Offline-Suche für {total} Caches…",
+    "update_loc_done":              "✓ Fertig — {updated} aktualisiert, {skipped} übersprungen, {errors} Fehler",
+    "update_loc_cancelled":         "Abgebrochen — {updated} bisher aktualisiert",
+    "update_loc_log_placeholder":   "Ergebnisse erscheinen hier…",
+    "update_loc_no_db":             "Keine Datenbank geöffnet.",
+    "update_loc_nothing_to_do":     "Keine Caches mit dem gewählten Umfang zu aktualisieren.",
+    "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
+    "update_loc_row_error":         "{gc_code}: Fehler — {msg}",
+    "update_loc_row_skipped":       "{gc_code}: übersprungen (keine Koordinaten)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Neue Datenbank",
@@ -456,6 +477,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Koordinaten-Konverter",
     "ctx_mark_found":       "☑  Als Gefunden markieren",
     "ctx_mark_not_found":   "☐  Als Nicht Gefunden markieren",
+    "ctx_update_location":  "🌍  Standortdaten aktualisieren…",
 
     # ── Waypoint dialog — field labels and placeholders ───────────────────────
     "wp_label_gc_code":             "GC-Code *:",

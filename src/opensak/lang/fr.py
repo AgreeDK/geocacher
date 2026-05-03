@@ -71,6 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Paramètres…",
     "action_found_update":          "⟳  Mettre à jour les caches trouvées depuis la base de données de référence…",
+    "action_update_location":       "🌍  Mettre à jour département / région / pays…",
     "action_gps_export":            "📤  Envoyer au GPS…",
 
     # Help menu
@@ -140,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} caches chargées — cliquez sur un cache pour voir la carte",
     "import_log_placeholder":       "Les résultats d'importation s'afficheront ici…",
     "import_all_done":            "✓ Les {count} fichiers ont été traités.",
+    "import_geocode_checkbox":      "🌍  Géocoder le département / région / pays manquants après l'import",
+    "import_geocode_running":       "📍  Géocodage des données de localisation manquantes…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Définir le filtre",
@@ -279,6 +282,24 @@ STRINGS: dict[str, str] = {
     "found_active_db":                "Base active (à mettre à jour) :",
     "found_completed":                "✓ Mise à jour terminée !",
     "found_errors":                   "Erreurs :",
+
+    # ── Boîte de dialogue mise à jour de la localisation ─────────────────────
+    "update_loc_title":             "Mettre à jour département / région / pays",
+    "update_loc_scope_group":       "Périmètre",
+    "update_loc_scope_all":         "Mettre à jour tous les caches",
+    "update_loc_scope_missing":     "Uniquement les caches sans données de localisation",
+    "update_loc_use_corrected":     "Utiliser les coordonnées corrigées si disponibles",
+    "update_loc_start_btn":         "▶  Lancer la mise à jour",
+    "update_loc_info":              "Les données de localisation sont recherchées hors ligne à l'aide des données GeoNames — rapide, sans réseau requis, sans limites de débit.",
+    "update_loc_running":           "Recherche hors ligne pour {total} caches en cours…",
+    "update_loc_done":              "✓ Terminé — {updated} mis à jour, {skipped} ignorés, {errors} erreurs",
+    "update_loc_cancelled":         "Annulé — {updated} mis à jour jusqu'ici",
+    "update_loc_log_placeholder":   "Les résultats apparaîtront ici…",
+    "update_loc_no_db":             "Aucune base de données ouverte.",
+    "update_loc_nothing_to_do":     "Aucun cache à mettre à jour avec le périmètre sélectionné.",
+    "update_loc_row":               "{gc_code} : {country} / {state} / {county}",
+    "update_loc_row_error":         "{gc_code} : erreur — {msg}",
+    "update_loc_row_skipped":       "{gc_code} : ignoré (pas de coordonnées)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Nouvelle base de données",
@@ -456,6 +477,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Convertisseur de coordonnées…",
     "ctx_mark_found":       "☑  Marquer comme trouvée",
     "ctx_mark_not_found":   "☐  Marquer comme non trouvée",
+    "ctx_update_location":  "🌍  Mettre à jour les données de localisation…",
 
     # ── Waypoint dialog — libellés et espaces réservés ────────────────────────
     "wp_label_gc_code":             "Code GC *:",

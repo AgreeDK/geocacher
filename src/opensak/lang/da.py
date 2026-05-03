@@ -71,6 +71,7 @@ STRINGS: dict[str, str] = {
     # Funktioner-menu
     "action_settings":              "&Indstillinger…",
     "action_found_update":          "⟳  Opdater fund fra reference database…",
+    "action_update_location":       "🌍  Opdater amt / region / land…",
     "action_gps_export":            "📤  Send til GPS…",
 
     # Hjælp-menu
@@ -140,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} caches indlæst — klik på en cache for at se kortet",
     "import_log_placeholder":       "Import-resultat vises her…",
     "import_all_done":            "✓ Alle {count} filer er behandlet.",
+    "import_geocode_checkbox":      "🌍  Geokod manglende amt / region / land efter import",
+    "import_geocode_running":       "📍  Geokoder manglende lokationsdata…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Sæt filter",
@@ -279,6 +282,24 @@ STRINGS: dict[str, str] = {
     "found_active_db":                "Aktiv database (opdateres):",
     "found_completed":                "✓ Opdatering fuldført!",
     "found_errors":                   "Fejl:",
+
+    # ── Opdater lokation dialog ───────────────────────────────────────────────
+    "update_loc_title":             "Opdater amt / region / land",
+    "update_loc_scope_group":       "Omfang",
+    "update_loc_scope_all":         "Opdater alle caches",
+    "update_loc_scope_missing":     "Kun caches med manglende lokationsdata",
+    "update_loc_use_corrected":     "Brug korrigerede koordinater når tilgængelige",
+    "update_loc_start_btn":         "▶  Start opdatering",
+    "update_loc_info":              "Lokationsdata slås op offline ved hjælp af GeoNames-data — hurtigt, ingen netværk nødvendigt, ingen hastighedsbegrænsninger.",
+    "update_loc_running":           "Kører offline opslag for {total} caches…",
+    "update_loc_done":              "✓ Færdig — {updated} opdateret, {skipped} sprunget over, {errors} fejl",
+    "update_loc_cancelled":         "Annulleret — {updated} opdateret indtil videre",
+    "update_loc_log_placeholder":   "Resultater vises her…",
+    "update_loc_no_db":             "Ingen database åben.",
+    "update_loc_nothing_to_do":     "Ingen caches at opdatere med det valgte omfang.",
+    "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
+    "update_loc_row_error":         "{gc_code}: fejl — {msg}",
+    "update_loc_row_skipped":       "{gc_code}: sprunget over (ingen koordinater)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Ny database",
@@ -456,6 +477,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Koordinatkonverter…",
     "ctx_mark_found":       "☑  Marker som fundet",
     "ctx_mark_not_found":   "☐  Marker som ikke fundet",
+    "ctx_update_location":  "🌍  Opdater lokationsdata…",
 
     # ── Waypoint dialog — feltnavne og placeholders ───────────────────────────
     "wp_label_gc_code":             "GC Kode *:",

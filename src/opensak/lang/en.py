@@ -71,6 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Settings…",
     "action_found_update":          "⟳  Update finds from reference database…",
+    "action_update_location":       "🌍  Update county / state / country…",
     "action_gps_export":            "📤  Send to GPS…",
 
     # Help menu
@@ -140,6 +141,8 @@ STRINGS: dict[str, str] = {
     "import_table_loaded":         "✓ {count} caches loaded — click a cache to view on map",
     "import_log_placeholder":       "Import results will appear here…",
     "import_all_done":            "✓ All {count} files processed.",
+    "import_geocode_checkbox":      "🌍  Geocode missing county / state / country after import",
+    "import_geocode_running":       "📍  Geocoding missing location data…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Set filter",
@@ -279,6 +282,24 @@ STRINGS: dict[str, str] = {
     "found_active_db":                "Active database (to update):",
     "found_completed":                "✓ Update completed!",
     "found_errors":                   "Errors:",
+
+    # ── Update location dialog ────────────────────────────────────────────────
+    "update_loc_title":             "Update County / State / Country",
+    "update_loc_scope_group":       "Scope",
+    "update_loc_scope_all":         "Update all caches",
+    "update_loc_scope_missing":     "Only caches with missing location data",
+    "update_loc_use_corrected":     "Use corrected coordinates when available",
+    "update_loc_start_btn":         "▶  Start update",
+    "update_loc_info":              "Location data is looked up offline using GeoNames data — fast, no network required, no rate limits.",
+    "update_loc_running":           "Running offline lookup for {total} caches…",
+    "update_loc_done":              "✓ Done — {updated} updated, {skipped} skipped, {errors} errors",
+    "update_loc_cancelled":         "Cancelled — {updated} updated so far",
+    "update_loc_log_placeholder":   "Results will appear here…",
+    "update_loc_no_db":             "No database open.",
+    "update_loc_nothing_to_do":     "No caches to update with the selected scope.",
+    "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
+    "update_loc_row_error":         "{gc_code}: error — {msg}",
+    "update_loc_row_skipped":       "{gc_code}: skipped (no coordinates)",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "New database",
@@ -456,6 +477,7 @@ STRINGS: dict[str, str] = {
     "ctx_coord_converter":  "⇄  Coordinate converter…",
     "ctx_mark_found":       "☑  Mark as found",
     "ctx_mark_not_found":   "☐  Mark as not found",
+    "ctx_update_location":  "🌍  Update location data…",
 
     # ── Waypoint dialog — field labels and placeholders ───────────────────────
     "wp_label_gc_code":             "GC Code *:",

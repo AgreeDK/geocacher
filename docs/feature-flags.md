@@ -110,3 +110,4 @@ if flags.my_new_flag:
 | Flag | Default | Description |
 |---|---|---|
 | `where-filter` | `false` | SQL WHERE clause editor in the filter dialog |
+| `update-location` | `false` | Update County / State / Country via offline GeoNames lookup (Waypoint menu, right-click context menu, and auto-geocode on GPX import) |
