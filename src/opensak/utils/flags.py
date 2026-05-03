@@ -30,6 +30,7 @@ _FEATURES_FILE: Path = Path(__file__).parent.parent.parent.parent / "features.js
 _RELEASE_DEFAULTS: dict[str, bool] = {
     "where-filter": True,
     "db-combo": True,
+    "update-location": False,
 }
 
 
@@ -72,3 +73,4 @@ _flags = _load()
 
 where_filter: bool = _flags["where-filter"]
 db_combo: bool = _flags["db-combo"]
+update_location: bool = _flags["update-location"]
