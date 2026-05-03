@@ -56,19 +56,29 @@ class AppSettings:
 
     @property
     def home_lat(self) -> float:
-        return float(self._s.value(self._db_key("home_lat"), 55.6761))
+        per_db_key = self._db_key("home_lat")
+        val = self._s.value(per_db_key, None)
+        if val is not None:
+            return float(val)
+        return float(self._s.value("location/home_lat", 55.6761))
 
     @home_lat.setter
     def home_lat(self, value: float) -> None:
         self._s.setValue(self._db_key("home_lat"), value)
+        self._s.setValue("location/home_lat", value)
 
     @property
     def home_lon(self) -> float:
-        return float(self._s.value(self._db_key("home_lon"), 12.5683))
+        per_db_key = self._db_key("home_lon")
+        val = self._s.value(per_db_key, None)
+        if val is not None:
+            return float(val)
+        return float(self._s.value("location/home_lon", 12.5683))
 
     @home_lon.setter
     def home_lon(self, value: float) -> None:
         self._s.setValue(self._db_key("home_lon"), value)
+        self._s.setValue("location/home_lon", value)
 
     # ── Globale hjemmepunkter (liste) ─────────────────────────────────────────
 
