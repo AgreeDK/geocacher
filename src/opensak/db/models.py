@@ -127,6 +127,11 @@ class Cache(Base):
     # for performance). Updated automatically on import in _upsert_cache().
     log_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
+    # ── Issue #186: Cached latest log date ───────────────────────────────────
+    # Date of the most recent log entry, cached so the UI can display it
+    # without loading the noload'ed logs relationship. Updated on import.
+    last_log_date: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+
     # Custom waypoint link (issue #141)
     # For CW... entries: optionally links to a parent geocache's gc_code.
     # NULL for all real geocaches imported from GPX/PQ.
