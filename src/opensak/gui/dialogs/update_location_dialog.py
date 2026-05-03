@@ -1,8 +1,8 @@
 """
 src/opensak/gui/dialogs/update_location_dialog.py — Update county/state/country dialog.
 
-Runs a background reverse-geocode pass over caches using Nominatim (OSM),
-which is the same boundary data source as project-gc.
+Runs a fully offline background reverse-geocode pass over caches using a
+KD-tree (GeoNames data). Instant for any number of caches, no network required.
 
 Can be opened two ways:
   - Bulk (no gc_codes): shows scope options, user picks all vs. missing-only.
@@ -11,7 +11,6 @@ Can be opened two ways:
 
 from __future__ import annotations
 
-import time
 from dataclasses import dataclass, field
 
 from PySide6.QtCore import Qt, QThread, Signal
@@ -47,22 +46,15 @@ class UpdateLocationResult:
 
 class ReverseGeocodeWorker(QThread):
     """
-    Two-phase hybrid geocoding worker.
+    Offline geocoding worker using the reverse_geocoder KD-tree (GeoNames).
 
-    Phase 1 — fast (offline, instant):
-        Uses reverse_geocoder KD-tree to fill country + state + county
-        for ALL rows in a single batch call. No network, no rate limit.
-
-    Phase 2 — refinement (online, 1 req/sec):
-        Uses Nominatim to replace the county field with a more accurate
-        polygon-based result. User can cancel between phases.
+    Fills country + state + county for all rows in a single batch call.
+    No network, no rate limit — runs in under a second for any database size.
     """
 
-    phase_changed = Signal(int, int)  # (phase_number, total_phases)
-    progress      = Signal(int, int)  # (current, total)  — phase 2 only
-    row_done      = Signal(str, str)  # (gc_code, log_line)
-    all_done      = Signal(object)    # UpdateLocationResult
-    cancelled     = Signal(object)    # UpdateLocationResult
+    row_done  = Signal(str, str)  # (gc_code, log_line)
+    all_done  = Signal(object)    # UpdateLocationResult
+    cancelled = Signal(object)    # UpdateLocationResult
 
     def __init__(self, rows: list[_CacheRow], *, parent=None):
         super().__init__(parent)
@@ -73,15 +65,15 @@ class ReverseGeocodeWorker(QThread):
         self._cancel = True
 
     def run(self) -> None:
-        from opensak.geocoder import fast_batch_geocode, nominatim_county
+        from opensak.geocoder import fast_batch_geocode
         from opensak.db.database import get_session
         from opensak.db.models import Cache
 
         result = UpdateLocationResult()
-        total = len(self._rows)
 
-        # ── Phase 1: fast offline batch ───────────────────────────────────────
-        self.phase_changed.emit(1, 2)
+        if self._cancel:
+            self.cancelled.emit(result)
+            return
 
         coords = [(row.lat, row.lon) for row in self._rows]
         locations = fast_batch_geocode(coords)
@@ -111,40 +103,6 @@ class ReverseGeocodeWorker(QThread):
             self.cancelled.emit(result)
             return
 
-        # ── Phase 2: Nominatim county refinement ──────────────────────────────
-        self.phase_changed.emit(2, 2)
-
-        for i, row in enumerate(self._rows):
-            if self._cancel:
-                self.cancelled.emit(result)
-                return
-
-            self.progress.emit(i + 1, total)
-
-            county = nominatim_county(row.lat, row.lon)
-            if county is not None:
-                try:
-                    with get_session() as session:
-                        cache = session.query(Cache).filter_by(gc_code=row.gc_code).first()
-                        if cache:
-                            cache.county = county
-                    line = tr(
-                        "update_loc_county_refined",
-                        gc_code=row.gc_code,
-                        county=county,
-                    )
-                    self.row_done.emit(row.gc_code, line)
-                except Exception as exc:
-                    result.errors += 1
-                    self.row_done.emit(
-                        row.gc_code,
-                        tr("update_loc_row_error", gc_code=row.gc_code, msg=str(exc)),
-                    )
-
-            # Nominatim ToS: max 1 request/second
-            if not self._cancel:
-                time.sleep(1.0)
-
         self.all_done.emit(result)
 
 
@@ -152,7 +110,7 @@ class ReverseGeocodeWorker(QThread):
 
 class UpdateLocationDialog(QDialog):
     """
-    Dialog to update county/state/country via Nominatim reverse geocoding.
+    Dialog to update county/state/country via offline reverse geocoding.
 
     When gc_codes is None: full bulk mode — scope options are shown.
     When gc_codes is a list: targeted mode — scope group is hidden and only
@@ -186,7 +144,7 @@ class UpdateLocationDialog(QDialog):
         info.setStyleSheet("color: palette(mid);")
         layout.addWidget(info)
 
-        # ── Scope (bulk mode only) ─────────────────────────────────────────────
+        # ── Scope (bulk mode only) ────────────────────────────────────────────
         self._scope_box = QGroupBox(tr("update_loc_scope_group"))
         scope_layout = QVBoxLayout(self._scope_box)
 
@@ -209,8 +167,7 @@ class UpdateLocationDialog(QDialog):
         layout.addWidget(self._progress_label)
 
         self._progress = QProgressBar()
-        self._progress.setRange(0, 1)
-        self._progress.setValue(0)
+        self._progress.setRange(0, 0)  # indeterminate — batch runs instantly
         self._progress.setVisible(False)
         layout.addWidget(self._progress)
 
@@ -295,15 +252,11 @@ class UpdateLocationDialog(QDialog):
         self._cancel_btn.setEnabled(True)
         self._close_btn.setEnabled(False)
 
-        self._progress.setRange(0, len(rows))
-        self._progress.setValue(0)
         self._progress.setVisible(True)
         self._log.clear()
-        self._progress_label.setText(tr("update_loc_progress", current=0, total=len(rows)))
+        self._progress_label.setText(tr("update_loc_running", total=len(rows)))
 
         self._worker = ReverseGeocodeWorker(rows)
-        self._worker.phase_changed.connect(self._on_phase_changed)
-        self._worker.progress.connect(self._on_progress)
         self._worker.row_done.connect(self._on_row_done)
         self._worker.all_done.connect(self._on_done)
         self._worker.cancelled.connect(self._on_cancelled)
@@ -316,30 +269,17 @@ class UpdateLocationDialog(QDialog):
 
     # ── Worker signals ────────────────────────────────────────────────────────
 
-    def _on_phase_changed(self, phase: int, total: int) -> None:
-        self._progress_label.setText(tr("update_loc_phase", phase=phase, total=total))
-        if phase == 1:
-            self._progress.setRange(0, 0)  # indeterminate during fast batch
-        else:
-            self._progress.setRange(0, len(self._worker._rows))
-            self._progress.setValue(0)
-
-    def _on_progress(self, current: int, total: int) -> None:
-        self._progress.setValue(current)
-        self._progress_label.setText(tr("update_loc_progress", current=current, total=total))
-
     def _on_row_done(self, _gc_code: str, line: str) -> None:
         self._log.append(line)
 
     def _on_done(self, result: UpdateLocationResult) -> None:
         self._finalize()
-        summary = tr(
+        self._progress_label.setText(tr(
             "update_loc_done",
             updated=result.updated,
             skipped=result.skipped,
             errors=result.errors,
-        )
-        self._progress_label.setText(summary)
+        ))
         self.location_updated.emit()
 
     def _on_cancelled(self, result: UpdateLocationResult) -> None:
@@ -349,6 +289,7 @@ class UpdateLocationDialog(QDialog):
             self.location_updated.emit()
 
     def _finalize(self) -> None:
+        self._progress.setVisible(False)
         self._start_btn.setEnabled(True)
         self._scope_box.setEnabled(True)
         self._cb_corrected.setEnabled(True)
