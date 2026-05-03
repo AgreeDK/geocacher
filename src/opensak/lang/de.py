@@ -213,6 +213,11 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Benutzername:",
     "settings_gc_username_placeholder":            "Dein geocaching.com Benutzername",
     "settings_gc_username_hint":                   "Wird zur Erkennung eigener Logs verwendet (z.B. FTF-Erkennung)",
+    "settings_group_search":                       "Suchmaschine",
+    "settings_search_min_chars_label":             "Mindestzeichen:",
+    "settings_search_debounce_label":              "Debounce-Verzögerung (ms):",
+    "settings_search_auto":                        "Auto",
+    "settings_search_hint":                        "0 (Auto) wählt adaptive Schwellenwerte. Mindestzeichen erreicht → sofort auslösen; Debounce-Pause abgewartet → trotzdem auslösen. < 1 000 Caches → 1 Zeichen / 200 ms, 1 000–10 000 → 2 / 400 ms, > 10 000 → 3 / 600 ms.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Datenbanken verwalten",
@@ -730,6 +735,7 @@ STRINGS: dict[str, str] = {
     # ── Geocaching.com integration ────────────────────────────────────────────
     "settings_tab_general":         "Allgemein",
     "settings_tab_geocaching":      "Geocaching.com",
+    "settings_tab_advanced":        "Erweitert",
     "gc_not_logged_in":             "Nicht eingeloggt",
     "gc_status_offline":            "Offline",
     "gc_status_online":             "verbunden",

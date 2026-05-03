@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox, QGroupBox, QComboBox,
     QMessageBox, QTableWidget, QTableWidgetItem,
     QHeaderView, QAbstractItemView, QTabWidget, QWidget,
-    QFrame, QSizePolicy
+    QFrame, QSizePolicy, QSpinBox
 )
 from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from PySide6.QtGui import QPixmap, QFont
@@ -75,8 +75,9 @@ class SettingsDialog(QDialog):
 
         # Tab-widget med tre faner
         self._tabs = QTabWidget()
-        self._tabs.addTab(self._build_general_tab(),  tr("settings_tab_general"))
-        self._tabs.addTab(self._build_gc_tab(),        tr("settings_tab_geocaching"))
+        self._tabs.addTab(self._build_general_tab(),   tr("settings_tab_general"))
+        self._tabs.addTab(self._build_gc_tab(),         tr("settings_tab_geocaching"))
+        self._tabs.addTab(self._build_advanced_tab(),   tr("settings_tab_advanced"))
 
         layout.addWidget(self._tabs)
 
@@ -257,6 +258,49 @@ class SettingsDialog(QDialog):
         user_layout.addWidget(hint)
 
         layout.addWidget(user_group)
+
+        layout.addStretch()
+        return tab
+
+    # ── Fane 3: Advanced ─────────────────────────────────────────────────────
+
+    def _build_advanced_tab(self) -> QWidget:
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(12, 12, 12, 12)
+        layout.setSpacing(12)
+
+        # ── Search behaviour ──────────────────────────────────────────────────
+        search_group = QGroupBox(tr("settings_group_search"))
+        search_layout = QVBoxLayout(search_group)
+
+        min_row = QHBoxLayout()
+        min_row.addWidget(QLabel(tr("settings_search_min_chars_label")))
+        self._search_min_chars = QSpinBox()
+        self._search_min_chars.setRange(0, 20)
+        self._search_min_chars.setSpecialValueText(tr("settings_search_auto"))
+        self._search_min_chars.setFixedWidth(80)
+        min_row.addWidget(self._search_min_chars)
+        min_row.addStretch()
+        search_layout.addLayout(min_row)
+
+        delay_row = QHBoxLayout()
+        delay_row.addWidget(QLabel(tr("settings_search_debounce_label")))
+        self._search_debounce_ms = QSpinBox()
+        self._search_debounce_ms.setRange(0, 2000)
+        self._search_debounce_ms.setSingleStep(50)
+        self._search_debounce_ms.setSpecialValueText(tr("settings_search_auto"))
+        self._search_debounce_ms.setFixedWidth(80)
+        delay_row.addWidget(self._search_debounce_ms)
+        delay_row.addStretch()
+        search_layout.addLayout(delay_row)
+
+        search_hint = QLabel(tr("settings_search_hint"))
+        search_hint.setStyleSheet("color: gray; font-size: 10px;")
+        search_hint.setWordWrap(True)
+        search_layout.addWidget(search_hint)
+
+        layout.addWidget(search_group)
         layout.addStretch()
         return tab
 
@@ -621,17 +665,21 @@ class SettingsDialog(QDialog):
         lang_idx = self._lang_combo.findData(current_language())
         self._lang_combo.setCurrentIndex(lang_idx if lang_idx >= 0 else 0)
         self._gc_username.setText(s.gc_username)
+        self._search_min_chars.setValue(s.search_min_chars)
+        self._search_debounce_ms.setValue(s.search_debounce_ms)
         # Opdater GC-status
         self._refresh_gc_status_on_open()
 
     def _save(self) -> None:
         s = get_settings()
-        s.gc_username   = self._gc_username.text()
-        s.use_miles     = self._miles_cb.isChecked()
-        s.show_archived = self._archived_cb.isChecked()
-        s.show_found    = self._found_cb.isChecked()
-        s.map_provider  = self._map_provider.currentData()
-        s.coord_format  = self._coord_format.currentData()
+        s.gc_username       = self._gc_username.text()
+        s.use_miles         = self._miles_cb.isChecked()
+        s.show_archived     = self._archived_cb.isChecked()
+        s.show_found        = self._found_cb.isChecked()
+        s.map_provider      = self._map_provider.currentData()
+        s.coord_format      = self._coord_format.currentData()
+        s.search_min_chars  = self._search_min_chars.value()
+        s.search_debounce_ms = self._search_debounce_ms.value()
         s.sync()
 
         new_lang = self._lang_combo.currentData()

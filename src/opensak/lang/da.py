@@ -213,6 +213,11 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Brugernavn:",
     "settings_gc_username_placeholder":            "Dit geocaching.com brugernavn",
     "settings_gc_username_hint":                   "Bruges til at genkende dine egne logs (fx FTF-detektion)",
+    "settings_group_search":                       "Søgemaskine",
+    "settings_search_min_chars_label":             "Minimumstegn:",
+    "settings_search_debounce_label":              "Debounce-forsinkelse (ms):",
+    "settings_search_auto":                        "Auto",
+    "settings_search_hint":                        "Sæt til 0 (Auto) for adaptive grænser. At nå minimumstegn udløser straks; en pause på debounce-tiden udløser uanset hvad. < 1 000 caches → 1 tegn / 200 ms, 1 000–10 000 → 2 / 400 ms, > 10 000 → 3 / 600 ms.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Administrer databaser",
@@ -730,6 +735,7 @@ STRINGS: dict[str, str] = {
     # ── Geocaching.com integration ────────────────────────────────────────────
     "settings_tab_general":         "Generelt",
     "settings_tab_geocaching":      "Geocaching.com",
+    "settings_tab_advanced":        "Avanceret",
     "gc_not_logged_in":             "Ikke logget ind",
     "gc_status_offline":            "Offline",
     "gc_status_online":             "Forbundet",
