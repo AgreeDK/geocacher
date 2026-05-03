@@ -644,6 +644,10 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
     # its length equals the new total count of logs for this cache.
     cache.log_count = len(seen_log_ids)
 
+    # ── Issue #186: Cache latest log date for fast UI display ────────────────
+    log_dates = [lg["log_date"] for lg in data.get("logs", []) if lg.get("log_date")]
+    cache.last_log_date = max(log_dates) if log_dates else None
+
     # Trackables
     for tb in data.get("trackables", []):
         session.add(Trackable(cache=cache, ref=tb["ref"], name=tb["name"]))
