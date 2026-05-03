@@ -56,19 +56,29 @@ class AppSettings:
 
     @property
     def home_lat(self) -> float:
-        return float(self._s.value(self._db_key("home_lat"), 55.6761))
+        per_db_key = self._db_key("home_lat")
+        val = self._s.value(per_db_key, None)
+        if val is not None:
+            return float(val)
+        return float(self._s.value("location/home_lat", 55.6761))
 
     @home_lat.setter
     def home_lat(self, value: float) -> None:
         self._s.setValue(self._db_key("home_lat"), value)
+        self._s.setValue("location/home_lat", value)
 
     @property
     def home_lon(self) -> float:
-        return float(self._s.value(self._db_key("home_lon"), 12.5683))
+        per_db_key = self._db_key("home_lon")
+        val = self._s.value(per_db_key, None)
+        if val is not None:
+            return float(val)
+        return float(self._s.value("location/home_lon", 12.5683))
 
     @home_lon.setter
     def home_lon(self, value: float) -> None:
         self._s.setValue(self._db_key("home_lon"), value)
+        self._s.setValue("location/home_lon", value)
 
     # ── Globale hjemmepunkter (liste) ─────────────────────────────────────────
 
@@ -240,6 +250,26 @@ class AppSettings:
     @bottom_splitter_state.setter
     def bottom_splitter_state(self, value) -> None:
         self._s.setValue("window/bottom_splitter_state", value)
+
+    # ── Search thresholds ──────────────────────────────────────────────────────
+
+    @property
+    def search_min_chars(self) -> int:
+        """Minimum characters before search fires. 0 = adaptive based on DB size."""
+        return int(self._s.value("search/min_chars", 0))
+
+    @search_min_chars.setter
+    def search_min_chars(self, value: int) -> None:
+        self._s.setValue("search/min_chars", value)
+
+    @property
+    def search_debounce_ms(self) -> int:
+        """Debounce delay in milliseconds. 0 = adaptive based on DB size."""
+        return int(self._s.value("search/debounce_ms", 0))
+
+    @search_debounce_ms.setter
+    def search_debounce_ms(self, value: int) -> None:
+        self._s.setValue("search/debounce_ms", value)
 
     # ── Last used paths ───────────────────────────────────────────────────────
 

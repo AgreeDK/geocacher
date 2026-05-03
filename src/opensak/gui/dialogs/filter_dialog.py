@@ -35,7 +35,7 @@ from opensak.filters.engine import (
     AvailableFilter, ArchivedFilter, AvailabilityFilter,
     CountryFilter, NameFilter, GcCodeFilter,
     PlacedByFilter, OwnerFilter, DistanceFilter,
-    AttributeFilter, HasTrackableFilter,
+    AttributeFilter, HasTrackableFilter, HasCorrectedFilter,
     PremiumFilter, NonPremiumFilter,
     WhereClauseFilter,
     FilterProfile,
@@ -335,13 +335,24 @@ class FilterDialog(QDialog):
 
         # Cache type
         type_group = QGroupBox(tr("filter_cache_type_group"))
-        type_layout = QGridLayout(type_group)
+        type_outer = QVBoxLayout(type_group)
+        type_layout = QGridLayout()
         self._type_checks: dict[str, QCheckBox] = {}
         for i, ct in enumerate(CACHE_TYPES):
             cb = QCheckBox(ct.replace(" Cache", "").replace("Unknown", "Mystery"))
             cb.setChecked(True)
             self._type_checks[ct] = cb
             type_layout.addWidget(cb, i // 3, i % 3)
+        type_outer.addLayout(type_layout)
+        type_btn_row = QHBoxLayout()
+        type_enable_all = QPushButton(tr("filter_type_enable_all"))
+        type_enable_all.clicked.connect(self._enable_all_types)
+        type_disable_all = QPushButton(tr("filter_type_disable_all"))
+        type_disable_all.clicked.connect(self._disable_all_types)
+        type_btn_row.addWidget(type_enable_all)
+        type_btn_row.addWidget(type_disable_all)
+        type_btn_row.addStretch()
+        type_outer.addLayout(type_btn_row)
         layout.addRow(type_group)
 
         # Container
@@ -448,6 +459,18 @@ class FilterDialog(QDialog):
         tb_layout.addWidget(self._tb_no)
         tb_layout.addStretch()
         layout.addRow(tb_group)
+
+        # Corrected Coordinates
+        cc_group = QGroupBox(tr("filter_corrected_group"))
+        cc_layout = QHBoxLayout(cc_group)
+        self._cc_yes = QCheckBox(tr("filter_has_corrected"))
+        self._cc_yes.setChecked(True)
+        self._cc_no  = QCheckBox(tr("filter_no_corrected"))
+        self._cc_no.setChecked(True)
+        cc_layout.addWidget(self._cc_yes)
+        cc_layout.addWidget(self._cc_no)
+        cc_layout.addStretch()
+        layout.addRow(cc_group)
 
         scroll.setWidget(inner)
         outer_layout.addWidget(scroll)
@@ -722,6 +745,14 @@ class FilterDialog(QDialog):
     def _on_dist_toggled(self, checked: bool) -> None:
         self._dist_max.setEnabled(checked)
 
+    def _enable_all_types(self) -> None:
+        for cb in self._type_checks.values():
+            cb.setChecked(True)
+
+    def _disable_all_types(self) -> None:
+        for cb in self._type_checks.values():
+            cb.setChecked(False)
+
     def _reset_general(self) -> None:
         self._name_filter.clear()
         self._gc_filter.clear()
@@ -745,6 +776,8 @@ class FilterDialog(QDialog):
         self._prem_no.setChecked(True)
         self._tb_yes.setChecked(True)
         self._tb_no.setChecked(True)
+        self._cc_yes.setChecked(True)
+        self._cc_no.setChecked(True)
 
     def _reset_dates(self) -> None:
         self._hidden_from_enabled.setChecked(False)
@@ -858,6 +891,12 @@ class FilterDialog(QDialog):
         tb_no  = self._tb_no.isChecked()
         if tb_yes and not tb_no:
             fs.add(HasTrackableFilter())
+
+        # Corrected Coordinates
+        cc_yes = self._cc_yes.isChecked()
+        cc_no  = self._cc_no.isChecked()
+        if cc_yes and not cc_no:
+            fs.add(HasCorrectedFilter())
 
         # Datoer
         if self._hidden_from_enabled.isChecked() or self._hidden_to_enabled.isChecked():
@@ -1066,6 +1105,9 @@ class FilterDialog(QDialog):
             elif ftype == "has_trackable":
                 self._tb_yes.setChecked(True)
                 self._tb_no.setChecked(False)
+            elif ftype == "has_corrected":
+                self._cc_yes.setChecked(True)
+                self._cc_no.setChecked(False)
             elif ftype == "attribute":
                 attr_id = getattr(f, "attribute_id", None)
                 is_on   = getattr(f, "is_on", True)

@@ -55,6 +55,15 @@ class BaseFilter(ABC):
     def matches(self, cache: Cache) -> bool:
         """Return True if *cache* passes this filter."""
 
+    def apply_to_query(self, query):
+        """Optionally push this filter into a SQLAlchemy query before .all().
+
+        Return the updated query if SQL-level filtering is possible, or None
+        to fall back to Python-level matches(). When this returns a query the
+        filter must also return True from matches() to avoid double-filtering.
+        """
+        return None
+
     def to_dict(self) -> dict:
         """Serialise filter to a JSON-safe dict."""
         return {"filter_type": self.filter_type}
@@ -311,8 +320,16 @@ class NameFilter(BaseFilter):
 
     def __init__(self, text: str):
         self.text = text.lower()
+        self._sql_applied = False
+
+    def apply_to_query(self, query):
+        from sqlalchemy import func
+        self._sql_applied = True
+        return query.filter(func.lower(Cache.name).like(f"%{self.text}%"))
 
     def matches(self, cache: Cache) -> bool:
+        if self._sql_applied:
+            return True
         return self.text in (cache.name or "").lower()
 
     def to_dict(self) -> dict:
@@ -329,9 +346,19 @@ class GcCodeFilter(BaseFilter):
 
     def __init__(self, text: str):
         self.text = text.upper()
+        self._sql_applied = False
+
+    def apply_to_query(self, query):
+        from sqlalchemy import func
+        self._sql_applied = True
+        # GC codes are always searched from the start (GC12345) — use a prefix
+        # match so SQLite can exploit the existing B-tree index on gc_code.
+        return query.filter(func.upper(Cache.gc_code).like(f"{self.text}%"))
 
     def matches(self, cache: Cache) -> bool:
-        return self.text in (cache.gc_code or "").upper()
+        if self._sql_applied:
+            return True
+        return (cache.gc_code or "").upper().startswith(self.text)
 
     def to_dict(self) -> dict:
         return {"filter_type": self.filter_type, "text": self.text}
@@ -502,6 +529,19 @@ class NonPremiumFilter(BaseFilter):
         return cls()
 
 
+class HasCorrectedFilter(BaseFilter):
+    """Keep only caches that have corrected coordinates set."""
+    filter_type = "has_corrected"
+
+    def matches(self, cache: Cache) -> bool:
+        note = cache.user_note
+        return bool(note and note.is_corrected)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "HasCorrectedFilter":
+        return cls()
+
+
 # ── Filter registry (for deserialisation) ─────────────────────────────────────
 
 FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
@@ -524,6 +564,7 @@ FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
     "distance":      DistanceFilter,
     "attribute":     AttributeFilter,
     "has_trackable": HasTrackableFilter,
+    "has_corrected": HasCorrectedFilter,
     "premium":       PremiumFilter,
     "non_premium":   NonPremiumFilter,
     "where_clause":  WhereClauseFilter,
@@ -725,18 +766,35 @@ def apply_filters(
                 except Exception:
                     _f._matching_ids = set()  # invalid SQL → no matches
 
-    # Load caches med kun de relationer der bruges i filtrene.
-    # logs, waypoints og user_note loader vi IKKE her — de hentes
-    # on-demand når brugeren klikker på en enkelt cache.
-    # Dette er kritisk for performance ved store databaser (50K+ caches).
+    # Determine which relationships are actually needed by the active filters.
+    # Only joinedload what is required — avoids loading thousands of attribute
+    # and trackable rows when the filterset contains only a NameFilter or a
+    # simple quick-filter (the common case during live search).
+    needs_attributes  = filterset is not None and any(
+        isinstance(f, AttributeFilter)    for f in _iter_filters(filterset)
+    )
+    needs_trackables  = filterset is not None and any(
+        isinstance(f, HasTrackableFilter) for f in _iter_filters(filterset)
+    )
+
     from sqlalchemy.orm import joinedload, noload
     query = session.query(Cache).options(
-        joinedload(Cache.attributes),   # bruges i AttributeFilter
-        joinedload(Cache.trackables),   # bruges i TrackableFilter
-        noload(Cache.logs),             # ikke brugt i filtre — load on-demand
-        noload(Cache.waypoints),        # ikke brugt i filtre — load on-demand
-        joinedload(Cache.user_note),    # one-to-one, cheap join; needed for corrected-coords display
+        joinedload(Cache.attributes) if needs_attributes else noload(Cache.attributes),
+        joinedload(Cache.trackables) if needs_trackables else noload(Cache.trackables),
+        noload(Cache.logs),       # load on-demand when user opens a cache
+        noload(Cache.waypoints),  # load on-demand when user opens a cache
+        joinedload(Cache.user_note),  # one-to-one, cheap; needed for corrected-coords
     )
+
+    # Push SQL-capable filters into the query before loading rows.
+    # This lets SQLite discard non-matching rows before any Python objects
+    # are constructed — critical for NameFilter / GcCodeFilter on large DBs.
+    if filterset:
+        for _f in _iter_filters(filterset):
+            updated = _f.apply_to_query(query)
+            if updated is not None:
+                query = updated
+
     all_caches = query.all()
 
     # Apply filters

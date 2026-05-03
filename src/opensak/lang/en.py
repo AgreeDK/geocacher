@@ -216,6 +216,11 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Username:",
     "settings_gc_username_placeholder":            "Your geocaching.com username",
     "settings_gc_username_hint":                   "Used to identify your own logs (e.g. for FTF detection)",
+    "settings_group_search":                       "Search Engine",
+    "settings_search_min_chars_label":             "Minimum characters:",
+    "settings_search_debounce_label":              "Debounce delay (ms):",
+    "settings_search_auto":                        "Auto",
+    "settings_search_hint":                        "Set to 0 (Auto) for adaptive thresholds. Reaching the minimum chars fires immediately; pausing for the debounce fires regardless. < 1 000 caches → 1 char / 200 ms, 1 000–10 000 → 2 / 400 ms, > 10 000 → 3 / 600 ms.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Manage databases",
@@ -368,6 +373,8 @@ STRINGS: dict[str, str] = {
     "filter_placed_by_label":       "Placed by:",
     "filter_owner_name_label":      "Owner name:",
     "filter_cache_type_group":      "Cache type",
+    "filter_type_enable_all":       "Enable all",
+    "filter_type_disable_all":      "Disable all",
     "filter_container_group":       "Container size",
     "filter_dt_group":              "Difficulty / Terrain",
     "filter_from":                  "From:",
@@ -384,6 +391,9 @@ STRINGS: dict[str, str] = {
     "filter_trackables_group":      "Trackables",
     "filter_has_trackables":        "Has trackables",
     "filter_no_trackables":         "No trackables",
+    "filter_corrected_group":       "Corrected Coordinates",
+    "filter_has_corrected":         "Has corrected coordinates",
+    "filter_no_corrected":          "No corrected coordinates",
     "filter_hidden_date_group":     "Hidden date",
     "filter_log_date_group":        "Latest log date",
     "filter_caches_with":           "Caches that have:",
@@ -750,6 +760,7 @@ STRINGS: dict[str, str] = {
     # ── Geocaching.com integration ────────────────────────────────────────────
     "settings_tab_general":         "General",
     "settings_tab_geocaching":      "Geocaching.com",
+    "settings_tab_advanced":        "Advanced",
     "gc_not_logged_in":             "Not logged in",
     "gc_status_offline":            "Offline",
     "gc_status_online":             "Connected",

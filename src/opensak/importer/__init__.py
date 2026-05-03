@@ -258,33 +258,71 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
                 "name": _text(tb_el, "gs:name", NS),
             })
 
-    # ── GSAK extensions (issue #58, #129) ─────────────────────────────────────
-    # GSAK exports extra data inside <gsak:wptExtension>:
-    #   <gsak:FirstToFind>  — FTF flag ("true"/"false")
-    #   <gsak:LatN>         — corrected latitude  (decimal degrees, float)
-    #   <gsak:LongE>        — corrected longitude (decimal degrees, float)
-    # LatN/LongE are only present when the user has saved corrected coords in GSAK.
+    # ── GSAK extensions (issue #58, #129, #73) ────────────────────────────────
+    # GSAK exports extra data inside <gsak:wptExtension>.
+    #
+    # GSAK supports two CC export formats depending on version:
+    #
+    # Format A — older GSAK versions:
+    #   <gsak:LatN>   — corrected latitude  (decimal degrees)
+    #   <gsak:LongE>  — corrected longitude (decimal degrees)
+    #   The <wpt lat lon> attributes contain the ORIGINAL coordinates.
+    #
+    # Format B — newer GSAK versions (confirmed from RigaCC.gpx export):
+    #   <gsak:LatBeforeCorrect>  — original latitude  (decimal degrees)
+    #   <gsak:LonBeforeCorrect>  — original longitude (decimal degrees)
+    #   The <wpt lat lon> attributes contain the CORRECTED coordinates.
+    #   LatBeforeCorrect is only present when CC has been set in GSAK.
+    #
+    # We detect Format B first (LatBeforeCorrect present and differs from wpt),
+    # then fall back to Format A (LatN/LongE).
     gsak_ftf: Optional[bool] = None
     gsak_corrected_lat: Optional[float] = None
     gsak_corrected_lon: Optional[float] = None
+    gsak_original_lat: Optional[float] = None
+    gsak_original_lon: Optional[float] = None
     for gsak_uri in _GSAK_NAMESPACES:
         gsak_ext = wpt_el.find(f"{{{gsak_uri}}}wptExtension")
         if gsak_ext is not None:
             ftf_el = gsak_ext.find(f"{{{gsak_uri}}}FirstToFind")
             if ftf_el is not None and ftf_el.text:
                 gsak_ftf = ftf_el.text.strip().lower() == "true"
-            lat_el = gsak_ext.find(f"{{{gsak_uri}}}LatN")
-            lon_el = gsak_ext.find(f"{{{gsak_uri}}}LongE")
-            if lat_el is not None and lon_el is not None:
+
+            # Format B: LatBeforeCorrect/LonBeforeCorrect (newer GSAK)
+            # The mere PRESENCE of LatBeforeCorrect means CC has been set in GSAK —
+            # even when the corrected coords equal the original (e.g. user marks a
+            # cache as "want to find" without changing the location).
+            before_lat_el = gsak_ext.find(f"{{{gsak_uri}}}LatBeforeCorrect")
+            before_lon_el = gsak_ext.find(f"{{{gsak_uri}}}LonBeforeCorrect")
+            if before_lat_el is not None and before_lon_el is not None:
                 try:
-                    parsed_lat = float(lat_el.text.strip())
-                    parsed_lon = float(lon_el.text.strip())
-                    # GSAK writes 0.0/0.0 when no corrected coords are set
-                    if parsed_lat != 0.0 or parsed_lon != 0.0:
-                        gsak_corrected_lat = parsed_lat
-                        gsak_corrected_lon = parsed_lon
+                    orig_lat = float(before_lat_el.text.strip())
+                    orig_lon = float(before_lon_el.text.strip())
+                    # wpt lat/lon are the corrected coordinates
+                    gsak_corrected_lat = lat
+                    gsak_corrected_lon = lon
+                    # Only store originals if they actually differ from corrected
+                    # (if same, no need to overwrite cache.latitude/longitude)
+                    if abs(orig_lat - lat) > 1e-6 or abs(orig_lon - lon) > 1e-6:
+                        gsak_original_lat = orig_lat
+                        gsak_original_lon = orig_lon
                 except (ValueError, AttributeError):
                     pass
+
+            # Format A: LatN/LongE (older GSAK) — only if Format B didn't fire
+            if gsak_corrected_lat is None:
+                lat_el = gsak_ext.find(f"{{{gsak_uri}}}LatN")
+                lon_el = gsak_ext.find(f"{{{gsak_uri}}}LongE")
+                if lat_el is not None and lon_el is not None:
+                    try:
+                        parsed_lat = float(lat_el.text.strip())
+                        parsed_lon = float(lon_el.text.strip())
+                        # GSAK writes 0.0/0.0 when no corrected coords are set
+                        if parsed_lat != 0.0 or parsed_lon != 0.0:
+                            gsak_corrected_lat = parsed_lat
+                            gsak_corrected_lon = parsed_lon
+                    except (ValueError, AttributeError):
+                        pass
             break
 
     return {
@@ -316,6 +354,8 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
         "gsak_ftf":          gsak_ftf,
         "gsak_corrected_lat": gsak_corrected_lat,
         "gsak_corrected_lon": gsak_corrected_lon,
+        "gsak_original_lat": gsak_original_lat,
+        "gsak_original_lon": gsak_original_lon,
     }
 
 
@@ -681,14 +721,25 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
             # User has NOT found this cache — FTF is not applicable
             cache.first_to_find = False
 
-    # ── GSAK corrected coordinates (issue #129) ───────────────────────────────
+    # ── GSAK corrected coordinates (issue #129, #73) ──────────────────────────
     # Corrected coords are stored in UserNote (user data), not on Cache itself.
     # Only write if GSAK actually exported them (non-zero values).
     # We never overwrite existing corrected coords with None so that manually
     # entered corrections survive a re-import.
+    #
+    # Format B (newer GSAK): wpt lat/lon were the corrected coords and
+    # gsak_original_lat/lon hold the true cache location. In this case we
+    # must restore the Cache's lat/lon to the original values so the cache
+    # appears at the correct map position before the puzzle is solved.
     gsak_clat = data.get("gsak_corrected_lat")
     gsak_clon = data.get("gsak_corrected_lon")
+    gsak_orig_lat = data.get("gsak_original_lat")
+    gsak_orig_lon = data.get("gsak_original_lon")
     if gsak_clat is not None and gsak_clon is not None:
+        # Format B: restore original coordinates on the Cache row
+        if gsak_orig_lat is not None and gsak_orig_lon is not None:
+            cache.latitude  = gsak_orig_lat
+            cache.longitude = gsak_orig_lon
         if cache.user_note is None:
             # Flush so cache gets a PK before we reference it in UserNote
             session.flush()

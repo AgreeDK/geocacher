@@ -216,6 +216,11 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Användarnamn:",
     "settings_gc_username_placeholder":            "Ditt geocaching.com-användarnamn",
     "settings_gc_username_hint":                   "Används för att identifiera egna loggningar (t.ex. FTF)",
+    "settings_group_search":                       "Sökmotor",
+    "settings_search_min_chars_label":             "Minsta antal tecken:",
+    "settings_search_debounce_label":              "Debounce-fördröjning (ms):",
+    "settings_search_auto":                        "Auto",
+    "settings_search_hint":                        "Sätt till 0 (Auto) för adaptiva trösklar. Nå minsta tecken → utlöses direkt; debounce-paus → utlöses ändå. < 1 000 cacher → 1 tecken / 200 ms, 1 000–10 000 → 2 / 400 ms, > 10 000 → 3 / 600 ms.",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_dialog_title":              "Hantera databaser",
@@ -368,6 +373,8 @@ STRINGS: dict[str, str] = {
     "filter_placed_by_label":       "Utlagd av:",
     "filter_owner_name_label":      "Ägarnamn:",
     "filter_cache_type_group":      "Cache typ",
+    "filter_type_enable_all":       "Aktivera alla",
+    "filter_type_disable_all":      "Avaktivera alla",
     "filter_container_group":       "Storlek",
     "filter_dt_group":              "Svårighet / Terräng",
     "filter_from":                  "Från:",
@@ -384,6 +391,9 @@ STRINGS: dict[str, str] = {
     "filter_trackables_group":      "Spårbara",
     "filter_has_trackables":        "Har spårbara",
     "filter_no_trackables":         "Inga spårbara",
+    "filter_corrected_group":       "Korrigerade koordinater",
+    "filter_has_corrected":         "Har korrigerade koordinater",
+    "filter_no_corrected":          "Inga korrigerade koordinater",
     "filter_hidden_date_group":     "Gömd datum",
     "filter_log_date_group":        "Senaste logg datum",
     "filter_caches_with":           "Cacher som har:",
@@ -750,6 +760,7 @@ STRINGS: dict[str, str] = {
     # ── Geocaching.com integration ────────────────────────────────────────────
     "settings_tab_general":         "Allmänt",
     "settings_tab_geocaching":      "Geocaching.com",
+    "settings_tab_advanced":        "Avancerat",
     "gc_not_logged_in":             "Inte inloggad",
     "gc_status_offline":            "Offline",
     "gc_status_online":             "Ansluten",

@@ -19,6 +19,7 @@ from opensak.coords import format_coords, format_lat, format_lon, format_lat, fo
 from opensak.lang import tr
 from opensak.utils.types import GcCode
 from opensak.gui.icon_provider import get_cache_type_icon, get_cache_size_icon
+from opensak.gui.dialogs.column_dialog import get_column_widths, set_column_widths
 import math
 
 
@@ -735,8 +736,10 @@ class CacheTableView(QTableView):
         self.verticalHeader().setVisible(False)
         self.setWordWrap(False)
         self.verticalHeader().setDefaultSectionSize(24)
+        self._applying_widths = False
         self._apply_column_widths()
         self.horizontalHeader().setSortIndicatorShown(True)
+        self.horizontalHeader().sectionResized.connect(self._on_column_resized)
         self.selectionModel().currentRowChanged.connect(self._on_row_changed)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_context_menu)
@@ -759,22 +762,39 @@ class CacheTableView(QTableView):
         super().mousePressEvent(event)
 
     def _apply_column_widths(self) -> None:
-        header = self.horizontalHeader()
+        self._applying_widths = True
+        try:
+            header = self.horizontalHeader()
+            columns = self._model._columns
+            saved = get_column_widths()
+            for i, col_id in enumerate(columns):
+                default_width = get_column_defs().get(col_id, (col_id, 80))[1]
+                width = saved.get(col_id, default_width)
+                self.setColumnWidth(i, width)
+                header.setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
+                if col_id == "container":
+                    self._size_bar_delegate = SizeBarDelegate(self)
+                    self.setItemDelegateForColumn(i, self._size_bar_delegate)
+                else:
+                    self.setItemDelegateForColumn(i, None)
+            if "name" in columns:
+                name_idx = columns.index("name")
+                header.setSectionResizeMode(
+                    name_idx, QHeaderView.ResizeMode.Interactive
+                )
+        finally:
+            self._applying_widths = False
+
+    def _on_column_resized(self, logical_index: int, _old: int, new_size: int) -> None:
+        if self._applying_widths:
+            return
         columns = self._model._columns
-        for i, col_id in enumerate(columns):
-            width = get_column_defs().get(col_id, (col_id, 80))[1]
-            self.setColumnWidth(i, width)
-            header.setSectionResizeMode(i, QHeaderView.ResizeMode.Interactive)
-            if col_id == "container":
-                self._size_bar_delegate = SizeBarDelegate(self)
-                self.setItemDelegateForColumn(i, self._size_bar_delegate)
-            else:
-                self.setItemDelegateForColumn(i, None)
-        if "name" in columns:
-            name_idx = columns.index("name")
-            header.setSectionResizeMode(
-                name_idx, QHeaderView.ResizeMode.Interactive
-            )
+        if logical_index >= len(columns):
+            return
+        col_id = columns[logical_index]
+        widths = get_column_widths()
+        widths[col_id] = new_size
+        set_column_widths(widths)
 
     def reload_columns(self) -> None:
         """Opdatér kolonner fra indstillinger."""
