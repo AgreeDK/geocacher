@@ -659,7 +659,7 @@ SORT_FIELDS: dict[str, Any] = {
     "distance":        lambda c: c.distance or 99999.0,
     "bearing":         lambda c: c.bearing or 0.0,
     "log_count":       lambda c: 0,   # placeholder — model.sort() håndterer det
-    "last_log":        lambda c: 0,
+    "last_log":        lambda c: 0,   # placeholder — model.sort() håndterer det
     "found_date":      lambda c: c.found_date or 0,
     "dnf":             lambda c: int(c.dnf),
     "dnf_date":        lambda c: c.dnf_date or 0,
