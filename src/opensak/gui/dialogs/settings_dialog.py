@@ -595,8 +595,11 @@ class SettingsDialog(QDialog):
                 s.set_active_home(point)
 
         s.add_or_update_home_point(point)
+        s.sync()
 
-        if len(s.home_points) == 1 or not s.active_home_name:
+        is_active = (s.active_home_name == name
+                     or s.active_home_name == self._editing_original_name)
+        if len(s.home_points) == 1 or not s.active_home_name or is_active:
             s.set_active_home(point)
 
         self._editing_original_name = None
@@ -625,6 +628,12 @@ class SettingsDialog(QDialog):
         self._refresh_gc_status_on_open()
 
     def _save(self) -> None:
+        # Auto-commit any in-progress home-point edit when the user clicks OK
+        if self._editing_original_name is not None:
+            self._add_point()
+            if self._editing_original_name is not None:
+                return  # validation failed — keep dialog open
+
         s = get_settings()
         s.gc_username   = self._gc_username.text()
         s.use_miles     = self._miles_cb.isChecked()
