@@ -122,8 +122,10 @@ class ImportDialog(QDialog):
         layout.addLayout(btn_row)
 
         # ── Geocode option ────────────────────────────────────────────────────
+        from opensak.utils import flags
         self._cb_geocode = QCheckBox(tr("import_geocode_checkbox"))
         self._cb_geocode.setChecked(True)
+        self._cb_geocode.setVisible(flags.update_location)
         layout.addWidget(self._cb_geocode)
 
         # ── Progress ──────────────────────────────────────────────────────────
@@ -261,7 +263,8 @@ class ImportDialog(QDialog):
         if self._any_success:
             self.import_completed.emit()
 
-        if self._any_success and self._cb_geocode.isChecked():
+        from opensak.utils import flags
+        if flags.update_location and self._any_success and self._cb_geocode.isChecked():
             self._start_geocoding()
         else:
             self._browse_btn.setEnabled(True)

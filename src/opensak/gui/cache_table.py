@@ -893,13 +893,15 @@ class CacheTableView(QTableView):
             act_found = menu.addAction(tr("ctx_mark_found"))
             act_found.triggered.connect(lambda: self._toggle_found(cache, True))
 
-        menu.addSeparator()
+        from opensak.utils import flags
+        if flags.update_location:
+            menu.addSeparator()
 
-        act_update_loc = menu.addAction(tr("ctx_update_location"))
-        gc = cache.gc_code
-        act_update_loc.triggered.connect(
-            lambda checked=False, code=gc: self._update_location(code)
-        )
+            act_update_loc = menu.addAction(tr("ctx_update_location"))
+            gc = cache.gc_code
+            act_update_loc.triggered.connect(
+                lambda checked=False, code=gc: self._update_location(code)
+            )
 
         menu.exec(self.viewport().mapToGlobal(pos))
 
