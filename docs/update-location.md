@@ -6,7 +6,7 @@ OpenSAK can automatically fill in the county, state, and country fields for your
 
 ## Opening the dialog
 
-Click **File → Update County / State / Country**.
+Click **Waypoint → Update County / State / Country**.
 
 This option is only visible when the `update-location` feature flag is enabled. See [Feature Flags](feature-flags.md) for details.
 

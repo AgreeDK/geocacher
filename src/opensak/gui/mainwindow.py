@@ -237,12 +237,6 @@ class MainWindow(QMainWindow):
         self._act_import.triggered.connect(self._open_import_dialog)
         file_menu.addAction(self._act_import)
 
-        from opensak.utils import flags
-        if flags.update_location:
-            act_update_location = QAction(tr("action_update_location"), self)
-            act_update_location.triggered.connect(self._open_update_location)
-            file_menu.addAction(act_update_location)
-
         file_menu.addSeparator()
 
         act_quit = QAction(tr("action_quit"), self)
@@ -286,6 +280,13 @@ class MainWindow(QMainWindow):
         act_clear_flags.triggered.connect(self._clear_all_flags)
         wp_menu.addAction(act_clear_flags)
 
+        from opensak.utils import flags
+        if flags.update_location:
+            wp_menu.addSeparator()
+
+            act_update_location = QAction(tr("action_update_location"), self)
+            act_update_location.triggered.connect(self._open_update_location)
+            wp_menu.addAction(act_update_location)
 
         # ── Vis ───────────────────────────────────────────────────────────────
         view_menu = menubar.addMenu(tr("menu_view"))
