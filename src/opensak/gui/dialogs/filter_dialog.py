@@ -35,7 +35,7 @@ from opensak.filters.engine import (
     AvailableFilter, ArchivedFilter, AvailabilityFilter,
     CountryFilter, NameFilter, GcCodeFilter,
     PlacedByFilter, OwnerFilter, DistanceFilter,
-    AttributeFilter, HasTrackableFilter,
+    AttributeFilter, HasTrackableFilter, HasCorrectedFilter,
     PremiumFilter, NonPremiumFilter,
     WhereClauseFilter,
     FilterProfile,
@@ -460,6 +460,18 @@ class FilterDialog(QDialog):
         tb_layout.addStretch()
         layout.addRow(tb_group)
 
+        # Corrected Coordinates
+        cc_group = QGroupBox(tr("filter_corrected_group"))
+        cc_layout = QHBoxLayout(cc_group)
+        self._cc_yes = QCheckBox(tr("filter_has_corrected"))
+        self._cc_yes.setChecked(True)
+        self._cc_no  = QCheckBox(tr("filter_no_corrected"))
+        self._cc_no.setChecked(True)
+        cc_layout.addWidget(self._cc_yes)
+        cc_layout.addWidget(self._cc_no)
+        cc_layout.addStretch()
+        layout.addRow(cc_group)
+
         scroll.setWidget(inner)
         outer_layout.addWidget(scroll)
         return outer
@@ -764,6 +776,8 @@ class FilterDialog(QDialog):
         self._prem_no.setChecked(True)
         self._tb_yes.setChecked(True)
         self._tb_no.setChecked(True)
+        self._cc_yes.setChecked(True)
+        self._cc_no.setChecked(True)
 
     def _reset_dates(self) -> None:
         self._hidden_from_enabled.setChecked(False)
@@ -877,6 +891,12 @@ class FilterDialog(QDialog):
         tb_no  = self._tb_no.isChecked()
         if tb_yes and not tb_no:
             fs.add(HasTrackableFilter())
+
+        # Corrected Coordinates
+        cc_yes = self._cc_yes.isChecked()
+        cc_no  = self._cc_no.isChecked()
+        if cc_yes and not cc_no:
+            fs.add(HasCorrectedFilter())
 
         # Datoer
         if self._hidden_from_enabled.isChecked() or self._hidden_to_enabled.isChecked():
@@ -1085,6 +1105,9 @@ class FilterDialog(QDialog):
             elif ftype == "has_trackable":
                 self._tb_yes.setChecked(True)
                 self._tb_no.setChecked(False)
+            elif ftype == "has_corrected":
+                self._cc_yes.setChecked(True)
+                self._cc_no.setChecked(False)
             elif ftype == "attribute":
                 attr_id = getattr(f, "attribute_id", None)
                 is_on   = getattr(f, "is_on", True)

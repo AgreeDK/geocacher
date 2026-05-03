@@ -529,6 +529,19 @@ class NonPremiumFilter(BaseFilter):
         return cls()
 
 
+class HasCorrectedFilter(BaseFilter):
+    """Keep only caches that have corrected coordinates set."""
+    filter_type = "has_corrected"
+
+    def matches(self, cache: Cache) -> bool:
+        note = cache.user_note
+        return bool(note and note.is_corrected)
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "HasCorrectedFilter":
+        return cls()
+
+
 # ── Filter registry (for deserialisation) ─────────────────────────────────────
 
 FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
@@ -551,6 +564,7 @@ FILTER_REGISTRY: dict[str, type[BaseFilter]] = {
     "distance":      DistanceFilter,
     "attribute":     AttributeFilter,
     "has_trackable": HasTrackableFilter,
+    "has_corrected": HasCorrectedFilter,
     "premium":       PremiumFilter,
     "non_premium":   NonPremiumFilter,
     "where_clause":  WhereClauseFilter,

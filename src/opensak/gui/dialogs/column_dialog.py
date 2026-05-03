@@ -28,7 +28,7 @@ _ALL_COLUMNS_DEF = [
     ("bearing",      "col_bearing",      70,  True),
     ("found",        "col_found",        36,  True),
     ("favorite",     "col_favorite",     36,  True),
-    ("corrected",    "col_corrected",    36, False),
+    ("corrected",    "col_corrected",    36,  True),
     # Ekstra kolonner (fra)
     ("country",      "col_country",      80, False),
     ("state",        "col_state",       120, False),
