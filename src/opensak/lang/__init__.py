@@ -21,6 +21,7 @@ AVAILABLE_LANGUAGES: dict[str, str] = {
     "da": "Dansk",
     "en": "English",
     "fr": "Français",
+    "nl": "Nederlands",
     "pt": "Português",
     "cs": "Čeština",
     "se": "Svenska",
