@@ -559,15 +559,7 @@ class CacheTableModel(QAbstractTableModel):
         if col == "hidden_date":
             return cache.hidden_date.strftime("%d.%m.%Y") if cache.hidden_date else ""
         if col == "last_log":
-            if cache.logs:
-                latest = max(
-                    (l for l in cache.logs if l.log_date),
-                    key=lambda l: l.log_date,
-                    default=None
-                )
-                if latest:
-                    return latest.log_date.strftime("%d.%m.%Y")
-            return ""
+            return cache.last_log_date.strftime("%d.%m.%Y") if cache.last_log_date else ""
         if col == "log_count":
             # Issue #87: use cached log_count column instead of len(cache.logs)
             # because logs are noload'ed for performance and would always be
@@ -651,6 +643,11 @@ class CacheTableModel(QAbstractTableModel):
             # Issue #87: sort on cached log_count column (logs are noload'ed)
             self._caches.sort(
                 key=lambda c: c.log_count or 0, reverse=reverse
+            )
+        elif col == "last_log":
+            # Issue #186: sort on cached last_log_date column (logs are noload'ed)
+            self._caches.sort(
+                key=lambda c: c.last_log_date or datetime.min, reverse=reverse
             )
         elif col == "hidden_date":
             self._caches.sort(

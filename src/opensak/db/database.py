@@ -297,6 +297,29 @@ def _run_migrations(engine: Engine) -> None:
             conn.commit()
             print("Migration: tilføjede caches.owner_name")
 
+        # ── Migration 10: last_log_date (issue #186) ─────────────────────────
+        # Caches the date of the most recent log so the "Latest Log" column can
+        # display it without loading the noload'ed logs relationship.
+        # Populated from existing log data so users don't need to re-import.
+        existing_caches = [
+            row[1]
+            for row in conn.execute(text("PRAGMA table_info(caches)")).fetchall()
+        ]
+        if "last_log_date" not in existing_caches:
+            conn.execute(text(
+                "ALTER TABLE caches ADD COLUMN last_log_date DATETIME"
+            ))
+            result = conn.execute(text("""
+                UPDATE caches
+                SET last_log_date = (
+                    SELECT MAX(log_date)
+                    FROM logs
+                    WHERE logs.cache_id = caches.id
+                )
+            """))
+            conn.commit()
+            print(f"Migration: tilføjede caches.last_log_date og opdaterede {result.rowcount} caches")
+
 
 def dispose_engine(db_path: Path | None = None) -> None:
     """
