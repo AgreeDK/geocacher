@@ -84,6 +84,8 @@ OpenSAK works with standard **GPX files** and **Pocket Query ZIP files** — the
 
 > **Tip:** You can import multiple files into the same database. Duplicate caches are updated automatically, so you can re-import an updated Pocket Query without creating duplicates.
 
+> **Auto-geocoding:** After a successful import, OpenSAK automatically runs an offline lookup to fill in the county, state, and country for any waypoints that are missing that data. No extra step needed. For higher-accuracy results you can run an optional online refinement afterwards — see [Waypoints](#7-waypoints).
+
 ### Coming from GSAK
 OpenSAK uses the same GPX/PQ format as GSAK. Simply export or download your Pocket Queries as usual and import them into OpenSAK. Your existing GSAK databases cannot be opened directly, but re-importing your Pocket Queries takes only a few minutes.
 
