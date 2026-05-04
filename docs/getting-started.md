@@ -84,6 +84,8 @@ OpenSAK works with standard **GPX files** and **Pocket Query ZIP files** — the
 
 > **Tip:** You can import multiple files into the same database. Duplicate caches are updated automatically, so you can re-import an updated Pocket Query without creating duplicates.
 
+> **Auto-geocoding:** After a successful import, OpenSAK automatically runs an offline lookup to fill in the county, state, and country for any waypoints that are missing that data. No extra step needed. For higher-accuracy results you can run an optional online refinement afterwards — see [Waypoints](#7-waypoints).
+
 ### Coming from GSAK
 OpenSAK uses the same GPX/PQ format as GSAK. Simply export or download your Pocket Queries as usual and import them into OpenSAK. Your existing GSAK databases cannot be opened directly, but re-importing your Pocket Queries takes only a few minutes.
 
@@ -180,6 +182,19 @@ Waypoints imported from GPX/PQ files appear automatically in the cache details p
 4. Click **Save**
 
 Manually added waypoints (such as corrected coordinates for mystery caches) are saved in your local database and are not affected by re-importing.
+
+### Updating Location Data (county, state, country)
+
+OpenSAK can fill in the county, state, and country fields for waypoints using reverse geocoding.
+
+- **On import** — the offline lookup runs automatically for any waypoints missing location data.
+- **Manually** — go to **Waypoint → Update Waypoint Locations…** to re-run or refine the lookup for some or all waypoints. You can also right-click a waypoint and choose **Update location data…**.
+
+The offline lookup uses the bundled [GeoNames](https://geonames.org/) database and works with no internet connection. An optional **online refinement** pass (using OpenStreetMap polygon data) is available for higher accuracy — it is opt-in because it is rate-limited and can be slow on large databases.
+
+For full details, see [Update Waypoint Locations](update-location.md).
+
+> **Note:** This feature requires the `update-location` feature flag to be enabled. It is on by default in developer builds and can be enabled with `--feature update-location=true`. See [Feature Flags](feature-flags.md).
 
 ---
 
@@ -281,3 +296,5 @@ Want to add a new language? See [CONTRIBUTING.md](https://github.com/AgreeDK/ope
 ---
 
 *OpenSAK is free and open-source software, released under the MIT licence. Contributions are welcome — see [CONTRIBUTING.md](https://github.com/AgreeDK/opensak/blob/main/CONTRIBUTING.md) for details.*
+
+*Last updated for v1.12.0.*
