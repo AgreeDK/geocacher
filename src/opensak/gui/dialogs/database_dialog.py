@@ -227,6 +227,9 @@ class DatabaseManagerDialog(QDialog):
             self._list.addItem(item)
             if current and db.path == current.path:
                 select_item = item
+            elif active and db.path == active.path and select_item is None:
+                # Fallback: pre-mark active DB in case current is gone
+                select_item = item
         if select_item:
             self._list.setCurrentItem(select_item)
 
