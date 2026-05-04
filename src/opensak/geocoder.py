@@ -62,7 +62,6 @@ def nominatim_reverse(lat: float, lon: float, *, timeout: int = 10) -> GeoLocati
     import json
     import urllib.parse
     import urllib.request
-    import pycountry
 
     params = urllib.parse.urlencode({
         "lat": lat,
@@ -85,6 +84,7 @@ def nominatim_reverse(lat: float, lon: float, *, timeout: int = 10) -> GeoLocati
 
     address = data.get("address", {})
 
+    import pycountry
     cc = address.get("country_code", "").upper()
     try:
         country = pycountry.countries.get(alpha_2=cc).name if cc else None
