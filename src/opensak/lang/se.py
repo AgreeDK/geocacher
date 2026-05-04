@@ -142,7 +142,6 @@ STRINGS: dict[str, str] = {
     "import_log_placeholder":       "Resultatet av importen visas här…",
     "import_all_done":            "✓ Alla {count} filer har bearbetats.",
     "import_geocode_checkbox":      "🌍  Geokoda saknad kommun / län / land efter import",
-    "import_geocode_online_running": "🌐  Refining location data online (this may take a while)…",
     "import_geocode_running":       "📍  Geokoderar saknade platsdata…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────

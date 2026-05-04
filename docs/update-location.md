@@ -68,4 +68,6 @@ The online checkbox is **unchecked by default**. To have it checked by default f
 
 ## Auto-geocode on import
 
-When importing a GPX or PQ zip file, OpenSAK automatically runs Phase 1 for any waypoints that are missing location data immediately after a successful import — no extra step needed. If **Enable online lookup for higher accuracy** is enabled in Advanced Settings, Phase 2 runs as well.
+When importing a GPX or PQ zip file, OpenSAK automatically runs Phase 1 for any waypoints that are missing location data immediately after a successful import — no extra step needed.
+
+Phase 2 (online lookup) is **never triggered automatically on import**, even if **Enable online lookup for higher accuracy** is turned on in Advanced Settings. To run Phase 2, open the dialog manually via **Waypoint → Update Waypoint Locations…** after the import.

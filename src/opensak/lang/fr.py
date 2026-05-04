@@ -142,7 +142,6 @@ STRINGS: dict[str, str] = {
     "import_log_placeholder":       "Les résultats d'importation s'afficheront ici…",
     "import_all_done":            "✓ Les {count} fichiers ont été traités.",
     "import_geocode_checkbox":      "🌍  Géocoder le département / région / pays manquants après l'import",
-    "import_geocode_online_running": "🌐  Refining location data online (this may take a while)…",
     "import_geocode_running":       "📍  Géocodage des données de localisation manquantes…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────

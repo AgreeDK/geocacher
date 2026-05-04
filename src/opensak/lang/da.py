@@ -142,7 +142,6 @@ STRINGS: dict[str, str] = {
     "import_log_placeholder":       "Import-resultat vises her…",
     "import_all_done":            "✓ Alle {count} filer er behandlet.",
     "import_geocode_checkbox":      "🌍  Geokod manglende amt / region / land efter import",
-    "import_geocode_online_running": "🌐  Refining location data online (this may take a while)…",
     "import_geocode_running":       "📍  Geokoder manglende lokationsdata…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────

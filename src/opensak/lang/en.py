@@ -143,7 +143,6 @@ STRINGS: dict[str, str] = {
     "import_all_done":            "✓ All {count} files processed.",
     "import_geocode_checkbox":      "🌍  Geocode missing county / state / country after import",
     "import_geocode_running":       "📍  Looking up missing location data (offline)…",
-    "import_geocode_online_running": "🌐  Refining location data online (this may take a while)…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Set filter",

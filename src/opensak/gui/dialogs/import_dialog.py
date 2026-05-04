@@ -77,7 +77,6 @@ class ImportDialog(QDialog):
         self.setMinimumHeight(420)
         self._worker: ImportWorker | None = None
         self._geo_worker = None
-        self._online_worker = None
         self._selected_paths: list[Path] = []
         self._any_success = False
         self._setup_ui()
@@ -306,41 +305,9 @@ class ImportDialog(QDialog):
         self._geo_worker.start()
 
     def _on_geocode_done(self, result) -> None:
-        self._append_log(tr(
-            "update_loc_done",
-            updated=result.updated,
-            skipped=result.skipped,
-            errors=result.errors,
-        ))
-        if result.updated > 0:
-            self.import_completed.emit()
-
-        if get_settings().nominatim_enabled:
-            self._start_online_geocoding(self._geocode_rows)
-        else:
-            self._progress.setVisible(False)
-            self._finish_geocoding()
-
-    def _start_online_geocoding(self, rows: list) -> None:
-        from opensak.gui.dialogs.update_location_dialog import OnlineLookupWorker
-
-        self._append_log(tr("import_geocode_online_running"))
-        self._progress.setRange(0, len(rows))
-        self._progress.setValue(0)
-
-        self._online_worker = OnlineLookupWorker(rows)
-        self._online_worker.progress.connect(
-            lambda cur, tot: self._progress.setValue(cur)
-        )
-        self._online_worker.all_done.connect(self._on_online_geocode_done)
-        self._online_worker.cancelled.connect(self._on_online_geocode_done)
-        self._online_worker.finished.connect(self._online_worker.deleteLater)
-        self._online_worker.start()
-
-    def _on_online_geocode_done(self, result) -> None:
         self._progress.setVisible(False)
         self._append_log(tr(
-            "update_loc_online_done",
+            "update_loc_done",
             updated=result.updated,
             skipped=result.skipped,
             errors=result.errors,
@@ -361,15 +328,13 @@ class ImportDialog(QDialog):
         except RuntimeError:
             pass
         self._worker = None
-        for worker in (self._geo_worker, self._online_worker):
-            try:
-                if worker and worker.isRunning():
-                    worker.request_cancel()
-                    worker.wait(3000)
-            except RuntimeError:
-                pass
+        try:
+            if self._geo_worker and self._geo_worker.isRunning():
+                self._geo_worker.request_cancel()
+                self._geo_worker.wait(3000)
+        except RuntimeError:
+            pass
         self._geo_worker = None
-        self._online_worker = None
         super().closeEvent(event)
 
     # ── Log helpers ───────────────────────────────────────────────────────────

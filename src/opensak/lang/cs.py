@@ -142,7 +142,6 @@ STRINGS: dict[str, str] = {
     "import_log_placeholder":       "Výsledky importu se zobrazí zde…",
     "import_all_done":            "✓ Všech {count} souborů bylo zpracováno.",
     "import_geocode_checkbox":      "🌍  Geokódovat chybějící okres / kraj / zemi po importu",
-    "import_geocode_online_running": "🌐  Refining location data online (this may take a while)…",
     "import_geocode_running":       "📍  Geokóduji chybějící údaje o poloze…",
     
     # ── Filter dialog ─────────────────────────────────────────────────────────
