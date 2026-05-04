@@ -3,11 +3,11 @@ src/opensak/gui/dialogs/update_location_dialog.py — Update county/state/countr
 
 Two-phase reverse geocoding:
   Phase 1 (always): offline KD-tree (GeoNames), instant, no network.
-  Phase 2 (optional, flag-gated): Nominatim OSM API, 1 req/sec, online.
+  Phase 2 (opt-in): online OpenStreetMap lookup, 1 req/sec.
 
 Can be opened two ways:
   - Bulk (no gc_codes): shows scope options, user picks all vs. missing-only.
-  - Single/selection (gc_codes list): hides scope group, targets only those caches.
+  - Single/selection (gc_codes list): compact mode, scope group hidden.
 """
 
 from __future__ import annotations
@@ -122,13 +122,13 @@ class ReverseGeocodeWorker(QThread):
         self.all_done.emit(result)
 
 
-class NominatimWorker(QThread):
+class OnlineLookupWorker(QThread):
     """
-    Phase 2: Nominatim reverse geocoding at 1 request/second (Nominatim ToS).
+    Phase 2: online lookup via OpenStreetMap at 1 request/second.
 
     Refines county/state/country for each cache using OSM polygon boundaries.
-    Requires internet. Only non-None fields returned by Nominatim are written
-    back, so Phase 1 data is never erased by a failed/empty Nominatim response.
+    Requires internet. Only non-None fields are written back, so Phase 1 data
+    is never erased by a failed or empty online response.
     """
 
     row_done  = Signal(str, str)   # (gc_code, log_line)
@@ -165,7 +165,7 @@ class NominatimWorker(QThread):
                 result.skipped += 1
                 self.row_done.emit(
                     row.gc_code,
-                    tr("update_loc_nominatim_skip", gc_code=row.gc_code),
+                    tr("update_loc_online_skip", gc_code=row.gc_code),
                 )
             else:
                 try:
@@ -182,7 +182,7 @@ class NominatimWorker(QThread):
                             self.row_done.emit(
                                 row.gc_code,
                                 tr(
-                                    "update_loc_nominatim_row",
+                                    "update_loc_online_row",
                                     gc_code=row.gc_code,
                                     county=loc.county or "–",
                                 ),
@@ -215,11 +215,10 @@ class UpdateLocationDialog(QDialog):
     Dialog to update county/state/country via reverse geocoding.
 
     Phase 1 (always active): offline GeoNames KD-tree — instant.
-    Phase 2 (opt-in, flag-gated): Nominatim OSM API — 1 req/sec, online.
+    Phase 2 (opt-in): online OpenStreetMap lookup — 1 req/sec.
 
-    When gc_codes is None: full bulk mode — scope options are shown.
-    When gc_codes is a list: targeted mode — scope group is hidden and only
-    those specific caches are processed.
+    Bulk mode (gc_codes=None): full dialog with scope options and log.
+    Single/selection mode (gc_codes list): compact dialog, no log.
     """
 
     location_updated = Signal()
@@ -227,56 +226,58 @@ class UpdateLocationDialog(QDialog):
     def __init__(self, parent=None, *, gc_codes: list[str] | None = None):
         super().__init__(parent)
         self._gc_codes = gc_codes
+        self._is_single = gc_codes is not None
         self.setWindowTitle(tr("update_loc_title"))
-        self.setMinimumWidth(520)
-        self.setMinimumHeight(480)
-        self._worker: ReverseGeocodeWorker | NominatimWorker | None = None
+        self.setMinimumWidth(460)
+        self._worker: ReverseGeocodeWorker | OnlineLookupWorker | None = None
         self._pending_rows: list[_CacheRow] = []
         self._setup_ui()
-
-        # In targeted mode, hide the scope controls — they don't apply.
-        if gc_codes is not None:
-            self._scope_box.setVisible(False)
 
     # ── UI ────────────────────────────────────────────────────────────────────
 
     def _setup_ui(self) -> None:
+        from opensak.utils import flags
         from opensak.gui.settings import get_settings
 
         layout = QVBoxLayout(self)
         layout.setSpacing(10)
 
-        # Info label
-        info = QLabel(tr("update_loc_info"))
-        info.setWordWrap(True)
-        info.setStyleSheet("color: palette(mid);")
-        layout.addWidget(info)
+        # Info label — text changes when the online checkbox is toggled
+        self._info_label = QLabel(tr("update_loc_info"))
+        self._info_label.setWordWrap(True)
+        self._info_label.setStyleSheet("color: palette(mid);")
+        layout.addWidget(self._info_label)
 
         # ── Scope (bulk mode only) ────────────────────────────────────────────
         self._scope_box = QGroupBox(tr("update_loc_scope_group"))
         scope_layout = QVBoxLayout(self._scope_box)
-
         self._rb_all = QRadioButton(tr("update_loc_scope_all"))
         self._rb_missing = QRadioButton(tr("update_loc_scope_missing"))
         self._rb_missing.setChecked(True)
         scope_layout.addWidget(self._rb_all)
         scope_layout.addWidget(self._rb_missing)
-
         layout.addWidget(self._scope_box)
+
+        if self._is_single:
+            self._scope_box.setVisible(False)
 
         # ── Options ───────────────────────────────────────────────────────────
         self._cb_corrected = QCheckBox(tr("update_loc_use_corrected"))
         self._cb_corrected.setChecked(True)
         layout.addWidget(self._cb_corrected)
 
-        # Nominatim checkbox — shown only when the user has enabled it in Advanced Settings
-        if get_settings().nominatim_enabled:
-            self._cb_nominatim = QCheckBox(tr("update_loc_nominatim_cb"))
-            self._cb_nominatim.setChecked(False)
-            self._cb_nominatim.setToolTip(tr("update_loc_nominatim_tooltip"))
-            layout.addWidget(self._cb_nominatim)
+        # Online lookup checkbox — always visible when flag is on;
+        # initial state comes from the Advanced Settings default.
+        if flags.update_location:
+            self._cb_online = QCheckBox(tr("update_loc_online_cb"))
+            self._cb_online.setChecked(get_settings().nominatim_enabled)
+            self._cb_online.setToolTip(tr("update_loc_online_tooltip"))
+            self._cb_online.stateChanged.connect(self._on_online_toggled)
+            layout.addWidget(self._cb_online)
+            # Sync info text with initial checkbox state
+            self._on_online_toggled()
         else:
-            self._cb_nominatim = None
+            self._cb_online = None
 
         # ── Progress ──────────────────────────────────────────────────────────
         self._progress_label = QLabel("")
@@ -284,15 +285,19 @@ class UpdateLocationDialog(QDialog):
         layout.addWidget(self._progress_label)
 
         self._progress = QProgressBar()
-        self._progress.setRange(0, 0)  # indeterminate during Phase 1
+        self._progress.setRange(0, 0)
         self._progress.setVisible(False)
         layout.addWidget(self._progress)
 
-        # ── Log ───────────────────────────────────────────────────────────────
-        self._log = QTextEdit()
-        self._log.setReadOnly(True)
-        self._log.setPlaceholderText(tr("update_loc_log_placeholder"))
-        layout.addWidget(self._log)
+        # ── Log (bulk mode only — hidden for single-cache to reduce verbosity) ─
+        if not self._is_single:
+            self._log = QTextEdit()
+            self._log.setReadOnly(True)
+            self._log.setPlaceholderText(tr("update_loc_log_placeholder"))
+            layout.addWidget(self._log)
+            self.setMinimumHeight(420)
+        else:
+            self._log = None
 
         # ── Buttons ───────────────────────────────────────────────────────────
         btn_row = QHBoxLayout()
@@ -314,10 +319,17 @@ class UpdateLocationDialog(QDialog):
 
         layout.addLayout(btn_row)
 
+    # ── Dynamic info text ─────────────────────────────────────────────────────
+
+    def _on_online_toggled(self) -> None:
+        if self._cb_online and self._cb_online.isChecked():
+            self._info_label.setText(tr("update_loc_info_online"))
+        else:
+            self._info_label.setText(tr("update_loc_info"))
+
     # ── Row building ──────────────────────────────────────────────────────────
 
     def _build_rows(self) -> list[_CacheRow]:
-        """Load cache rows from the active DB, applying scope and coord options."""
         from opensak.db.database import get_session
         from opensak.db.models import Cache
         from sqlalchemy.orm import joinedload
@@ -332,7 +344,6 @@ class UpdateLocationDialog(QDialog):
                 query = query.options(joinedload(Cache.user_note))
 
             if self._gc_codes is not None:
-                # Targeted mode: restrict to the given gc_codes.
                 query = query.filter(Cache.gc_code.in_(self._gc_codes))
             elif only_missing:
                 query = query.filter(
@@ -348,7 +359,6 @@ class UpdateLocationDialog(QDialog):
                     clon = cache.user_note.corrected_lon
                     if clat is not None and clon is not None:
                         lat, lon = clat, clon
-
                 if lat is None or lon is None:
                     continue
                 rows.append(_CacheRow(gc_code=cache.gc_code, lat=lat, lon=lon))
@@ -360,22 +370,16 @@ class UpdateLocationDialog(QDialog):
     def _start(self) -> None:
         rows = self._build_rows()
         if not rows:
-            self._log.setPlainText(tr("update_loc_nothing_to_do"))
+            self._progress_label.setText(tr("update_loc_nothing_to_do"))
             return
 
         self._pending_rows = rows
+        self._set_controls_enabled(False)
 
-        self._start_btn.setEnabled(False)
-        self._scope_box.setEnabled(False)
-        self._cb_corrected.setEnabled(False)
-        if self._cb_nominatim is not None:
-            self._cb_nominatim.setEnabled(False)
-        self._cancel_btn.setEnabled(True)
-        self._close_btn.setEnabled(False)
-
-        self._progress.setRange(0, 0)  # indeterminate for Phase 1
+        self._progress.setRange(0, 0)
         self._progress.setVisible(True)
-        self._log.clear()
+        if self._log:
+            self._log.clear()
         self._progress_label.setText(tr("update_loc_running", total=len(rows)))
 
         self._worker = ReverseGeocodeWorker(rows)
@@ -384,16 +388,16 @@ class UpdateLocationDialog(QDialog):
         self._worker.cancelled.connect(self._on_phase1_cancelled)
         self._worker.start()
 
-    def _start_phase2(self, rows: list[_CacheRow]) -> None:
+    def _start_online_phase(self, rows: list[_CacheRow]) -> None:
         self._progress.setRange(0, len(rows))
         self._progress.setValue(0)
         self._cancel_btn.setEnabled(True)
 
-        self._worker = NominatimWorker(rows)
+        self._worker = OnlineLookupWorker(rows)
         self._worker.row_done.connect(self._on_row_done)
-        self._worker.progress.connect(self._on_nominatim_progress)
-        self._worker.all_done.connect(self._on_nominatim_done)
-        self._worker.cancelled.connect(self._on_nominatim_cancelled)
+        self._worker.progress.connect(self._on_online_progress)
+        self._worker.all_done.connect(self._on_online_done)
+        self._worker.cancelled.connect(self._on_online_cancelled)
         self._worker.start()
 
     def _request_cancel(self) -> None:
@@ -404,20 +408,19 @@ class UpdateLocationDialog(QDialog):
     # ── Worker signals — Phase 1 ──────────────────────────────────────────────
 
     def _on_row_done(self, _gc_code: str, line: str) -> None:
-        self._log.append(line)
+        if self._log:
+            self._log.append(line)
 
     def _on_phase1_done(self, result: UpdateLocationResult) -> None:
         self.location_updated.emit()
 
-        nominatim_requested = (
-            self._cb_nominatim is not None and self._cb_nominatim.isChecked()
-        )
-        if nominatim_requested and self._pending_rows:
+        online_requested = self._cb_online is not None and self._cb_online.isChecked()
+        if online_requested and self._pending_rows:
             self._progress_label.setText(tr(
-                "update_loc_phase1_done",
+                "update_loc_offline_done",
                 updated=result.updated,
             ))
-            self._start_phase2(self._pending_rows)
+            self._start_online_phase(self._pending_rows)
         else:
             self._finalize()
             self._progress_label.setText(tr(
@@ -435,46 +438,49 @@ class UpdateLocationDialog(QDialog):
 
     # ── Worker signals — Phase 2 ──────────────────────────────────────────────
 
-    def _on_nominatim_progress(self, done: int, total: int) -> None:
+    def _on_online_progress(self, done: int, total: int) -> None:
         self._progress.setValue(done)
         eta = _format_eta(total - done)
         self._progress_label.setText(tr(
-            "update_loc_nominatim_running",
+            "update_loc_online_running",
             done=done,
             total=total,
             eta=eta,
         ))
 
-    def _on_nominatim_done(self, result: UpdateLocationResult) -> None:
+    def _on_online_done(self, result: UpdateLocationResult) -> None:
         self._finalize()
         self._progress_label.setText(tr(
-            "update_loc_nominatim_done",
+            "update_loc_online_done",
             updated=result.updated,
             skipped=result.skipped,
             errors=result.errors,
         ))
         self.location_updated.emit()
 
-    def _on_nominatim_cancelled(self, result: UpdateLocationResult) -> None:
+    def _on_online_cancelled(self, result: UpdateLocationResult) -> None:
         self._finalize()
         self._progress_label.setText(tr(
-            "update_loc_nominatim_cancelled",
+            "update_loc_online_cancelled",
             updated=result.updated,
         ))
         if result.updated > 0:
             self.location_updated.emit()
 
-    # ── Shared finalization ───────────────────────────────────────────────────
+    # ── Helpers ───────────────────────────────────────────────────────────────
+
+    def _set_controls_enabled(self, enabled: bool) -> None:
+        self._start_btn.setEnabled(enabled)
+        self._scope_box.setEnabled(enabled)
+        self._cb_corrected.setEnabled(enabled)
+        if self._cb_online is not None:
+            self._cb_online.setEnabled(enabled)
+        self._cancel_btn.setEnabled(not enabled)
+        self._close_btn.setEnabled(enabled)
 
     def _finalize(self) -> None:
         self._progress.setVisible(False)
-        self._start_btn.setEnabled(True)
-        self._scope_box.setEnabled(True)
-        self._cb_corrected.setEnabled(True)
-        if self._cb_nominatim is not None:
-            self._cb_nominatim.setEnabled(True)
-        self._cancel_btn.setEnabled(False)
-        self._close_btn.setEnabled(True)
+        self._set_controls_enabled(True)
 
     def closeEvent(self, event) -> None:
         if self._worker and self._worker.isRunning():

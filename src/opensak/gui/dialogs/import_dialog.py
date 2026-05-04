@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QFileDialog, QProgressBar,
     QTextEdit, QListWidget, QListWidgetItem,
-    QAbstractItemView, QCheckBox
+    QAbstractItemView,
 )
 
 from opensak.gui.settings import get_settings
@@ -76,7 +76,8 @@ class ImportDialog(QDialog):
         self.setMinimumWidth(540)
         self.setMinimumHeight(420)
         self._worker: ImportWorker | None = None
-        self._geo_worker = None   # ReverseGeocodeWorker, set after import if needed
+        self._geo_worker = None
+        self._online_worker = None
         self._selected_paths: list[Path] = []
         self._any_success = False
         self._setup_ui()
@@ -120,13 +121,6 @@ class ImportDialog(QDialog):
         btn_row.addWidget(self._close_btn)
 
         layout.addLayout(btn_row)
-
-        # ── Geocode option ────────────────────────────────────────────────────
-        from opensak.utils import flags
-        self._cb_geocode = QCheckBox(tr("import_geocode_checkbox"))
-        self._cb_geocode.setChecked(True)
-        self._cb_geocode.setVisible(flags.update_location)
-        layout.addWidget(self._cb_geocode)
 
         # ── Progress ──────────────────────────────────────────────────────────
         self._progress = QProgressBar()
@@ -192,7 +186,6 @@ class ImportDialog(QDialog):
         self._import_btn.setEnabled(False)
         self._browse_btn.setEnabled(False)
         self._remove_btn.setEnabled(False)
-        self._cb_geocode.setEnabled(False)
         self._progress.setVisible(True)
         self._any_success = False
         self._log.clear()
@@ -264,13 +257,12 @@ class ImportDialog(QDialog):
             self.import_completed.emit()
 
         from opensak.utils import flags
-        if flags.update_location and self._any_success and self._cb_geocode.isChecked():
+        if flags.update_location and self._any_success:
             self._start_geocoding()
         else:
             self._browse_btn.setEnabled(True)
             self._import_btn.setText(tr("import_again"))
             self._import_btn.setEnabled(True)
-            self._cb_geocode.setEnabled(True)
 
     def _start_geocoding(self) -> None:
         from opensak.gui.dialogs.update_location_dialog import (
@@ -300,39 +292,67 @@ class ImportDialog(QDialog):
                     rows.append(_CacheRow(gc_code=cache.gc_code, lat=lat, lon=lon))
 
         if not rows:
-            self._browse_btn.setEnabled(True)
-            self._import_btn.setText(tr("import_again"))
-            self._import_btn.setEnabled(True)
-            self._cb_geocode.setEnabled(True)
+            self._finish_geocoding()
             return
 
-        self._progress.setRange(0, len(rows))
-        self._progress.setValue(0)
+        self._progress.setRange(0, 0)  # indeterminate — batch runs instantly
         self._progress.setVisible(True)
+        self._geocode_rows = rows
 
         self._geo_worker = ReverseGeocodeWorker(rows)
-        self._geo_worker.progress.connect(lambda cur, tot: self._progress.setValue(cur))
-        self._geo_worker.row_done.connect(lambda _gc, line: self._append_log(line))
         self._geo_worker.all_done.connect(self._on_geocode_done)
         self._geo_worker.cancelled.connect(self._on_geocode_done)
         self._geo_worker.finished.connect(self._geo_worker.deleteLater)
         self._geo_worker.start()
 
     def _on_geocode_done(self, result) -> None:
-        self._progress.setVisible(False)
-        summary = tr(
+        self._append_log(tr(
             "update_loc_done",
             updated=result.updated,
             skipped=result.skipped,
             errors=result.errors,
-        )
-        self._append_log(summary)
+        ))
         if result.updated > 0:
             self.import_completed.emit()
+
+        if get_settings().nominatim_enabled:
+            self._start_online_geocoding(self._geocode_rows)
+        else:
+            self._progress.setVisible(False)
+            self._finish_geocoding()
+
+    def _start_online_geocoding(self, rows: list) -> None:
+        from opensak.gui.dialogs.update_location_dialog import OnlineLookupWorker
+
+        self._append_log(tr("import_geocode_online_running"))
+        self._progress.setRange(0, len(rows))
+        self._progress.setValue(0)
+
+        self._online_worker = OnlineLookupWorker(rows)
+        self._online_worker.progress.connect(
+            lambda cur, tot: self._progress.setValue(cur)
+        )
+        self._online_worker.all_done.connect(self._on_online_geocode_done)
+        self._online_worker.cancelled.connect(self._on_online_geocode_done)
+        self._online_worker.finished.connect(self._online_worker.deleteLater)
+        self._online_worker.start()
+
+    def _on_online_geocode_done(self, result) -> None:
+        self._progress.setVisible(False)
+        self._append_log(tr(
+            "update_loc_online_done",
+            updated=result.updated,
+            skipped=result.skipped,
+            errors=result.errors,
+        ))
+        if result.updated > 0:
+            self.import_completed.emit()
+        self._finish_geocoding()
+
+    def _finish_geocoding(self) -> None:
         self._browse_btn.setEnabled(True)
         self._import_btn.setText(tr("import_again"))
         self._import_btn.setEnabled(True)
-        self._cb_geocode.setEnabled(True)
 
     def closeEvent(self, event) -> None:
         try:
@@ -341,13 +361,15 @@ class ImportDialog(QDialog):
         except RuntimeError:
             pass
         self._worker = None
-        try:
-            if self._geo_worker and self._geo_worker.isRunning():
-                self._geo_worker.request_cancel()
-                self._geo_worker.wait(3000)
-        except RuntimeError:
-            pass
+        for worker in (self._geo_worker, self._online_worker):
+            try:
+                if worker and worker.isRunning():
+                    worker.request_cancel()
+                    worker.wait(3000)
+            except RuntimeError:
+                pass
         self._geo_worker = None
+        self._online_worker = None
         super().closeEvent(event)
 
     # ── Log helpers ───────────────────────────────────────────────────────────
