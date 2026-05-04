@@ -71,7 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Settings…",
     "action_found_update":          "⟳  Update finds from reference database…",
-    "action_update_location":       "🌍  Update county / state / country…",
+    "action_update_location":       "🌍  Update waypoint locations…",
     "action_gps_export":            "📤  Send to GPS…",
 
     # Help menu

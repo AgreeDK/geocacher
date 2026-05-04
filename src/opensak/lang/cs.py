@@ -71,7 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Nastavení…",
     "action_found_update":          "⟳  Aktualizovat nálezy z referenční databáze…",
-    "action_update_location":       "🌍  Aktualizovat okres / kraj / zemi…",
+    "action_update_location":       "Update waypoint locations…",
     "action_gps_export":            "📤  Odeslat do GPS…",
 
     # Help menu

@@ -71,7 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Definições…",
     "action_found_update":          "⟳  Atualizar caches encontradas da base de dados de referência…",
-    "action_update_location":       "🌍  Atualizar concelho / estado / país…",
+    "action_update_location":       "Update waypoint locations…",
     "action_gps_export":            "📤  Enviar para GPS…",
 
     # Help menu
