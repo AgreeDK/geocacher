@@ -1,6 +1,6 @@
 # Update County / State / Country
 
-OpenSAK can automatically fill in the county, state, and country fields for your caches using an offline reverse geocoding lookup. The process is instant for any database size — no network connection required.
+OpenSAK can automatically fill in the county, state, and country fields for your caches using reverse geocoding. The process runs in two phases — a fast offline pass, followed by an optional online refinement step.
 
 ---
 
@@ -27,11 +27,11 @@ When **Use corrected coordinates when available** is checked (the default), cach
 
 ---
 
-## Data source and accuracy
+## Phase 1 — offline lookup (always runs)
 
-Location data comes from [GeoNames](https://www.geonames.org/), a curated global geographic database bundled with the `reverse_geocoder` library. Lookups use a K-D tree that loads once in about one second and then resolves any number of coordinates instantly.
+Location data comes from [GeoNames](https://www.geonames.org/), a curated global geographic database bundled with the `reverse_geocoder` library. Lookups use a K-D tree that loads once in about one second and then resolves any number of coordinates instantly — no network connection required, no rate limits.
 
-**Known limitations:**
+**Known limitations of Phase 1:**
 
 - The lookup is point-based (nearest known locality), not polygon-based. Caches on or very close to an administrative boundary may resolve to the wrong side.
 - GeoNames data is periodically updated but may not reflect very recent political changes (e.g. county redefinitions).
@@ -39,12 +39,25 @@ Location data comes from [GeoNames](https://www.geonames.org/), a curated global
 
 ---
 
+## Phase 2 — Nominatim refinement (optional, online)
+
+When **Also refine with Nominatim** is checked, a second pass runs after Phase 1 using the [Nominatim](https://nominatim.org/) reverse geocoding API (OpenStreetMap polygon data). This provides higher-accuracy results — especially for county — because it uses actual administrative boundary polygons rather than nearest-point matching.
+
+**Important notes:**
+
+- Requires an internet connection.
+- Rate-limited to **1 request per second** per Nominatim's usage policy. For large databases this can take a long time (e.g. ~3 hours for 10 000 caches).
+- Phase 1 results are always written first. Nominatim only overwrites a field if it returns a non-empty value — Phase 1 data is never erased by a failed or empty Nominatim response.
+- Progress and estimated time remaining are shown in the dialog. You can cancel at any time and keep whatever has been refined so far.
+
+---
+
 ## Updating a single cache
 
-Right-click any cache in the cache list and choose **Update County / State / Country** to run the lookup for that cache only. The same scope and corrected-coordinates logic applies.
+Right-click any cache in the cache list and choose **Update location data…** to run the lookup for that cache only. The same corrected-coordinates logic applies, and the Nominatim checkbox is available here as well.
 
 ---
 
 ## Auto-geocode on import
 
-When importing a GPX or PQ zip file, the import dialog shows a **Geocode missing location data after import** checkbox. When checked, OpenSAK automatically runs the offline lookup for any newly imported caches that are missing location fields. This runs as part of the import flow without opening a separate dialog.
+When importing a GPX or PQ zip file, the import dialog shows a **Geocode missing location data after import** checkbox. When checked, OpenSAK automatically runs the offline lookup (Phase 1) for any newly imported caches that are missing location fields. This runs as part of the import flow without opening a separate dialog.

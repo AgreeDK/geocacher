@@ -1,16 +1,19 @@
 """
-tests/unit-tests/test_geocoder.py — Unit tests for the offline reverse geocoder.
+tests/unit-tests/test_geocoder.py — Unit tests for the reverse geocoder.
 
 reverse_geocoder and pycountry are injected into sys.modules so the tests
 work even when neither library is installed in the test environment.
+Nominatim tests mock urllib.request.urlopen so no real network calls are made.
 """
 
 from __future__ import annotations
 
+import json
 import sys
+from io import BytesIO
 from unittest.mock import MagicMock, patch
 
-from opensak.geocoder import GeoLocation, fast_batch_geocode
+from opensak.geocoder import GeoLocation, fast_batch_geocode, nominatim_reverse
 
 
 def _mocks(search_results: list[dict], country_name: str | None = ""):
@@ -128,3 +131,112 @@ def test_empty_input_returns_empty_list():
         result = fast_batch_geocode([])
 
     assert result == []
+
+
+# ── nominatim_reverse tests ───────────────────────────────────────────────────
+
+def _nominatim_mock(address: dict, country_name: str | None = "United States"):
+    """
+    Build a context manager that patches urllib.request.urlopen and pycountry
+    to simulate a Nominatim response with the given address dict.
+    """
+    payload = json.dumps({"address": address}).encode()
+
+    mock_resp = MagicMock()
+    mock_resp.read.return_value = payload
+    mock_resp.__enter__ = lambda s: s
+    mock_resp.__exit__ = MagicMock(return_value=False)
+
+    mock_urlopen = patch("urllib.request.urlopen", return_value=mock_resp)
+
+    mock_pc = MagicMock()
+    if country_name is None:
+        mock_pc.countries.get.return_value = None
+    else:
+        country_obj = MagicMock()
+        country_obj.name = country_name
+        mock_pc.countries.get.return_value = country_obj
+
+    mock_pycountry = patch.dict(sys.modules, {"pycountry": mock_pc})
+    return mock_urlopen, mock_pycountry
+
+
+def test_nominatim_full_response():
+    address = {
+        "country_code": "us",
+        "state": "California",
+        "county": "Los Angeles County",
+    }
+    mock_urlopen, mock_pycountry = _nominatim_mock(address, "United States")
+    with mock_urlopen, mock_pycountry:
+        result = nominatim_reverse(34.05, -118.24)
+
+    assert result == GeoLocation(
+        country="United States",
+        state="California",
+        county="Los Angeles County",
+    )
+
+
+def test_nominatim_falls_back_to_district():
+    address = {
+        "country_code": "gb",
+        "state": "England",
+        "district": "London Borough of Hackney",
+    }
+    mock_urlopen, mock_pycountry = _nominatim_mock(address, "United Kingdom")
+    with mock_urlopen, mock_pycountry:
+        result = nominatim_reverse(51.54, -0.06)
+
+    assert result.county == "London Borough of Hackney"
+
+
+def test_nominatim_falls_back_to_municipality():
+    address = {
+        "country_code": "dk",
+        "state": "Capital Region of Denmark",
+        "municipality": "Copenhagen Municipality",
+    }
+    mock_urlopen, mock_pycountry = _nominatim_mock(address, "Denmark")
+    with mock_urlopen, mock_pycountry:
+        result = nominatim_reverse(55.67, 12.56)
+
+    assert result.county == "Copenhagen Municipality"
+
+
+def test_nominatim_unknown_country_code():
+    address = {"country_code": "xx", "state": "Nowhere", "county": "Void County"}
+    mock_urlopen, mock_pycountry = _nominatim_mock(address, None)
+    with mock_urlopen, mock_pycountry:
+        result = nominatim_reverse(0.0, 0.0)
+
+    assert result.country is None
+    assert result.county == "Void County"
+
+
+def test_nominatim_no_county_field():
+    address = {"country_code": "us", "state": "Wyoming"}
+    mock_urlopen, mock_pycountry = _nominatim_mock(address, "United States")
+    with mock_urlopen, mock_pycountry:
+        result = nominatim_reverse(43.0, -107.5)
+
+    assert result.state == "Wyoming"
+    assert result.county is None
+
+
+def test_nominatim_network_error_returns_all_none():
+    with patch("urllib.request.urlopen", side_effect=OSError("timeout")):
+        result = nominatim_reverse(34.05, -118.24)
+
+    assert result == GeoLocation(None, None, None)
+
+
+def test_nominatim_invalid_json_returns_all_none():
+    mock_resp = MagicMock()
+    mock_resp.read.return_value = b"not-json"
+    mock_resp.__enter__ = lambda s: s
+    mock_resp.__exit__ = MagicMock(return_value=False)
+    with patch("urllib.request.urlopen", return_value=mock_resp):
+        result = nominatim_reverse(0.0, 0.0)
+
+    assert result == GeoLocation(None, None, None)

@@ -301,6 +301,19 @@ STRINGS: dict[str, str] = {
     "update_loc_row_error":         "{gc_code}: chyba — {msg}",
     "update_loc_row_skipped":       "{gc_code}: přeskočeno (žádné souřadnice)",
 
+    # Phase 2 — Nominatim refinement
+    "update_loc_nominatim_cb":      "Also refine with Nominatim (online, ~1 req/sec)",
+    "update_loc_nominatim_tooltip": "Uses OpenStreetMap polygon data for higher-accuracy county lookups.\nRequires internet. Approximate time: 1 second per cache.",
+    "update_loc_phase1_done":       "✓ Phase 1 complete — {updated} updated offline. Starting Nominatim…",
+    "update_loc_nominatim_running": "Nominatim: {done} / {total} — {eta}",
+    "update_loc_nominatim_done":    "✓ Nominatim done — {updated} refined, {skipped} skipped, {errors} errors",
+    "update_loc_nominatim_cancelled": "Nominatim cancelled — {updated} refined so far",
+    "update_loc_nominatim_row":     "{gc_code}: Nominatim → {county}",
+    "update_loc_nominatim_skip":    "{gc_code}: Nominatim returned no data",
+    "update_loc_eta_sec":           "{n}s remaining",
+    "update_loc_eta_min":           "{m}m {s}s remaining",
+    "update_loc_eta_hr":            "{h}h {m}m remaining",
+
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Nová databáze",
     "db_name_label":                "Název:",
