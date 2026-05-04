@@ -39,27 +39,29 @@ Location data comes from [GeoNames](https://www.geonames.org/), a curated global
 
 ---
 
-## Phase 2 — Nominatim refinement (optional, online)
+## Phase 2 — online lookup (opt-in)
 
-Phase 2 is **disabled by default**. To enable it, go to **Settings → Advanced → Location refinement** and tick **Enable Nominatim online refinement**.
-
-Once enabled, an **Also refine with Nominatim** checkbox appears in the update dialog. When ticked, a second pass runs after Phase 1 using the [Nominatim](https://nominatim.org/) reverse geocoding API (OpenStreetMap polygon data). This provides higher-accuracy results — especially for county — because it uses actual administrative boundary polygons rather than nearest-point matching.
+An **Also use online lookup for higher accuracy** checkbox appears in the update dialog. When ticked, a second pass runs after Phase 1 using the [Nominatim](https://nominatim.org/) reverse geocoding API (OpenStreetMap polygon data). This provides higher-accuracy results — especially for county — because it uses actual administrative boundary polygons rather than nearest-point matching.
 
 **Important notes:**
 
 - Requires an internet connection.
 - Rate-limited to **1 request per second** per Nominatim's usage policy. For large databases this can take a long time (e.g. ~3 hours for 10 000 caches).
-- Phase 1 results are always written first. Nominatim only overwrites a field if it returns a non-empty value — Phase 1 data is never erased by a failed or empty Nominatim response.
+- Phase 1 results are always written first. The online pass only overwrites a field if it returns a non-empty value — Phase 1 data is never erased by a failed or empty response.
 - Progress and estimated time remaining are shown in the dialog. You can cancel at any time and keep whatever has been refined so far.
+
+### Setting the default
+
+The checkbox is **unchecked by default**. To have it checked by default for every run, go to **Settings → Advanced → Location refinement** and tick **Enable online lookup for higher accuracy**. You can still toggle it per-run in the dialog regardless of this setting.
 
 ---
 
 ## Updating a single cache
 
-Right-click any cache in the cache list and choose **Update location data…** to run the lookup for that cache only. The same corrected-coordinates logic applies, and the Nominatim checkbox is available here as well.
+Right-click any cache in the cache list and choose **Update location data…** to run the lookup for that cache only. The same corrected-coordinates logic applies, and the online lookup checkbox is available here as well.
 
 ---
 
 ## Auto-geocode on import
 
-When importing a GPX or PQ zip file, the import dialog shows a **Geocode missing location data after import** checkbox. When checked, OpenSAK automatically runs the offline lookup (Phase 1) for any newly imported caches that are missing location fields. This runs as part of the import flow without opening a separate dialog.
+When importing a GPX or PQ zip file, OpenSAK automatically runs Phase 1 for any caches that are missing location data immediately after a successful import — no extra step needed. If **Enable online lookup for higher accuracy** is enabled in Advanced Settings, Phase 2 runs as well.
