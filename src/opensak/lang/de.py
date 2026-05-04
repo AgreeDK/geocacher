@@ -71,7 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Einstellungen…",
     "action_found_update":          "⟳  Funde aus Referenz-Datenbank aktualisieren",
-    "action_update_location":       "🌍  Landkreis / Bundesland / Land aktualisieren…",
+    "action_update_location":       "Update waypoint locations…",
     "action_gps_export":            "📤  An GPS senden…",
 
     # Help menu
@@ -216,6 +216,10 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Benutzername:",
     "settings_gc_username_placeholder":            "Dein geocaching.com Benutzername",
     "settings_gc_username_hint":                   "Wird zur Erkennung eigener Logs verwendet (z.B. FTF-Erkennung)",
+    "settings_group_nominatim":                    "Location refinement",
+    "settings_nominatim_cb":                       "Enable online lookup for higher accuracy",
+    "settings_nominatim_hint":                     "When enabled, county, state and country data is further refined using OpenStreetMap after the fast offline pass.\n\nNote: requires an internet connection and takes about 1 second per waypoint. A database of 10 000 waypoints takes around 3 hours to fully refine. Leave this off unless you need higher accuracy near administrative boundaries.",
+
     "settings_group_search":                       "Suchmaschine",
     "settings_search_min_chars_label":             "Mindestzeichen:",
     "settings_search_debounce_label":              "Debounce-Verzögerung (ms):",
@@ -284,10 +288,12 @@ STRINGS: dict[str, str] = {
     "found_errors":                   "Fehler:",
 
     # ── Standort aktualisieren Dialog ─────────────────────────────────────────
-    "update_loc_title":             "Landkreis / Bundesland / Land aktualisieren",
+    "update_loc_title":             "Update Waypoint Locations",
     "update_loc_scope_group":       "Umfang",
+    "update_loc_scope_this":        "Only this waypoint",
     "update_loc_scope_all":         "Alle Caches aktualisieren",
-    "update_loc_scope_missing":     "Nur Caches mit fehlenden Standortdaten",
+    "update_loc_scope_missing":     "Nur Caches mit fehlenden Standortdaten",    "update_loc_lookup_group":      "Lookup options",
+
     "update_loc_use_corrected":     "Korrigierte Koordinaten verwenden wenn vorhanden",
     "update_loc_start_btn":         "▶  Aktualisierung starten",
     "update_loc_info":              "Standortdaten werden offline anhand von GeoNames-Daten abgerufen — schnell, kein Netzwerk erforderlich, keine Ratenlimitierung.",
@@ -300,6 +306,22 @@ STRINGS: dict[str, str] = {
     "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
     "update_loc_row_error":         "{gc_code}: Fehler — {msg}",
     "update_loc_row_skipped":       "{gc_code}: übersprungen (keine Koordinaten)",
+    # Dynamic info text (changes when online checkbox is toggled)
+    "update_loc_info_online":       "Looks up county, state and country from local data first, then refines the result online for higher accuracy. Requires internet. About 1 second per waypoint.",
+
+    # Online refinement (replaces Nominatim terminology for end users)
+    "update_loc_online_cb":         "Also use online lookup for higher accuracy",
+    "update_loc_online_tooltip":    "Uses OpenStreetMap boundary maps to refine results near county borders.\nRequires internet. About 1 second per waypoint.",
+    "update_loc_offline_done":      "✓ Offline lookup complete ({updated} updated). Starting online refinement...",
+    "update_loc_online_running":    "Online lookup: {done} of {total} ({eta})",
+    "update_loc_online_done":       "✓ Online lookup complete: {updated} refined, {skipped} unchanged, {errors} errors",
+    "update_loc_online_cancelled":  "Online lookup cancelled. {updated} refined so far.",
+    "update_loc_online_row":        "{gc_code}: online lookup → {county}",
+    "update_loc_online_skip":       "{gc_code}: no data from online lookup",
+
+    "update_loc_eta_sec":           "{n}s remaining",
+    "update_loc_eta_min":           "{m}m {s}s remaining",
+    "update_loc_eta_hr":            "{h}h {m}m remaining",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "Neue Datenbank",

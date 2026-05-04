@@ -271,6 +271,17 @@ class AppSettings:
     def search_debounce_ms(self, value: int) -> None:
         self._s.setValue("search/debounce_ms", value)
 
+    # ── Location refinement ───────────────────────────────────────────────────
+
+    @property
+    def nominatim_enabled(self) -> bool:
+        """Enable Nominatim online refinement after the fast offline pass."""
+        return self._s.value("location/nominatim_enabled", False, type=bool)
+
+    @nominatim_enabled.setter
+    def nominatim_enabled(self, value: bool) -> None:
+        self._s.setValue("location/nominatim_enabled", value)
+
     # ── Last used paths ───────────────────────────────────────────────────────
 
     @property

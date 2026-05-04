@@ -188,6 +188,7 @@ class MainWindow(QMainWindow):
         self._cache_table.cache_selected.connect(self._on_cache_selected)
         self._cache_table.flags_changed.connect(self._on_flags_changed)
         self._cache_table.sort_changed.connect(self._on_sort_changed)
+        self._cache_table.location_updated.connect(self._refresh_cache_list)
         self._splitter.addWidget(self._cache_table)
 
         # Bottom container: info bar (fixed) + horisontal splitter (resizable)

@@ -71,7 +71,7 @@ STRINGS: dict[str, str] = {
     # Tools menu
     "action_settings":              "&Settings…",
     "action_found_update":          "⟳  Update finds from reference database…",
-    "action_update_location":       "🌍  Update county / state / country…",
+    "action_update_location":       "🌍  Update waypoint locations…",
     "action_gps_export":            "📤  Send to GPS…",
 
     # Help menu
@@ -142,7 +142,7 @@ STRINGS: dict[str, str] = {
     "import_log_placeholder":       "Import results will appear here…",
     "import_all_done":            "✓ All {count} files processed.",
     "import_geocode_checkbox":      "🌍  Geocode missing county / state / country after import",
-    "import_geocode_running":       "📍  Geocoding missing location data…",
+    "import_geocode_running":       "📍  Looking up missing location data (offline)…",
 
     # ── Filter dialog ─────────────────────────────────────────────────────────
     "filter_dialog_title":          "Set filter",
@@ -216,6 +216,10 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Username:",
     "settings_gc_username_placeholder":            "Your geocaching.com username",
     "settings_gc_username_hint":                   "Used to identify your own logs (e.g. for FTF detection)",
+    "settings_group_nominatim":                    "Location refinement",
+    "settings_nominatim_cb":                       "Enable online lookup for higher accuracy",
+    "settings_nominatim_hint":                     "When enabled, county, state and country data is further refined using OpenStreetMap after the fast offline pass.\n\nNote: requires an internet connection and takes about 1 second per waypoint. A database of 10 000 waypoints takes around 3 hours to fully refine. Leave this off unless you need higher accuracy near administrative boundaries.",
+
     "settings_group_search":                       "Search Engine",
     "settings_search_min_chars_label":             "Minimum characters:",
     "settings_search_debounce_label":              "Debounce delay (ms):",
@@ -284,22 +288,40 @@ STRINGS: dict[str, str] = {
     "found_errors":                   "Errors:",
 
     # ── Update location dialog ────────────────────────────────────────────────
-    "update_loc_title":             "Update County / State / Country",
+    "update_loc_title":             "Update Waypoint Locations",
     "update_loc_scope_group":       "Scope",
-    "update_loc_scope_all":         "Update all caches",
-    "update_loc_scope_missing":     "Only caches with missing location data",
+    "update_loc_scope_this":        "Only this waypoint",
+    "update_loc_scope_all":         "Update all waypoints",
+    "update_loc_scope_missing":     "Only waypoints with missing location data",
+    "update_loc_lookup_group":      "Lookup options",
     "update_loc_use_corrected":     "Use corrected coordinates when available",
     "update_loc_start_btn":         "▶  Start update",
     "update_loc_info":              "Location data is looked up offline using GeoNames data — fast, no network required, no rate limits.",
-    "update_loc_running":           "Running offline lookup for {total} caches…",
+    "update_loc_running":           "Running offline lookup for {total} waypoints…",
     "update_loc_done":              "✓ Done — {updated} updated, {skipped} skipped, {errors} errors",
     "update_loc_cancelled":         "Cancelled — {updated} updated so far",
     "update_loc_log_placeholder":   "Results will appear here…",
     "update_loc_no_db":             "No database open.",
-    "update_loc_nothing_to_do":     "No caches to update with the selected scope.",
+    "update_loc_nothing_to_do":     "No waypoints to update with the selected scope.",
     "update_loc_row":               "{gc_code}: {country} / {state} / {county}",
     "update_loc_row_error":         "{gc_code}: error — {msg}",
     "update_loc_row_skipped":       "{gc_code}: skipped (no coordinates)",
+
+    # Dynamic info text (changes when online checkbox is toggled)
+    "update_loc_info_online":       "Looks up county, state and country from local data first, then refines the result online for higher accuracy. Requires internet. About 1 second per waypoint.",
+
+    # Online refinement (replaces Nominatim terminology for end users)
+    "update_loc_online_cb":         "Also use online lookup for higher accuracy",
+    "update_loc_online_tooltip":    "Uses OpenStreetMap boundary maps to refine results near county borders.\nRequires internet. About 1 second per waypoint.",
+    "update_loc_offline_done":      "✓ Offline lookup complete ({updated} updated). Starting online refinement...",
+    "update_loc_online_running":    "Online lookup: {done} of {total} ({eta})",
+    "update_loc_online_done":       "✓ Online lookup complete: {updated} refined, {skipped} unchanged, {errors} errors",
+    "update_loc_online_cancelled":  "Online lookup cancelled. {updated} refined so far.",
+    "update_loc_online_row":        "{gc_code}: online lookup → {county}",
+    "update_loc_online_skip":       "{gc_code}: no data from online lookup",
+    "update_loc_eta_sec":           "{n}s remaining",
+    "update_loc_eta_min":           "{m}m {s}s remaining",
+    "update_loc_eta_hr":            "{h}h {m}m remaining",
 
     # ── Database dialog ───────────────────────────────────────────────────────
     "db_new_title":                 "New database",

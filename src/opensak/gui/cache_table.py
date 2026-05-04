@@ -713,6 +713,7 @@ class CacheTableView(QTableView):
     cache_selected = Signal(object)
     flags_changed = Signal()          # videresendes fra model
     sort_changed = Signal(str, bool)  # (col_id, ascending) videresendes fra model
+    location_updated = Signal()       # emitted after right-click location update
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -993,10 +994,7 @@ class CacheTableView(QTableView):
         """Open UpdateLocationDialog targeted at a single cache."""
         from opensak.gui.dialogs.update_location_dialog import UpdateLocationDialog
         dlg = UpdateLocationDialog(self, gc_codes=[gc_code])
-        dlg.location_updated.connect(lambda: (
-            self._model.beginResetModel(),
-            self._model.endResetModel(),
-        ))
+        dlg.location_updated.connect(self.location_updated)
         dlg.exec()
 
     def selected_cache(self) -> Optional[Cache]:
