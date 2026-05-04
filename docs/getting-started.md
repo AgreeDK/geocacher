@@ -296,3 +296,5 @@ Want to add a new language? See [CONTRIBUTING.md](https://github.com/AgreeDK/ope
 ---
 
 *OpenSAK is free and open-source software, released under the MIT licence. Contributions are welcome — see [CONTRIBUTING.md](https://github.com/AgreeDK/opensak/blob/main/CONTRIBUTING.md) for details.*
+
+*Last updated for v1.12.0.*
