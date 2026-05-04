@@ -41,7 +41,9 @@ Location data comes from [GeoNames](https://www.geonames.org/), a curated global
 
 ## Phase 2 — Nominatim refinement (optional, online)
 
-When **Also refine with Nominatim** is checked, a second pass runs after Phase 1 using the [Nominatim](https://nominatim.org/) reverse geocoding API (OpenStreetMap polygon data). This provides higher-accuracy results — especially for county — because it uses actual administrative boundary polygons rather than nearest-point matching.
+Phase 2 is **disabled by default**. To enable it, go to **Settings → Advanced → Location refinement** and tick **Enable Nominatim online refinement**.
+
+Once enabled, an **Also refine with Nominatim** checkbox appears in the update dialog. When ticked, a second pass runs after Phase 1 using the [Nominatim](https://nominatim.org/) reverse geocoding API (OpenStreetMap polygon data). This provides higher-accuracy results — especially for county — because it uses actual administrative boundary polygons rather than nearest-point matching.
 
 **Important notes:**
 

@@ -241,7 +241,7 @@ class UpdateLocationDialog(QDialog):
     # ── UI ────────────────────────────────────────────────────────────────────
 
     def _setup_ui(self) -> None:
-        from opensak.utils import flags
+        from opensak.gui.settings import get_settings
 
         layout = QVBoxLayout(self)
         layout.setSpacing(10)
@@ -269,8 +269,8 @@ class UpdateLocationDialog(QDialog):
         self._cb_corrected.setChecked(True)
         layout.addWidget(self._cb_corrected)
 
-        # Nominatim checkbox — shown whenever the update-location flag is active
-        if flags.update_location:
+        # Nominatim checkbox — shown only when the user has enabled it in Advanced Settings
+        if get_settings().nominatim_enabled:
             self._cb_nominatim = QCheckBox(tr("update_loc_nominatim_cb"))
             self._cb_nominatim.setChecked(False)
             self._cb_nominatim.setToolTip(tr("update_loc_nominatim_tooltip"))

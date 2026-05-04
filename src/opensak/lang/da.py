@@ -216,6 +216,10 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_label":                  "Brugernavn:",
     "settings_gc_username_placeholder":            "Dit geocaching.com brugernavn",
     "settings_gc_username_hint":                   "Bruges til at genkende dine egne logs (fx FTF-detektion)",
+    "settings_group_nominatim":                    "Location refinement",
+    "settings_nominatim_cb":                       "Enable Nominatim online refinement",
+    "settings_nominatim_hint":                     "When enabled, county / state / country data is further refined after the fast offline pass using OpenStreetMap's Nominatim service.\n\nDrawback: requires an internet connection and takes approximately 1 second per cache — a database of 10 000 caches takes around 3 hours to fully refine. Leave this off unless you specifically need higher accuracy near administrative boundaries.",
+
     "settings_group_search":                       "Søgemaskine",
     "settings_search_min_chars_label":             "Minimumstegn:",
     "settings_search_debounce_label":              "Debounce-forsinkelse (ms):",

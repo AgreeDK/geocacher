@@ -301,6 +301,25 @@ class SettingsDialog(QDialog):
         search_layout.addWidget(search_hint)
 
         layout.addWidget(search_group)
+
+        # ── Location refinement (only shown when update-location flag is on) ──
+        from opensak.utils import flags
+        if flags.update_location:
+            loc_ref_group = QGroupBox(tr("settings_group_nominatim"))
+            loc_ref_layout = QVBoxLayout(loc_ref_group)
+
+            self._nominatim_cb = QCheckBox(tr("settings_nominatim_cb"))
+            loc_ref_layout.addWidget(self._nominatim_cb)
+
+            nominatim_hint = QLabel(tr("settings_nominatim_hint"))
+            nominatim_hint.setWordWrap(True)
+            nominatim_hint.setStyleSheet("color: gray; font-size: 10px;")
+            loc_ref_layout.addWidget(nominatim_hint)
+
+            layout.addWidget(loc_ref_group)
+        else:
+            self._nominatim_cb = None
+
         layout.addStretch()
         return tab
 
@@ -670,6 +689,8 @@ class SettingsDialog(QDialog):
         self._gc_username.setText(s.gc_username)
         self._search_min_chars.setValue(s.search_min_chars)
         self._search_debounce_ms.setValue(s.search_debounce_ms)
+        if self._nominatim_cb is not None:
+            self._nominatim_cb.setChecked(s.nominatim_enabled)
         # Opdater GC-status
         self._refresh_gc_status_on_open()
 
@@ -689,6 +710,8 @@ class SettingsDialog(QDialog):
         s.coord_format      = self._coord_format.currentData()
         s.search_min_chars  = self._search_min_chars.value()
         s.search_debounce_ms = self._search_debounce_ms.value()
+        if self._nominatim_cb is not None:
+            s.nominatim_enabled = self._nominatim_cb.isChecked()
         s.sync()
 
         new_lang = self._lang_combo.currentData()
