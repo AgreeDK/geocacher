@@ -369,7 +369,8 @@ class MapWidget(QWidget):
         # Sæt hjemkoordinat og centrér kortet der
         from opensak.gui.settings import get_settings
         s = get_settings()
-        self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(tr('map_home_label'))})")
+        home_label = s.active_home_name or tr("map_home_label")
+        self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(home_label)})")
         self._run_js("panToHome()")
 
         # Indlæs ventende caches hvis der er nogen
@@ -434,7 +435,8 @@ class MapWidget(QWidget):
         from opensak.gui.settings import get_settings
         s = get_settings()
         if self._ready:
-            self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(tr('map_home_label'))})")
+            home_label = s.active_home_name or tr("map_home_label")
+            self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(home_label)})")
 
     def fit_all(self) -> None:
         if self._ready:
