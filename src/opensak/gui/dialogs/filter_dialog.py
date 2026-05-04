@@ -650,10 +650,13 @@ class FilterDialog(QDialog):
         self._where_sql_general.setPlaceholderText(tr("filter_where_sql_placeholder"))
         layout.addWidget(self._where_sql_general)
 
-        # Error label (hidden until a SQL error occurs)
-        self._where_error_label = QLabel()
-        self._where_error_label.setWordWrap(True)
-        self._where_error_label.setStyleSheet("color: #cc0000;")
+        # Error box (hidden until a SQL error occurs) — scrollable so large errors don't break the layout
+        self._where_error_label = QPlainTextEdit()
+        self._where_error_label.setReadOnly(True)
+        self._where_error_label.setMaximumHeight(120)
+        self._where_error_label.setStyleSheet(
+            "color: #cc0000; background: transparent; border: 1px solid #cc0000; border-radius: 4px;"
+        )
         self._where_error_label.hide()
         layout.addWidget(self._where_error_label)
 
@@ -1131,7 +1134,7 @@ class FilterDialog(QDialog):
             if sql:
                 error = self._validate_where_sql(sql)
                 if error:
-                    self._where_error_label.setText(
+                    self._where_error_label.setPlainText(
                         f"{tr('filter_where_error_prefix')} {error}"
                     )
                     self._where_error_label.show()
