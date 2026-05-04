@@ -183,6 +183,19 @@ Waypoints imported from GPX/PQ files appear automatically in the cache details p
 
 Manually added waypoints (such as corrected coordinates for mystery caches) are saved in your local database and are not affected by re-importing.
 
+### Updating Location Data (county, state, country)
+
+OpenSAK can fill in the county, state, and country fields for waypoints using reverse geocoding.
+
+- **On import** — the offline lookup runs automatically for any waypoints missing location data.
+- **Manually** — go to **Waypoint → Update Waypoint Locations…** to re-run or refine the lookup for some or all waypoints. You can also right-click a waypoint and choose **Update location data…**.
+
+The offline lookup uses the bundled [GeoNames](https://geonames.org/) database and works with no internet connection. An optional **online refinement** pass (using OpenStreetMap polygon data) is available for higher accuracy — it is opt-in because it is rate-limited and can be slow on large databases.
+
+For full details, see [Update Waypoint Locations](update-location.md).
+
+> **Note:** This feature requires the `update-location` feature flag to be enabled. It is on by default in developer builds and can be enabled with `--feature update-location=true`. See [Feature Flags](feature-flags.md).
+
 ---
 
 ## 8. Marking Caches as Found
