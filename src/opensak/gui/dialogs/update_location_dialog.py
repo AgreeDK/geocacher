@@ -1,13 +1,13 @@
 """
-src/opensak/gui/dialogs/update_location_dialog.py — Update county/state/country dialog.
+src/opensak/gui/dialogs/update_location_dialog.py — Update cache locations dialog.
 
 Two-phase reverse geocoding:
   Phase 1 (always): offline KD-tree (GeoNames), instant, no network.
   Phase 2 (opt-in): online OpenStreetMap lookup, 1 req/sec.
 
-Can be opened two ways:
-  - Bulk (no gc_codes): shows scope options, user picks all vs. missing-only.
-  - Single/selection (gc_codes list): compact mode, scope group hidden.
+Always opened as the same dialog; entry point controls the default scope:
+  - Via menu (gc_codes=None): "Only caches with missing location data" is default.
+  - Via right-click (gc_codes list): "Only this cache" is default.
 """
 
 from __future__ import annotations
@@ -212,13 +212,14 @@ class OnlineLookupWorker(QThread):
 
 class UpdateLocationDialog(QDialog):
     """
-    Dialog to update county/state/country via reverse geocoding.
+    Dialog to update cache locations via reverse geocoding.
 
     Phase 1 (always active): offline GeoNames KD-tree — instant.
     Phase 2 (opt-in): online OpenStreetMap lookup — 1 req/sec.
 
-    Bulk mode (gc_codes=None): full dialog with scope options and log.
-    Single/selection mode (gc_codes list): compact dialog, no log.
+    The same dialog is used from the menu and from the right-click context menu.
+    When gc_codes is None (menu): "Only caches with missing location data" is default.
+    When gc_codes is a list (right-click): "Only this cache" is default.
     """
 
     location_updated = Signal()
@@ -226,9 +227,10 @@ class UpdateLocationDialog(QDialog):
     def __init__(self, parent=None, *, gc_codes: list[str] | None = None):
         super().__init__(parent)
         self._gc_codes = gc_codes
-        self._is_single = gc_codes is not None
+        self._from_context_menu = gc_codes is not None
         self.setWindowTitle(tr("update_loc_title"))
         self.setMinimumWidth(460)
+        self.setMinimumHeight(420)
         self._worker: ReverseGeocodeWorker | OnlineLookupWorker | None = None
         self._pending_rows: list[_CacheRow] = []
         self._setup_ui()
@@ -248,23 +250,34 @@ class UpdateLocationDialog(QDialog):
         self._info_label.setStyleSheet("color: palette(mid);")
         layout.addWidget(self._info_label)
 
-        # ── Scope (bulk mode only) ────────────────────────────────────────────
+        # ── Section 1: Scope ──────────────────────────────────────────────────
         self._scope_box = QGroupBox(tr("update_loc_scope_group"))
         scope_layout = QVBoxLayout(self._scope_box)
-        self._rb_all = QRadioButton(tr("update_loc_scope_all"))
+
+        self._rb_this = QRadioButton(tr("update_loc_scope_this"))
         self._rb_missing = QRadioButton(tr("update_loc_scope_missing"))
-        self._rb_missing.setChecked(True)
-        scope_layout.addWidget(self._rb_all)
+        self._rb_all = QRadioButton(tr("update_loc_scope_all"))
+
+        scope_layout.addWidget(self._rb_this)
         scope_layout.addWidget(self._rb_missing)
+        scope_layout.addWidget(self._rb_all)
         layout.addWidget(self._scope_box)
 
-        if self._is_single:
-            self._scope_box.setVisible(False)
+        if self._from_context_menu:
+            # Right-click: default to "Only this cache"
+            self._rb_this.setChecked(True)
+        else:
+            # Menu: "Only this cache" is irrelevant — disable and default to missing
+            self._rb_this.setEnabled(False)
+            self._rb_missing.setChecked(True)
 
-        # ── Options ───────────────────────────────────────────────────────────
+        # ── Section 2: Lookup options ─────────────────────────────────────────
+        self._lookup_box = QGroupBox(tr("update_loc_lookup_group"))
+        lookup_layout = QVBoxLayout(self._lookup_box)
+
         self._cb_corrected = QCheckBox(tr("update_loc_use_corrected"))
         self._cb_corrected.setChecked(True)
-        layout.addWidget(self._cb_corrected)
+        lookup_layout.addWidget(self._cb_corrected)
 
         # Online lookup checkbox — always visible when flag is on;
         # initial state comes from the Advanced Settings default.
@@ -273,11 +286,12 @@ class UpdateLocationDialog(QDialog):
             self._cb_online.setChecked(get_settings().nominatim_enabled)
             self._cb_online.setToolTip(tr("update_loc_online_tooltip"))
             self._cb_online.stateChanged.connect(self._on_online_toggled)
-            layout.addWidget(self._cb_online)
-            # Sync info text with initial checkbox state
+            lookup_layout.addWidget(self._cb_online)
             self._on_online_toggled()
         else:
             self._cb_online = None
+
+        layout.addWidget(self._lookup_box)
 
         # ── Progress ──────────────────────────────────────────────────────────
         self._progress_label = QLabel("")
@@ -289,15 +303,11 @@ class UpdateLocationDialog(QDialog):
         self._progress.setVisible(False)
         layout.addWidget(self._progress)
 
-        # ── Log (bulk mode only — hidden for single-cache to reduce verbosity) ─
-        if not self._is_single:
-            self._log = QTextEdit()
-            self._log.setReadOnly(True)
-            self._log.setPlaceholderText(tr("update_loc_log_placeholder"))
-            layout.addWidget(self._log)
-            self.setMinimumHeight(420)
-        else:
-            self._log = None
+        # ── Log ───────────────────────────────────────────────────────────────
+        self._log = QTextEdit()
+        self._log.setReadOnly(True)
+        self._log.setPlaceholderText(tr("update_loc_log_placeholder"))
+        layout.addWidget(self._log)
 
         # ── Buttons ───────────────────────────────────────────────────────────
         btn_row = QHBoxLayout()
@@ -335,7 +345,6 @@ class UpdateLocationDialog(QDialog):
         from sqlalchemy.orm import joinedload
 
         use_corrected = self._cb_corrected.isChecked()
-        only_missing  = self._rb_missing.isChecked()
 
         rows: list[_CacheRow] = []
         with get_session() as session:
@@ -343,14 +352,15 @@ class UpdateLocationDialog(QDialog):
             if use_corrected:
                 query = query.options(joinedload(Cache.user_note))
 
-            if self._gc_codes is not None:
+            if self._rb_this.isChecked() and self._gc_codes is not None:
                 query = query.filter(Cache.gc_code.in_(self._gc_codes))
-            elif only_missing:
+            elif self._rb_missing.isChecked():
                 query = query.filter(
                     (Cache.country == None) | (Cache.country == "") |
                     (Cache.state   == None) | (Cache.state   == "") |
                     (Cache.county  == None) | (Cache.county  == "")
                 )
+            # _rb_all: no filter
 
             for cache in query.all():
                 lat, lon = cache.latitude, cache.longitude
@@ -378,8 +388,7 @@ class UpdateLocationDialog(QDialog):
 
         self._progress.setRange(0, 0)
         self._progress.setVisible(True)
-        if self._log:
-            self._log.clear()
+        self._log.clear()
         self._progress_label.setText(tr("update_loc_running", total=len(rows)))
 
         self._worker = ReverseGeocodeWorker(rows)
@@ -408,8 +417,7 @@ class UpdateLocationDialog(QDialog):
     # ── Worker signals — Phase 1 ──────────────────────────────────────────────
 
     def _on_row_done(self, _gc_code: str, line: str) -> None:
-        if self._log:
-            self._log.append(line)
+        self._log.append(line)
 
     def _on_phase1_done(self, result: UpdateLocationResult) -> None:
         self.location_updated.emit()
@@ -472,15 +480,16 @@ class UpdateLocationDialog(QDialog):
     def _set_controls_enabled(self, enabled: bool) -> None:
         self._start_btn.setEnabled(enabled)
         self._scope_box.setEnabled(enabled)
-        self._cb_corrected.setEnabled(enabled)
-        if self._cb_online is not None:
-            self._cb_online.setEnabled(enabled)
+        self._lookup_box.setEnabled(enabled)
         self._cancel_btn.setEnabled(not enabled)
         self._close_btn.setEnabled(enabled)
 
     def _finalize(self) -> None:
         self._progress.setVisible(False)
         self._set_controls_enabled(True)
+        # Re-disable "Only this cache" if opened from menu
+        if not self._from_context_menu:
+            self._rb_this.setEnabled(False)
 
     def closeEvent(self, event) -> None:
         if self._worker and self._worker.isRunning():

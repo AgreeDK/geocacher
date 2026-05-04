@@ -219,7 +219,7 @@ STRINGS: dict[str, str] = {
     "settings_gc_username_hint":                   "Usado para identificar os seus próprios registos (ex. FTF)",
     "settings_group_nominatim":                    "Location refinement",
     "settings_nominatim_cb":                       "Enable online lookup for higher accuracy",
-    "settings_nominatim_hint":                     "When enabled, county, state and country data is further refined using OpenStreetMap after the fast offline pass.\n\nNote: requires an internet connection and takes about 1 second per cache. A database of 10 000 caches takes around 3 hours to fully refine. Leave this off unless you need higher accuracy near administrative boundaries.",
+    "settings_nominatim_hint":                     "When enabled, county, state and country data is further refined using OpenStreetMap after the fast offline pass.\n\nNote: requires an internet connection and takes about 1 second per waypoint. A database of 10 000 waypoints takes around 3 hours to fully refine. Leave this off unless you need higher accuracy near administrative boundaries.",
 
     "settings_group_search":                       "Motor de Pesquisa",
     "settings_search_min_chars_label":             "Caracteres mínimos:",
@@ -289,10 +289,12 @@ STRINGS: dict[str, str] = {
     "found_errors":                   "Erros:",
 
     # ── Diálogo de atualização de localização ─────────────────────────────────
-    "update_loc_title":             "Atualizar Concelho / Estado / País",
+    "update_loc_title":             "Update Waypoint Locations",
     "update_loc_scope_group":       "Âmbito",
+    "update_loc_scope_this":        "Only this waypoint",
     "update_loc_scope_all":         "Atualizar todas as caches",
-    "update_loc_scope_missing":     "Apenas caches sem dados de localização",
+    "update_loc_scope_missing":     "Apenas caches sem dados de localização",    "update_loc_lookup_group":      "Lookup options",
+
     "update_loc_use_corrected":     "Usar coordenadas corrigidas quando disponíveis",
     "update_loc_start_btn":         "▶  Iniciar atualização",
     "update_loc_info":              "Os dados de localização são obtidos offline usando dados GeoNames — rápido, sem necessidade de rede, sem limites de pedidos.",
@@ -306,11 +308,11 @@ STRINGS: dict[str, str] = {
     "update_loc_row_error":         "{gc_code}: erro — {msg}",
     "update_loc_row_skipped":       "{gc_code}: ignorado (sem coordenadas)",
     # Dynamic info text (changes when online checkbox is toggled)
-    "update_loc_info_online":       "Looks up county, state and country from local data first, then refines the result online for higher accuracy. Requires internet. About 1 second per cache.",
+    "update_loc_info_online":       "Looks up county, state and country from local data first, then refines the result online for higher accuracy. Requires internet. About 1 second per waypoint.",
 
     # Online refinement (replaces Nominatim terminology for end users)
     "update_loc_online_cb":         "Also use online lookup for higher accuracy",
-    "update_loc_online_tooltip":    "Uses OpenStreetMap boundary maps to refine results near county borders.\nRequires internet. About 1 second per cache.",
+    "update_loc_online_tooltip":    "Uses OpenStreetMap boundary maps to refine results near county borders.\nRequires internet. About 1 second per waypoint.",
     "update_loc_offline_done":      "✓ Offline lookup complete ({updated} updated). Starting online refinement...",
     "update_loc_online_running":    "Online lookup: {done} of {total} ({eta})",
     "update_loc_online_done":       "✓ Online lookup complete: {updated} refined, {skipped} unchanged, {errors} errors",
