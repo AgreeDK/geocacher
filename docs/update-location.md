@@ -1,6 +1,6 @@
 # Update Waypoint Locations
 
-OpenSAK can automatically fill in the county, state, and country fields for your waypoints using reverse geocoding. The process runs in two phases — a fast offline pass, followed by an optional online refinement step.
+OpenSAK can automatically fill in the county, state, and country fields for your waypoints using reverse geocoding. It always starts with a fast offline lookup, and optionally follows up with an online refinement for higher accuracy.
 
 ---
 
@@ -33,15 +33,15 @@ Controls how the lookup behaves:
 
 **Use corrected coordinates when available** — when checked (the default), waypoints with a corrected final location are looked up using those coordinates instead of the original listing coordinates. This is the correct behaviour for mystery and multi-caches where the final location differs from the published coordinates.
 
-**Also use online lookup for higher accuracy** — when checked, a second online pass runs after the offline lookup (see Phase 2 below). The initial state of this checkbox is controlled by **Settings → Advanced → Location refinement**; you can always override it per-run.
+**Also use online lookup for higher accuracy** — when checked, an online refinement pass runs after the offline lookup. The initial state of this checkbox is controlled by **Settings → Advanced → Location refinement**; you can always override it per-run.
 
 ---
 
-## Phase 1 — offline lookup (always runs)
+## Offline lookup
 
-Location data comes from [GeoNames](https://www.geonames.org/), a curated global geographic database bundled with the `reverse_geocoder` library. Lookups use a K-D tree that loads once in about one second and then resolves any number of coordinates instantly — no network connection required, no rate limits.
+The offline lookup always runs first. Location data comes from [GeoNames](https://www.geonames.org/), a curated global geographic database bundled with the app. It resolves any number of coordinates instantly — no network connection required, no rate limits.
 
-**Known limitations of Phase 1:**
+**Known limitations:**
 
 - The lookup is point-based (nearest known locality), not polygon-based. Waypoints on or very close to an administrative boundary may resolve to the wrong side.
 - GeoNames data is periodically updated but may not reflect very recent political changes (e.g. county redefinitions).
@@ -49,15 +49,15 @@ Location data comes from [GeoNames](https://www.geonames.org/), a curated global
 
 ---
 
-## Phase 2 — online lookup (opt-in)
+## Online refinement (opt-in)
 
-When **Also use online lookup for higher accuracy** is checked in the Lookup options section, a second pass runs after Phase 1 using the [Nominatim](https://nominatim.org/) reverse geocoding API (OpenStreetMap polygon data). This provides higher-accuracy results — especially for county — because it uses actual administrative boundary polygons rather than nearest-point matching.
+When **Also use online lookup for higher accuracy** is checked, an additional pass runs after the offline lookup using the [Nominatim](https://nominatim.org/) reverse geocoding API (OpenStreetMap polygon data). This provides higher-accuracy results — especially for county — because it uses actual administrative boundary polygons rather than nearest-point matching.
 
 **Important notes:**
 
 - Requires an internet connection.
 - Rate-limited to **1 request per second** per Nominatim's usage policy. For large databases this can take a long time (e.g. ~3 hours for 10 000 waypoints).
-- Phase 1 results are always written first. The online pass only overwrites a field if it returns a non-empty value — Phase 1 data is never erased by a failed or empty response.
+- Offline results are always written first. The online pass only overwrites a field if it returns a non-empty value — offline data is never erased by a failed or empty response.
 - Progress and estimated time remaining are shown in the dialog. You can cancel at any time and keep whatever has been refined so far.
 
 ### Setting the default
@@ -68,6 +68,6 @@ The online checkbox is **unchecked by default**. To have it checked by default f
 
 ## Auto-geocode on import
 
-When importing a GPX or PQ zip file, OpenSAK automatically runs Phase 1 for any waypoints that are missing location data immediately after a successful import — no extra step needed.
+When importing a GPX or PQ zip file, OpenSAK automatically runs the offline lookup for any waypoints that are missing location data immediately after a successful import — no extra step needed.
 
-Phase 2 (online lookup) is **never triggered automatically on import**, even if **Enable online lookup for higher accuracy** is turned on in Advanced Settings. To run Phase 2, open the dialog manually via **Waypoint → Update Waypoint Locations…** after the import.
+The online refinement is **never triggered automatically on import**. To run it, open the dialog manually via **Waypoint → Update Waypoint Locations…** after the import.
