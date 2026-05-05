@@ -10,6 +10,29 @@ For planned features and known issues see the [GitHub Issues list](https://githu
 
 ---
 
+## [1.13.2] — 2026-05-05
+
+### Added
+
+- **Found status and date set automatically on PQ import** — When importing a standard Pocket
+  Query, caches you have found are now automatically marked as found and given the correct found
+  date. OpenSAK reads the `<sym>Geocache Found</sym>` flag that Geocaching.com sets in PQ files
+  for the requesting user's own finds, then locates your log entry to extract the exact date.
+  Your Geocaching username (configured in Settings) is used to match the log; the numeric finder
+  ID is learned automatically on first import and stored for faster matching in future imports.
+
+### Fixed
+
+- **FTF false positives on PQ import** — The First To Find flag was incorrectly set on all
+  found caches when importing a Pocket Query. The previous detection logic checked whether the
+  user's log was the earliest of the five logs shown in the PQ — but Geocaching.com only includes
+  the five *most recent* logs, so an old find would often appear first among those five even if
+  hundreds of people had found the cache earlier. FTF is now detected exclusively from keywords
+  in the user's own log text (`FTF`, `First to find`, `First finder`, `Første til at finde`),
+  which is the only reliable signal available from a standard PQ.
+
+---
+
 ## [1.13.1] — 2026-05-05
 
 ### Added

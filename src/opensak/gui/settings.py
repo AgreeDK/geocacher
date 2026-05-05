@@ -163,6 +163,19 @@ class AppSettings:
         self._s.setValue("user/gc_username", value.strip())
 
     @property
+    def gc_finder_id(self) -> str:
+        """Brugerens numeriske Geocaching.com finder-ID.
+
+        Sættes automatisk ved første PQ-import når gc_username matcher en log.
+        Kan også sættes manuelt. Bruges til hurtig og sikker found-detektion.
+        """
+        return self._s.value("user/gc_finder_id", "")
+
+    @gc_finder_id.setter
+    def gc_finder_id(self, value: str) -> None:
+        self._s.setValue("user/gc_finder_id", str(value).strip())
+
+    @property
     def gc_home_location(self) -> str:
         """Brugerens faste hjemkoordinat som rå streng."""
         return self._s.value("user/gc_home_location", "")

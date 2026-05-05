@@ -171,6 +171,11 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
 
     hidden_raw = _text(wpt_el, "gpx:time", NS)
 
+    # ── Found by me — detekteret via <sym>Geocache Found</sym> ───────────────
+    # Groundspeak sætter sym til "Geocache Found" for caches fundet af PQ-ejeren.
+    sym = _text(wpt_el, "gpx:sym", NS) or ""
+    found_by_me = sym.strip().lower() == "geocache found"
+
     # ── Groundspeak extension block ───────────────────────────────────────────
     # Detect which Groundspeak namespace this file actually uses (/1/0 or /1/0/1)
     gs_cache = None
@@ -356,6 +361,7 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
         "gsak_corrected_lon": gsak_corrected_lon,
         "gsak_original_lat": gsak_original_lat,
         "gsak_original_lon": gsak_original_lon,
+        "found_by_me":       found_by_me,
     }
 
 
@@ -652,10 +658,65 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
     for tb in data.get("trackables", []):
         session.add(Trackable(cache=cache, ref=tb["ref"], name=tb["name"]))
 
+    # ── Found by me (sym=Geocache Found) + found_date fra brugerens log ────────
+    # Vi sætter kun found=True hvis GPX'en eksplicit markerer cachen som fundet
+    # (sym="Geocache Found"). found=False sætter vi IKKE ved re-import — det ville
+    # overskrive manuelle markeringer. Undtagelse: hvis found_by_me er False og
+    # cachen ikke er fundet, lader vi den eksisterende found-værdi stå uændret.
+    #
+    # found_date hentes fra brugerens egen log-entry:
+    #   1. Søg efter log med finder_id der matcher gc_finder_id i Settings.
+    #   2. Fallback: søg på gc_username (case-insensitive).
+    #   3. Hvis ingen match og cachen er found: brug ældste "Found it" dato.
+    #
+    # Auto-lær finder_id: første gang vi ser en log der matcher gc_username
+    # gemmer vi det numeriske finder_id i Settings — så næste import er hurtigere.
+
+    found_by_me = data.get("found_by_me", False)
+    logs_data = data.get("logs", [])
+
+    if found_by_me:
+        cache.found = True
+        from opensak.gui.settings import get_settings
+        _sett = get_settings()
+        gc_username  = (_sett.gc_username  or "").strip().lower()
+        gc_finder_id = (_sett.gc_finder_id or "").strip()
+
+        found_log = None
+
+        # Trin 1: match på numerisk finder_id (hurtigst + mest præcist)
+        if gc_finder_id:
+            for lg in logs_data:
+                if (lg.get("log_type") == "Found it"
+                        and str(lg.get("finder_id", "")).strip() == gc_finder_id):
+                    found_log = lg
+                    break
+
+        # Trin 2: match på brugernavn (case-insensitive)
+        if found_log is None and gc_username:
+            for lg in logs_data:
+                if (lg.get("log_type") == "Found it"
+                        and (lg.get("finder") or "").strip().lower() == gc_username):
+                    found_log = lg
+                    # Auto-lær finder_id fra denne log
+                    detected_id = str(lg.get("finder_id", "")).strip()
+                    if detected_id and not gc_finder_id:
+                        _sett.gc_finder_id = detected_id
+                    break
+
+        # Trin 3: fallback — ældste "Found it" log (f.eks. ingen brugernavn sat)
+        if found_log is None:
+            found_logs = [lg for lg in logs_data
+                          if lg.get("log_type") == "Found it" and lg.get("log_date")]
+            if found_logs:
+                found_log = min(found_logs, key=lambda lg: lg["log_date"])
+
+        if found_log and found_log.get("log_date"):
+            cache.found_date = found_log["log_date"]
+
     # ── Derive dnf_date, first_to_find from logs (issue #33, #58, #114) ────────
     # These are only set/updated when a fresh import brings logs in.
     # We only touch them if we actually have log data to derive from.
-    logs_data = data.get("logs", [])
     if logs_data:
         # dnf_date: date of the most recent "Didn't find it" log by any finder
         # (GSAK stores the last DNF date regardless of who logged it)
@@ -683,46 +744,39 @@ def _upsert_cache(session: Session, data: dict, source_file: str) -> tuple[Cache
             # GSAK flag is authoritative — user set it manually in GSAK
             cache.first_to_find = gsak_ftf
         elif cache.found:
-            # Log-based detection: only check the current user's own logs
+            # Log-baseret FTF-detektion: kun brugerens egne log-tekster tjekkes.
+            #
+            # VIGTIGT: "rækkefølge-baseret" detektion (er brugerens log ældst?)
+            # er IKKE pålidelig fra en PQ — PQ viser kun de 5 NYESTE logs,
+            # ikke alle logs. En gammel found-log fra brugeren vil tit være
+            # den ældste af de 5 viste, selvom hundredvis fandt den først.
+            # Kun keyword-match i brugerens egen log-tekst er sikker.
             from opensak.gui.settings import get_settings
-            gc_username = get_settings().gc_username.strip().lower()
+            gc_username  = get_settings().gc_username.strip().lower()
+            gc_finder_id = get_settings().gc_finder_id.strip()
 
             ftf_keywords = ("ftf", "first to find", "first finder",
                             "første til at finde")
 
-            if gc_username:
-                # User has configured their username — match their logs
+            if gc_username or gc_finder_id:
                 user_found_logs = [
                     lg for lg in logs_data
                     if lg.get("log_type") == "Found it"
-                    and (lg.get("finder") or "").strip().lower() == gc_username
+                    and (
+                        (gc_finder_id and str(lg.get("finder_id", "")).strip() == gc_finder_id)
+                        or
+                        (gc_username and (lg.get("finder") or "").strip().lower() == gc_username)
+                    )
                 ]
-
-                # Check if user's own log text contains FTF keywords
-                user_log_has_ftf = any(
-                    any(kw in (lg.get("text") or "").lower()
-                        for kw in ftf_keywords)
+                cache.first_to_find = any(
+                    any(kw in (lg.get("text") or "").lower() for kw in ftf_keywords)
                     for lg in user_found_logs
                 )
-
-                # Check if user's log is the earliest "Found it" log
-                all_found_logs = [
-                    lg for lg in logs_data
-                    if lg.get("log_type") == "Found it" and lg.get("log_date")
-                ]
-                user_is_earliest = False
-                if user_found_logs and all_found_logs:
-                    all_found_logs.sort(key=lambda lg: lg["log_date"])
-                    earliest_finder = (all_found_logs[0].get("finder") or "").strip().lower()
-                    user_is_earliest = earliest_finder == gc_username
-
-                cache.first_to_find = user_log_has_ftf or user_is_earliest
             else:
-                # No username configured — cannot reliably detect FTF
-                # Don't guess, leave as False to avoid false positives (#114)
+                # Intet brugernavn konfigureret — kan ikke detektere FTF sikkert
                 cache.first_to_find = False
         else:
-            # User has NOT found this cache — FTF is not applicable
+            # Brugeren har IKKE fundet denne cache — FTF ikke relevant
             cache.first_to_find = False
 
     # ── GSAK corrected coordinates (issue #129, #73) ──────────────────────────
