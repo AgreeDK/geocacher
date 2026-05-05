@@ -44,7 +44,9 @@ def seeded_window(qtbot, tmp_path, monkeypatch):
     qtbot.addWidget(window)
     window.show()
     qtbot.waitExposed(window)
-    qtbot.wait(300)
+    qtbot.wait(600)
+    window._refresh_cache_list()
+    qtbot.wait(200)
 
     yield window
 
@@ -71,7 +73,9 @@ def empty_window(qtbot, tmp_path, monkeypatch):
     qtbot.addWidget(window)
     window.show()
     qtbot.waitExposed(window)
-    qtbot.wait(300)
+    qtbot.wait(600)
+    window._refresh_cache_list()
+    qtbot.wait(200)
 
     yield window
 
