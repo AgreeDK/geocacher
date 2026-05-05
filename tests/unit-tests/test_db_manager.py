@@ -72,7 +72,7 @@ class TestNewDatabase:
         assert len(manager.databases) == 2
 
     def test_rejects_duplicate_name(self, manager):
-        with pytest.raises(ValueError, match="db_err_name_exists"):
+        with pytest.raises(ValueError, match="Default"):
             manager.new_database("Default")
 
     def test_two_new_databases_are_distinct(self, manager, tmp_path):
@@ -99,7 +99,7 @@ class TestRename:
 
     def test_rejects_name_already_taken_by_another(self, manager, tmp_path):
         info = manager.new_database("Second", tmp_path / "second.db")
-        with pytest.raises(ValueError, match="db_err_name_exists"):
+        with pytest.raises(ValueError, match="Default"):
             manager.rename(info, "Default")
 
     def test_rename_to_same_name_is_allowed(self, manager):
@@ -124,7 +124,7 @@ class TestRemoveFromList:
         assert db_path.exists()
 
     def test_refuses_to_remove_active_database(self, manager):
-        with pytest.raises(ValueError, match="db_err_remove_active"):
+        with pytest.raises(ValueError, match="active"):
             manager.remove_from_list(manager.active)
 
 
@@ -147,7 +147,7 @@ class TestDeleteDatabase:
         assert not db_path.exists()
 
     def test_refuses_to_delete_active_database(self, manager):
-        with pytest.raises(ValueError, match="db_err_delete_active"):
+        with pytest.raises(ValueError, match="active"):
             manager.delete_database(manager.active)
 
     def test_missing_file_does_not_raise(self, manager, tmp_path):

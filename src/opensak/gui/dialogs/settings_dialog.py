@@ -98,7 +98,7 @@ class SettingsDialog(QDialog):
         layout.setContentsMargins(6, 6, 6, 6)
 
         # ── Hjemmepunkter ─────────────────────────────────────────────────────
-        loc_group = QGroupBox(tr("settings_group_location"))
+        loc_group = QGroupBox(tr("settings_group_user_locations"))
         loc_layout = QVBoxLayout(loc_group)
 
         self._points_table = QTableWidget(0, 3)
@@ -134,10 +134,6 @@ class SettingsDialog(QDialog):
         loc_layout.addWidget(self._points_table)
 
         list_btn_row = QHBoxLayout()
-        self._btn_activate = QPushButton(tr("settings_hp_activate"))
-        self._btn_activate.setEnabled(False)
-        self._btn_activate.clicked.connect(self._activate_point)
-        list_btn_row.addWidget(self._btn_activate)
 
         self._btn_edit = QPushButton(tr("edit"))
         self._btn_edit.setEnabled(False)
@@ -150,6 +146,11 @@ class SettingsDialog(QDialog):
         list_btn_row.addWidget(self._btn_delete)
         list_btn_row.addStretch()
         loc_layout.addLayout(list_btn_row)
+
+        self._home_protected_hint = QLabel(tr("settings_hp_home_protected_hint"))
+        self._home_protected_hint.setStyleSheet("color: gray; font-size: 10px;")
+        self._home_protected_hint.setVisible(False)
+        loc_layout.addWidget(self._home_protected_hint)
 
         add_group = QGroupBox(tr("settings_hp_add_group"))
         add_layout = QVBoxLayout(add_group)
@@ -256,6 +257,26 @@ class SettingsDialog(QDialog):
         hint = QLabel(tr("settings_gc_username_hint"))
         hint.setStyleSheet("color: gray; font-size: 10px;")
         user_layout.addWidget(hint)
+
+        # Home Location
+        home_loc_row = QHBoxLayout()
+        home_loc_row.addWidget(QLabel(tr("settings_gc_home_location_label")))
+        self._gc_home_location = QLineEdit()
+        self._gc_home_location.setPlaceholderText(tr("coord_conv_placeholder"))
+        home_loc_row.addWidget(self._gc_home_location)
+        user_layout.addLayout(home_loc_row)
+
+        self._home_loc_hint = QLabel("")
+        self._home_loc_hint.setStyleSheet("color: gray; font-size: 10px; padding-left: 2px;")
+        user_layout.addWidget(self._home_loc_hint)
+        self._gc_home_location.textChanged.connect(self._on_home_loc_changed)
+
+        home_loc_btn_row = QHBoxLayout()
+        self._btn_save_home_loc = QPushButton(tr("settings_gc_home_location_save"))
+        self._btn_save_home_loc.clicked.connect(self._save_home_location)
+        home_loc_btn_row.addWidget(self._btn_save_home_loc)
+        home_loc_btn_row.addStretch()
+        user_layout.addLayout(home_loc_btn_row)
 
         layout.addWidget(user_group)
 
@@ -535,10 +556,17 @@ class SettingsDialog(QDialog):
         fmt = s.coord_format
         self._points_table.setRowCount(len(points))
         for row, p in enumerate(points):
+            is_star_home = p.name == "★ Home"
             label = f"★  {p.name}" if p.name == active else p.name
+            if is_star_home:
+                label = "★ Home" if p.name != active else "★ Home  ★"
             name_item = QTableWidgetItem(label)
             if p.name == active:
                 name_item.setForeground(Qt.GlobalColor.darkGreen)
+            if is_star_home:
+                font = name_item.font()
+                font.setBold(True)
+                name_item.setFont(font)
 
             coords_str = format_coords(p.lat, p.lon, fmt)
             if "," in coords_str:
@@ -555,9 +583,9 @@ class SettingsDialog(QDialog):
             self._points_table.setItem(row, 1, QTableWidgetItem(lat_str))
             self._points_table.setItem(row, 2, QTableWidgetItem(lon_str))
 
-        self._btn_activate.setEnabled(False)
         self._btn_edit.setEnabled(False)
         self._btn_delete.setEnabled(False)
+        self._home_protected_hint.setVisible(False)
 
     def _selected_point(self) -> HomePoint | None:
         row = self._points_table.currentRow()
@@ -570,26 +598,20 @@ class SettingsDialog(QDialog):
         has = self._points_table.currentRow() >= 0 and bool(
             self._points_table.selectedItems()
         )
-        self._btn_edit.setEnabled(has)
-        self._btn_delete.setEnabled(has)
-        # Aktivér skal kun være aktiv hvis det valgte punkt IKKE allerede er aktivt
-        if has:
-            p = self._selected_point()
-            already_active = p is not None and p.name == get_settings().active_home_name
-            self._btn_activate.setEnabled(not already_active)
-        else:
-            self._btn_activate.setEnabled(False)
+        p = self._selected_point() if has else None
+        is_home = p is not None and p.name == "★ Home"
 
-    def _activate_point(self) -> None:
-        p = self._selected_point()
-        if p:
-            get_settings().set_active_home(p)
-            self._reload_points_table()
+        # ★ Home kan ikke redigeres eller slettes herfra
+        self._btn_edit.setEnabled(has and not is_home)
+        self._btn_delete.setEnabled(has and not is_home)
+        self._home_protected_hint.setVisible(is_home)
 
     def _delete_point(self) -> None:
         p = self._selected_point()
         if not p:
             return
+        if p.name == "★ Home":
+            return  # kan ikke slettes herfra
         reply = QMessageBox.question(
             self,
             tr("settings_hp_delete_title"),
@@ -605,12 +627,51 @@ class SettingsDialog(QDialog):
         p = self._selected_point()
         if not p:
             return
+        if p.name == "★ Home":
+            return  # redigeres under Geocaching profil
         fmt = get_settings().coord_format
         self._editing_original_name = p.name   # Issue #157: gem originalt navn
         self._new_name.setText(p.name)
         self._new_coord.setText(format_coords(p.lat, p.lon, fmt))
         self._btn_add.setText(tr("save"))       # Issue #157: vis at vi redigerer
         self._new_name.setFocus()
+
+    def _on_home_loc_changed(self, text: str) -> None:
+        if not text.strip():
+            self._home_loc_hint.setText("")
+            return
+        try:
+            from opensak.coords import parse_coords
+            lat, lon = parse_coords(text)
+            fmt = get_settings().coord_format
+            self._home_loc_hint.setText(f"✓  {format_coords(lat, lon, fmt)}")
+            self._home_loc_hint.setStyleSheet(
+                "color: #2e7d32; font-size: 10px; padding-left: 2px;"
+            )
+        except Exception:
+            self._home_loc_hint.setText(tr("settings_hp_coord_error"))
+            self._home_loc_hint.setStyleSheet(
+                "color: #c62828; font-size: 10px; padding-left: 2px;"
+            )
+
+    def _save_home_location(self) -> None:
+        """Gem Home Location fra Geocaching profil-feltet."""
+        text = self._gc_home_location.text().strip()
+        if not text:
+            get_settings().gc_home_location = ""
+            get_settings().sync()
+            self._reload_points_table()
+            return
+        try:
+            from opensak.coords import parse_coords
+            parse_coords(text)  # valider
+        except Exception:
+            from opensak.gui.icon import OpenSAKMessageBox
+            OpenSAKMessageBox.warning(self, tr("warning"), tr("settings_hp_coord_invalid"))
+            return
+        get_settings().gc_home_location = text
+        get_settings().sync()
+        self._reload_points_table()
 
     def _on_coord_changed(self, text: str) -> None:
         if not text.strip():
@@ -687,6 +748,7 @@ class SettingsDialog(QDialog):
         lang_idx = self._lang_combo.findData(current_language())
         self._lang_combo.setCurrentIndex(lang_idx if lang_idx >= 0 else 0)
         self._gc_username.setText(s.gc_username)
+        self._gc_home_location.setText(s.gc_home_location)
         self._search_min_chars.setValue(s.search_min_chars)
         self._search_debounce_ms.setValue(s.search_debounce_ms)
         if self._nominatim_cb is not None:
@@ -703,6 +765,18 @@ class SettingsDialog(QDialog):
 
         s = get_settings()
         s.gc_username       = self._gc_username.text()
+        # Home Location gemmes via knappen, men vi gemmer også ved OK
+        # (hvis brugeren har tastet uden at trykke Gem)
+        home_text = self._gc_home_location.text().strip()
+        if not home_text:
+            s.gc_home_location = ""
+        else:
+            try:
+                from opensak.coords import parse_coords
+                parse_coords(home_text)
+                s.gc_home_location = home_text
+            except Exception:
+                pass  # behold eksisterende hvis invalid
         s.use_miles         = self._miles_cb.isChecked()
         s.show_archived     = self._archived_cb.isChecked()
         s.show_found        = self._found_cb.isChecked()

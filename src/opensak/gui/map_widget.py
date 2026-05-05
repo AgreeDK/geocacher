@@ -108,8 +108,8 @@ MAP_HTML = """<!DOCTYPE html>
 <script>
 // ── Kort initialisering ───────────────────────────────────────────────────────
 var map = L.map('map', {
-    center: [56.0, 10.5],
-    zoom: 7,
+    center: [INIT_LAT, INIT_LON],
+    zoom: INIT_ZOOM,
     zoomControl: true
 });
 
@@ -203,6 +203,19 @@ function loadCaches(cachesJson) {
         markers[c.gc_code] = marker;
         clusterGroup.addLayer(marker);
     });
+
+    // Pan/zoom efter markers er tilføjet
+    if (window._panHomeAfterLoad) {
+        window._panHomeAfterLoad = false;
+        panToHome();
+    } else if (Object.keys(markers).length > 0) {
+        try {
+            var bounds = clusterGroup.getBounds();
+            if (bounds && bounds.isValid()) {
+                map.fitBounds(bounds, {padding: [30, 30]});
+            }
+        } catch(e) {}
+    }
 }
 
 function setHomeLocation(lat, lon, label) {
@@ -322,6 +335,7 @@ class MapWidget(QWidget):
         self._caches: list[Cache] = []
         self._ready = False
         self._pending_caches = None
+        self._pending_refresh = None
         self._pending_home = None
         self._setup_ui()
 
@@ -351,7 +365,16 @@ class MapWidget(QWidget):
 
         # Load kortet
         self._page.loadFinished.connect(self._on_load_finished)
-        self._page.setHtml(MAP_HTML, QUrl("qrc:///"))
+        self._ready = False
+        import time
+        from opensak.gui.settings import get_settings
+        s = get_settings()
+        init_lat = s.home_lat
+        init_lon = s.home_lon
+        html = MAP_HTML.replace("INIT_LAT", str(init_lat))
+        html = html.replace("INIT_LON", str(init_lon))
+        html = html.replace("INIT_ZOOM", "12")
+        self._page.setHtml(html, QUrl(f"qrc:///{int(time.time())}"))
 
         layout.addWidget(self._view)
 
@@ -364,19 +387,33 @@ class MapWidget(QWidget):
     def _on_load_finished(self, ok: bool) -> None:
         if not ok:
             return
+        # loadFinished fyres flere gange — tjek Leaflet er klar
+        self._page.runJavaScript(
+            "typeof L !== 'undefined' && typeof loadCaches === 'function'",
+            self._on_leaflet_ready
+        )
+
+    def _on_leaflet_ready(self, ready: bool) -> None:
+        if not ready or self._ready:
+            return
         self._ready = True
 
-        # Sæt hjemkoordinat og centrér kortet der
+        # Sæt home-markør (kortet er allerede centreret via INIT_LAT/LON)
         from opensak.gui.settings import get_settings
         s = get_settings()
         home_label = s.active_home_name or tr("map_home_label")
         self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(home_label)})")
-        self._run_js("panToHome()")
 
-        # Indlæs ventende caches hvis der er nogen
+        # Indlæs ventende caches
         if self._pending_caches is not None:
             self._do_load_caches(self._pending_caches)
             self._pending_caches = None
+
+        # Kald pending refresh callback
+        if self._pending_refresh is not None:
+            cb = self._pending_refresh
+            self._pending_refresh = None
+            cb()
 
     def _run_js(self, js: str) -> None:
         """Kør JavaScript i kortvisningen."""
@@ -420,23 +457,13 @@ class MapWidget(QWidget):
         json_str = json_str.replace("\\", "\\\\").replace("`", "\\`")
         self._run_js(f"loadCaches(`{json_str}`)")
 
-        # Zoom til alle markers
-        if data:
-            self._run_js("fitAllMarkers()")
-
     def pan_to_cache(self, gc_code: GcCode) -> None:
         """Centrér kortet på en bestemt cache."""
         if self._ready:
             safe = gc_code.replace("'", "\\'")
             self._run_js(f"panToCache('{safe}')")
 
-    def update_home(self) -> None:
-        """Opdatér hjemkoordinat markøren fra indstillinger."""
-        from opensak.gui.settings import get_settings
-        s = get_settings()
-        if self._ready:
-            home_label = s.active_home_name or tr("map_home_label")
-            self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(home_label)})")
+
 
     def fit_all(self) -> None:
         if self._ready:
@@ -468,6 +495,41 @@ class MapWidget(QWidget):
         json_str = json.dumps(data, ensure_ascii=False)
         json_str = json_str.replace("\\", "\\\\").replace("`", "\\`")
         self._run_js(f"updateCacheMarker(`{json_str}`)")
+
+    def is_ready(self) -> bool:
+        return self._ready
+
+    def set_pending_refresh(self, callback) -> None:
+        self._pending_refresh = callback
+
+    def update_home(self) -> None:
+        """Opdatér home-markøren på kortet."""
+        from opensak.gui.settings import get_settings
+        s = get_settings()
+        if self._ready:
+            home_label = s.active_home_name or tr("map_home_label")
+            self._run_js(f"setHomeLocation({s.home_lat}, {s.home_lon}, {json.dumps(home_label)})")
+
+    def pan_to_location(self, lat: float, lon: float, label: str) -> None:
+        """Pan kortet til en specifik koordinat."""
+        if self._ready:
+            self._run_js(f"setHomeLocation({lat}, {lon}, {json.dumps(label)})")
+            self._run_js("panToHome()")
+
+    def reload_map(self, refresh_callback=None) -> None:
+        """Genindlæs kort HTML med aktuelle koordinater."""
+        self._pending_refresh = refresh_callback
+        # Genindlæs setHtml (koordinater hentes fra settings)
+        import time
+        from opensak.gui.settings import get_settings
+        s = get_settings()
+        init_lat = s.home_lat
+        init_lon = s.home_lon
+        html = MAP_HTML.replace("INIT_LAT", str(init_lat))
+        html = html.replace("INIT_LON", str(init_lon))
+        html = html.replace("INIT_ZOOM", "12")
+        self._ready = False
+        self._page.setHtml(html, QUrl(f"qrc:///{int(time.time())}"))
 
     def pan_to_home(self) -> None:
         if self._ready:

@@ -166,9 +166,10 @@ class MainWindow(QMainWindow):
         self._reload_home_combo()
         self._reload_db_combo()
         # Load caches after UI is ready
-        QTimer.singleShot(100, self._refresh_cache_list)
+        QTimer.singleShot(500, self._initial_load)
         # Tjek for opdateringer i baggrunden (5 sek forsinkelse — GUI er klar)
         QTimer.singleShot(5000, self._check_update_background)
+        QTimer.singleShot(7000, self._check_setup_complete)
 
     # ── UI setup ──────────────────────────────────────────────────────────────
 
@@ -631,9 +632,9 @@ class MainWindow(QMainWindow):
         self._reload_db_combo()
         self._detail_panel.clear()
         self._load_sort_for_active_db()
-        self._refresh_cache_list()
         self._reload_home_combo()
-        self._map_widget.update_home()
+        # Reload kort med aktuel lokation for denne DB
+        self._map_widget.reload_map(self._refresh_cache_list)
         self._statusbar.showMessage(
             tr("status_db_name", db_name=db_info.name), 4000
         )
@@ -961,8 +962,7 @@ class MainWindow(QMainWindow):
         dlg = SettingsDialog(self)
         if dlg.exec():
             self._reload_home_combo()
-            self._map_widget.update_home()
-            self._refresh_cache_list()
+            self._map_widget.reload_map(self._refresh_cache_list)
 
     def _reload_home_combo(self) -> None:
         """Genindlæs hjemmepunkts-dropdown fra settings."""
@@ -984,19 +984,61 @@ class MainWindow(QMainWindow):
         self._home_combo.blockSignals(False)
 
     def _on_home_changed(self, index: int) -> None:
-        """Skift aktivt hjemmepunkt fra dropdown."""
+        """Skift aktivt hjemmepunkt — gem per-db og pan kort."""
         name = self._home_combo.itemData(index)
         if not name:
             return
         s = get_settings()
         for p in s.home_points:
             if p.name == name:
-                s.set_active_home(p)
-                self._map_widget.update_home()
+                # ★ Home: brug koordinater fra gc_home_location
+                if p.name == "★ Home":
+                    real = s.get_gc_home_point()
+                    point = real if real else p
+                else:
+                    point = p
+                # Gem direkte til QSettings uden at bruge setters
+                # (for at undgå evt. caching-problemer)
+                db_key_prefix = s._db_key("")
+                s._s.setValue(f"{db_key_prefix}active_home_name", point.name)
+                s._s.setValue(f"{db_key_prefix}home_lat", point.lat)
+                s._s.setValue(f"{db_key_prefix}home_lon", point.lon)
+                s._s.sync()
+                # Pan kort til ny lokation — INGEN HTML reload
+                self._map_widget.pan_to_location(point.lat, point.lon, point.name)
+                # Opdater distances i cache-listen
+                self._refresh_cache_list()
+                self._update_info_bar()
                 self._statusbar.showMessage(
-                    tr("status_home_changed", name=p.name), 3000
+                    tr("status_home_changed", name=point.name), 3000
                 )
                 break
+
+    def _initial_load(self) -> None:
+        """Første load ved opstart — vent på kort hvis ikke klar."""
+        if not self._map_widget.is_ready():
+            self._map_widget.set_pending_refresh(self._refresh_cache_list)
+        else:
+            self._refresh_cache_list()
+
+    def _check_setup_complete(self) -> None:
+        """Vis velkomst-dialog hvis setup mangler."""
+        from opensak.gui.settings import get_settings
+        s = get_settings()
+        if not s.is_setup_complete():
+            from opensak.gui.icon import OpenSAKMessageBox
+            msg = OpenSAKMessageBox(self)
+            msg.setWindowTitle(tr("setup_welcome_title"))
+            msg.setText(tr("setup_welcome_msg"))
+            msg.setStandardButtons(
+                OpenSAKMessageBox.StandardButton.Ok |
+                OpenSAKMessageBox.StandardButton.Cancel
+            )
+            msg.button(OpenSAKMessageBox.StandardButton.Ok).setText(
+                tr("setup_open_settings")
+            )
+            if msg.exec() == OpenSAKMessageBox.StandardButton.Ok:
+                self._open_settings()
 
     def _next_cw_id(self) -> str:
         """Return the next available CWnnn id for the active database."""

@@ -279,7 +279,12 @@ class DatabaseManagerDialog(QDialog):
         if dlg.exec():
             try:
                 db = self._manager.new_database(dlg.name, dlg.custom_path)
-                self._refresh_list()
+                # Sæt centerpoint til Home Location eller sidst aktive koordinat
+                self._manager.switch_to(db)
+                from opensak.gui.settings import get_settings
+                get_settings().apply_default_center_for_new_db()
+                self._refresh_list(select_db=db)
+                self.database_switched.emit(db)
                 QMessageBox.information(
                     self, tr("db_created_title"),
                     tr("db_created_msg", name=db.name)

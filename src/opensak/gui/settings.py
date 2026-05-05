@@ -84,21 +84,25 @@ class AppSettings:
 
     @property
     def home_points(self) -> list[HomePoint]:
-        """Global liste af navngivne hjemmepunkter."""
+        """Global liste — ★ Home øverst, derefter User Locations."""
         raw = self._s.value("homepoints/list", None)
-        if not raw:
-            return []
-        try:
-            data = json.loads(raw)
-            return [HomePoint.from_dict(d) for d in data]
-        except Exception:
-            return []
+        user_points: list[HomePoint] = []
+        if raw:
+            try:
+                data = json.loads(raw)
+                user_points = [HomePoint.from_dict(d) for d in data
+                               if d.get("name") != "★ Home"]
+            except Exception:
+                pass
+        home = self.get_gc_home_point()
+        return ([home] + user_points) if home else user_points
 
     @home_points.setter
     def home_points(self, points: list[HomePoint]) -> None:
+        filtered = [p for p in points if p.name != "★ Home"]
         self._s.setValue(
             "homepoints/list",
-            json.dumps([p.to_dict() for p in points])
+            json.dumps([p.to_dict() for p in filtered])
         )
 
     @property
@@ -157,6 +161,30 @@ class AppSettings:
     @gc_username.setter
     def gc_username(self, value: str) -> None:
         self._s.setValue("user/gc_username", value.strip())
+
+    @property
+    def gc_home_location(self) -> str:
+        """Brugerens faste hjemkoordinat som rå streng."""
+        return self._s.value("user/gc_home_location", "")
+
+    @gc_home_location.setter
+    def gc_home_location(self, value: str) -> None:
+        self._s.setValue("user/gc_home_location", value.strip())
+
+    def get_gc_home_point(self) -> "HomePoint | None":
+        """Parse gc_home_location til HomePoint, eller None."""
+        raw = self.gc_home_location
+        if not raw:
+            return None
+        try:
+            from opensak.coords import parse_coords
+            lat, lon = parse_coords(raw)
+            return HomePoint("★ Home", lat, lon)
+        except Exception:
+            return None
+
+    def is_setup_complete(self) -> bool:
+        return bool(self.gc_username.strip()) and bool(self.gc_home_location.strip())
 
     # ── Units ─────────────────────────────────────────────────────────────────
 
@@ -292,6 +320,16 @@ class AppSettings:
     @last_import_dir.setter
     def last_import_dir(self, value: str) -> None:
         self._s.setValue("paths/last_import_dir", value)
+
+    def apply_default_center_for_new_db(self) -> None:
+        """Sæt ★ Home som centerpoint for ny DB hvis tilgængeligt."""
+        home = self.get_gc_home_point()
+        if home:
+            self.set_active_home(home)
+            self._s.sync()
+
+    def is_setup_complete(self) -> bool:
+        return bool(self.gc_username.strip()) and bool(self.gc_home_location.strip())
 
     def sync(self) -> None:
         self._s.sync()

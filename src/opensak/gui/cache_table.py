@@ -821,6 +821,10 @@ class CacheTableView(QTableView):
         self.horizontalHeader().setSortIndicator(col_idx, order)
 
     def load_caches(self, caches: list[Cache]) -> None:
+        # Bloker row-changed signalet under load så første cache ikke
+        # auto-selekteres og vises på kortet (Qt sætter current til række 0
+        # efter beginResetModel/endResetModel)
+        self.selectionModel().blockSignals(True)
         self._model.load(caches)
         # Genanvend sortering - beginResetModel() nulstiller Qt sort-indikatoren
         if self._last_sort_col is not None:
@@ -828,6 +832,9 @@ class CacheTableView(QTableView):
                      else Qt.SortOrder.DescendingOrder)
             self._model.sort(self._last_sort_col, order)
             self.horizontalHeader().setSortIndicator(self._last_sort_col, order)
+        self.clearSelection()
+        self.setCurrentIndex(self._model.index(-1, -1))
+        self.selectionModel().blockSignals(False)
 
     def _on_row_changed(self, current, previous) -> None:
         cache = self._model.cache_at(current.row())
