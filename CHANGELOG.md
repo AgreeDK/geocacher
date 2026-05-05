@@ -10,6 +10,54 @@ For planned features and known issues see the [GitHub Issues list](https://githu
 
 ---
 
+## [1.13.1] — 2026-05-05
+
+### Added
+
+- **Home location in Geocaching profile** (fixes #183) — A dedicated *Home location* field
+  has been added to the *Geocaching profile* section in Settings. This sets a permanent
+  home coordinate that is used as the default center point for all new databases and as the
+  ★ Home entry in the location dropdown.
+
+- **User locations renamed** (fixes #183) — The *Home coordinates* group in Settings has
+  been renamed to *User locations* to better reflect its purpose. The ★ Home entry (from
+  Geocaching profile) always appears at the top and cannot be edited or deleted from this
+  list — it is managed exclusively via the Geocaching profile section.
+
+- **Welcome dialog on first launch** (fixes #183) — If username or home location is not
+  configured, a welcome dialog is shown a few seconds after startup prompting the user to
+  open Settings and complete the setup.
+
+### Fixed
+
+- **Map centers on correct location at startup** (fixes #183) — The map now starts at the
+  active location for the current database instead of a hardcoded position in Denmark. The
+  starting coordinates are injected directly into the Leaflet HTML before the page loads,
+  so the correct location is visible from the very first render.
+
+- **Location saved per database** (fixes #183) — Switching the active location via the
+  toolbar dropdown now correctly saves the chosen location for that specific database.
+  Switching to a different database and back restores each database's own last-used location.
+
+- **Toolbar dropdown reflects active location after DB switch** (fixes #183) — The location
+  dropdown in the toolbar now correctly updates to show the active location for the newly
+  selected database when switching databases.
+
+- **New database uses Home location as default center** (fixes #183) — When creating a new
+  database, the center point is automatically set to the Home location from the Geocaching
+  profile. If no Home location is configured, the last active location is used as a fallback.
+
+- **First cache no longer auto-selected on load** — After loading or refreshing caches, the
+  first entry in the list was automatically selected and shown on the map without any user
+  action. The list now loads with no selection, so the map is not unintentionally panned.
+
+- **test_db_manager match patterns** — Four unit tests used raw translation keys as match
+  patterns in `pytest.raises()`. Since `tr()` returns translated text, the patterns never
+  matched and the tests always failed. Updated to match on stable substrings present in
+  the translated messages.
+
+---
+
 ## [1.13.0] — 2026-05-05
 
 ### Added
