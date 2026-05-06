@@ -405,17 +405,11 @@ class TripPlannerDialog(_PreviewMixin, QDialog):
         layout = QVBoxLayout(self)
         layout.setSpacing(8)
 
-        # Kilde-label
-        src_lbl = QLabel(tr("trip_source_label", count=len(self._all_caches)))
-        src_lbl.setStyleSheet("color: gray; font-style: italic;")
-        layout.addWidget(src_lbl)
-
-        # Fælles filtre (ikke-fundet, tilgængelig, antal, sortering)
+        # Criteria-gruppe: antal + kilde-label på én linje
         filter_group = QGroupBox(tr("trip_criteria_group"))
         fl = QVBoxLayout(filter_group)
         fl.setSpacing(6)
 
-        # Antal
         count_row = QHBoxLayout()
         count_row.addWidget(QLabel(tr("trip_count_label")))
         self._spin_count = QSpinBox()
@@ -424,27 +418,12 @@ class TripPlannerDialog(_PreviewMixin, QDialog):
         self._spin_count.setMaximumWidth(90)
         self._spin_count.valueChanged.connect(self._update_preview)
         count_row.addWidget(self._spin_count)
+        count_row.addSpacing(16)
+        src_lbl = QLabel(tr("trip_source_label", count=len(self._all_caches)))
+        src_lbl.setStyleSheet("color: gray; font-style: italic;")
+        count_row.addWidget(src_lbl)
         count_row.addStretch()
         fl.addLayout(count_row)
-
-        # Kun ikke-fundne
-        self._cb_not_found = QCheckBox(tr("trip_cb_not_found"))
-        self._cb_not_found.setChecked(True)
-        self._cb_not_found.stateChanged.connect(self._update_preview)
-        fl.addWidget(self._cb_not_found)
-
-        found_hint = QLabel(tr("trip_found_hint"))
-        found_hint.setWordWrap(True)
-        found_hint.setStyleSheet(
-            "color: gray; font-size: 10px; padding-left: 20px; font-style: italic;"
-        )
-        fl.addWidget(found_hint)
-
-        # Kun tilgængelige
-        self._cb_available = QCheckBox(tr("trip_cb_available"))
-        self._cb_available.setChecked(True)
-        self._cb_available.stateChanged.connect(self._update_preview)
-        fl.addWidget(self._cb_available)
 
         layout.addWidget(filter_group)
 
@@ -772,11 +751,9 @@ class TripPlannerDialog(_PreviewMixin, QDialog):
     # ── Beregning ─────────────────────────────────────────────────────────────
 
     def _base_filter(self, caches: list) -> list:
-        """Anvend fælles filtre (found, available)."""
-        if self._cb_not_found.isChecked():
-            caches = [c for c in caches if not c.found]
-        if self._cb_available.isChecked():
-            caches = [c for c in caches if c.available and not c.archived]
+        """Anvend fælles filtre (found, available) — altid aktive."""
+        caches = [c for c in caches if not c.found]
+        caches = [c for c in caches if c.available and not c.archived]
         return caches
 
     def _compute_radius(self) -> tuple[list, dict, str]:
