@@ -381,6 +381,9 @@ STRINGS: dict[str, str] = {
     "db_err_remove_active":         "Aktivní databázi nelze odebrat ze seznamu.",
     "db_err_delete_active":         "Aktivní databázi nelze smazat — nejprve přepněte na jinou.",
     "db_err_delete_partial":        "Databáze byla odebrána ze seznamu, ale některé soubory se nepodařilo smazat:",
+    "db_delete_folder_title":      "Smazat složku",
+    "db_delete_folder_msg":         "Složka '{path}' je nyní prázdná.\n\nChcete ji také smazat?",
+    "db_err_delete_folder":         "Složku '{path}' se nepodařilo smazat:",
     "db_delete_active_error":       "Nelze smazat '{name}', protože je to aktivní databáze.\n\nNejprve přepněte na jinou databázi.",
 
     # ── Column dialog ─────────────────────────────────────────────────────────

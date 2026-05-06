@@ -380,8 +380,22 @@ class DatabaseManagerDialog(QDialog):
         )
         if reply == QMessageBox.StandardButton.Yes:
             try:
-                self._manager.delete_database(db)
+                empty_folder = self._manager.delete_database(db)
                 self._refresh_list()
+                # Tilbyd at slette mappen hvis den er tom
+                if empty_folder is not None:
+                    folder_reply = QMessageBox.question(
+                        self,
+                        tr("db_delete_folder_title"),
+                        tr("db_delete_folder_msg", path=empty_folder),
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                        QMessageBox.StandardButton.No,
+                    )
+                    if folder_reply == QMessageBox.StandardButton.Yes:
+                        try:
+                            self._manager.delete_folder(empty_folder)
+                        except OSError as e:
+                            QMessageBox.warning(self, tr("warning"), str(e))
             except OSError as e:
                 # Filer kunne ikke slettes, men db er fjernet fra listen
                 self._refresh_list()

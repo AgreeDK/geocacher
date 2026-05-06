@@ -381,6 +381,9 @@ STRINGS: dict[str, str] = {
     "db_err_remove_active":         "Não é possível remover a base de dados ativa da lista.",
     "db_err_delete_active":         "Não é possível eliminar a base de dados ativa — mude primeiro para outra.",
     "db_err_delete_partial":        "A base de dados foi removida da lista, mas alguns ficheiros não puderam ser eliminados:",
+    "db_delete_folder_title":      "Excluir pasta",
+    "db_delete_folder_msg":         "A pasta '{path}' está agora vazia.\n\nDeseja excluí-la também?",
+    "db_err_delete_folder":         "Não foi possível excluir a pasta '{path}':",
     "db_delete_active_error":       "Não é possível eliminar '{name}' porque é a base de dados ativa.\n\nMude primeiro para outra base de dados.",
 
     # ── Column dialog ─────────────────────────────────────────────────────────

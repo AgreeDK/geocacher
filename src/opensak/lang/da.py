@@ -381,6 +381,9 @@ STRINGS: dict[str, str] = {
     "db_err_remove_active":         "Kan ikke fjerne den aktive database fra listen.",
     "db_err_delete_active":         "Kan ikke slette den aktive database — skift til en anden først.",
     "db_err_delete_partial":        "Databasen er fjernet fra listen, men nogle filer kunne ikke slettes:",
+    "db_delete_folder_title":      "Slet mappe",
+    "db_delete_folder_msg":         "Mappen '{path}' er nu tom.\n\nVil du også slette den?",
+    "db_err_delete_folder":         "Kunne ikke slette mappen '{path}':",
     "db_delete_active_error":       "Kan ikke slette '{name}' fordi den er den aktive database.\n\nSkift til en anden database først.",
 
     # ── Kolonne dialog ────────────────────────────────────────────────────────

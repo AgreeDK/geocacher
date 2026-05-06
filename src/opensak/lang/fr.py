@@ -381,6 +381,9 @@ STRINGS: dict[str, str] = {
     "db_err_remove_active":         "Impossible de retirer la base de données active de la liste.",
     "db_err_delete_active":         "Impossible de supprimer la base de données active — basculez d'abord vers une autre.",
     "db_err_delete_partial":        "La base de données a été retirée de la liste, mais certains fichiers n'ont pas pu être supprimés :",
+    "db_delete_folder_title":      "Supprimer le dossier",
+    "db_delete_folder_msg":         "Le dossier '{path}' est maintenant vide.\n\nVoulez-vous également le supprimer ?",
+    "db_err_delete_folder":         "Impossible de supprimer le dossier '{path}' :",
     "db_delete_active_error":       "Impossible de supprimer '{name}' car c'est la base de données active.\n\nBasculez d'abord vers une autre base de données.",
 
     # ── Column dialog ─────────────────────────────────────────────────────────

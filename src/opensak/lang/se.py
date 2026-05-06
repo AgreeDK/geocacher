@@ -381,6 +381,9 @@ STRINGS: dict[str, str] = {
     "db_err_remove_active":         "Den aktiva databasen kan inte tas bort från listan.",
     "db_err_delete_active":         "Den aktiva databasen kan inte raderas — byt till en annan först.",
     "db_err_delete_partial":        "Databasen har tagits bort från listan, men vissa filer kunde inte raderas:",
+    "db_delete_folder_title":      "Ta bort mapp",
+    "db_delete_folder_msg":         "Mappen '{path}' är nu tom.\n\nVill du också ta bort den?",
+    "db_err_delete_folder":         "Det gick inte att ta bort mappen '{path}':",
     "db_delete_active_error":       "Kan inte radera '{name}' eftersom det är den aktiva databasen.\n\nByt till en annan databas först.",
 
     # ── Column dialog ─────────────────────────────────────────────────────────

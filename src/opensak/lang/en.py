@@ -381,6 +381,9 @@ STRINGS: dict[str, str] = {
     "db_err_remove_active":         "Cannot remove the active database from the list.",
     "db_err_delete_active":         "Cannot delete the active database — switch to another one first.",
     "db_err_delete_partial":        "The database was removed from the list, but some files could not be deleted:",
+    "db_delete_folder_title":      "Delete folder",
+    "db_delete_folder_msg":         "The folder '{path}' is now empty.\n\nDo you want to delete it as well?",
+    "db_err_delete_folder":         "Could not delete the folder '{path}':",
     "db_delete_active_error":       "Cannot delete '{name}' because it is the active database.\n\nSwitch to another database first.",
 
     # ── Column dialog ─────────────────────────────────────────────────────────

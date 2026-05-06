@@ -304,8 +304,14 @@ class DatabaseManager:
         self._databases.remove(db_info)
         self._save_to_settings()
 
-    def delete_database(self, db_info: "DatabaseInfo") -> None:
-        """Slet database permanent (inkl. -shm og -wal filer)."""
+    def delete_database(self, db_info: "DatabaseInfo") -> Optional[Path]:
+        """Slet database permanent (inkl. -shm og -wal filer).
+
+        Returnerer:
+            Path til forældremappe hvis den er tom efter sletning og
+            indeholder ingen andre filer — så dialogen kan tilbyde at
+            slette den.  Returnerer None hvis mappen ikke er tom.
+        """
         if db_info == self._active:
             raise ValueError(
                 tr("db_err_delete_active")
@@ -321,6 +327,7 @@ class DatabaseManager:
 
         errors: list[str] = []
         db_path = db_info.path
+        folder = db_path.parent
 
         # Slet hovedfilen + WAL/SHM sidekick-filer
         for suffix in ("", "-shm", "-wal"):
@@ -341,6 +348,23 @@ class DatabaseManager:
 
         self._databases.remove(db_info)
         self._save_to_settings()
+
+        # Tjek om mappen er tom efter sletning — returner stien så
+        # dialogen kan spørge brugeren om den også skal slettes.
+        try:
+            remaining = list(folder.iterdir())
+            if not remaining:
+                return folder
+        except OSError:
+            pass
+        return None
+
+    def delete_folder(self, folder: Path) -> None:
+        """Slet en tom mappe (kaldes fra dialog efter bruger-bekræftelse)."""
+        try:
+            folder.rmdir()
+        except OSError as e:
+            raise OSError(tr("db_err_delete_folder", path=folder) + f"\n{e}")
 
 
 # ── Module-level singleton ────────────────────────────────────────────────────

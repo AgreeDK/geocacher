@@ -384,6 +384,9 @@ STRINGS: dict[str, str] = {
     "db_err_remove_active":         "Kan de actieve database niet uit de lijst verwijderen.",
     "db_err_delete_active":         "Kan de actieve database niet verwijderen — schakel eerst over naar een andere.",
     "db_err_delete_partial":        "De database is uit de lijst verwijderd, maar sommige bestanden konden niet worden verwijderd:",
+    "db_delete_folder_title":      "Map verwijderen",
+    "db_delete_folder_msg":         "De map '{path}' is nu leeg.\n\nWilt u deze ook verwijderen?",
+    "db_err_delete_folder":         "Kan de map '{path}' niet verwijderen:",
     "db_delete_active_error":       "Kan '{name}' niet verwijderen omdat het de actieve database is.\n\nSchakel eerst over naar een andere database.",
 
     # ── Column dialog ─────────────────────────────────────────────────────────
