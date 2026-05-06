@@ -10,6 +10,26 @@ For planned features and known issues see the [GitHub Issues list](https://githu
 
 ---
 
+## [1.13.3] — 2026-05-06
+
+### Added
+
+- **Colour-coded GC codes** (fixes #117) — Cache type colours are now applied to the GC code
+  column in the cache list, making it easy to spot cache types at a glance. The colours in the
+  *Count:* summary bar have been updated to match.
+
+### Fixed
+
+- **Strikethrough for archived and disabled caches** (fixes #118) — Cache entries that are
+  archived or temporarily disabled are now shown with strikethrough text in the cache list,
+  giving a clear visual indication that the cache is not currently active.
+
+- **Delete database — empty folder cleanup** (fixes #146) — After deleting a database, OpenSAK
+  now checks whether the containing folder is empty. If it is, a prompt is shown offering to
+  delete the folder as well, so no orphaned folders are left behind.
+
+---
+
 ## [1.13.2] — 2026-05-05
 
 ### Added
@@ -169,308 +189,44 @@ For planned features and known issues see the [GitHub Issues list](https://githu
   a single filter expression combines any number of conditions (cache type, D/T,
   hidden date, size, attributes, …) into one efficient query. Contributed by Fabio.
 - **Database switcher dropdown** in the toolbar (closes #17) — switch between databases
-  directly from the toolbar without opening the Database Manager dialog. The active
-  database is always pre-selected; choosing another entry switches immediately.
-  Contributed by Fabio.
+  without opening the Database Manager dialog.
+
+### Fixed
+- **Lat/Lon columns** (fixes #84) — latitude and longitude are now shown in the correct
+  human-readable format (DMM / DMS / DD according to the user's preference) instead of
+  raw decimal degrees.
+- **Container sort** (fixes #90) — the Size/Container column now sorts in a logical order
+  (Nano → Micro → Small → Regular → Large → Very Large → Other) instead of alphabetically.
+- **Log counter** (fixes #87) — a new *Logs* column shows the total number of log entries
+  for each cache. The count is populated automatically for existing databases via a migration.
+- **Lab Cache label** — Lab Caches now show an `L` label in the size/type indicator column,
+  consistent with the labels used for other special cache types.
 
 ---
 
-## [1.11.16] — 2026-04-30
+## [1.11.16] — 2026-04-29
+### Fixed
+- Search field duplicated in filter dialog (fixes #86) — rolled back the change introduced
+  in #80 that caused the search field to appear twice.
+
+---
+
+## [1.11.15] — 2026-04-29
 ### Added
-- **Custom Waypoint support** (fixes #141) — the Add/Edit cache dialog now supports
-  two modes selected via radio buttons at the top:
-  - **Geocache** — existing behaviour; GC code and D/T are validated strictly.
-  - **Custom Waypoint** — for personal points of interest such as parking spots,
-    hotel stays, multi-cache stages or anything else that is not a geocache.
-    The waypoint receives an auto-generated ID (`CW001`, `CW002`, …) and a dedicated
-    type dropdown (Parking Area, Trailhead, Stage, Final Location, Reference Point,
-    Waypoint, Hotel/POI, Custom). D/T, Container and the Status tab are hidden as
-    they are not relevant for custom waypoints.
-- **"Belongs to cache" field on Custom Waypoints** — an optional GC code field lets
-  you link a custom waypoint to a specific geocache (e.g. a parking coordinate for
-  GC12345). This is validated on save (must start with `GC` if filled in) and stored
-  in the new `parent_gc_code` column, making the connection explicit in the database —
-  something that was not possible in GSAK.
-
-### Fixed
-- **Invalid D/T values accepted** (part of #141) — Difficulty and Terrain fields in
-  Geocache mode now validate that the entered value is one of the official Groundspeak
-  ratings (1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0). Previously it was possible
-  to save illegal values such as 1.7 by typing them directly into the spin box.
-
-### Changed
-- **`parent_gc_code` column added to `caches` table** — Migration #8 adds the column
-  automatically on first launch. No re-import required. The column is `NULL` for all
-  existing geocaches.
-- **8 new translation keys** added to all 7 language files (da, en, fr, de, cs, pt, se).
+- **Swedish translation** (`lang/se.py`) — contributed by Hans
+- **German translation** (`lang/de.py`) — contributed by Hans
 
 ---
 
-## [1.11.15] — 2026-04-30
+## [1.11.14] — 2026-04-28
 ### Fixed
-- **Missing cache types in filter dialog** (fixes #132) — Cache In Trash Out Event, Lab Cache,
-  Community Celebration Event, Geocaching HQ Cache, Geocaching HQ Celebration,
-  Geocaching HQ Block Party, Project A.P.E. Cache and Locationless (Reverse) Cache
-  were missing from the cache type filter. All 21 official Groundspeak cache types
-  are now listed.
-- **Corrected coordinates not imported from GSAK** (fixes #129) — Corrected coordinates
-  saved in GSAK (`<gsak:LatN>` / `<gsak:LongE>` inside `<gsak:wptExtension>`) are now
-  read during GPX import and stored in the cache's UserNote. A value of 0.0/0.0 (GSAK's
-  default when no correction is set) is correctly ignored. Existing corrected coordinates
-  survive a re-import from a plain geocaching.com GPX file.
-- **Container sort order** (fixes #133) — Container column now sorts logically by physical
-  size (Micro → Small → Regular → Large) rather than alphabetically. Non-physical types
-  (EarthCache, Lab Cache, Virtual, Other) follow in alphabetical letter order (E → L → O → V),
-  with empty/not-chosen last.
-- **Trip Planner opens multiple windows** (fixes #134) — Opening the Trip Planner while it
-  is already visible no longer opens a second window. The existing window is brought to
-  the front instead.
-- **Missing geocache attributes** (fixes #139) — Eight attribute IDs missing from the
-  attributes list have been added: First Aid nearby (38), Livestock nearby (39),
-  Flashlight required (42), Fuel nearby (54), Food nearby (55), Wireless Beacon (56),
-  Significant Hike (59) and Tourist Friendly (61). IDs 42, 54, 55, 59 and 61 are legacy
-  GPX IDs that map to existing attributes; 38, 39 and 56 are new entries with translations
-  in all 7 languages.
-
-### Changed
-- **Nano container size removed** — "Nano" is not an official Geocaching.com container size
-  (it is an informal term for very small Micro caches < 10 ml). Geocaching.com always exports
-  these as "Micro". Migration #7 automatically converts any existing `container = 'Nano'`
-  values to `'Micro'` in all databases on first launch.
+- Unit and e2e test split introduced in v1.11.0 — corrected CI pipeline configuration
 
 ---
 
-## [1.11.14] — 2026-04-29
-### Fixed
-- issue #130: Deleting a database on Windows no longer fails with WinError 32 ("file in use by another process"). SQLite WAL-mode keeps .db, .db-shm and .db-wal files locked as long as the SQLAlchemy connection pool is open. The fix disposes the engine and releases all file handles before attempting deletion, then forces garbage collection and a short delay to give Windows time to free the handles.
-
----
-
-## [1.11.13] — 2026-04-29
-### Fixed
-- **Active filter dropped on Settings close** (fixes #128) — When an advanced filter was active
-  and the user opened and closed the Settings dialog, the cache list was refreshed without
-  reapplying the filter. The root cause was that `_refresh_cache_list()` only considered the
-  quick-filter and search fields, ignoring `_current_filterset` entirely. The fix combines both
-  into a single AND-condition on every refresh.
-
-## [1.11.12] — 2026-04-29
-### Fixed
-- **Cache selection highlight inconsistent on Windows** (fixes #112) — The selected row was shown
-  in gray on Windows 10/11, making it hard to distinguish from archived caches. The highlight
-  colour is now always light blue, matching Linux and macOS.
-- **New database in custom folder not created** (fixes #121) — The folder browser was a "Save
-  file" dialog, causing nothing to happen if no filename was typed. Changed to a "Select folder"
-  dialog with a live path preview (folder + database name + `.db`) while typing the name.
-
----
-
-## [1.11.11] — 2026-04-29
-### Fixed
-
-- GC Code and Name search fields now sit directly next to their labels
-- no more blank space between label and input box.
-
-### Improved
-
-- Version number is now shown in the splash screen at startup.
-- Version number is now shown in the main window title bar.
-- app.setApplicationVersion now uses the actual version from __version__ instead of a hardcoded value.
-
----
-
-## [1.11.10] — 2026-04-29
-### Fixed
-- **Database delete leaves shm/wal files behind** (fixes #120) — All three SQLite files
-  (`.db`, `.db-shm`, `.db-wal`) are now removed on deletion.
-- **Missing path permission validation** (fixes #121) — Write permissions are now checked
-  before creating a new database file.
-- All error messages are now translated via `tr()`.
-
----
-
-## [1.11.9] — 2026-04-28
-### Fixed
-- Fixed crash when deleting caches: child records (logs, attributes, trackables, waypoints, user notes) are now deleted before the parent cache to prevent FOREIGN KEY constraint errors and orphaned data
-- Fixed GPX/PQ re-import failing with UNIQUE constraint errors on logs when importing into a database with existing data — caused by orphaned log records from previous cache deletions
-- Import now uses SAVEPOINT per cache so a single failing cache no longer rolls back the entire batch
-- Fixed RuntimeError in terminal when closing the import dialog after import completes (C++ worker object already deleted)
-
----
-
-## [1.11.8] — 2026-04-28
+## [1.11.0] — 2026-04-27
 ### Added
-- **Check for latest release on startup** — OpenSAK now checks for a newer release when the
-  application loads. A manual check is also available via the Help menu.
-
----
-
-## [1.11.7] — 2026-04-28
-### Added
-- **GSAK-style info bar** between cache list and detail/map panel (fixes #116):
-  - Active filter name or "None"
-  - Total caches in the current database
-  - Number of flagged (🚩) caches
-  - Active center/home point name
-  - Color-coded counts: Found (yellow), All in filter (white), Archived + Deactivated (red), User-owned caches (green)
-  - Updates automatically on filter change, database switch, import, and flag toggle
-  - Owned cache count matches `placed_by` against stored GC username
-- 9 new translation keys added to all 7 language files (da, en, fr, de, cs, pt, se) with proper translations
-
----
-
-## [1.11.6] — 2026-04-27
-
-### Fixed 
-- **FTF false positives - only detect on user's own flag** 
-  fixes issue #114 and implement issue #58
-
----
-
-## [1.11.5] — 2026-04-27
-### Added
-- **Latitude and Longitude as selectable columns** — new optional columns
-  in the cache list show coordinates per cache. Format respects the user's
-  coordinate format setting (DD/DMM/DMS) so values match the detail panel.
-  Shows corrected coordinates when set (matches map behaviour). Tooltip
-  indicates whether coordinates are original or corrected (fixes #84,
-  thanks @hansblom for reporting).
-- **`format_lat()` and `format_lon()` helpers** in `coords.py` — new
-  single-axis formatters used by the Latitude/Longitude columns.
-- **Lab Cache 'L' label** — Lab Caches now display empty bars + 'L' in the
-  Container column, consistent with Virtual ('V') and EarthCache ('E').
-
-### Fixed
-- **Container column sorts by size, not alphabetically** — sorting the
-  Container column now produces a logical order grouped by visual style:
-  physical containers first (Nano → Micro → Small → Regular → Large), then
-  letter-display types alphabetically (E → L → O → V), then empty
-  ("Not chosen"). Stable sort preserves a previous secondary order such
-  as Distance (fixes #90, thanks @Fabio-A-Sa for reporting).
-- **'Other' container visualisation** — was showing 3 filled bars (visually
-  identical to Small); now shows 5 empty bars + 'O' label, consistent with
-  V/E/L (part of #90).
-- **Log count column always 0** — added `log_count` as a cached column on
-  the Cache model so the count is available without loading the logs
-  relationship (which is `noload`'ed for performance). Migration #6
-  populates `log_count` from existing logs on first startup, so existing
-  databases show correct counts immediately without re-import (fixes #87,
-  thanks @Fabio-A-Sa for reporting).
-- **Search field rollback to GSAK-style separate fields** — Name search
-  field now searches only cache names (not GC codes too). GC code search
-  remains in its own dedicated field. Restores GSAK convention of clear,
-  single-purpose search fields (fixes #86, thanks @Fabio-A-Sa for
-  reporting; rolls back the combined search added in #80).
-
-### Changed
-- **Search toolbar always visible** — the search toolbar can no longer be
-  accidentally hidden via the right-click context menu. Forced visible at
-  startup to recover from any previously hidden state in QSettings. The
-  search bar is essential UI and is planned to host more fields in future.
-
----
-
-## [1.11.4] — 2026-04-27
-### Fixed
-- **Version number mismatch** — fixed `__init__.py` to correctly report version 1.11.4 (the v1.11.3 tag was created with `__version__` still set to "1.11.2"; this release brings the version string in sync with the release tag).
-
----
-
-## [1.11.3] — 2026-04-27
-### Fixed
-- Fixed duplicate search fields showing in the search toolbar after opening and closing the Column Chooser dialog. The root cause was that `_setup_search_toolbar()` was called every time the toolbar was rebuilt, appending a new set of widgets on top of the existing ones. The fix clears the toolbar before rebuilding.
-
----
-
-## [1.11.2] — 2026-04-26
-### Fixed
-- Fixed a crash on startup when no database is selected: `_refresh_cache_list()` and `_update_status_bar()` now guard against a `None` active database path.
-- Fixed `status_db_caches` translation key missing in all 7 language files — caused `pytest test_no_missing_keys` to fail.
-
----
-
-## [1.11.1] — 2026-04-26
-### Fixed
-- Restored missing import of `QApplication` in `app.py` — caused an immediate crash on startup after the v1.11.0 refactor.
-
----
-
-## [1.11.0] — 2026-04-26
-### Added
-- **Fabio's CI/CD refactor** — unit tests and end-to-end tests are now split into separate directories (`tests/unit-tests/` and `tests/e2e-tests/`). GitHub Actions runs unit tests on every push and e2e tests on version tags only.
-
----
-
-## [1.10.2] — 2026-04-25
-### Fixed
-- Fixed GPX import crash when `<groundspeak:long_description>` or `<groundspeak:short_description>` elements are missing from a cache entry — `AttributeError: 'NoneType' object has no attribute 'text'`.
-
----
-
-## [1.10.1] — 2026-04-25
-### Fixed
-- Fixed import of multiple GPX files (issue #16) — previously only the first file in a multi-file selection was imported; remaining files were silently skipped due to the `QFileDialog` return value not being iterated correctly.
-
----
-
-## [1.10.0] — 2026-04-25
-### Added
-- **Import multiple GPX files at once** (issue #16) — the import dialog now accepts a multi-file selection. Each file is imported in sequence with a combined progress bar and a summary report at the end listing per-file results (new, updated, skipped, errors).
-
----
-
-## [1.9.2] — 2026-04-24
-### Fixed
-- **Map pin click scrolls to correct cache** (fixes #50) — clicking a pin on the map now selects and scrolls to the matching cache in the list. Previously the selection landed on a wrong row because the map used the raw list index rather than looking up the cache by GC code.
-- **Delete button disabled for active database** (fixes #52) — the Delete button in the database manager is now disabled when the selected database is the currently active one, preventing accidental deletion of the open database.
-
----
-
-## [1.9.1] — 2026-04-23
-### Fixed
-- Fixed crash when switching databases while a filter was active — `apply_filters()` now always receives a valid session.
-
----
-
-## [1.9.0] — 2026-04-23
-### Added
-- **Trip Planner** — plan a geocaching outing directly in OpenSAK:
-  - Radius search from home point with configurable distance
-  - Route planning (A → B → … up to 10 waypoints) with caches sorted in driving order
-  - Filters: max count, not-found only, available only
-  - Show selected caches on an interactive OSM map
-  - Export directly to GPS or GPX file
-
----
-
-## [1.8.0] — 2026-04-22
-### Added
-- **Home points list** — replace single home coordinate with a named list (Home, Cottage, Hotel, …). Quick-switch dropdown in the toolbar.
-
----
-
-## [1.7.0] — 2026-04-21
-### Added
-- **GSAK field parity** (issue #33) — migration adds `dnf_date`, `first_to_find`, `user_flag`, `user_sort`, `user_data_1–4`, `distance`, `bearing`, `favorite_points` columns to existing databases.
-
----
-
-## [1.6.0] — 2026-04-20
-### Added
-- **Geocaching Tools menu** — Coordinate Converter, Projection, Digit Checksum, Midpoint, Distance & Bearing.
-- **Coordinate format preference** — DMM (default), DMS or DD.
-
----
-
-## [1.5.0] — 2026-04-18
-### Added
-- **Corrected Coordinates** — add solved coordinates to mystery caches; shown on map with orange pin; used in GPS export.
-
----
-
-## [1.4.6] — 2026-04-04
-### Added
-- **App icons** — application icon added for all platforms
+- Unit/e2e test infrastructure split — contributed by Fabio
 
 ---
 
