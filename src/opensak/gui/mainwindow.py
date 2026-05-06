@@ -91,7 +91,7 @@ class InfoBar(QFrame):
         row.addWidget(lbl_prefix)
 
         self._found_lbl = QLabel("0")
-        self._found_lbl.setStyleSheet(f"{count_style} color: #b8860b;")
+        self._found_lbl.setStyleSheet(f"{count_style} color: #1e8449;")   # grøn — found
         self._found_lbl.setToolTip(tr("infobar_found_tooltip"))
         row.addWidget(self._found_lbl)
 
@@ -106,7 +106,7 @@ class InfoBar(QFrame):
         row.addWidget(self._inactive_lbl)
 
         self._owned_lbl = QLabel("0")
-        self._owned_lbl.setStyleSheet(f"{count_style} color: #2e7d32;")
+        self._owned_lbl.setStyleSheet(f"{count_style} color: #d68910;")   # gul — owned/placed
         self._owned_lbl.setToolTip(tr("infobar_owned_tooltip"))
         row.addWidget(self._owned_lbl)
 

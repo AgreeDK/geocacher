@@ -300,6 +300,71 @@ class SizeBarDelegate(QStyledItemDelegate):
         return sh
 
 
+class GcCodeDelegate(QStyledItemDelegate):
+    """Issue #117: Tegner farvet baggrund i gc_code-kolonnen (GSAK-style).
+
+    Farve-prioritet (dæmpede pastellfarver, sort tekst):
+      1. Archived / unavailable  → rødlig  (#f5b7b1)
+      2. Placed (brugeren er CO) → gul     (#fdebd0)
+      3. Found                   → grøn    (#a9dfbf)
+      4. Not found               → ingen   (standard rækkefarve)
+
+    Valg: farvet baggrund frem for farvet tekst giver bedre læsbarhed
+    og matcher GSAK's visuelle stil.
+    """
+
+    _COLOR_ARCHIVED = QColor("#f1948a")   # rød
+    _COLOR_PLACED   = QColor("#f9e79f")   # gul
+    _COLOR_FOUND    = QColor("#7dcea0")   # grøn
+
+    def _bg_color(self, index) -> QColor | None:
+        """Returnér baggrundsfarve for denne cache, eller None for default."""
+        from opensak.gui.settings import get_settings
+        cache = index.data(Qt.ItemDataRole.UserRole)
+        if cache is None:
+            return None
+        if cache.archived or not cache.available:
+            return self._COLOR_ARCHIVED
+        gc_username = (get_settings().gc_username or "").strip().lower()
+        if gc_username and (cache.owner_name or "").strip().lower() == gc_username:
+            return self._COLOR_PLACED
+        if cache.found:
+            return self._COLOR_FOUND
+        return None
+
+    def paint(self, painter: QPainter, option, index) -> None:
+        from PySide6.QtWidgets import QStyle
+        is_selected = bool(option.state & QStyle.StateFlag.State_Selected)
+
+        painter.save()
+
+        if is_selected:
+            # Valgt række: brug standard selection-farve
+            painter.fillRect(option.rect, QColor("#3daee9"))
+        else:
+            bg = self._bg_color(index)
+            if bg is not None:
+                painter.fillRect(option.rect, bg)
+            else:
+                # Ingen statusfarve — lad standard delegate tegne baggrund
+                # (alternating rows mv.)
+                super().paint(painter, option, index)
+                painter.restore()
+                return
+
+        # Tegn tekst i sort (læsbar på alle baggrundsfarver)
+        text = index.data(Qt.ItemDataRole.DisplayRole) or ""
+        text_rect = option.rect.adjusted(4, 0, -4, 0)
+        painter.setPen(Qt.GlobalColor.black)
+        painter.drawText(
+            text_rect,
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+            text,
+        )
+
+        painter.restore()
+
+
 class CacheTableModel(QAbstractTableModel):
     """Qt table model backed by a list of Cache objects."""
 
@@ -402,12 +467,6 @@ class CacheTableModel(QAbstractTableModel):
                        "latitude", "longitude"):
                 return Qt.AlignmentFlag.AlignCenter
             return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
-
-        if role == Qt.ItemDataRole.ForegroundRole:
-            if cache.archived:
-                return QColor("#999999")
-            if cache.found:
-                return QColor("#2e7d32")
 
         if role == Qt.ItemDataRole.FontRole:
             if cache.archived or cache.found:
@@ -774,6 +833,9 @@ class CacheTableView(QTableView):
                 if col_id == "container":
                     self._size_bar_delegate = SizeBarDelegate(self)
                     self.setItemDelegateForColumn(i, self._size_bar_delegate)
+                elif col_id == "gc_code":
+                    self._gc_code_delegate = GcCodeDelegate(self)
+                    self.setItemDelegateForColumn(i, self._gc_code_delegate)
                 else:
                     self.setItemDelegateForColumn(i, None)
             if "name" in columns:
