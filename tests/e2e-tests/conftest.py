@@ -50,6 +50,8 @@ def seeded_window(qtbot, tmp_path, monkeypatch):
 
     yield window
 
+    window.close()
+    qtbot.wait(200)
     mgr_module._manager = None
 
 
@@ -79,4 +81,6 @@ def empty_window(qtbot, tmp_path, monkeypatch):
 
     yield window
 
+    window.close()
+    qtbot.wait(200)
     mgr_module._manager = None
