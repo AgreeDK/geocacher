@@ -410,9 +410,10 @@ class CacheTableModel(QAbstractTableModel):
                 return QColor("#2e7d32")
 
         if role == Qt.ItemDataRole.FontRole:
-            if cache.found:
+            if cache.archived or cache.found:
                 font = QFont()
-                font.setItalic(True)
+                font.setStrikeOut(cache.archived)
+                font.setItalic(cache.found)
                 return font
 
         if role == Qt.ItemDataRole.ToolTipRole:
