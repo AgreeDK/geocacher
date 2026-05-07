@@ -8,6 +8,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 For planned features and known issues see the [GitHub Issues list](https://github.com/AgreeDK/opensak/issues).
 
+### [1.13.5] - 2026-05-07
+
+---
+
+**Update notification improvements**
+
+- Update popup now includes a **"See changelog"** link opening the full changelog on GitHub
+- Added **"Skip this version"** button — suppresses the popup for that release until a newer version is available
+- Manual update check (Help → Check for updates) always shows the popup, regardless of skipped version
+- Added automatic update check toggle in Settings → Advanced
+
 ---
 
 ## [1.13.4] — 2026-05-07
