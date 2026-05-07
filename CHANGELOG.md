@@ -10,6 +10,40 @@ For planned features and known issues see the [GitHub Issues list](https://githu
 
 ---
 
+## [1.13.4] — 2026-05-07
+
+### Added
+
+- **Light / Dark / Automatic theme** — A new *Appearance* section in Settings lets you choose
+  between a light theme, a dark theme, or *Automatic* which follows the operating system setting.
+  The change takes effect immediately without restarting. Dark mode is detected natively on
+  macOS (System Preferences), Windows 10/11 (registry) and modern Linux desktops (freedesktop
+  portal / GTK theme).
+
+### Fixed
+
+- **Consistent look across Linux, Windows and macOS** — OpenSAK now forces Qt's *Fusion* style
+  on all platforms, giving a uniform baseline appearance regardless of the desktop environment
+  or OS theme. A platform-appropriate default font is applied automatically (Segoe UI on Windows,
+  SF Pro on macOS, Ubuntu on Linux).
+
+- **Cache list text invisible in dark mode** — The GC code column delegate used hardcoded black
+  text in all cases. Rows without a status colour (archived / found / placed) now use
+  `palette.text()` so the text is readable in both light and dark themes. Status-coloured rows
+  (red / yellow / green pastels) keep black text since the pastel backgrounds are always light.
+
+- **Strikethrough and colour confined to GC code column** (fixes #196) — Strikethrough for
+  archived caches and the orange disabled colour were previously applied to the cache name and
+  type icon columns as well. They are now shown exclusively in the GC code column, making the
+  status easier to read at a glance without affecting the other columns.
+
+- **Theme change did not update all open windows** — Switching theme in Settings left already-
+  visible widgets (including the cache list) unchanged until restart. The theme engine now
+  explicitly propagates the new palette to every open window and its child widgets, so the
+  entire UI updates in one go when you click OK.
+
+---
+
 ## [1.13.3] — 2026-05-06
 
 ### Added
