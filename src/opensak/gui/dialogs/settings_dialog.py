@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox, QGroupBox, QComboBox,
     QMessageBox, QTableWidget, QTableWidgetItem,
     QHeaderView, QAbstractItemView, QTabWidget, QWidget,
-    QFrame, QSizePolicy, QSpinBox
+    QFrame, QSizePolicy, QSpinBox, QScrollArea
 )
 from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
 from PySide6.QtGui import QPixmap, QFont
@@ -281,7 +281,13 @@ class SettingsDialog(QDialog):
         layout.addWidget(user_group)
 
         layout.addStretch()
-        return tab
+
+        # Wrap i QScrollArea så dialogen virker på små skærme (Windows/høj DPI)
+        scroll = QScrollArea()
+        scroll.setWidget(tab)
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        return scroll
 
     # ── Fane 3: Advanced ─────────────────────────────────────────────────────
 

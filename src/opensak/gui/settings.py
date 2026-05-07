@@ -197,7 +197,9 @@ class AppSettings:
             return None
 
     def is_setup_complete(self) -> bool:
-        return bool(self.gc_username.strip()) and bool(self.gc_home_location.strip())
+        has_username = bool(self.gc_username.strip())
+        has_home = bool(self.gc_home_location.strip()) or bool(self.home_points)
+        return has_username and has_home
 
     # ── Units ─────────────────────────────────────────────────────────────────
 
@@ -342,7 +344,9 @@ class AppSettings:
             self._s.sync()
 
     def is_setup_complete(self) -> bool:
-        return bool(self.gc_username.strip()) and bool(self.gc_home_location.strip())
+        has_username = bool(self.gc_username.strip())
+        has_home = bool(self.gc_home_location.strip()) or bool(self.home_points)
+        return has_username and has_home
 
     def sync(self) -> None:
         self._s.sync()
