@@ -355,12 +355,34 @@ class GcCodeDelegate(QStyledItemDelegate):
         # Tegn tekst i sort (læsbar på alle baggrundsfarver)
         text = index.data(Qt.ItemDataRole.DisplayRole) or ""
         text_rect = option.rect.adjusted(4, 0, -4, 0)
-        painter.setPen(Qt.GlobalColor.black)
+
+        cache = index.data(Qt.ItemDataRole.UserRole)
+
+        # Issue #196: disabled → orange tekst, archived → strikethrough
+        if not is_selected and cache is not None:
+            if cache.archived:
+                painter.setPen(Qt.GlobalColor.black)
+            elif not cache.available:
+                painter.setPen(QColor("#e67e22"))  # orange for disabled
+            else:
+                painter.setPen(Qt.GlobalColor.black)
+        else:
+            painter.setPen(Qt.GlobalColor.black)
+
         painter.drawText(
             text_rect,
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
             text,
         )
+
+        # Strikethrough for archived — tegn en linje hen over teksten
+        if not is_selected and cache is not None and cache.archived:
+            fm = painter.fontMetrics()
+            text_width = fm.horizontalAdvance(text)
+            mid_y = option.rect.center().y()
+            x_start = text_rect.left()
+            painter.setPen(Qt.GlobalColor.black)
+            painter.drawLine(x_start, mid_y, x_start + text_width, mid_y)
 
         painter.restore()
 
@@ -469,10 +491,9 @@ class CacheTableModel(QAbstractTableModel):
             return Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
 
         if role == Qt.ItemDataRole.FontRole:
-            if cache.archived or cache.found:
+            if cache.found:
                 font = QFont()
-                font.setStrikeOut(cache.archived)
-                font.setItalic(cache.found)
+                font.setItalic(True)
                 return font
 
         if role == Qt.ItemDataRole.ToolTipRole:
