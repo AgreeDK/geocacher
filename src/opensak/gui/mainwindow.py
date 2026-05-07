@@ -1473,6 +1473,10 @@ class MainWindow(QMainWindow):
     def _check_update_background(self) -> None:
         """Kald ved opstart — tjekker lydløst i baggrunden."""
         from opensak import __version__
+        from PySide6.QtCore import QSettings
+        s = QSettings("OpenSAK Project", "OpenSAK")
+        if not s.value("updates/check_enabled", True, type=bool):
+            return
         self._update_worker = UpdateCheckWorker(__version__, parent=self)
         self._update_worker.update_available.connect(self._on_update_available)
         self._update_worker.start()
@@ -1504,16 +1508,38 @@ class MainWindow(QMainWindow):
     ) -> None:
         """Vis notifikationsdialog om ny version."""
         self._manual_found_update = True
+
+        # Ved automatisk tjek: ignorer versioner brugeren har valgt at springe over
+        if not manual:
+            from PySide6.QtCore import QSettings
+            s = QSettings("OpenSAK Project", "OpenSAK")
+            skipped = s.value("updates/skipped_version", "", type=str)
+            if skipped == latest_tag:
+                return
+
         from opensak import __version__
+        changelog_url = "https://github.com/AgreeDK/opensak/blob/main/CHANGELOG.md"
+
         msg = QMessageBox(self)
         msg.setWindowTitle(tr("update_available_title"))
         msg.setText(tr("update_available_msg", latest=latest_tag, current=__version__))
-        msg.setInformativeText(tr("update_available_info"))
+        msg.setInformativeText(
+            tr("update_available_info")
+            + f'  <a href="{changelog_url}">{tr("update_changelog")}</a>'
+        )
+        msg.setTextFormat(Qt.TextFormat.RichText)
         btn_open = msg.addButton(tr("update_open_releases"), QMessageBox.ButtonRole.AcceptRole)
+        btn_skip = msg.addButton(tr("update_skip_version"), QMessageBox.ButtonRole.DestructiveRole)
         msg.addButton(tr("update_later"), QMessageBox.ButtonRole.RejectRole)
         msg.setIcon(QMessageBox.Icon.Information)
         msg.exec()
-        if msg.clickedButton() == btn_open:
+
+        clicked = msg.clickedButton()
+        if clicked == btn_open:
             import webbrowser
             webbrowser.open(url)
+        elif clicked == btn_skip:
+            from PySide6.QtCore import QSettings
+            s = QSettings("OpenSAK Project", "OpenSAK")
+            s.setValue("updates/skipped_version", latest_tag)
 

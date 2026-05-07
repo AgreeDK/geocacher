@@ -251,6 +251,10 @@ STRINGS: dict[str, str] = {
     "update_available_info":        "Click 'Download' to open the GitHub releases page and get the latest version.",
     "update_open_releases":         "Download new version",
     "update_later":                 "Later",
+    "update_skip_version":           "Skip this version",
+    "update_changelog":              "See changelog",
+    "settings_group_updates":        "Updates",
+    "settings_update_check_label":   "Automatically check for new versions at startup",
     "update_uptodate_title":        "No update found",
     "update_uptodate_msg":          "You are running the latest version of OpenSAK.",
     "about_text":

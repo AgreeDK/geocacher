@@ -254,6 +254,10 @@ STRINGS: dict[str, str] = {
     "update_available_info":        "Klik op 'Downloaden' om de GitHub releases-pagina te openen en de nieuwste versie te downloaden.",
     "update_open_releases":         "Nieuwe versie downloaden",
     "update_later":                 "Later",
+    "update_skip_version":           "Skip this version",
+    "update_changelog":              "See changelog",
+    "settings_group_updates":        "Updates",
+    "settings_update_check_label":   "Automatically check for new versions at startup",
     "update_uptodate_title":        "Geen update gevonden",
     "update_uptodate_msg":          "Je gebruikt de nieuwste versie van OpenSAK.",
     "about_text":
