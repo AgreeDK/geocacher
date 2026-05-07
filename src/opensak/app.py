@@ -181,6 +181,11 @@ def main() -> None:
     app.setOrganizationName("OpenSAK Project")
     app.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps, True)
 
+    # Anvend Fusion stil + platform-tilpasset font + brugertema
+    # (gøres FØR nogen vinduer oprettes så alt arver paletten korrekt)
+    from opensak.gui.theme import apply_theme
+    apply_theme(app)
+
     # Vis splash screen øjeblikkeligt
     splash = _make_splash(app)
 

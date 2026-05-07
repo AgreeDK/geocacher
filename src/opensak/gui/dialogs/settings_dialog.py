@@ -222,6 +222,34 @@ class SettingsDialog(QDialog):
 
         layout.addWidget(disp_group)
 
+        # ── Udseende (tema) ───────────────────────────────────────────────────
+        appear_group = QGroupBox(tr("settings_group_appearance"))
+        appear_layout = QVBoxLayout(appear_group)
+
+        theme_row = QHBoxLayout()
+        theme_row.addWidget(QLabel(tr("settings_theme_label")))
+        self._theme_combo = QComboBox()
+        self._theme_combo.addItem(tr("settings_theme_auto"),  "auto")
+        self._theme_combo.addItem(tr("settings_theme_light"), "light")
+        self._theme_combo.addItem(tr("settings_theme_dark"),  "dark")
+        theme_row.addWidget(self._theme_combo)
+
+        self._theme_preview = QLabel()
+        self._theme_preview.setFixedSize(16, 16)
+        self._theme_preview.setStyleSheet(
+            "border-radius: 8px; border: 1px solid palette(mid);"
+        )
+        theme_row.addWidget(self._theme_preview)
+        theme_row.addStretch()
+        appear_layout.addLayout(theme_row)
+
+        appear_hint = QLabel(tr("settings_theme_hint"))
+        appear_hint.setStyleSheet("color: gray; font-size: 10px;")
+        appear_layout.addWidget(appear_hint)
+
+        self._theme_combo.currentIndexChanged.connect(self._on_theme_changed)
+        layout.addWidget(appear_group)
+
         # ── Sprog ─────────────────────────────────────────────────────────────
         lang_group = QGroupBox(tr("settings_group_language"))
         lang_layout = QVBoxLayout(lang_group)
@@ -679,6 +707,17 @@ class SettingsDialog(QDialog):
         get_settings().sync()
         self._reload_points_table()
 
+    def _on_theme_changed(self, _index: int = 0) -> None:
+        """Opdater preview-farve og anvend tema live som forhåndsvisning."""
+        theme = self._theme_combo.currentData()
+        from opensak.gui.theme import effective_theme
+        resolved = effective_theme(theme)
+        color = "#1E1E1E" if resolved == "dark" else "#F5F5F5"
+        self._theme_preview.setStyleSheet(
+            f"border-radius: 8px; border: 1px solid palette(mid);"
+            f"background-color: {color};"
+        )
+
     def _on_coord_changed(self, text: str) -> None:
         if not text.strip():
             self._coord_hint.setText("")
@@ -753,6 +792,9 @@ class SettingsDialog(QDialog):
         self._coord_format.setCurrentIndex(idx if idx >= 0 else 0)
         lang_idx = self._lang_combo.findData(current_language())
         self._lang_combo.setCurrentIndex(lang_idx if lang_idx >= 0 else 0)
+        theme_idx = self._theme_combo.findData(s.theme)
+        self._theme_combo.setCurrentIndex(theme_idx if theme_idx >= 0 else 0)
+        self._on_theme_changed()  # opdater preview-farve
         self._gc_username.setText(s.gc_username)
         self._gc_home_location.setText(s.gc_home_location)
         self._search_min_chars.setValue(s.search_min_chars)
@@ -790,6 +832,13 @@ class SettingsDialog(QDialog):
         s.coord_format      = self._coord_format.currentData()
         s.search_min_chars  = self._search_min_chars.value()
         s.search_debounce_ms = self._search_debounce_ms.value()
+        new_theme = self._theme_combo.currentData()
+        if new_theme != s.theme:
+            s.theme = new_theme
+            # Anvend nyt tema øjeblikkeligt — ingen genstart nødvendig
+            from PySide6.QtWidgets import QApplication
+            from opensak.gui.theme import apply_theme
+            apply_theme(QApplication.instance(), new_theme)
         if self._nominatim_cb is not None:
             s.nominatim_enabled = self._nominatim_cb.isChecked()
         s.sync()

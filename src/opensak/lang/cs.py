@@ -821,4 +821,12 @@ STRINGS: dict[str, str] = {
     "infobar_all_tooltip":               "Všechny keše ve filtru",
     "infobar_inactive_tooltip":          "Archivované + Deaktivované",
     "infobar_owned_tooltip":             "Vaše keše",
+
+    # ── Appearance / theme ──────────────────────────────────────────────
+    "settings_group_appearance":               "Vzhled",
+    "settings_theme_label":                    "Téma:",
+    "settings_theme_auto":                     "Automaticky (systém)",
+    "settings_theme_light":                    "Světlé",
+    "settings_theme_dark":                     "Tmavé",
+    "settings_theme_hint":                     "Změna se projeví ihned po kliknutí na OK",
 }

@@ -823,4 +823,12 @@ STRINGS: dict[str, str] = {
     "infobar_all_tooltip":               "Alle caches in filter",
     "infobar_inactive_tooltip":          "Gearchiveerd + Gedeactiveerd",
     "infobar_owned_tooltip":             "Jouw caches",
+
+    # ── Appearance / theme ──────────────────────────────────────────────
+    "settings_group_appearance":               "Uiterlijk",
+    "settings_theme_label":                    "Thema:",
+    "settings_theme_auto":                     "Automatisch (systeem)",
+    "settings_theme_light":                    "Licht",
+    "settings_theme_dark":                     "Donker",
+    "settings_theme_hint":                     "Wijziging wordt direct van kracht na OK",
 }

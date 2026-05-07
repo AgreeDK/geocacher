@@ -201,6 +201,21 @@ class AppSettings:
         has_home = bool(self.gc_home_location.strip()) or bool(self.home_points)
         return has_username and has_home
 
+    # ── Theme / appearance ────────────────────────────────────────────────────
+
+    @property
+    def theme(self) -> str:
+        """
+        UI theme preference.  One of ``"auto"``, ``"light"``, ``"dark"``.
+
+        ``"auto"`` (the default) follows the OS dark-mode setting.
+        """
+        return self._s.value("display/theme", "auto")
+
+    @theme.setter
+    def theme(self, value: str) -> None:
+        self._s.setValue("display/theme", value)
+
     # ── Units ─────────────────────────────────────────────────────────────────
 
     @property

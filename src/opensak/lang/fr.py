@@ -825,4 +825,12 @@ STRINGS: dict[str, str] = {
     "infobar_all_tooltip":               "Toutes les caches du filtre",
     "infobar_inactive_tooltip":          "Archivées + Désactivées",
     "infobar_owned_tooltip":             "Vos caches",
+
+    # ── Appearance / theme ──────────────────────────────────────────────
+    "settings_group_appearance":               "Apparence",
+    "settings_theme_label":                    "Thème :",
+    "settings_theme_auto":                     "Automatique (système)",
+    "settings_theme_light":                    "Clair",
+    "settings_theme_dark":                     "Sombre",
+    "settings_theme_hint":                     "Le changement prend effet immédiatement après OK",
 }

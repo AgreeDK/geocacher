@@ -352,22 +352,28 @@ class GcCodeDelegate(QStyledItemDelegate):
                 painter.restore()
                 return
 
-        # Tegn tekst i sort (læsbar på alle baggrundsfarver)
+        # Tegn tekst — farven følger tema/palette undtagen på statusfarve-baggrunde
         text = index.data(Qt.ItemDataRole.DisplayRole) or ""
         text_rect = option.rect.adjusted(4, 0, -4, 0)
 
         cache = index.data(Qt.ItemDataRole.UserRole)
 
-        # Issue #196: disabled → orange tekst, archived → strikethrough
-        if not is_selected and cache is not None:
-            if cache.archived:
-                painter.setPen(Qt.GlobalColor.black)
-            elif not cache.available:
-                painter.setPen(QColor("#e67e22"))  # orange for disabled
-            else:
-                painter.setPen(Qt.GlobalColor.black)
+        # Tekstfarve-prioritet:
+        #   Valgt række          → highlightedText (hvid på blå)
+        #   disabled/unavailable → orange
+        #   statusfarve baggrund → sort (pastels er altid lyse, sort er altid læsbart)
+        #   ingen baggrund       → palette.text() (følger light/dark tema)
+        if is_selected:
+            text_color = option.palette.highlightedText().color()
+        elif cache is not None and not cache.available and not cache.archived:
+            text_color = QColor("#e67e22")  # orange for disabled
+        elif bg is not None:
+            # Statusfarve baggrund (rød/gul/grøn pastel) — sort er altid læsbart
+            text_color = QColor(Qt.GlobalColor.black)
         else:
-            painter.setPen(Qt.GlobalColor.black)
+            text_color = option.palette.text().color()
+
+        painter.setPen(text_color)
 
         painter.drawText(
             text_rect,
@@ -381,7 +387,7 @@ class GcCodeDelegate(QStyledItemDelegate):
             text_width = fm.horizontalAdvance(text)
             mid_y = option.rect.center().y()
             x_start = text_rect.left()
-            painter.setPen(Qt.GlobalColor.black)
+            painter.setPen(QColor(Qt.GlobalColor.black))
             painter.drawLine(x_start, mid_y, x_start + text_width, mid_y)
 
         painter.restore()

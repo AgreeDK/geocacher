@@ -825,4 +825,12 @@ STRINGS: dict[str, str] = {
     "infobar_all_tooltip":               "Alla cacher i filtret",
     "infobar_inactive_tooltip":          "Arkiverade + Inaktiverade",
     "infobar_owned_tooltip":             "Dina cacher",
+
+    # ── Appearance / theme ──────────────────────────────────────────────
+    "settings_group_appearance":               "Utseende",
+    "settings_theme_label":                    "Tema:",
+    "settings_theme_auto":                     "Automatisk (följ OS)",
+    "settings_theme_light":                    "Ljust",
+    "settings_theme_dark":                     "Mörkt",
+    "settings_theme_hint":                     "Ändringen träder i kraft omedelbart vid OK",
 }
