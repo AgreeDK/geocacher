@@ -14,8 +14,10 @@ kommentar, så de ikke mistes.
 
 from __future__ import annotations
 
+import os
 import platform
 import subprocess
+import tempfile
 from pathlib import Path
 from typing import Optional
 
@@ -33,22 +35,41 @@ GARMIN_MARKERS = [
     Path(".is_garmin"),
 ]
 
+# MTP Garmin devices use uppercase folder names and have a storage root
+# (e.g. "Internal Storage") between the GVFS mount and the GARMIN folder.
+_MTP_GARMIN_FOLDER_NAMES = {"garmin", "GARMIN", "Garmin"}
+_MTP_GARMIN_MARKER_NAMES = {"GarminDevice.xml", "GPX"}
+
 
 # ── Enhed detektion ───────────────────────────────────────────────────────────
 
 def find_garmin_devices() -> list[Path]:
     """
-    Find alle monterede Garmin GPS enheder.
-    Returnerer liste af rod-stier (mount points).
+    Find Garmin GPS-enheder.
+    Søger først efter normale writable mount points og derefter efter GVFS/MTP
+    Garmin-monteringer på Linux.
 
     Virker på Linux, Windows og macOS.
     """
-    candidates = _get_mount_points()
-    devices = []
+    devices: list[Path] = []
+    seen: set[Path] = set()
 
-    for mount in candidates:
-        if _is_garmin(mount):
-            devices.append(mount)
+    for candidate in _get_mount_points():
+        if candidate in seen:
+            continue
+        if not _is_writable_directory(candidate):
+            seen.add(candidate)
+            continue
+        seen.add(candidate)
+        if _is_garmin(candidate):
+            devices.append(candidate)
+
+    for candidate in _linux_mtp_mounts():
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        if _is_garmin_mtp_mount(candidate):
+            devices.append(candidate)
 
     return devices
 
@@ -62,6 +83,156 @@ def _is_garmin(path: Path) -> bool:
         except OSError:
             continue
     return False
+
+
+def _is_writable_directory(path: Path) -> bool:
+    """Returnerer True for en faktisk skrivbar mount-point."""
+    try:
+        return path.is_dir() and os.access(path, os.W_OK)
+    except OSError:
+        return False
+
+
+def _linux_mtp_mounts() -> list[Path]:
+    """Returner GVFS/MTP-mounts på Linux."""
+    candidates: list[Path] = []
+    gvfs_roots = [Path("/run/user")]
+
+    for root in gvfs_roots:
+        if not root.exists():
+            continue
+        for sub in root.iterdir():
+            gvfs_dir = sub / "gvfs"
+            if not gvfs_dir.exists():
+                continue
+            for mount in gvfs_dir.iterdir():
+                if "mtp:" in str(mount):
+                    candidates.append(mount)
+
+    return sorted(set(candidates))
+
+
+def _is_garmin_mtp_mount(path: Path) -> bool:
+    """Tjek om en GVFS/MTP-mount faktisk er en Garmin-enhed."""
+    if not path or not path.is_dir():
+        return False
+    return _find_mtp_garmin_root(path) is not None
+
+
+def _find_mtp_garmin_root(mtp_mount: Path) -> Optional[Path]:
+    """
+    Find the actual Garmin folder inside an MTP mount.
+
+    MTP devices have a storage root (e.g. "Internal Storage") and the
+    Garmin folder may be uppercase (GARMIN) or mixed case. Returns the
+    path to the folder that contains GarminDevice.xml or a GPX subfolder,
+    or None if not found.
+    """
+    try:
+        for storage in mtp_mount.iterdir():
+            if not storage.is_dir():
+                continue
+            for child in storage.iterdir():
+                if not child.is_dir():
+                    continue
+                if child.name not in _MTP_GARMIN_FOLDER_NAMES:
+                    continue
+                for marker_name in _MTP_GARMIN_MARKER_NAMES:
+                    if (child / marker_name).exists():
+                        return child
+    except OSError:
+        pass
+    return None
+
+
+def _find_mtp_gpx_dir(mtp_mount: Path) -> Optional[Path]:
+    """Find the GPX folder inside an MTP-mounted Garmin."""
+    garmin = _find_mtp_garmin_root(mtp_mount)
+    if garmin is None:
+        return None
+    gpx = garmin / "GPX"
+    if gpx.is_dir():
+        return gpx
+    for child in garmin.iterdir():
+        if child.is_dir() and child.name.upper() == "GPX":
+            return child
+    return None
+
+
+def _find_mtp_ggz_dir(mtp_mount: Path) -> Optional[Path]:
+    """Find the GGZ folder inside an MTP-mounted Garmin."""
+    garmin = _find_mtp_garmin_root(mtp_mount)
+    if garmin is None:
+        return None
+    ggz = garmin / "GGZ"
+    if ggz.is_dir():
+        return ggz
+    for child in garmin.iterdir():
+        if child.is_dir() and child.name.upper() == "GGZ":
+            return child
+    return None
+
+
+def is_mtp_device(path: Path) -> bool:
+    """Returnerer True hvis path er en GVFS/MTP-mount."""
+    return "mtp:" in str(path)
+
+
+# Active gio subprocess — stored so it can be killed on cancel.
+_active_gio_proc: Optional[subprocess.Popen] = None
+
+
+def cancel_mtp_transfer() -> None:
+    """Afbryd en igangværende MTP-overførsel (gio copy)."""
+    global _active_gio_proc
+    proc = _active_gio_proc
+    if proc is not None:
+        try:
+            proc.kill()
+        except OSError:
+            pass
+        _active_gio_proc = None
+
+
+def _gio_copy(local_file: Path, dest_path: Path) -> None:
+    """
+    Kopiér en lokal fil til en MTP-sti via gio copy.
+    Raises OSError on failure.
+    """
+    global _active_gio_proc
+    proc = subprocess.Popen(
+        ["gio", "copy", str(local_file), str(dest_path)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    _active_gio_proc = proc
+    try:
+        stdout, stderr = proc.communicate(timeout=300)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.communicate()
+        raise OSError("MTP transfer timed out (300s)")
+    finally:
+        _active_gio_proc = None
+    if proc.returncode != 0:
+        msg = (stderr or b"").decode(errors="replace").strip()
+        if not msg:
+            msg = f"gio copy failed (exit {proc.returncode})"
+        raise OSError(msg)
+
+
+def _gio_remove(path: Path) -> bool:
+    """Slet en fil på en MTP-sti via gio remove. Returnerer True ved succes."""
+    try:
+        result = subprocess.run(
+            ["gio", "remove", str(path)],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        return result.returncode == 0
+    except (FileNotFoundError, OSError, subprocess.TimeoutExpired):
+        return False
 
 
 def _get_mount_points() -> list[Path]:
@@ -897,19 +1068,37 @@ def export_ggz_to_device(
 ) -> ExportResult:
     """
     Eksportér caches som GGZ fil direkte til en Garmin GPS enhed.
-    GGZ-filen skrives til Garmin/GGZ mappen på enheden.
+    Understøtter både normale mount points og MTP-enheder (via gio copy).
     """
     result = ExportResult()
     result.device = device_root
 
     try:
-        ggz_dir = get_garmin_ggz_path(device_root)
-        ggz_dir.mkdir(parents=True, exist_ok=True)
-
         ggz_content = generate_ggz(caches, filename, progress_cb=progress_cb)
 
-        output_path = ggz_dir / f"{filename}.ggz"
-        output_path.write_bytes(ggz_content)
+        if is_mtp_device(device_root):
+            ggz_dir = _find_mtp_ggz_dir(device_root)
+            if ggz_dir is None:
+                garmin = _find_mtp_garmin_root(device_root)
+                if garmin is None:
+                    result.error = tr("gps_error_file", error="Garmin folder not found on MTP device")
+                    return result
+                ggz_dir = garmin / "GGZ"
+            output_path = ggz_dir / f"{filename}.ggz"
+            with tempfile.NamedTemporaryFile(
+                suffix=".ggz", delete=False,
+            ) as tmp:
+                tmp.write(ggz_content)
+                tmp_path = Path(tmp.name)
+            try:
+                _gio_copy(tmp_path, output_path)
+            finally:
+                tmp_path.unlink(missing_ok=True)
+        else:
+            ggz_dir = get_garmin_ggz_path(device_root)
+            ggz_dir.mkdir(parents=True, exist_ok=True)
+            output_path = ggz_dir / f"{filename}.ggz"
+            output_path.write_bytes(ggz_content)
 
         result.file_path   = output_path
         result.cache_count = len([c for c in caches if c.latitude is not None])
@@ -992,30 +1181,37 @@ def delete_gpx_files(
 ) -> DeleteResult:
     """
     Slet alle filer der matcher 'pattern' i en mappe på enheden.
-
-    Som standard slettes GPX-filer i Garmin/GPX mappen (bagudkompatibel
-    brug). Sæt 'folder' eksplicit (fx get_garmin_ggz_path(device_root))
-    for at slette i en anden mappe, fx Garmin/GGZ ved GGZ-eksport
-    (issue #656 follow-up — samme "slet gamle filer først"-funktion
-    udvidet til også at dække GGZ, ikke kun GPX).
+    Understøtter både normale mount points og MTP-enheder (via gio remove).
     """
     result = DeleteResult()
     result.device = device_root
 
     try:
-        target_dir = folder if folder is not None else get_garmin_gpx_path(device_root)
+        if is_mtp_device(device_root) and folder is None:
+            target_dir = _find_mtp_gpx_dir(device_root)
+        elif is_mtp_device(device_root) and folder is not None:
+            target_dir = folder
+        else:
+            target_dir = folder if folder is not None else get_garmin_gpx_path(device_root)
 
-        if not target_dir.exists():
+        if target_dir is None or not target_dir.exists():
             return result
 
         matched_files = list(target_dir.glob(pattern))
+        use_gio = is_mtp_device(device_root)
 
         for f in matched_files:
             if not f.is_file():
                 continue
             try:
-                f.unlink()
-                result.deleted_files.append(f)
+                if use_gio:
+                    if _gio_remove(f):
+                        result.deleted_files.append(f)
+                    else:
+                        result.failed_files.append(f)
+                else:
+                    f.unlink()
+                    result.deleted_files.append(f)
             except (PermissionError, OSError):
                 result.failed_files.append(f)
 
@@ -1064,19 +1260,34 @@ def export_to_device(
 ) -> ExportResult:
     """
     Eksportér caches til en Garmin GPS enhed.
-    Caches med korrigerede koordinater eksporteres med disse.
+    Understøtter både normale mount points og MTP-enheder (via gio copy).
     """
     result = ExportResult()
     result.device = device_root
 
     try:
-        gpx_dir = get_garmin_gpx_path(device_root)
-        gpx_dir.mkdir(parents=True, exist_ok=True)
-
         gpx_content = generate_gpx(caches, filename, progress_cb=progress_cb)
 
-        output_path = gpx_dir / f"{filename}.gpx"
-        output_path.write_text(gpx_content, encoding="utf-8")
+        if is_mtp_device(device_root):
+            gpx_dir = _find_mtp_gpx_dir(device_root)
+            if gpx_dir is None:
+                result.error = tr("gps_error_file", error="Garmin/GPX folder not found on MTP device")
+                return result
+            output_path = gpx_dir / f"{filename}.gpx"
+            with tempfile.NamedTemporaryFile(
+                suffix=".gpx", mode="w", encoding="utf-8", delete=False,
+            ) as tmp:
+                tmp.write(gpx_content)
+                tmp_path = Path(tmp.name)
+            try:
+                _gio_copy(tmp_path, output_path)
+            finally:
+                tmp_path.unlink(missing_ok=True)
+        else:
+            gpx_dir = get_garmin_gpx_path(device_root)
+            gpx_dir.mkdir(parents=True, exist_ok=True)
+            output_path = gpx_dir / f"{filename}.gpx"
+            output_path.write_text(gpx_content, encoding="utf-8")
 
         result.file_path   = output_path
         result.cache_count = len([c for c in caches if c.latitude is not None])
