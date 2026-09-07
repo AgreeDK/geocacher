@@ -19,10 +19,13 @@ import platform
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from opensak.lang import tr
 from opensak.utils.constants import CUSTOM_WP_TYPES
+
+if TYPE_CHECKING:
+    from opensak.gps.mtp import MTPDevice
 
 
 # ── Garmin GPX/GGZ mapper på enheden ──────────────────────────────────────────
@@ -43,7 +46,7 @@ _MTP_GARMIN_MARKER_NAMES = {"GarminDevice.xml", "GPX"}
 
 # ── Enhed detektion ───────────────────────────────────────────────────────────
 
-def find_garmin_devices() -> list[Path]:
+def find_garmin_devices() -> list[Path | MTPDevice]:
     """
     Find Garmin GPS-enheder.
     Søger først efter normale writable mount points og derefter efter GVFS/MTP
@@ -51,7 +54,7 @@ def find_garmin_devices() -> list[Path]:
 
     Virker på Linux, Windows og macOS.
     """
-    devices: list[Path] = []
+    devices: list[Path | MTPDevice] = []
     seen: set[Path] = set()
 
     for candidate in _get_mount_points():
