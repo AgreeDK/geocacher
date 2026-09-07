@@ -377,12 +377,41 @@ def _macos_volumes() -> list[Path]:
     return [v for v in volumes.iterdir() if v.is_dir()]
 
 
+def _match_existing_folder(parent: Path) -> Optional[Path]:
+    """
+    Return the actual on-disk entry matching a Garmin folder name, matched
+    case-insensitively against the real directory listing.
+
+    Deliberately does NOT probe constructed candidate paths (e.g.
+    `parent / "garmin"`, `parent / "GARMIN"`, `parent / "Garmin"`) and test
+    each with `.is_dir()`: on a case-insensitive filesystem (macOS APFS,
+    Windows NTFS by default) all three candidates resolve to the same
+    physical folder once it exists, so which one "matches" first depends on
+    iteration order over `_MTP_GARMIN_FOLDER_NAMES` — a set, whose order is
+    randomised per-process by Python's string hash seed. That made
+    `_get_garmin_folder()` return a different casing on every run. Scanning
+    the real entries once and matching case-insensitively sidesteps the
+    ambiguity entirely and returns the folder's true on-disk name.
+    """
+    wanted = {name.casefold() for name in _MTP_GARMIN_FOLDER_NAMES}
+    try:
+        # `parent / Path()` is a no-op for a plain Path, but for an MTPDevice
+        # (which has no iterdir()/glob() of its own) it produces an MTPPath
+        # rooted at the device root, which does support glob() — this keeps
+        # a single code path working for both mass-storage and MTP devices.
+        for entry in (parent / Path()).glob("*"):
+            if entry.is_dir() and entry.name.casefold() in wanted:
+                return entry
+    except (AttributeError, OSError):
+        pass
+    return None
+
+
 def _get_garmin_folder(device_root: Path) -> Path:
     """Resolve the Garmin folder for mass-storage and MTP device layouts."""
-    for folder_name in _MTP_GARMIN_FOLDER_NAMES:
-        candidate = device_root / folder_name
-        if candidate.is_dir():
-            return candidate
+    match = _match_existing_folder(device_root)
+    if match is not None:
+        return match
 
     if is_mtp_device(device_root):
         garmin = _find_mtp_garmin_root(device_root)
@@ -390,14 +419,12 @@ def _get_garmin_folder(device_root: Path) -> Path:
             return garmin
 
     try:
-        storage_roots = (device_root / Path()).glob("*")
-        for storage_root in storage_roots:
+        for storage_root in (device_root / Path()).glob("*"):
             if not storage_root.is_dir():
                 continue
-            for folder_name in _MTP_GARMIN_FOLDER_NAMES:
-                candidate = storage_root / folder_name
-                if candidate.is_dir():
-                    return candidate
+            match = _match_existing_folder(storage_root)
+            if match is not None:
+                return match
     except (AttributeError, OSError):
         pass
 
