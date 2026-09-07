@@ -1,8 +1,8 @@
 """
 src/opensak/gps/garmin.py — Garmin GPS device detection og GPX/LOC/GGZ export.
 
-Understøtter alle Garmin enheder der monteres som USB drev og
-accepterer GPX filer i /Garmin/GPX/ mappen.
+Understøtter Garmin enheder der monteres som USB drev eller som MTP-lager
+og accepterer GPX filer i /Garmin/GPX/ mappen.
 
 Testet med: GPSMAP64s, Oregon750
 
@@ -49,6 +49,15 @@ def find_garmin_devices() -> list[Path]:
     for mount in candidates:
         if _is_garmin(mount):
             devices.append(mount)
+
+    # MTP devices do not receive a Windows drive letter. Keep this optional
+    # and Windows-only so mass-storage support remains dependency-free.
+    if platform.system() == "Windows":
+        try:
+            from opensak.gps.mtp import find_mtp_devices
+            devices.extend(find_mtp_devices())
+        except (ImportError, OSError):
+            pass
 
     return devices
 

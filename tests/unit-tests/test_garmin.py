@@ -1220,6 +1220,9 @@ class TestDeviceScan:
         plain = tmp_path / "USB"
         plain.mkdir()
         monkeypatch.setattr("opensak.gps.garmin._get_mount_points", lambda: [garmin, plain])
+        # MTP scanning is independent of the mocked mass-storage candidates;
+        # disable it so this test remains focused on mount-point filtering.
+        monkeypatch.setattr("opensak.gps.mtp.find_mtp_devices", lambda: [])
         assert find_garmin_devices() == [garmin]
 
     def test_debug_scan_reports_devices(self, tmp_path, monkeypatch):
