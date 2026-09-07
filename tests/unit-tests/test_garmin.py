@@ -1239,6 +1239,7 @@ class TestDeviceScan:
         (garmin / "Garmin" / "GarminDevice.xml").write_text("<device/>")
         monkeypatch.setattr("opensak.gps.garmin._get_mount_points", lambda: [garmin])
         monkeypatch.setattr("opensak.gps.garmin._linux_mtp_mounts", lambda: [])
+        monkeypatch.setattr("opensak.gps.mtp.find_mtp_devices", lambda: [])
         monkeypatch.setattr("opensak.gps.garmin._is_writable_directory", lambda p: False)
         assert find_garmin_devices() == []
 
@@ -1248,6 +1249,7 @@ class TestDeviceScan:
         mtp_root.mkdir(parents=True)
         monkeypatch.setattr("opensak.gps.garmin._get_mount_points", lambda: [])
         monkeypatch.setattr("opensak.gps.garmin._linux_mtp_mounts", lambda: [mtp_root])
+        monkeypatch.setattr("opensak.gps.mtp.find_mtp_devices", lambda: [])
         monkeypatch.setattr(
             "opensak.gps.garmin._is_garmin_mtp_mount",
             lambda p: p == mtp_root,
@@ -1260,6 +1262,7 @@ class TestDeviceScan:
         (garmin / "Garmin" / "GarminDevice.xml").write_text("<device/>")
         monkeypatch.setattr("opensak.gps.garmin._get_mount_points", lambda: [garmin])
         monkeypatch.setattr("opensak.gps.garmin._linux_mtp_mounts", lambda: [])
+        monkeypatch.setattr("opensak.gps.mtp.find_mtp_devices", lambda: [])
         report = debug_scan()
         assert "Garmin scan debug" in report
         assert "GARMIN" in report

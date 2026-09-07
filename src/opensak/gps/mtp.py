@@ -11,7 +11,9 @@ pywin32 dependency is only required when an MTP scan is requested on Windows.
 from __future__ import annotations
 
 import fnmatch
+import os
 import platform
+import re
 import tempfile
 import time
 from pathlib import Path
@@ -172,12 +174,14 @@ class MTPDevice:
             raise ValueError("An MTP file path is required")
         folder = self._ensure_folder(parts[:-1])
         filename = parts[-1]
-        with tempfile.NamedTemporaryFile(delete=False, suffix=Path(filename).suffix) as tmp:
-            tmp.write(data)
-            local_path = Path(tmp.name)
+        # CopyHere preserves the source filename, so the local file must
+        # have the target name.  Use a temp *directory* + the real name.
+        tmpdir = Path(tempfile.mkdtemp())
+        local_path = tmpdir / filename
+        local_path.write_bytes(data)
         try:
             folder.CopyHere(str(local_path), 16 | 4 | 1024)
-            deadline = time.monotonic() + 30
+            deadline = time.monotonic() + 300
             while time.monotonic() < deadline:
                 if _find_item(folder, filename) is not None:
                     return
@@ -185,6 +189,7 @@ class MTPDevice:
             raise MTPError(f"Timed out copying {filename} to {self.name}")
         finally:
             local_path.unlink(missing_ok=True)
+            tmpdir.rmdir()
 
     def delete_file(self, parts: tuple[str, ...]) -> None:
         item = self._resolve(parts)
@@ -193,7 +198,20 @@ class MTPDevice:
         invoke = getattr(item, "InvokeVerb", None)
         if invoke is None:
             raise MTPError("The MTP device does not support file deletion")
+        name = parts[-1]
+        parent_folder = self._folder_for(parts[:-1]) if len(parts) > 1 else self._root_folder
         invoke("delete")
+        # Verify the file was actually removed.
+        if parent_folder is not None:
+            deadline = time.monotonic() + 10
+            while time.monotonic() < deadline:
+                if _find_item(parent_folder, name) is None:
+                    return
+                time.sleep(0.2)
+            raise MTPError(f"Failed to delete {name} from {self.name}")
+
+
+_DRIVE_LETTER_RE = re.compile(r"^[A-Za-z]:\\")
 
 
 def find_mtp_devices() -> list[MTPDevice]:
@@ -207,6 +225,11 @@ def find_mtp_devices() -> list[MTPDevice]:
         devices: list[MTPDevice] = []
         for item in drives.Items():
             try:
+                # Skip regular drive letters — they are handled by
+                # _windows_drives() and would cause duplicate detection.
+                item_path = str(getattr(item, "Path", ""))
+                if _DRIVE_LETTER_RE.match(item_path):
+                    continue
                 root = MTPDevice(item, shell)
                 # File Explorer commonly exposes a portable device first and
                 # its "Internal Storage" as a child. Garmin is stored under
