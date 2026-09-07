@@ -87,13 +87,17 @@ class ExportWorker(QThread):
     def run(self) -> None:
         try:
             from opensak.db.database import reload_caches_full
+            from opensak.gps.garmin import is_mtp_device
             caches = self.caches[:self.max_caches] if self.max_caches > 0 else self.caches
             caches = reload_caches_full(caches)
             cb = make_progress_cb(self.progress.emit)
 
             is_device = (
-                self.device_path.is_dir()
-                and (self.device_path / "Garmin").exists()
+                is_mtp_device(self.device_path)
+                or (
+                    self.device_path.is_dir()
+                    and (self.device_path / "Garmin").exists()
+                )
             )
 
             if self.export_format == "ggz":
@@ -145,6 +149,16 @@ class GpsExportDialog(QDialog):
         self._export_format = "gpx"   # "gpx" eller "ggz"
         self._setup_ui()
         self._scan_devices()
+
+    def closeEvent(self, event) -> None:
+        """Afbryd igangværende MTP-overførsler når dialogen lukkes."""
+        from opensak.gps.garmin import cancel_mtp_transfer
+        cancel_mtp_transfer()
+        for worker in (self._worker, self._delete_worker):
+            if worker is not None and worker.isRunning():
+                worker.quit()
+                worker.wait(2000)
+        super().closeEvent(event)
 
     def _setup_ui(self) -> None:
         layout = QVBoxLayout(self)
