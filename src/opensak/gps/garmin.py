@@ -1,8 +1,8 @@
 """
 src/opensak/gps/garmin.py — Garmin GPS device detection og GPX/LOC/GGZ export.
 
-Understøtter alle Garmin enheder der monteres som USB drev og
-accepterer GPX filer i /Garmin/GPX/ mappen.
+Understøtter Garmin enheder der monteres som USB drev eller som MTP-lager
+og accepterer GPX filer i /Garmin/GPX/ mappen.
 
 Testet med: GPSMAP64s, Oregon750
 
@@ -19,10 +19,13 @@ import platform
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from opensak.lang import tr
 from opensak.utils.constants import CUSTOM_WP_TYPES
+
+if TYPE_CHECKING:
+    from opensak.gps.mtp import MTPDevice
 
 
 # ── Garmin GPX/GGZ mapper på enheden ──────────────────────────────────────────
@@ -43,7 +46,7 @@ _MTP_GARMIN_MARKER_NAMES = {"GarminDevice.xml", "GPX"}
 
 # ── Enhed detektion ───────────────────────────────────────────────────────────
 
-def find_garmin_devices() -> list[Path]:
+def find_garmin_devices() -> list[Path | MTPDevice]:
     """
     Find Garmin GPS-enheder.
     Søger først efter normale writable mount points og derefter efter GVFS/MTP
@@ -51,7 +54,7 @@ def find_garmin_devices() -> list[Path]:
 
     Virker på Linux, Windows og macOS.
     """
-    devices: list[Path] = []
+    devices: list[Path | MTPDevice] = []
     seen: set[Path] = set()
 
     for candidate in _get_mount_points():
@@ -70,6 +73,15 @@ def find_garmin_devices() -> list[Path]:
         seen.add(candidate)
         if _is_garmin_mtp_mount(candidate):
             devices.append(candidate)
+
+    # MTP devices do not receive a Windows drive letter. Keep this optional
+    # and Windows-only so mass-storage support remains dependency-free.
+    if platform.system() == "Windows":
+        try:
+            from opensak.gps.mtp import find_mtp_devices
+            devices.extend(find_mtp_devices())
+        except (ImportError, OSError):
+            pass
 
     return devices
 
@@ -365,14 +377,41 @@ def _macos_volumes() -> list[Path]:
     return [v for v in volumes.iterdir() if v.is_dir()]
 
 
+def _get_garmin_folder(device_root: Path) -> Path:
+    """Resolve the Garmin folder for mass-storage and MTP device layouts."""
+    for folder_name in _MTP_GARMIN_FOLDER_NAMES:
+        candidate = device_root / folder_name
+        if candidate.is_dir():
+            return candidate
+
+    if is_mtp_device(device_root):
+        garmin = _find_mtp_garmin_root(device_root)
+        if garmin is not None:
+            return garmin
+
+    try:
+        storage_roots = (device_root / Path()).glob("*")
+        for storage_root in storage_roots:
+            if not storage_root.is_dir():
+                continue
+            for folder_name in _MTP_GARMIN_FOLDER_NAMES:
+                candidate = storage_root / folder_name
+                if candidate.is_dir():
+                    return candidate
+    except (AttributeError, OSError):
+        pass
+
+    return device_root / "Garmin"
+
+
 def get_garmin_gpx_path(device_root: Path) -> Path:
     """Returner stien til GPX mappen på en Garmin enhed."""
-    return device_root / GARMIN_GPX_SUBPATH
+    return _get_garmin_folder(device_root) / "GPX"
 
 
 def get_garmin_ggz_path(device_root: Path) -> Path:
     """Returner stien til GGZ mappen på en Garmin enhed."""
-    return device_root / GARMIN_GGZ_SUBPATH
+    return _get_garmin_folder(device_root) / "GGZ"
 
 
 # ── Debug hjælper ─────────────────────────────────────────────────────────────

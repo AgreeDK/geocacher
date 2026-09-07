@@ -421,7 +421,9 @@ class GpsExportDialog(QDialog):
     def _get_destination(self) -> Path | None:
         if self._rb_device.isChecked():
             data = self._device_combo.currentData()
-            return Path(data) if data else None
+            # Mass-storage devices are Paths; MTP devices are Path-like
+            # adapters and must not be passed through pathlib.Path().
+            return data if data else None
         else:
             if self._selected_file_path:
                 return self._selected_file_path
@@ -513,6 +515,12 @@ class GpsExportDialog(QDialog):
     ) -> None:
         """Kaldt når sletning er færdig — fortsæt med export."""
         self._log.setPlainText(str(delete_result) + "\n")
+        if (
+            not getattr(delete_result, "success", True)
+            or getattr(delete_result, "failed_count", 0) > 0
+        ):
+            self._on_error(str(delete_result))
+            return
         self._run_export(dest, filename, max_caches)
 
     def _prompt_new_filename(self, target: Path) -> tuple[str, bool]:

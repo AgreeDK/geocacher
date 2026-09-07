@@ -1226,6 +1226,10 @@ class TestDeviceScan:
         plain = tmp_path / "USB"
         plain.mkdir()
         monkeypatch.setattr("opensak.gps.garmin._get_mount_points", lambda: [garmin, plain])
+        # MTP scanning is independent of the mocked mass-storage candidates;
+        # disable both MTP discovery paths so this test remains focused on
+        # mass-storage mount-point filtering.
+        monkeypatch.setattr("opensak.gps.mtp.find_mtp_devices", lambda: [])
         monkeypatch.setattr("opensak.gps.garmin._linux_mtp_mounts", lambda: [])
         assert find_garmin_devices() == [garmin]
 
@@ -1235,6 +1239,7 @@ class TestDeviceScan:
         (garmin / "Garmin" / "GarminDevice.xml").write_text("<device/>")
         monkeypatch.setattr("opensak.gps.garmin._get_mount_points", lambda: [garmin])
         monkeypatch.setattr("opensak.gps.garmin._linux_mtp_mounts", lambda: [])
+        monkeypatch.setattr("opensak.gps.mtp.find_mtp_devices", lambda: [])
         monkeypatch.setattr("opensak.gps.garmin._is_writable_directory", lambda p: False)
         assert find_garmin_devices() == []
 
@@ -1244,6 +1249,7 @@ class TestDeviceScan:
         mtp_root.mkdir(parents=True)
         monkeypatch.setattr("opensak.gps.garmin._get_mount_points", lambda: [])
         monkeypatch.setattr("opensak.gps.garmin._linux_mtp_mounts", lambda: [mtp_root])
+        monkeypatch.setattr("opensak.gps.mtp.find_mtp_devices", lambda: [])
         monkeypatch.setattr(
             "opensak.gps.garmin._is_garmin_mtp_mount",
             lambda p: p == mtp_root,
@@ -1256,6 +1262,7 @@ class TestDeviceScan:
         (garmin / "Garmin" / "GarminDevice.xml").write_text("<device/>")
         monkeypatch.setattr("opensak.gps.garmin._get_mount_points", lambda: [garmin])
         monkeypatch.setattr("opensak.gps.garmin._linux_mtp_mounts", lambda: [])
+        monkeypatch.setattr("opensak.gps.mtp.find_mtp_devices", lambda: [])
         report = debug_scan()
         assert "Garmin scan debug" in report
         assert "GARMIN" in report
@@ -1571,4 +1578,20 @@ class TestMtp:
         monkeypatch.setattr("opensak.gps.garmin._gio_remove", lambda p: (removed.append(p) or True))
 
         result = delete_gpx_files(root, pattern="*.ggz", folder=ggz_dir)
+        assert result.deleted_count == 1
+
+    def test_delete_mtp_ggz_with_dialog_resolved_folder(self, tmp_path, monkeypatch):
+        root = self._mtp_device(tmp_path)
+        ggz_dir = root / "Internal Storage" / "GARMIN" / "GGZ"
+        ggz_dir.mkdir()
+        (ggz_dir / "old.ggz").write_text("data")
+
+        monkeypatch.setattr("opensak.gps.garmin._gio_remove", lambda path: True)
+
+        result = delete_gpx_files(
+            root,
+            pattern="*.ggz",
+            folder=get_garmin_ggz_path(root),
+        )
+
         assert result.deleted_count == 1
