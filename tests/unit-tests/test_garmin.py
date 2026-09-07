@@ -1579,3 +1579,19 @@ class TestMtp:
 
         result = delete_gpx_files(root, pattern="*.ggz", folder=ggz_dir)
         assert result.deleted_count == 1
+
+    def test_delete_mtp_ggz_with_dialog_resolved_folder(self, tmp_path, monkeypatch):
+        root = self._mtp_device(tmp_path)
+        ggz_dir = root / "Internal Storage" / "GARMIN" / "GGZ"
+        ggz_dir.mkdir()
+        (ggz_dir / "old.ggz").write_text("data")
+
+        monkeypatch.setattr("opensak.gps.garmin._gio_remove", lambda path: True)
+
+        result = delete_gpx_files(
+            root,
+            pattern="*.ggz",
+            folder=get_garmin_ggz_path(root),
+        )
+
+        assert result.deleted_count == 1

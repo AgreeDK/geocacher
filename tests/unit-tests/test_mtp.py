@@ -10,6 +10,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from opensak.gps.garmin import get_garmin_ggz_path, get_garmin_gpx_path
 from opensak.gps.mtp import (
     MTPDevice,
     MTPError,
@@ -27,9 +28,10 @@ from opensak.gps.mtp import (
 class FakeItem:
     """Mimics a Shell FolderItem with Name, Path, and optional GetFolder."""
 
-    def __init__(self, name: str, children=None, *, path: str = ""):
+    def __init__(self, name: str, children=None, *, path: str = "", filename: str | None = None):
         self.Name = name
         self.Path = path
+        self._filename = filename
         self._children = children  # list[FakeItem] or None (file)
         self._deleted = False
         # Cache the folder so every access returns the same object.
@@ -37,11 +39,20 @@ class FakeItem:
 
     @property
     def GetFolder(self):
+        if self._folder is None:
+            raise RuntimeError("File items do not expose GetFolder")
         return self._folder
 
     def InvokeVerb(self, verb: str) -> None:
         if verb == "delete":
             self._deleted = True
+
+    def ExtendedProperty(self, name: str):
+        if name in {"System.FileName", "System.ItemName"}:
+            return self._filename
+        if name == "System.FileExtension" and self._filename:
+            return Path(self._filename).suffix
+        return None
 
 
 class FakeFolder:
@@ -198,6 +209,18 @@ class TestMTPPath:
         assert "cache2.gpx" in names
         assert "notes.txt" not in names
 
+    def test_glob_and_unlink_use_canonical_filename_when_extension_is_hidden(self):
+        dev = self._device()
+        gpx_folder = dev._folder_for(("Internal Storage", "GARMIN", "GPX"))
+        gpx_folder._items.append(FakeItem("Washington", filename="Washington.gpx"))
+
+        path = dev / "Internal Storage" / "GARMIN" / "GPX"
+        matches = path.glob("*.gpx")
+
+        assert [match.name for match in matches] == ["Washington.gpx"]
+        matches[0].unlink()
+        assert matches[0].exists() is False
+
     def test_write_text(self):
         dev = self._device()
         p = dev / "Internal Storage" / "GARMIN" / "GPX" / "test.gpx"
@@ -229,6 +252,13 @@ class TestMTPDevice:
         p = dev / "GARMIN"
         assert isinstance(p, MTPPath)
         assert p.parts == ("GARMIN",)
+
+    def test_garmin_paths_resolve_storage_layer(self):
+        dev = _make_device()
+        (dev / "Internal Storage" / "GARMIN" / "GGZ").mkdir()
+
+        assert get_garmin_gpx_path(dev).is_dir()
+        assert get_garmin_ggz_path(dev).is_dir()
 
     def test_resolve_root(self):
         dev = _make_device()

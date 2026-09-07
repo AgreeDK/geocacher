@@ -515,6 +515,12 @@ class GpsExportDialog(QDialog):
     ) -> None:
         """Kaldt når sletning er færdig — fortsæt med export."""
         self._log.setPlainText(str(delete_result) + "\n")
+        if (
+            not getattr(delete_result, "success", True)
+            or getattr(delete_result, "failed_count", 0) > 0
+        ):
+            self._on_error(str(delete_result))
+            return
         self._run_export(dest, filename, max_caches)
 
     def _prompt_new_filename(self, target: Path) -> tuple[str, bool]:

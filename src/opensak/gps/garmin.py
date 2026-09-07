@@ -377,14 +377,41 @@ def _macos_volumes() -> list[Path]:
     return [v for v in volumes.iterdir() if v.is_dir()]
 
 
+def _get_garmin_folder(device_root: Path) -> Path:
+    """Resolve the Garmin folder for mass-storage and MTP device layouts."""
+    for folder_name in _MTP_GARMIN_FOLDER_NAMES:
+        candidate = device_root / folder_name
+        if candidate.is_dir():
+            return candidate
+
+    if is_mtp_device(device_root):
+        garmin = _find_mtp_garmin_root(device_root)
+        if garmin is not None:
+            return garmin
+
+    try:
+        storage_roots = (device_root / Path()).glob("*")
+        for storage_root in storage_roots:
+            if not storage_root.is_dir():
+                continue
+            for folder_name in _MTP_GARMIN_FOLDER_NAMES:
+                candidate = storage_root / folder_name
+                if candidate.is_dir():
+                    return candidate
+    except (AttributeError, OSError):
+        pass
+
+    return device_root / "Garmin"
+
+
 def get_garmin_gpx_path(device_root: Path) -> Path:
     """Returner stien til GPX mappen på en Garmin enhed."""
-    return device_root / GARMIN_GPX_SUBPATH
+    return _get_garmin_folder(device_root) / "GPX"
 
 
 def get_garmin_ggz_path(device_root: Path) -> Path:
     """Returner stien til GGZ mappen på en Garmin enhed."""
-    return device_root / GARMIN_GGZ_SUBPATH
+    return _get_garmin_folder(device_root) / "GGZ"
 
 
 # ── Debug hjælper ─────────────────────────────────────────────────────────────

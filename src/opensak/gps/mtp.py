@@ -25,16 +25,42 @@ class MTPError(OSError):
 
 
 def _shell_folder(item: Any) -> Any:
-    folder = getattr(item, "GetFolder", None)
+    try:
+        folder = getattr(item, "GetFolder", None)
+    except Exception as error:
+        raise MTPError("The portable device item is not a folder") from error
     if folder is None:
         raise MTPError("The portable device does not expose a storage folder")
     return folder
 
 
+def _item_filename(item: Any) -> str:
+    """Return an item's real filename rather than its extensionless display name."""
+    extended_property = getattr(item, "ExtendedProperty", None)
+    if extended_property is not None:
+        for property_name in ("System.FileName", "System.ItemName"):
+            try:
+                value = extended_property(property_name)
+                if value:
+                    return str(value)
+            except Exception:
+                pass
+
+        try:
+            extension = extended_property("System.FileExtension")
+            display_name = str(item.Name)
+            if extension and not display_name.casefold().endswith(str(extension).casefold()):
+                return display_name + str(extension)
+        except Exception:
+            pass
+
+    return str(item.Name)
+
+
 def _find_item(folder: Any, name: str) -> Any | None:
     wanted = name.casefold()
     for item in folder.Items():
-        if str(item.Name).casefold() == wanted:
+        if _item_filename(item).casefold() == wanted:
             return item
     return None
 
@@ -101,9 +127,9 @@ class MTPPath:
         if folder is None:
             return []
         return [
-            MTPPath(self.device, self.parts + (str(item.Name),))
+            MTPPath(self.device, self.parts + (_item_filename(item),))
             for item in folder.Items()
-            if fnmatch.fnmatchcase(str(item.Name).casefold(), pattern.casefold())
+            if fnmatch.fnmatchcase(_item_filename(item).casefold(), pattern.casefold())
         ]
 
 
