@@ -4,6 +4,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.19.0-beta.1] — 2026-09-07
+
+### Added
+
+- **MTP support for newer Garmin devices, Linux (#453, #822)** — Newer
+  Garmin models (2020+) dropped USB mass-storage in favour of MTP
+  (Media Transfer Protocol), which the mount-point-based device
+  detection couldn't see, so "Send to GPS" silently found no device on
+  Linux for these units. Device detection now also scans GVFS/MTP
+  mounts (`/run/user/*/gvfs/mtp:...`) for a Garmin folder (handling the
+  uppercase `GARMIN` naming and extra storage-root nesting MTP devices
+  use), and both GPX and GGZ export/delete now go through `gio copy`/
+  `gio remove` when the target is an MTP device instead of a direct
+  filesystem write. An in-progress MTP transfer is cancelled cleanly if
+  the export dialog is closed mid-copy. Requires `gio` (part of GLib/
+  GVFS), present by default on most GNOME-based Linux desktops; falls
+  back to a clear error message if it's missing. This fix is Linux-only
+  — Windows and macOS were not affected by the original mount-point
+  detection gap in the same way and are unchanged here. Thanks to Brian
+  Anderson (@blazerat) for both the investigation and the fix!
+
+---
+
 ## [1.18.0] — 2026-09-02
 
 > First stable release of the 1.18.0 cycle, and the **first stable release
