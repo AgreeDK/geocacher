@@ -4,6 +4,50 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.19.0-beta.2] — 2026-09-07
+
+### Added
+
+- **MTP support for newer Garmin devices, Windows (#453, #826)** —
+  Extends the MTP fix from #822 to Windows. Windows doesn't assign
+  MTP-connected devices a drive letter, so the existing mount-point
+  scan couldn't see them either. A new `opensak.gps.mtp` module talks
+  to the device through the same Shell "Folder" automation API File
+  Explorer itself uses (via `pywin32`, a new Windows-only dependency),
+  wrapped in a small `MTPDevice`/`MTPPath` adapter that mirrors
+  `pathlib.Path`'s interface (`/`, `write_text`, `mkdir`, `unlink`,
+  etc.). Because of that, the existing GPX/GGZ export code needed no
+  changes at all — it already worked in terms of `Path`-like objects,
+  so the new adapter just slots into the same code path a normal mount
+  point uses. File copies go through `Folder.CopyHere`, deletions
+  through `InvokeVerb("delete")`, both polled to confirm completion
+  since neither is a synchronous, confirmable operation on Windows.
+  Detection deliberately skips anything already exposed as a regular
+  drive letter, to avoid double-listing the same device. With this,
+  **#453 is now resolved on both Linux and Windows** — macOS is the
+  one remaining unconfirmed platform (see below). Thanks again to
+  Brian Anderson (@blazerat)!
+
+### Fixed
+
+- **Garmin folder lookup could resolve to a different casing on every
+  run, on case-insensitive filesystems (macOS, Windows)** — a
+  follow-up commit to #826 introduced `_get_garmin_folder()`, which
+  probed `garmin`/`GARMIN`/`Garmin` as constructed candidate paths and
+  tested each with `.is_dir()`. On a case-sensitive filesystem (Linux)
+  only the real one matches, but on macOS' APFS and Windows' NTFS all
+  three resolve to the same physical folder once it exists — so which
+  one "matched" depended on the iteration order of the Python `set`
+  they were stored in, itself randomised per-process by string hash
+  seeding. `TestExportGgzToDevice::test_file_path_recorded` caught
+  this via a genuinely flaky assertion on the macOS CI runner. Fixed
+  by scanning the real directory listing once and matching
+  case-insensitively against the actual on-disk name, instead of
+  guessing candidate paths. Caught and fixed before this reached a
+  tagged release — no user-facing impact.
+
+---
+
 ## [1.19.0-beta.1] — 2026-09-07
 
 ### Added
