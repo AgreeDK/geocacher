@@ -401,3 +401,165 @@ class TestAtomicWriteRetry:
         assert not path.exists()
         # The temp file must not be left behind after giving up.
         assert list(tmp_path.iterdir()) == []
+
+
+# ── platform-specific path resolution (issue #825) ─────────────────────────
+#
+# Regression coverage for the os.name/darwin bug: os.name is "posix" on both
+# Linux and macOS, so these paths must be exercised directly against a mocked
+# sys.platform + os.name, rather than via the monkeypatched-function shortcuts
+# used elsewhere in this file (those bypass the branching logic entirely).
+
+class TestPlatformSpecificPaths:
+    # Note: there's deliberately no test here for the os.name == "nt" branch.
+    # Python 3.12's pathlib decides WindowsPath vs. PosixPath once, at module
+    # import time, not dynamically per call — monkeypatching os.name/sys.platform
+    # afterwards on a posix test runner can't make Path() build a WindowsPath
+    # (raises "cannot instantiate 'WindowsPath' on your system"). This is a
+    # pre-existing stdlib limitation unrelated to issue #825, and the Windows
+    # branch itself isn't touched by this fix — only the darwin/posix split is.
+    # Windows behaviour is exercised via the existing test suite on Windows CI.
+
+    def test_bootstrap_path_macos(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(ss.os, "name", "posix")
+        monkeypatch.setattr(ss.sys, "platform", "darwin")
+        monkeypatch.setattr(ss.Path, "home", lambda: tmp_path)
+        result = ss._bootstrap_path()
+        assert result == (
+            tmp_path / "Library" / "Application Support" / "opensak" / "bootstrap.json"
+        )
+
+    def test_bootstrap_path_linux(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(ss.os, "name", "posix")
+        monkeypatch.setattr(ss.sys, "platform", "linux")
+        monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+        monkeypatch.setattr(ss.Path, "home", lambda: tmp_path)
+        result = ss._bootstrap_path()
+        assert result == tmp_path / ".config" / "opensak" / "bootstrap.json"
+
+    def test_bootstrap_path_linux_respects_xdg_config_home(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(ss.os, "name", "posix")
+        monkeypatch.setattr(ss.sys, "platform", "linux")
+        xdg = tmp_path / "custom-xdg"
+        monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg))
+        result = ss._bootstrap_path()
+        assert result == xdg / "opensak" / "bootstrap.json"
+
+    def test_default_install_dir_macos(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(ss.os, "name", "posix")
+        monkeypatch.setattr(ss.sys, "platform", "darwin")
+        monkeypatch.setattr(ss.Path, "home", lambda: tmp_path)
+        result = ss._default_install_dir()
+        assert result == tmp_path / "Library" / "Application Support" / "opensak"
+
+    def test_default_install_dir_linux(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(ss.os, "name", "posix")
+        monkeypatch.setattr(ss.sys, "platform", "linux")
+        monkeypatch.delenv("XDG_DATA_HOME", raising=False)
+        monkeypatch.setattr(ss.Path, "home", lambda: tmp_path)
+        result = ss._default_install_dir()
+        assert result == tmp_path / ".local" / "share" / "opensak"
+
+
+# ── macOS default-path migration (issue #825) ──────────────────────────────
+
+class TestMigrateMacosDefaultPaths:
+    def _patch_platform(self, monkeypatch, home: Path):
+        """Common setup: pretend to be macOS, rooted at a temp $HOME."""
+        monkeypatch.setattr(ss.sys, "platform", "darwin")
+        monkeypatch.setattr(ss.os, "name", "posix")
+        monkeypatch.setattr(ss.Path, "home", lambda: home)
+        monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
+        monkeypatch.delenv("XDG_DATA_HOME", raising=False)
+
+    def test_noop_on_non_macos(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(ss.sys, "platform", "linux")
+        assert ss.migrate_macos_default_paths() is False
+
+    def test_noop_on_fresh_install_nothing_to_migrate(self, monkeypatch, tmp_path):
+        self._patch_platform(monkeypatch, tmp_path)
+        assert ss.migrate_macos_default_paths() is False
+        # Must not have created anything on either the old or the new side.
+        assert not (tmp_path / ".config").exists()
+        assert not (tmp_path / "Library").exists()
+
+    def test_noop_if_new_bootstrap_already_exists(self, monkeypatch, tmp_path):
+        self._patch_platform(monkeypatch, tmp_path)
+        new_bootstrap = ss._bootstrap_path()
+        new_bootstrap.parent.mkdir(parents=True)
+        new_bootstrap.write_text(json.dumps({"install_dir": "whatever"}), encoding="utf-8")
+        # Old (legacy) data present too — must be left untouched.
+        old_dir = ss._legacy_macos_default_install_dir()
+        old_dir.mkdir(parents=True)
+        (old_dir / "opensak.json").write_text("{}", encoding="utf-8")
+
+        assert ss.migrate_macos_default_paths() is False
+        assert (old_dir / "opensak.json").exists()  # untouched, not clobbered
+
+    def test_migrates_default_path_contents(self, monkeypatch, tmp_path):
+        self._patch_platform(monkeypatch, tmp_path)
+        old_dir = ss._legacy_macos_default_install_dir()
+        old_dir.mkdir(parents=True)
+        (old_dir / "opensak.json").write_text(json.dumps({"a": 1}), encoding="utf-8")
+        (old_dir / "MyCaches.sqlite").write_text("dummy-db", encoding="utf-8")
+
+        assert ss.migrate_macos_default_paths() is True
+
+        new_dir = ss._default_install_dir()
+        assert (new_dir / "opensak.json").exists()
+        assert (new_dir / "MyCaches.sqlite").read_text(encoding="utf-8") == "dummy-db"
+        # Old dir should be cleaned up once empty.
+        assert not old_dir.exists()
+        # New bootstrap.json must point at the new default install dir.
+        new_bootstrap_data = json.loads(ss._bootstrap_path().read_text(encoding="utf-8"))
+        assert Path(new_bootstrap_data["install_dir"]) == new_dir
+
+    def test_preserves_custom_install_dir_moves_only_bootstrap(self, monkeypatch, tmp_path):
+        # User picked a custom install dir via the welcome wizard (#210) —
+        # that data isn't affected by the bug and must not be moved, only
+        # the bootstrap.json pointer's own location needs correcting.
+        self._patch_platform(monkeypatch, tmp_path)
+        custom_dir = tmp_path / "MyOwnOpenSAKFolder"
+        custom_dir.mkdir(parents=True)
+        (custom_dir / "opensak.json").write_text(json.dumps({"a": 1}), encoding="utf-8")
+
+        old_bootstrap = ss._legacy_macos_bootstrap_path()
+        old_bootstrap.parent.mkdir(parents=True)
+        old_bootstrap.write_text(json.dumps({"install_dir": str(custom_dir)}), encoding="utf-8")
+
+        assert ss.migrate_macos_default_paths() is True
+
+        # Custom dir contents must be untouched, in-place.
+        assert (custom_dir / "opensak.json").exists()
+        assert json.loads((custom_dir / "opensak.json").read_text(encoding="utf-8")) == {"a": 1}
+
+        new_bootstrap_data = json.loads(ss._bootstrap_path().read_text(encoding="utf-8"))
+        assert Path(new_bootstrap_data["install_dir"]) == custom_dir
+        assert not old_bootstrap.exists()
+
+    def test_skips_colliding_entries_without_clobbering(self, monkeypatch, tmp_path):
+        self._patch_platform(monkeypatch, tmp_path)
+        old_dir = ss._legacy_macos_default_install_dir()
+        old_dir.mkdir(parents=True)
+        (old_dir / "opensak.json").write_text(json.dumps({"old": True}), encoding="utf-8")
+
+        new_dir = ss._default_install_dir()
+        new_dir.mkdir(parents=True)
+        (new_dir / "opensak.json").write_text(json.dumps({"new": True}), encoding="utf-8")
+
+        assert ss.migrate_macos_default_paths() is True
+
+        # The colliding file must be left as-is on the new side, not
+        # overwritten by the old side's version.
+        assert json.loads((new_dir / "opensak.json").read_text(encoding="utf-8")) == {"new": True}
+        # And the old side must still have its own copy, since it wasn't moved.
+        assert json.loads((old_dir / "opensak.json").read_text(encoding="utf-8")) == {"old": True}
+
+    def test_idempotent_second_call_is_noop(self, monkeypatch, tmp_path):
+        self._patch_platform(monkeypatch, tmp_path)
+        old_dir = ss._legacy_macos_default_install_dir()
+        old_dir.mkdir(parents=True)
+        (old_dir / "opensak.json").write_text("{}", encoding="utf-8")
+
+        assert ss.migrate_macos_default_paths() is True
+        assert ss.migrate_macos_default_paths() is False  # nothing left to do

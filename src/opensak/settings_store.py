@@ -18,6 +18,8 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -27,9 +29,18 @@ from typing import Any
 # ── Bootstrap-sti ─────────────────────────────────────────────────────────────
 
 def _bootstrap_path() -> Path:
-    """Returner platform-korrekt sti til bootstrap.json."""
+    """
+    Returner platform-korrekt sti til bootstrap.json.
+
+    Issue #825: `os.name` er `"posix"` på BÅDE Linux og macOS, så en
+    macOS-specifik gren skal tjekkes FØR den generelle posix-gren via
+    `sys.platform == "darwin"` — ellers rammer macOS fejlagtigt
+    Linux-stien (~/.config), som den gjorde før denne fix.
+    """
     if os.name == "nt":
         base = Path(os.environ.get("APPDATA", Path.home()))
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
     elif os.name == "posix":
         xdg = os.environ.get("XDG_CONFIG_HOME")
         base = Path(xdg) if xdg else Path.home() / ".config"
@@ -39,14 +50,44 @@ def _bootstrap_path() -> Path:
 
 
 def _default_install_dir() -> Path:
-    """Standard installations-mappe — bruges hvis bootstrap ikke findes."""
+    """
+    Standard installations-mappe — bruges hvis bootstrap ikke findes.
+
+    Issue #825: se `_bootstrap_path()` — samme `sys.platform == "darwin"`
+    tjek er nødvendigt her af samme årsag.
+    """
     if os.name == "nt":
         base = Path(os.environ.get("APPDATA", Path.home()))
+    elif sys.platform == "darwin":
+        base = Path.home() / "Library" / "Application Support"
     elif os.name == "posix":
         xdg = os.environ.get("XDG_DATA_HOME")
         base = Path(xdg) if xdg else Path.home() / ".local" / "share"
     else:
         base = Path.home()
+    return base / "opensak"
+
+
+# ── Legacy macOS-stier (issue #825) ─────────────────────────────────────────
+#
+# Før denne fix brugte macOS fejlagtigt den generelle posix-gren, dvs. de
+# samme stier som Linux. Disse to funktioner genskaber PRÆCIS den gamle
+# (forkerte) logik, udelukkende til brug i migrate_macos_default_paths()
+# nedenfor, så eksisterende macOS-brugeres data kan findes og flyttes.
+# Skal IKKE bruges andre steder — al ny kode skal bruge _bootstrap_path()/
+# _default_install_dir() ovenfor.
+
+def _legacy_macos_bootstrap_path() -> Path:
+    """Den (forkerte) sti macOS brugte til bootstrap.json før issue #825."""
+    xdg = os.environ.get("XDG_CONFIG_HOME")
+    base = Path(xdg) if xdg else Path.home() / ".config"
+    return base / "opensak" / "bootstrap.json"
+
+
+def _legacy_macos_default_install_dir() -> Path:
+    """Den (forkerte) standard-installationsmappe macOS brugte før issue #825."""
+    xdg = os.environ.get("XDG_DATA_HOME")
+    base = Path(xdg) if xdg else Path.home() / ".local" / "share"
     return base / "opensak"
 
 
@@ -416,6 +457,116 @@ def migrate_from_qsettings(store: SettingsStore) -> bool:
         print(f"[settings] Migration fra QSettings fejlede: {e}")
         store.set("_migrated_from_qsettings", True)
         return False
+
+
+def migrate_macos_default_paths() -> bool:
+    """
+    Én-gangs migration af eksisterende macOS-brugeres data fra den
+    fejlagtige posix-sti til den korrekte macOS-sti (issue #825).
+
+    Før denne fix brugte macOS fejlagtigt Linux-stierne (~/.config og
+    ~/.local/share) i stedet for ~/Library/Application Support, fordi
+    `os.name` er "posix" på begge platforme. Denne funktion flytter
+    eksisterende brugeres data til den korrekte placering.
+
+    Ingen effekt på Windows/Linux — returnerer altid False med det samme
+    på andre platforme end macOS.
+
+    Idempotent: hvis den nye bootstrap.json allerede findes (enten fordi
+    migration allerede er kørt, eller fordi det er en frisk installation
+    der aldrig ramte den gamle sti), gøres intet. Rører aldrig en
+    destination der allerede har data — ved kollision bevares begge
+    steder uændret i stedet for at overskrive noget.
+
+    Hvis den gamle bootstrap.json peger på en brugervalgt installations-
+    mappe (via velkomst-wizarden, issue #210) i stedet for standard-stien,
+    flyttes KUN selve bootstrap.json-filens placering — den brugervalgte
+    mappes indhold er ikke ramt af denne bug og røres ikke.
+
+    Returnerer True hvis noget blev migreret, False ellers.
+    """
+    if sys.platform != "darwin":
+        return False
+
+    new_bootstrap = _bootstrap_path()
+    if new_bootstrap.exists():
+        return False  # allerede migreret, eller frisk install på korrekt sti
+
+    old_bootstrap = _legacy_macos_bootstrap_path()
+    old_default_install = _legacy_macos_default_install_dir()
+
+    if not old_bootstrap.exists() and not old_default_install.exists():
+        return False  # intet at migrere — helt frisk installation
+
+    migrated_something = False
+
+    # Find den FAKTISKE install_dir fra den gamle bootstrap, hvis den
+    # findes — det er ikke nødvendigvis standard-stien, hvis brugeren har
+    # valgt en anden mappe via velkomst-wizarden.
+    actual_install_dir = old_default_install
+    if old_bootstrap.exists():
+        try:
+            data = json.loads(old_bootstrap.read_text(encoding="utf-8"))
+            candidate = data.get("install_dir")
+            if candidate:
+                actual_install_dir = Path(candidate)
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    if actual_install_dir == old_default_install:
+        # Standard-sti — flyt selve indholdet (opensak.json, databaser osv.)
+        # til den nye standard-sti. Samme "best-effort, spring kollisioner
+        # over"-mønster som _move_remaining_install_dir_contents() i
+        # velkomst-wizarden (issue #562).
+        new_install_dir = _default_install_dir()
+        if old_default_install.exists():
+            new_install_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                entries = list(old_default_install.iterdir())
+            except OSError:
+                entries = []
+            for entry in entries:
+                target = new_install_dir / entry.name
+                if target.exists():
+                    continue  # kollision — rør det ikke, behold begge som de er
+                try:
+                    shutil.move(str(entry), str(target))
+                    migrated_something = True
+                except OSError as exc:
+                    print(f"[settings] macOS-migration: kunne ikke flytte "
+                          f"{entry} → {target}: {exc}")
+            try:
+                if not any(old_default_install.iterdir()):
+                    old_default_install.rmdir()
+            except OSError:
+                pass
+    else:
+        # Brugervalgt mappe — indholdet er ikke ramt af bug'en, kun
+        # bootstrap.json's egen (forkerte) placering skal rettes.
+        new_install_dir = actual_install_dir
+
+    # Skriv bootstrap.json på den nye, korrekte sti, pegende på den
+    # (evt. flyttede) installationsmappe.
+    _atomic_write(new_bootstrap, {"install_dir": str(new_install_dir)})
+    migrated_something = True
+
+    # Ryd op i den gamle bootstrap.json/mappe hvis den nu er tom.
+    if old_bootstrap.exists():
+        try:
+            old_bootstrap.unlink()
+        except OSError:
+            pass
+    try:
+        if old_bootstrap.parent.exists() and not any(old_bootstrap.parent.iterdir()):
+            old_bootstrap.parent.rmdir()
+    except OSError:
+        pass
+
+    if migrated_something:
+        print(f"[settings] macOS-sti migreret: {old_default_install} → "
+              f"{new_install_dir}")
+
+    return migrated_something
 
 
 def get_db_dir() -> Path:
