@@ -286,9 +286,15 @@ def main() -> None:
     splash_msg("Indlæser sprog...")
     # Kør én-gangs migration fra QSettings → opensak.json (issue #209)
     from opensak.settings_store import (
-        get_store, migrate_from_qsettings, is_first_run,
-        mark_wizard_completed, repair_corrupted_bool_keys,
+        get_store, migrate_from_qsettings, migrate_macos_default_paths,
+        is_first_run, mark_wizard_completed, repair_corrupted_bool_keys,
     )
+    # Issue #825: macOS brugte fejlagtigt Linux-stierne (~/.config,
+    # ~/.local/share) i stedet for ~/Library/Application Support. Skal
+    # køres FØR get_store() kaldes nedenfor, så SettingsStore-singletonen
+    # aldrig når at slå op i (og cache) den gamle, forkerte sti. Ingen
+    # effekt på Windows/Linux.
+    migrate_macos_default_paths()
     did_migrate = migrate_from_qsettings(get_store())
     # Reparér evt. boolean-værdier korrumperet af en tidligere bug i
     # _flush() — kører altid, uafhængigt af om migration var nødvendig,
