@@ -107,11 +107,24 @@ def resolve_physical_appdata_path(logical_path: Path) -> Path:
     Returns `logical_path` unchanged if:
       - not running packaged (or not on Windows at all), or
       - %APPDATA%/%LOCALAPPDATA% aren't set, or
-      - `logical_path` isn't actually under %APPDATA%
-    — i.e. there's nothing to translate.
+      - `logical_path` isn't actually under %APPDATA%, or
+      - the computed physical location doesn't actually exist on disk
+    — i.e. there's nothing to translate, or translating would be a guess.
 
-    See issue #820 for the confirmed redirection scheme this mirrors:
+    See issue #820 for the redirection scheme this mirrors:
     %LocalAppData%\\Packages\\<PackageFamilyName>\\LocalCache\\Roaming\\...
+
+    IMPORTANT (see #820 discussion, 8 Sep 2026): this virtualization
+    scheme was confirmed against a real Microsoft Store install, but a
+    local sideload test with a self-signed dev-test certificate showed
+    NO virtualization at all — the file was exactly where the logical
+    path said. It's not yet confirmed whether this depends on the
+    package's signing identity (Store-issued vs. self-signed sideload),
+    or something else entirely. Given that uncertainty, this function
+    verifies the guessed physical path actually exists before using it,
+    rather than presenting a possibly-fictional path as fact — showing
+    a wrong-but-confident path is worse than showing the original
+    (merely unconfirmed) logical one.
     """
     family_name = get_package_family_name()
     if family_name is None:
@@ -127,10 +140,19 @@ def resolve_physical_appdata_path(logical_path: Path) -> Path:
     except ValueError:
         return logical_path  # not under %APPDATA% — nothing to translate
 
-    return (
+    physical_path = (
         Path(local_appdata) / "Packages" / family_name / "LocalCache"
         / "Roaming" / relative
     )
+
+    # Only trust the translation if it actually points at something real.
+    # See the docstring above: virtualization isn't confirmed in every
+    # signing/distribution scenario, so a guess that doesn't check out
+    # against the real filesystem must not be shown as if it were fact.
+    if not physical_path.exists():
+        return logical_path
+
+    return physical_path
 
 
 def reset_cache() -> None:

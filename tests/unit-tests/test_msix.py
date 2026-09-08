@@ -84,54 +84,86 @@ class TestResolvePhysicalAppdataPath:
     def _patch_packaged(self, monkeypatch, family_name, appdata, local_appdata):
         monkeypatch.setattr(msix, "get_package_family_name", lambda: family_name)
         if appdata is not None:
-            monkeypatch.setenv("APPDATA", appdata)
+            monkeypatch.setenv("APPDATA", str(appdata))
         else:
             monkeypatch.delenv("APPDATA", raising=False)
         if local_appdata is not None:
-            monkeypatch.setenv("LOCALAPPDATA", local_appdata)
+            monkeypatch.setenv("LOCALAPPDATA", str(local_appdata))
         else:
             monkeypatch.delenv("LOCALAPPDATA", raising=False)
 
-    def test_unchanged_when_not_packaged(self, monkeypatch):
-        self._patch_packaged(monkeypatch, None, "/Users/bob/AppData/Roaming",
-                              "/Users/bob/AppData/Local")
-        logical = Path("/Users/bob/AppData/Roaming/opensak")
+    def test_unchanged_when_not_packaged(self, monkeypatch, tmp_path):
+        appdata = tmp_path / "AppData" / "Roaming"
+        self._patch_packaged(monkeypatch, None, appdata, tmp_path / "AppData" / "Local")
+        logical = appdata / "opensak"
         assert msix.resolve_physical_appdata_path(logical) == logical
 
-    def test_translates_path_under_appdata_when_packaged(self, monkeypatch):
-        self._patch_packaged(
-            monkeypatch, "AgreeDK.OpenSAK_8wekyb3d8bbwe",
-            "/Users/bob/AppData/Roaming", "/Users/bob/AppData/Local",
-        )
-        logical = Path("/Users/bob/AppData/Roaming/opensak")
-        result = msix.resolve_physical_appdata_path(logical)
-        assert result == Path(
-            "/Users/bob/AppData/Local/Packages/AgreeDK.OpenSAK_8wekyb3d8bbwe"
-            "/LocalCache/Roaming/opensak"
-        )
+    def test_translates_path_when_physical_location_exists(self, monkeypatch, tmp_path):
+        # Real-world finding (#820, 8 Sep 2026): translation is only shown
+        # when the guessed physical path actually checks out on disk — so
+        # this test creates it for real, rather than asserting on a bare
+        # string computation.
+        appdata = tmp_path / "AppData" / "Roaming"
+        local_appdata = tmp_path / "AppData" / "Local"
+        family_name = "AgreeDK.OpenSAK_8wekyb3d8bbwe"
+        self._patch_packaged(monkeypatch, family_name, appdata, local_appdata)
 
-    def test_preserves_nested_subdirectories(self, monkeypatch):
-        self._patch_packaged(
-            monkeypatch, "AgreeDK.OpenSAK_8wekyb3d8bbwe",
-            "/Users/bob/AppData/Roaming", "/Users/bob/AppData/Local",
+        physical_dir = (
+            local_appdata / "Packages" / family_name / "LocalCache"
+            / "Roaming" / "opensak"
         )
-        logical = Path("/Users/bob/AppData/Roaming/opensak/MyCaches.db")
-        result = msix.resolve_physical_appdata_path(logical)
-        assert result == Path(
-            "/Users/bob/AppData/Local/Packages/AgreeDK.OpenSAK_8wekyb3d8bbwe"
-            "/LocalCache/Roaming/opensak/MyCaches.db"
-        )
+        physical_dir.mkdir(parents=True)
 
-    def test_unchanged_when_path_not_under_appdata(self, monkeypatch):
+        logical = appdata / "opensak"
+        result = msix.resolve_physical_appdata_path(logical)
+        assert result == physical_dir
+
+    def test_preserves_nested_subdirectories(self, monkeypatch, tmp_path):
+        appdata = tmp_path / "AppData" / "Roaming"
+        local_appdata = tmp_path / "AppData" / "Local"
+        family_name = "AgreeDK.OpenSAK_8wekyb3d8bbwe"
+        self._patch_packaged(monkeypatch, family_name, appdata, local_appdata)
+
+        physical_dir = (
+            local_appdata / "Packages" / family_name / "LocalCache"
+            / "Roaming" / "opensak"
+        )
+        physical_dir.mkdir(parents=True)
+        (physical_dir / "MyCaches.db").write_text("dummy", encoding="utf-8")
+
+        logical = appdata / "opensak" / "MyCaches.db"
+        result = msix.resolve_physical_appdata_path(logical)
+        assert result == physical_dir / "MyCaches.db"
+
+    def test_falls_back_to_logical_path_when_physical_location_does_not_exist(
+        self, monkeypatch, tmp_path
+    ):
+        # The core safety-net case: packaged, path under %APPDATA%, but the
+        # guessed physical location doesn't actually exist (e.g. a
+        # sideloaded/self-signed build where no virtualization actually
+        # occurred, per the real-hardware test on 8 Sep 2026). Must show
+        # the original logical path rather than a confident-looking guess
+        # that turns out to be fictional.
+        appdata = tmp_path / "AppData" / "Roaming"
+        local_appdata = tmp_path / "AppData" / "Local"
+        self._patch_packaged(
+            monkeypatch, "AgreeDK.OpenSAK_8wekyb3d8bbwe", appdata, local_appdata
+        )
+        logical = appdata / "opensak"
+        # Deliberately not creating anything under local_appdata/Packages/...
+        assert msix.resolve_physical_appdata_path(logical) == logical
+
+    def test_unchanged_when_path_not_under_appdata(self, monkeypatch, tmp_path):
         # e.g. a user-chosen Documents path, or the new #820-part-B default
+        appdata = tmp_path / "AppData" / "Roaming"
         self._patch_packaged(
-            monkeypatch, "AgreeDK.OpenSAK_8wekyb3d8bbwe",
-            "/Users/bob/AppData/Roaming", "/Users/bob/AppData/Local",
+            monkeypatch, "AgreeDK.OpenSAK_8wekyb3d8bbwe", appdata,
+            tmp_path / "AppData" / "Local",
         )
-        logical = Path("/Users/bob/Documents/opensak")
+        logical = tmp_path / "Documents" / "opensak"
         assert msix.resolve_physical_appdata_path(logical) == logical
 
-    def test_unchanged_when_env_vars_missing(self, monkeypatch):
+    def test_unchanged_when_env_vars_missing(self, monkeypatch, tmp_path):
         self._patch_packaged(monkeypatch, "AgreeDK.OpenSAK_8wekyb3d8bbwe", None, None)
-        logical = Path("/Users/bob/AppData/Roaming/opensak")
+        logical = tmp_path / "AppData" / "Roaming" / "opensak"
         assert msix.resolve_physical_appdata_path(logical) == logical

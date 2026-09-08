@@ -50,30 +50,38 @@ class TestNewDatabaseDialog:
         dlg._name_edit.setText("MyDB")
         assert dlg._path_edit.text() == str(tmp_path / "MyDB.db")
 
-    def test_path_preview_shows_physical_path_when_msix_packaged(self, qtbot, monkeypatch):
+    def test_path_preview_shows_physical_path_when_msix_packaged(
+        self, qtbot, monkeypatch, tmp_path
+    ):
         # Issue #820: same translation as the Manage databases info panel,
         # applied here since this preview is also purely for display (the
         # actual creation path comes from custom_path/get_db_dir(), not
-        # from parsing this read-only field back).
+        # from parsing this read-only field back). The existence check
+        # (added after real-hardware testing, 8 Sep 2026) runs against the
+        # *folder*, not the not-yet-created .db file — a new database's
+        # file obviously can't exist yet, but its parent folder can.
+        appdata = tmp_path / "AppData" / "Roaming"
+        local_appdata = tmp_path / "AppData" / "Local"
+        family_name = "AgreeDK.OpenSAK_8wekyb3d8bbwe"
+        physical_dir = (
+            local_appdata / "Packages" / family_name / "LocalCache"
+            / "Roaming" / "opensak"
+        )
+        physical_dir.mkdir(parents=True)
+
         monkeypatch.setattr(
             "opensak.settings_store.get_db_dir",
-            lambda: Path("/AppData/Roaming/opensak"),
+            lambda: appdata / "opensak",
         )
-        monkeypatch.setattr(
-            "opensak.msix.get_package_family_name",
-            lambda: "AgreeDK.OpenSAK_8wekyb3d8bbwe",
-        )
-        monkeypatch.setenv("APPDATA", "/AppData/Roaming")
-        monkeypatch.setenv("LOCALAPPDATA", "/AppData/Local")
+        monkeypatch.setattr("opensak.msix.get_package_family_name", lambda: family_name)
+        monkeypatch.setenv("APPDATA", str(appdata))
+        monkeypatch.setenv("LOCALAPPDATA", str(local_appdata))
 
         dlg = NewDatabaseDialog()
         qtbot.addWidget(dlg)
         dlg._name_edit.setText("MyDB")
 
-        assert dlg._path_edit.text() == str(
-            Path("/AppData/Local/Packages/AgreeDK.OpenSAK_8wekyb3d8bbwe"
-                 "/LocalCache/Roaming/opensak/MyDB.db")
-        )
+        assert dlg._path_edit.text() == str(physical_dir / "MyDB.db")
 
     def test_browse_sets_custom_path(self, qtbot, tmp_path, monkeypatch):
         dlg = NewDatabaseDialog()
@@ -186,28 +194,37 @@ class TestManagerDialog:
         _select(dlg, "Other")
         assert dlg._info_path.text() == str(Path("/data/other.db"))
 
-    def test_info_path_shows_physical_path_when_msix_packaged(self, dlg, manager, monkeypatch):
+    def test_info_path_shows_physical_path_when_msix_packaged(
+        self, dlg, manager, monkeypatch, tmp_path
+    ):
         # Issue #820: on the MSIX/Store build, the logical %AppData% path
         # OpenSAK uses internally doesn't match where Windows actually
         # stores the file — the info panel should show the real, physical
-        # location instead.
-        other = _DB("Other", "/AppData/Roaming/opensak/other.db")
+        # location instead. (Only shown when that physical location
+        # actually exists — see msix.py's existence-check safety net,
+        # added after real-hardware testing on 8 Sep 2026 found a
+        # sideloaded/self-signed build with NO virtualization at all.)
+        appdata = tmp_path / "AppData" / "Roaming"
+        local_appdata = tmp_path / "AppData" / "Local"
+        family_name = "AgreeDK.OpenSAK_8wekyb3d8bbwe"
+        physical_dir = (
+            local_appdata / "Packages" / family_name / "LocalCache"
+            / "Roaming" / "opensak"
+        )
+        physical_dir.mkdir(parents=True)
+        (physical_dir / "other.db").write_text("dummy", encoding="utf-8")
+
+        other = _DB("Other", str(appdata / "opensak" / "other.db"))
         manager.databases = [manager.active, other, manager._dbs["missing"]]
         manager._dbs["other"] = other
         dlg._refresh_list()
 
-        monkeypatch.setattr(
-            "opensak.msix.get_package_family_name",
-            lambda: "AgreeDK.OpenSAK_8wekyb3d8bbwe",
-        )
-        monkeypatch.setenv("APPDATA", "/AppData/Roaming")
-        monkeypatch.setenv("LOCALAPPDATA", "/AppData/Local")
+        monkeypatch.setattr("opensak.msix.get_package_family_name", lambda: family_name)
+        monkeypatch.setenv("APPDATA", str(appdata))
+        monkeypatch.setenv("LOCALAPPDATA", str(local_appdata))
 
         _select(dlg, "Other")
-        assert dlg._info_path.text() == str(
-            Path("/AppData/Local/Packages/AgreeDK.OpenSAK_8wekyb3d8bbwe"
-                 "/LocalCache/Roaming/opensak/other.db")
-        )
+        assert dlg._info_path.text() == str(physical_dir / "other.db")
 
     def test_switch_to_selected(self, dlg, manager, monkeypatch):
         monkeypatch.setattr(dd.QMessageBox, "information", MagicMock())
