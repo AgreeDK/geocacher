@@ -472,6 +472,16 @@ class TestPlatformSpecificPaths:
         result = ss._default_install_dir()
         assert result == tmp_path / ".local" / "share" / "opensak"
 
+    def test_default_install_dir_windows_msix_packaged_uses_documents(self, monkeypatch, tmp_path):
+        # Issue #820 part B: MSIX-packaged Windows installs default to
+        # Documents instead of the virtualized %AppData% location.
+        monkeypatch.setattr(ss.os, "name", "nt")
+        monkeypatch.setattr(ss.Path, "home", lambda: tmp_path)
+        import opensak.msix as msix_module
+        monkeypatch.setattr(msix_module, "is_msix_packaged", lambda: True)
+        result = ss._default_install_dir()
+        assert result == tmp_path / "Documents" / "opensak"
+
 
 # ── macOS default-path migration (issue #825) ──────────────────────────────
 

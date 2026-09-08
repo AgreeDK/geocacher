@@ -55,8 +55,20 @@ def _default_install_dir() -> Path:
 
     Issue #825: se `_bootstrap_path()` — samme `sys.platform == "darwin"`
     tjek er nødvendigt her af samme årsag.
+
+    Issue #820: på Windows, hvis processen kører MSIX-pakket (Desktop
+    Bridge), virtualiserer Windows fejlagtigt-usynligt skrivninger til
+    %AppData% til en per-pakke-mappe, som brugeren ikke kan finde via
+    Explorer. Documents-mappen bliver IKKE virtualiseret på samme måde,
+    så nye MSIX-installationer får den som standard i stedet. Berører kun
+    NYE installationer — eksisterende brugeres allerede-satte install_dir
+    (i bootstrap.json) ændres ikke af dette; se database_dialog.py for
+    visning af den faktiske fysiske sti for eksisterende data.
     """
     if os.name == "nt":
+        from opensak.msix import is_msix_packaged
+        if is_msix_packaged():
+            return Path.home() / "Documents" / "opensak"
         base = Path(os.environ.get("APPDATA", Path.home()))
     elif sys.platform == "darwin":
         base = Path.home() / "Library" / "Application Support"
