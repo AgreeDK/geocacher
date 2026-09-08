@@ -88,12 +88,19 @@ class NewDatabaseDialog(QDialog):
         # databasen faktisk oprettes (get_db_dir(), jf. manager.py's
         # _default_db_path()), ikke installationsmappen.
         from opensak.settings_store import get_db_dir
+        from opensak.msix import resolve_physical_appdata_path
         name = self._name_edit.text().strip()
         folder = self._custom_path or get_db_dir()
+        # Issue #820: on the MSIX/Store build, %AppData%-based paths are
+        # silently virtualized by Windows to a per-package folder — show
+        # the real, physical location so the preview matches what
+        # Explorer would actually show, not the logical (unreachable)
+        # path. No-op on non-MSIX builds/other platforms.
+        display_folder = resolve_physical_appdata_path(folder)
         if name:
-            self._path_edit.setText(str(folder / f"{name}.db"))
+            self._path_edit.setText(str(display_folder / f"{name}.db"))
         else:
-            self._path_edit.setText(str(folder))
+            self._path_edit.setText(str(display_folder))
 
     def _validate(self) -> None:
         name = self._name_edit.text().strip()
@@ -263,8 +270,17 @@ class DatabaseManagerDialog(QDialog):
         is_active = db == self._manager.active if db else False
 
         if db:
+            from opensak.msix import resolve_physical_appdata_path
+
             self._info_name.setText(db.name)
-            self._info_path.setText(str(db.path))
+            # Issue #820: db.path is the logical path OpenSAK itself uses
+            # (and reads/writes fine internally) — but on the MSIX/Store
+            # build, Windows silently virtualizes %AppData%-based paths to
+            # a per-package folder invisible to Explorer. Show the real,
+            # physical location instead, so a user trying to find/back up
+            # this file via Explorer sees a path that actually exists.
+            # No-op (returns db.path unchanged) on non-MSIX builds.
+            self._info_path.setText(str(resolve_physical_appdata_path(db.path)))
             self._info_size.setText(f"{db.size_mb:.2f} MB" if db.exists else tr("db_not_found"))
             self._info_mod.setText(
                 db.modified.strftime("%d.%m.%Y %H:%M") if db.modified else "—"

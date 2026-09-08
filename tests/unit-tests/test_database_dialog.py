@@ -50,6 +50,31 @@ class TestNewDatabaseDialog:
         dlg._name_edit.setText("MyDB")
         assert dlg._path_edit.text() == str(tmp_path / "MyDB.db")
 
+    def test_path_preview_shows_physical_path_when_msix_packaged(self, qtbot, monkeypatch):
+        # Issue #820: same translation as the Manage databases info panel,
+        # applied here since this preview is also purely for display (the
+        # actual creation path comes from custom_path/get_db_dir(), not
+        # from parsing this read-only field back).
+        monkeypatch.setattr(
+            "opensak.settings_store.get_db_dir",
+            lambda: Path("/AppData/Roaming/opensak"),
+        )
+        monkeypatch.setattr(
+            "opensak.msix.get_package_family_name",
+            lambda: "AgreeDK.OpenSAK_8wekyb3d8bbwe",
+        )
+        monkeypatch.setenv("APPDATA", "/AppData/Roaming")
+        monkeypatch.setenv("LOCALAPPDATA", "/AppData/Local")
+
+        dlg = NewDatabaseDialog()
+        qtbot.addWidget(dlg)
+        dlg._name_edit.setText("MyDB")
+
+        assert dlg._path_edit.text() == str(
+            Path("/AppData/Local/Packages/AgreeDK.OpenSAK_8wekyb3d8bbwe"
+                 "/LocalCache/Roaming/opensak/MyDB.db")
+        )
+
     def test_browse_sets_custom_path(self, qtbot, tmp_path, monkeypatch):
         dlg = NewDatabaseDialog()
         qtbot.addWidget(dlg)
@@ -155,6 +180,34 @@ class TestManagerDialog:
         assert dlg._info_size.text() != ""
         assert dlg._btn_switch.isEnabled() is False  # file missing
         assert dlg._btn_copy.isEnabled() is False
+
+    def test_info_path_shows_logical_path_when_not_msix_packaged(self, dlg, manager):
+        # Default/non-Windows-Store case: path shown as-is.
+        _select(dlg, "Other")
+        assert dlg._info_path.text() == str(Path("/data/other.db"))
+
+    def test_info_path_shows_physical_path_when_msix_packaged(self, dlg, manager, monkeypatch):
+        # Issue #820: on the MSIX/Store build, the logical %AppData% path
+        # OpenSAK uses internally doesn't match where Windows actually
+        # stores the file — the info panel should show the real, physical
+        # location instead.
+        other = _DB("Other", "/AppData/Roaming/opensak/other.db")
+        manager.databases = [manager.active, other, manager._dbs["missing"]]
+        manager._dbs["other"] = other
+        dlg._refresh_list()
+
+        monkeypatch.setattr(
+            "opensak.msix.get_package_family_name",
+            lambda: "AgreeDK.OpenSAK_8wekyb3d8bbwe",
+        )
+        monkeypatch.setenv("APPDATA", "/AppData/Roaming")
+        monkeypatch.setenv("LOCALAPPDATA", "/AppData/Local")
+
+        _select(dlg, "Other")
+        assert dlg._info_path.text() == str(
+            Path("/AppData/Local/Packages/AgreeDK.OpenSAK_8wekyb3d8bbwe"
+                 "/LocalCache/Roaming/opensak/other.db")
+        )
 
     def test_switch_to_selected(self, dlg, manager, monkeypatch):
         monkeypatch.setattr(dd.QMessageBox, "information", MagicMock())
