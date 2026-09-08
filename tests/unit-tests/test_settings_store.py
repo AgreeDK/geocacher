@@ -1,11 +1,22 @@
 # tests/unit-tests/test_settings_store.py — SettingsStore persistence tests.
 
 import json
+import os
 from pathlib import Path
 
 import pytest
 
 from opensak import settings_store as ss
+
+# Forces os.name="posix" + Path(str), which can't instantiate PosixPath on
+# Windows (see test_config.py for the same, pre-existing pattern). Needed
+# because pathlib's WindowsPath/PosixPath.__new__ overrides are fixed at
+# interpreter-startup based on the REAL OS, not the (later, patched) os.name
+# value the Path() factory itself dispatches on — so any bare Path(string)
+# construction reached while os.name is patched away from the real OS raises
+# NotImplementedError, even though the platform-branch logic being tested is
+# otherwise correct.
+posix_only = pytest.mark.skipif(os.name == "nt", reason="POSIX-only path branch")
 
 
 @pytest.fixture
@@ -437,6 +448,7 @@ class TestPlatformSpecificPaths:
         result = ss._bootstrap_path()
         assert result == tmp_path / ".config" / "opensak" / "bootstrap.json"
 
+    @posix_only
     def test_bootstrap_path_linux_respects_xdg_config_home(self, monkeypatch, tmp_path):
         monkeypatch.setattr(ss.os, "name", "posix")
         monkeypatch.setattr(ss.sys, "platform", "linux")
@@ -496,6 +508,7 @@ class TestMigrateMacosDefaultPaths:
         assert ss.migrate_macos_default_paths() is False
         assert (old_dir / "opensak.json").exists()  # untouched, not clobbered
 
+    @posix_only
     def test_migrates_default_path_contents(self, monkeypatch, tmp_path):
         self._patch_platform(monkeypatch, tmp_path)
         old_dir = ss._legacy_macos_default_install_dir()
@@ -514,6 +527,7 @@ class TestMigrateMacosDefaultPaths:
         new_bootstrap_data = json.loads(ss._bootstrap_path().read_text(encoding="utf-8"))
         assert Path(new_bootstrap_data["install_dir"]) == new_dir
 
+    @posix_only
     def test_preserves_custom_install_dir_moves_only_bootstrap(self, monkeypatch, tmp_path):
         # User picked a custom install dir via the welcome wizard (#210) —
         # that data isn't affected by the bug and must not be moved, only
@@ -537,6 +551,7 @@ class TestMigrateMacosDefaultPaths:
         assert Path(new_bootstrap_data["install_dir"]) == custom_dir
         assert not old_bootstrap.exists()
 
+    @posix_only
     def test_skips_colliding_entries_without_clobbering(self, monkeypatch, tmp_path):
         self._patch_platform(monkeypatch, tmp_path)
         old_dir = ss._legacy_macos_default_install_dir()
@@ -555,6 +570,7 @@ class TestMigrateMacosDefaultPaths:
         # And the old side must still have its own copy, since it wasn't moved.
         assert json.loads((old_dir / "opensak.json").read_text(encoding="utf-8")) == {"old": True}
 
+    @posix_only
     def test_idempotent_second_call_is_noop(self, monkeypatch, tmp_path):
         self._patch_platform(monkeypatch, tmp_path)
         old_dir = ss._legacy_macos_default_install_dir()
