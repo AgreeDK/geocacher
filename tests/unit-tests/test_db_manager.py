@@ -11,6 +11,20 @@ pytest.importorskip("pytestqt")
 from opensak.db.manager import DatabaseManager, DatabaseInfo
 
 
+def _write_valid_sqlite_header(path: Path) -> None:
+    """
+    Skriv en gyldig SQLite magic-header (16 bytes) til `path`.
+
+    Issue #828: move_databases_to() validerer nu kilde-filens header før
+    kopiering. Tests der tidligere skrev vilkårlig tekst ("db content")
+    som stand-in for en database skal derfor skrive rigtige magic bytes
+    for stadig at blive behandlet som en gyldig kilde. Ikke en fuldt
+    funktionel SQLite-fil (kun headeren) — nok til vores lette
+    validering, og hurtigere end at bygge en rigtig database pr. test.
+    """
+    path.write_bytes(b"SQLite format 3\x00")
+
+
 @pytest.fixture
 def manager(tmp_path, qapp, monkeypatch):
     """Isolated DatabaseManager: settings_store mocked, init_db no-op, tmp_path for files."""
@@ -495,7 +509,7 @@ class TestMoveDatabasesTo:
     def test_keep_originals_copies_and_preserves_source(self, manager, tmp_path):
         new_dir = tmp_path / "new_location"
         old_path = manager.active.path
-        old_path.write_text("db content")
+        _write_valid_sqlite_header(old_path)
 
         with patch("opensak.db.database.dispose_engine"):
             errors = manager.move_databases_to(new_dir, delete_originals=False)
@@ -508,7 +522,7 @@ class TestMoveDatabasesTo:
     def test_delete_originals_removes_source_file(self, manager, tmp_path):
         new_dir = tmp_path / "new_location"
         old_path = manager.active.path
-        old_path.write_text("db content")
+        _write_valid_sqlite_header(old_path)
 
         with patch("opensak.db.database.dispose_engine"):
             errors = manager.move_databases_to(new_dir, delete_originals=True)
@@ -520,7 +534,7 @@ class TestMoveDatabasesTo:
     def test_moves_sidecar_wal_and_shm_files(self, manager, tmp_path):
         new_dir = tmp_path / "new_location"
         old_path = manager.active.path
-        old_path.write_text("db content")
+        _write_valid_sqlite_header(old_path)
         wal = Path(str(old_path) + "-wal")
         shm = Path(str(old_path) + "-shm")
         wal.write_text("wal")
@@ -585,8 +599,8 @@ class TestMoveDatabasesTo:
         new_dir = tmp_path / "new_location"
         with patch("opensak.db.database.init_db"):
             second = manager.new_database("Second", tmp_path / "Second.db")
-        manager.active.path.write_text("db1")
-        second.path.write_text("db2")
+        _write_valid_sqlite_header(manager.active.path)
+        _write_valid_sqlite_header(second.path)
 
         with patch("opensak.db.database.dispose_engine"):
             errors = manager.move_databases_to(new_dir, delete_originals=False)
@@ -597,7 +611,7 @@ class TestMoveDatabasesTo:
     def test_creates_target_directory_if_missing(self, manager, tmp_path):
         new_dir = tmp_path / "does_not_exist_yet"
         assert not new_dir.exists()
-        manager.active.path.write_text("db content")
+        _write_valid_sqlite_header(manager.active.path)
 
         with patch("opensak.db.database.dispose_engine"):
             manager.move_databases_to(new_dir, delete_originals=False)
@@ -606,7 +620,7 @@ class TestMoveDatabasesTo:
 
     def test_persists_updated_paths_to_settings(self, manager, tmp_path):
         new_dir = tmp_path / "new_location"
-        manager.active.path.write_text("db content")
+        _write_valid_sqlite_header(manager.active.path)
 
         with patch("opensak.db.database.dispose_engine"):
             manager.move_databases_to(new_dir, delete_originals=False)
@@ -658,7 +672,7 @@ class TestMoveDatabasesTo:
         """A failure to reopen the engine afterwards must not surface as if
         the (already successful) file move itself had failed."""
         new_dir = tmp_path / "new_location"
-        manager.active.path.write_text("db content")
+        _write_valid_sqlite_header(manager.active.path)
         expected_name = manager.active.path.name
 
         with (
@@ -672,6 +686,103 @@ class TestMoveDatabasesTo:
 
         assert errors == []  # the move itself still succeeded
         assert manager.active.path == new_dir / expected_name
+
+
+class TestMoveDatabasesToValidatesSourceFile:
+    """Issue #828: don't copy a corrupt/invalid source file forward."""
+
+    def test_empty_file_is_rejected_and_left_untouched(self, manager, tmp_path):
+        new_dir = tmp_path / "new_location"
+        old_path = manager.active.path
+        old_path.write_bytes(b"")  # 0 bytes — e.g. an interrupted write
+
+        with patch("opensak.db.database.dispose_engine"):
+            errors = manager.move_databases_to(new_dir, delete_originals=True)
+
+        assert len(errors) == 1
+        # Nothing copied, source untouched, path not updated.
+        assert not (new_dir / old_path.name).exists()
+        assert old_path.exists()
+        assert old_path.read_bytes() == b""
+        assert manager.active.path == old_path
+
+    def test_truncated_header_is_rejected(self, manager, tmp_path):
+        new_dir = tmp_path / "new_location"
+        old_path = manager.active.path
+        # Only the first 6 of the 16 magic-header bytes — a plausible
+        # real-world shape for a write interrupted mid-flush.
+        old_path.write_bytes(b"SQLite")
+
+        with patch("opensak.db.database.dispose_engine"):
+            errors = manager.move_databases_to(new_dir, delete_originals=True)
+
+        assert len(errors) == 1
+        assert not (new_dir / old_path.name).exists()
+        assert old_path.exists()
+
+    def test_wrong_magic_bytes_is_rejected(self, manager, tmp_path):
+        new_dir = tmp_path / "new_location"
+        old_path = manager.active.path
+        old_path.write_bytes(b"Not a database at all, just text\x00\x00\x00")
+
+        with patch("opensak.db.database.dispose_engine"):
+            errors = manager.move_databases_to(new_dir, delete_originals=True)
+
+        assert len(errors) == 1
+        assert not (new_dir / old_path.name).exists()
+        assert old_path.exists()
+
+    def test_valid_sqlite_header_is_accepted_as_control(self, manager, tmp_path):
+        """Control case: a real (if minimal) SQLite header must still move
+        normally, to prove the check isn't rejecting everything."""
+        new_dir = tmp_path / "new_location"
+        old_path = manager.active.path
+        _write_valid_sqlite_header(old_path)
+
+        with patch("opensak.db.database.dispose_engine"):
+            errors = manager.move_databases_to(new_dir, delete_originals=True)
+
+        assert errors == []
+        assert (new_dir / old_path.name).exists()
+        assert not old_path.exists()
+
+    def test_real_database_file_from_init_db_is_accepted(self, real_manager, tmp_path):
+        """Control case with an actual, fully-initialised SQLite database
+        (not just the magic header) via the real init_db() path."""
+        from opensak.db import database as dbmod
+
+        manager = real_manager
+        new_dir = tmp_path / "new_location"
+        try:
+            dbmod.init_db(db_path=manager.active.path)
+            dbmod.dispose_engine(manager.active.path)
+
+            errors = manager.move_databases_to(new_dir, delete_originals=True)
+
+            assert errors == []
+            assert (new_dir / manager.active.path.name).exists()
+        finally:
+            dbmod.dispose_engine()
+
+    def test_corrupt_database_among_several_does_not_block_the_others(
+        self, manager, tmp_path
+    ):
+        """One corrupt database must be reported and skipped without
+        preventing the other, valid databases from moving normally."""
+        new_dir = tmp_path / "new_location"
+        with patch("opensak.db.database.init_db"):
+            second = manager.new_database("Second", tmp_path / "Second.db")
+        manager.active.path.write_bytes(b"")  # corrupt
+        _write_valid_sqlite_header(second.path)  # valid
+        old_second_path = second.path
+
+        with patch("opensak.db.database.dispose_engine"):
+            errors = manager.move_databases_to(new_dir, delete_originals=True)
+
+        assert len(errors) == 1
+        assert manager.active.path.exists()  # corrupt one left in place
+        assert (new_dir / old_second_path.name).exists()  # valid one moved
+        assert not old_second_path.exists()
 
 
 # ── ensure_active_initialised ─────────────────────────────────────────────────
