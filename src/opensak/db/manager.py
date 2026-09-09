@@ -21,6 +21,34 @@ from opensak.settings_store import get_store
 
 logger = logging.getLogger(__name__)
 
+_SQLITE_MAGIC = b"SQLite format 3\x00"
+
+
+def _is_valid_sqlite_file(path: Path) -> bool:
+    """
+    Let, hurtig gyldigheds-tjek af en SQLite-database — læser kun de
+    første 16 bytes (filens magic-header), åbner IKKE selve databasen.
+
+    Issue #828: shutil.copy2() kopierer glad enhver fil videre uanset
+    indhold. En tom, afkortet, eller på anden måde korrupt kilde-fil
+    (fx fra en afbrudt tidligere session, eller — som fundet i praksis —
+    en test-isolations-lækage, se #829) blev tidligere kopieret
+    byte-for-byte, og brugeren ramte først sqlite3.DatabaseError næste
+    gang appen prøvede at åbne filen, uden nogen kontekst om at filen
+    allerede var i stykker FØR flytningen.
+
+    Bevidst kun magic-bytes, ikke en fuld `sqlite3.connect()` +
+    `PRAGMA integrity_check` — det er nok til at fange de konkrete
+    fejlscenarier (tom fil, afkortet fil, forkert filtype) uden at åbne
+    en ekstra databaseforbindelse for hver fil der skal flyttes.
+    """
+    try:
+        with open(path, "rb") as f:
+            header = f.read(len(_SQLITE_MAGIC))
+    except OSError:
+        return False
+    return header == _SQLITE_MAGIC
+
 
 class DatabaseInfo:
     """Metadata om en enkelt database."""
@@ -449,6 +477,16 @@ class DatabaseManager:
             if new_path.exists() and new_path != old_path:
                 errors.append(
                     tr("db_err_move_target_exists", name=db_info.name, path=str(new_path))
+                )
+                continue
+
+            # Issue #828: valider FØR vi rører engine/dispose'r noget —
+            # en korrupt kilde skal aldrig kopieres videre, og der er
+            # ingen grund til at lukke den aktive engine for en fil der
+            # alligevel bliver sprunget over.
+            if not _is_valid_sqlite_file(old_path):
+                errors.append(
+                    tr("db_err_corrupt_source", name=db_info.name)
                 )
                 continue
 
