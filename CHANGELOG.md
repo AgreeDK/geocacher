@@ -4,6 +4,55 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.18.1-beta.1] — 2026-09-09
+
+> Targeted bugfix backport onto the 1.18.0 stable line, cherry-picked from
+> the active 1.19.0 beta cycle onto `v1.18.0` — deliberately skips the
+> in-progress Garmin MTP GPS export feature (#453/#822) so these fixes can
+> reach Store/stable users faster as a pure bugfix set, without waiting on
+> an unrelated feature to finish testing. Being verified via a Partner
+> Center package flight before promotion to stable 1.18.1.
+
+### Fixed
+
+- **macOS: default data path used Linux-style paths instead of
+  `~/Library/Application Support` (#825)**.
+- **MSIX/Microsoft Store builds could report the wrong database path,
+  traced to confusion around Windows AppData file-system virtualization
+  (#820)** — the Welcome wizard now defaults new MSIX installs to
+  `Documents\opensak` instead of `AppData\Roaming\opensak`, and the
+  Database Manager's "physical path" note no longer shows a guessed path
+  when it doesn't actually exist on disk. Real hardware testing (both a
+  self-signed sideload and a genuine Microsoft Store install) found no
+  evidence of AppData virtualization under either signing identity — the
+  original virtualization root-cause theory remains unconfirmed, and the
+  issue stays open pending more detail from the original reporter.
+- **Changing the database folder could silently copy a corrupt or empty
+  source database file, surfacing later as an unexplained
+  `sqlite3.DatabaseError` on next launch instead of a clear message
+  (#828)** — `move_databases_to()` now checks a source file's SQLite
+  header before copying it; an invalid source is reported as a specific
+  error and left untouched rather than copied forward. The exact failure
+  mode was reproduced in the wild while testing #820: a corrupted
+  database created by a test-suite isolation gap (see below) triggered
+  precisely this crash the first time a real user hit it.
+- **CI: a set of macOS/Linux-only path tests failed when run on the
+  Windows CI runner** — a `pathlib` platform-dispatch limitation; these
+  are now explicitly skipped on Windows.
+
+### Notes
+
+- **Test-suite isolation gap (#829)**: `pytest` runs could leak into the
+  real `%APPDATA%`/`~/.config`/`~/Library/Application Support`
+  installation on the machine running them, because `settings_store`,
+  `logger`, and `db.manager`'s process-global singletons were only
+  isolated per test-file rather than globally. This was the root cause of
+  the corrupted database file behind #828 above. `tests/conftest.py` now
+  isolates all three singletons behind a `tmp_path`-backed fixture for
+  every test, layered underneath the existing per-file fixtures.
+
+---
+
 ## [1.18.0] — 2026-09-02
 
 > First stable release of the 1.18.0 cycle, and the **first stable release
