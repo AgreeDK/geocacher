@@ -510,9 +510,16 @@ def _parse_wpt(wpt_el) -> Optional[dict]:
             sort_el = gsak_ext.find(f"{{{gsak_uri}}}UserSort")
             if sort_el is not None and sort_el.text:
                 try:
-                    gsak_user_sort = int(sort_el.text.strip())
+                    parsed_user_sort = int(sort_el.text.strip())
                 except ValueError:
                     pass
+                else:
+                    # Issue #830: GSAK does not allow a UserSort value of 0
+                    # — a blank field in GSAK's UI is exported as "0" in
+                    # this extension element, not omitted. Treat 0 as
+                    # "no value" so it round-trips as blank in OpenSAK.
+                    if parsed_user_sort != 0:
+                        gsak_user_sort = parsed_user_sort
 
             ud1_el = gsak_ext.find(f"{{{gsak_uri}}}UserData")
             if ud1_el is not None and ud1_el.text and ud1_el.text.strip():
