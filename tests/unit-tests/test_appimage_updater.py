@@ -6,11 +6,22 @@ for why: a real urlopen in CI is a flaky, non-deterministic network call).
 Two different urlopen calls happen here (release-lookup JSON, then the
 binary asset download), so the fake dispatches on the requested URL
 instead of returning a single fixed response.
+
+The AppImageUpdateWorker tests are POSIX-only (same `posix_only` marker
+convention as test_appimage.py/test_msix.py/test_settings_store.py):
+os.chmod()'s executable bits (S_IXUSR etc.) don't map onto Windows'
+permission model, so asserting on them fails there even though the
+replace itself succeeds. AppImage self-update is a Linux-only feature in
+practice anyway. (Discovered: Windows CI run of #836, matching the same
+issue already fixed for #835's test_appimage.py.) The fetch_release_by_tag/
+find_linux_appimage_asset_url tests above don't touch the filesystem and
+run on every platform.
 """
 
 from __future__ import annotations
 
 import json
+import os
 import stat
 from urllib.error import URLError
 
@@ -25,6 +36,8 @@ from opensak.updater import (
     fetch_release_by_tag,
     find_linux_appimage_asset_url,
 )
+
+posix_only = pytest.mark.skipif(os.name == "nt", reason="AppImage is a POSIX-only concept")
 
 # Note: the worker tests below call worker.run() directly (never .start()),
 # so signal connections fire synchronously on the test thread with no event
@@ -165,6 +178,7 @@ def test_find_linux_appimage_asset_url_none_when_release_fetch_fails(monkeypatch
 # test thread so signal connections fire synchronously, same pattern
 # test_updater.py uses for UpdateCheckWorker.
 
+@posix_only
 def test_worker_downloads_validates_and_replaces(monkeypatch, tmp_path):
     target = tmp_path / "OpenSAK.AppImage"
     target.write_bytes(b"old-version-content")
@@ -191,6 +205,7 @@ def test_worker_downloads_validates_and_replaces(monkeypatch, tmp_path):
     assert list(tmp_path.glob("*.AppImage.part")) == []
 
 
+@posix_only
 def test_worker_reports_asset_not_found_when_no_linux_asset(monkeypatch, tmp_path):
     target = tmp_path / "OpenSAK.AppImage"
     target.write_bytes(b"old-version-content")
@@ -213,6 +228,7 @@ def test_worker_reports_asset_not_found_when_no_linux_asset(monkeypatch, tmp_pat
     assert target.read_bytes() == b"old-version-content"
 
 
+@posix_only
 def test_worker_rejects_download_without_elf_magic(monkeypatch, tmp_path):
     target = tmp_path / "OpenSAK.AppImage"
     target.write_bytes(b"old-version-content")
@@ -238,6 +254,7 @@ def test_worker_rejects_download_without_elf_magic(monkeypatch, tmp_path):
     assert list(tmp_path.glob("*.AppImage.part")) == []
 
 
+@posix_only
 def test_worker_reports_oserror_and_cleans_up_on_download_failure(monkeypatch, tmp_path):
     target = tmp_path / "OpenSAK.AppImage"
     target.write_bytes(b"old-version-content")
