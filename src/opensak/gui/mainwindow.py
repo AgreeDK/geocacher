@@ -12,7 +12,8 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QSplitter, QVBoxLayout,
     QFrame, QHBoxLayout, QLabel, QLineEdit, QStatusBar,
     QToolBar, QPushButton, QComboBox, QApplication,
-    QSizePolicy, QMessageBox, QWidgetAction, QStackedWidget
+    QSizePolicy, QMessageBox, QWidgetAction, QStackedWidget,
+    QProgressDialog
 )
 
 from opensak.gui.icon import OpenSAKMessageBox as QMessageBox
@@ -3090,7 +3091,23 @@ class MainWindow(QMainWindow):
             + f'  <a href="{changelog_url}">{tr("update_changelog")}</a>'
         )
         msg.setTextFormat(Qt.TextFormat.RichText)
-        btn_open = msg.addButton(tr("update_open_releases"), QMessageBox.ButtonRole.AcceptRole)
+
+        # AppImage-integrerede brugere får "Opgrader nu" (selv-opdatering,
+        # issue #836) i stedet for "Åbn releases-side". Kun en billig
+        # lokal statustjek her — selve asset-URL-opslaget sker først i
+        # AppImageUpdateWorker, når brugeren rent faktisk klikker knappen.
+        from opensak import appimage
+        can_self_update = (
+            appimage.is_running_as_appimage() and appimage.is_appimage_integrated()
+        )
+        if can_self_update:
+            btn_primary = msg.addButton(
+                tr("update_appimage_upgrade_button"), QMessageBox.ButtonRole.AcceptRole
+            )
+        else:
+            btn_primary = msg.addButton(
+                tr("update_open_releases"), QMessageBox.ButtonRole.AcceptRole
+            )
         # More visible spot for supporting the project than the Help menu
         # alone, which users who never open Help would otherwise never see.
         btn_support = msg.addButton(tr("action_support_opensak"), QMessageBox.ButtonRole.HelpRole)
@@ -3100,12 +3117,57 @@ class MainWindow(QMainWindow):
         msg.exec()
 
         clicked = msg.clickedButton()
-        if clicked == btn_open:
-            import webbrowser
-            webbrowser.open(url)
+        if clicked == btn_primary:
+            if can_self_update:
+                self._start_appimage_self_update(latest_tag)
+            else:
+                import webbrowser
+                webbrowser.open(url)
         elif clicked == btn_skip:
             from opensak.gui.settings import get_settings
             get_settings().updates_skipped_version = latest_tag
         elif clicked == btn_support:
             self._open_support_page()
+
+    def _start_appimage_self_update(self, tag: str) -> None:
+        """
+        Kald ved klik på "Opgrader nu" for AppImage-integrerede brugere
+        (issue #836). Viser en ubestemt "Henter…"-indikator (§7 punkt 4 i
+        designdokumentet — ingen procent-visning i v1) mens
+        AppImageUpdateWorker finder asset-URL'en, downloader og udskifter
+        filen atomisk i baggrunden.
+        """
+        from opensak.updater import AppImageUpdateWorker
+
+        progress = QProgressDialog(tr("update_appimage_downloading"), "", 0, 0, self)
+        progress.setWindowTitle(tr("update_appimage_downloading_title"))
+        progress.setCancelButton(None)
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
+        progress.setMinimumDuration(0)
+        progress.show()
+
+        self._appimage_update_worker = AppImageUpdateWorker(tag, parent=self)
+
+        def _on_ok(_installed_path: str) -> None:
+            progress.close()
+            # Ingen execv-genstart (§7 punkt 5) — brugeren lukker og
+            # klikker ikonet igen, robust og forudsigeligt frem for
+            # skrøbelig in-process-genstart mens Qt/QtWebEngine kører.
+            QMessageBox.information(
+                self,
+                tr("update_appimage_done_title"),
+                tr("update_appimage_done_msg"),
+            )
+
+        def _on_error(error: str) -> None:
+            progress.close()
+            QMessageBox.warning(
+                self,
+                tr("update_appimage_error_title"),
+                tr("update_appimage_error_msg", error=error),
+            )
+
+        self._appimage_update_worker.finished_ok.connect(_on_ok)
+        self._appimage_update_worker.finished_error.connect(_on_error)
+        self._appimage_update_worker.start()
 

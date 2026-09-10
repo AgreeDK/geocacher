@@ -1184,4 +1184,13 @@ STRINGS: dict[str, str] = {
     "settings_appimage_install_button":        "Installera i programmeny",
     "settings_appimage_reinstall_button":      "Installera om i programmeny",
     "settings_appimage_hint":                  "Kopierar denna AppImage till ~/.local/bin och lägger till en genväg i din programmeny, så att framtida uppdateringar kan ersätta den på plats.",
+
+    # ── AppImage selv-opdatering (Linux, issue #836) ───────────────────────────
+    "update_appimage_upgrade_button":    "Uppgradera nu",
+    "update_appimage_downloading_title": "Hämtar uppdatering",
+    "update_appimage_downloading":       "Hämtar den nya versionen…",
+    "update_appimage_done_title":        "Uppdatering installerad",
+    "update_appimage_done_msg":          "Den nya versionen har installerats. Stäng OpenSAK och klicka på ikonen igen för att starta den.",
+    "update_appimage_error_title":       "Uppdateringen misslyckades",
+    "update_appimage_error_msg":         "OpenSAK kunde inte uppdateras automatiskt ({error}). Du kan fortfarande hämta den nya versionen manuellt från sidan för utgåvor.",
 }

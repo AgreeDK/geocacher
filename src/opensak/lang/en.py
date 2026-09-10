@@ -1183,4 +1183,13 @@ STRINGS: dict[str, str] = {
     "settings_appimage_install_button":        "Install in application menu",
     "settings_appimage_reinstall_button":      "Reinstall in application menu",
     "settings_appimage_hint":                  "Copies this AppImage to ~/.local/bin and adds a shortcut to your application menu, so future updates can replace it in place.",
+
+    # ── AppImage selv-opdatering (Linux, issue #836) ───────────────────────────
+    "update_appimage_upgrade_button":    "Upgrade now",
+    "update_appimage_downloading_title": "Downloading update",
+    "update_appimage_downloading":       "Downloading the new version…",
+    "update_appimage_done_title":        "Update installed",
+    "update_appimage_done_msg":          "The new version has been installed. Close OpenSAK and click the icon again to start it.",
+    "update_appimage_error_title":       "Update failed",
+    "update_appimage_error_msg":         "OpenSAK could not be updated automatically ({error}). You can still download the new version manually from the releases page.",
 }
