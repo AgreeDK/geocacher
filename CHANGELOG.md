@@ -4,6 +4,53 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.19.0-beta.3] — 2026-09-10
+
+### Added
+
+- **Linux AppImage: self-administration, no terminal required (#824, #835,
+  #836, #837)** — Replaces the originally planned external `uninstall.sh`
+  + AppImageUpdate approach with self-integration/-update/-uninstall
+  implemented directly in OpenSAK. Linux-only; a no-op everywhere else
+  (Windows/macOS/source installs are unaffected, and the AppImage's own
+  `scripts/install-opensak.sh` fallback path is unchanged).
+  - **Self-integration on first run (#835)** — On first launch as an
+    AppImage, OpenSAK offers to install itself into the application menu
+    (Yes / No thanks / Don't ask again). On "Yes", the running
+    `$APPIMAGE` file is copied to `~/.local/bin/OpenSAK.AppImage`, a
+    `.desktop` entry and icon are installed into the standard XDG
+    locations, and the chosen path is recorded so later self-update/
+    -uninstall never has to guess it. If AppImageLauncher has already
+    integrated the app (detected via an existing `X-AppImage-Identifier`
+    `.desktop` entry), the prompt is skipped silently instead of
+    double-integrating. A manual "Install in application menu" button was
+    also added under Settings → Advanced → AppImage, so choosing "Don't
+    ask again" is never an irreversible dead end.
+  - **Self-update (#836)** — AppImage-integrated users now see an
+    "Upgrade now" button (instead of "Open releases page") in the
+    existing update-available dialog. Clicking it downloads the matching
+    `OpenSAK-<tag>-Linux-x86_64.AppImage` release asset to a temp file
+    next to the installed copy, validates its ELF magic bytes before
+    accepting it, then atomically replaces the running installation
+    (`os.replace`) — safe even while the old version is still running.
+    No zsync/AppImageUpdate dependency; a full download every time, kept
+    deliberately simple. Shows an indeterminate "Downloading…" indicator
+    (no progress bar for v1) and, on success, asks the user to close and
+    relaunch rather than attempting a fragile in-process restart.
+  - **In-app uninstall (#837)** — A new "Uninstall OpenSAK" button
+    (Settings → Advanced → AppImage) removes the `.desktop` file, icons,
+    and the integrated AppImage copy, with a choice between "Remove
+    program only" (keeps databases/settings) and "Remove program and all
+    data" (the latter requires a second, explicit confirmation). Data
+    removal uses the exact `settings_store.get_install_dir()`/
+    `get_db_dir()` paths OpenSAK itself tracks — no guessing — with an
+    explicit safety guard against ever deleting the user's home
+    directory outright. Integration flags are always reset regardless of
+    which option is chosen, so a later reinstalled AppImage is correctly
+    re-offered integration instead of silently staying stuck.
+
+---
+
 ## [1.18.1] — 2026-09-09
 
 > Stable bugfix release on the 1.18.0 line. Replaces the `1.18.1-beta.1`
