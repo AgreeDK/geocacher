@@ -1193,4 +1193,17 @@ STRINGS: dict[str, str] = {
     "update_appimage_done_msg":          "Die neue Version wurde installiert. Schließen Sie OpenSAK und klicken Sie erneut auf das Symbol, um es zu starten.",
     "update_appimage_error_title":       "Update fehlgeschlagen",
     "update_appimage_error_msg":         "OpenSAK konnte nicht automatisch aktualisiert werden ({error}). Sie können die neue Version weiterhin manuell von der Release-Seite herunterladen.",
+
+    # ── AppImage in-app afinstaller (Linux, issue #837) ─────────────────────
+    "settings_appimage_uninstall_button":     "OpenSAK deinstallieren",
+    "appimage_uninstall_title":               "OpenSAK deinstallieren?",
+    "appimage_uninstall_msg":                 "Wählen Sie, ob Ihre Caches, Datenbanken und Einstellungen erhalten bleiben sollen oder alles entfernt werden soll.",
+    "appimage_uninstall_btn_program_only":    "Nur Programm entfernen",
+    "appimage_uninstall_btn_purge":           "Programm und alle Daten entfernen",
+    "appimage_uninstall_purge_confirm_title": "Sind Sie sicher?",
+    "appimage_uninstall_purge_confirm_msg":   "Dadurch werden alle Ihre Caches, Datenbanken und Einstellungen dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+    "appimage_uninstall_error_title":         "Deinstallation fehlgeschlagen",
+    "appimage_uninstall_error_msg":           "OpenSAK konnte nicht vollständig deinstalliert werden: {error}",
+    "appimage_uninstall_done_title":          "Deinstalliert",
+    "appimage_uninstall_done_msg":            "OpenSAK wurde entfernt. Die Anwendung wird nun geschlossen.",
 }

@@ -531,7 +531,8 @@ class SettingsDialog(QDialog):
             appimage_group = QGroupBox(tr("settings_group_appimage"))
             appimage_layout = QVBoxLayout(appimage_group)
 
-            if _appimage_mod.is_appimage_integrated():
+            is_integrated = _appimage_mod.is_appimage_integrated()
+            if is_integrated:
                 status_text = tr("settings_appimage_status_integrated")
                 button_label = tr("settings_appimage_reinstall_button")
             else:
@@ -545,6 +546,14 @@ class SettingsDialog(QDialog):
             self._appimage_install_btn = QPushButton(button_label)
             self._appimage_install_btn.clicked.connect(self._on_appimage_install_clicked)
             appimage_btn_row.addWidget(self._appimage_install_btn)
+
+            # Afinstaller kun relevant (og kun vist) når der rent faktisk
+            # er noget integreret at fjerne — issue #837.
+            self._appimage_uninstall_btn = QPushButton(tr("settings_appimage_uninstall_button"))
+            self._appimage_uninstall_btn.clicked.connect(self._on_appimage_uninstall_clicked)
+            self._appimage_uninstall_btn.setVisible(is_integrated)
+            appimage_btn_row.addWidget(self._appimage_uninstall_btn)
+
             appimage_btn_row.addStretch()
             appimage_layout.addLayout(appimage_btn_row)
 
@@ -728,6 +737,7 @@ class SettingsDialog(QDialog):
         if result.success:
             self._appimage_status_lbl.setText(tr("settings_appimage_status_integrated"))
             self._appimage_install_btn.setText(tr("settings_appimage_reinstall_button"))
+            self._appimage_uninstall_btn.setVisible(True)
             QMessageBox.information(
                 self,
                 tr("appimage_integrate_success_title"),
@@ -739,6 +749,19 @@ class SettingsDialog(QDialog):
                 tr("appimage_integrate_error_title"),
                 tr("appimage_integrate_error_msg", error=result.error or ""),
             )
+
+    def _on_appimage_uninstall_clicked(self) -> None:
+        """
+        Fjern OpenSAK fra programmenuen (og valgfrit alle data) — issue
+        #837. Lukker både indstillinger-dialogen og selve applikationen
+        ved succes, jf. §4.3 i designdokumentet ("Luk applikationen").
+        """
+        from opensak.gui.dialogs.appimage_uninstall_dialog import confirm_and_uninstall
+
+        if confirm_and_uninstall(self):
+            self.accept()
+            from PySide6.QtWidgets import QApplication
+            QApplication.quit()
 
     # ── Fane 2: Geocaching.com ────────────────────────────────────────────────
 

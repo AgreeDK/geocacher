@@ -64,6 +64,13 @@ class IntegrationResult:
     error: str | None = None
 
 
+@dataclass
+class UninstallResult:
+    """Resultat af et uninstall_appimage()-kald."""
+    success: bool
+    error: str | None = None
+
+
 # ── Detektion ────────────────────────────────────────────────────────────────
 
 def is_running_as_appimage() -> bool:
@@ -312,3 +319,109 @@ def integrate_appimage() -> IntegrationResult:
     })
     log.debug("AppImage integreret til %s", target)
     return IntegrationResult(success=True, installed_path=target)
+
+
+# ── In-app afinstaller (issue #837, Step C i epic #824) ─────────────────────
+
+def _remove_desktop_file() -> None:
+    desktop_path = Path.home() / ".local" / "share" / "applications" / _DESKTOP_FILENAME
+    desktop_path.unlink(missing_ok=True)
+
+
+def _remove_icons() -> None:
+    """Fjern præcis de ikon-filer integrate_appimage() selv installerede."""
+    hicolor_path = (
+        Path.home() / ".local" / "share" / "icons" / "hicolor"
+        / "256x256" / "apps" / "opensak.png"
+    )
+    hicolor_path.unlink(missing_ok=True)
+    pixmap_path = Path.home() / ".local" / "share" / "pixmaps" / "opensak.png"
+    pixmap_path.unlink(missing_ok=True)
+
+
+def _reset_integration_flags() -> None:
+    """
+    Nulstil integrations-status i settings_store.
+
+    Kaldes UANSET remove/purge-valg: selve integrationsartefakterne
+    (.desktop-fil, ikoner, den kopierede AppImage-fil) fjernes altid, så en
+    senere geninstalleret/genintegreret AppImage skal kunne blive korrekt
+    tilbudt integration igen (should_prompt_for_integration()) i stedet
+    for at forblive tavs pga. et forældet "allerede integreret"-flag.
+
+    VIGTIGT — rækkefølge: skal kaldes FØR en eventuel _purge_user_data(),
+    da get_store() (via get_install_dir()) selv genopretter
+    installations-mappen hvis den mangler. Kaldes den efter en fuld purge,
+    ville det utilsigtet efterlade en tom, "genoprettet" installations-
+    mappe med kun disse to nøgler i.
+    """
+    store = get_store()
+    store.set_many({
+        _KEY_INTEGRATED: False,
+        _KEY_DECLINED_PERMANENTLY: False,
+    })
+    store.delete(_KEY_INSTALL_PATH)
+
+
+def _purge_user_data() -> None:
+    """
+    Slet OpenSAKs installations- og database-mapper (settings, databases).
+
+    Bruger settings_store.get_install_dir()/get_db_dir() — de PRÆCISE
+    stier OpenSAK selv bruger (inkl. en evt. brugertilpasset database-
+    placering fra velkomst-wizarden), i stedet for at gætte stier selv
+    (det var netop svagheden ved en ekstern bash-uninstaller, se §4.3 i
+    designdokumentet).
+    """
+    from opensak.settings_store import get_db_dir, get_install_dir
+
+    home = Path.home().resolve()
+    dirs_to_remove: set[Path] = set()
+    for getter in (get_install_dir, get_db_dir):
+        try:
+            d = getter().resolve()
+        except OSError:
+            continue
+        # Sikkerhedstjek — slet aldrig hjemmemappen eller filsystemroden
+        # selv, uanset hvad en fejlkonfigureret sti måtte pege på.
+        if d == home or d == Path(d.anchor):
+            log.warning("Springer over mistænkelig sti ved data-oprydning: %s", d)
+            continue
+        dirs_to_remove.add(d)
+
+    for d in dirs_to_remove:
+        if d.is_dir():
+            shutil.rmtree(d, ignore_errors=True)
+
+
+def uninstall_appimage(*, purge_data: bool) -> UninstallResult:
+    """
+    Fjern OpenSAK fra programmenuen, og valgfrit alle data.
+
+    Rækkefølge (se §4.3 i designdokumentet):
+      1. .desktop-fil og ikoner fjernes.
+      2. Integrations-flag nulstilles.
+      3. Ved purge_data=True: installations- og database-mapperne slettes.
+      4. Den integrerede AppImage-kopi slettes SIDST — processen kører
+         selv fra denne fil. Linux tillader at slette en åben fils inode
+         uden at afbryde den kørende proces (samme princip som den
+         atomiske udskiftning i selv-opdateringen, appimage.py's søster-
+         funktionalitet i updater.py).
+    """
+    try:
+        _remove_desktop_file()
+        _remove_icons()
+        _reset_integration_flags()
+
+        if purge_data:
+            _purge_user_data()
+
+        get_integrated_appimage_path().unlink(missing_ok=True)
+
+    except OSError as exc:
+        log.warning("AppImage-afinstallation fejlede: %s", exc)
+        return UninstallResult(success=False, error=str(exc))
+
+    log.debug("AppImage afinstalleret (purge_data=%s)", purge_data)
+    return UninstallResult(success=True)
+
