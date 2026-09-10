@@ -524,6 +524,37 @@ class SettingsDialog(QDialog):
 
         layout.addWidget(folders_group)
 
+        # ── AppImage (kun synlig når kørende som AppImage — issue #835) ────────
+        from opensak import appimage as _appimage_mod
+
+        if _appimage_mod.is_running_as_appimage():
+            appimage_group = QGroupBox(tr("settings_group_appimage"))
+            appimage_layout = QVBoxLayout(appimage_group)
+
+            if _appimage_mod.is_appimage_integrated():
+                status_text = tr("settings_appimage_status_integrated")
+                button_label = tr("settings_appimage_reinstall_button")
+            else:
+                status_text = tr("settings_appimage_status_not_integrated")
+                button_label = tr("settings_appimage_install_button")
+
+            self._appimage_status_lbl = QLabel(status_text)
+            appimage_layout.addWidget(self._appimage_status_lbl)
+
+            appimage_btn_row = QHBoxLayout()
+            self._appimage_install_btn = QPushButton(button_label)
+            self._appimage_install_btn.clicked.connect(self._on_appimage_install_clicked)
+            appimage_btn_row.addWidget(self._appimage_install_btn)
+            appimage_btn_row.addStretch()
+            appimage_layout.addLayout(appimage_btn_row)
+
+            appimage_hint = QLabel(tr("settings_appimage_hint"))
+            appimage_hint.setWordWrap(True)
+            appimage_hint.setStyleSheet(hint_style())
+            appimage_layout.addWidget(appimage_hint)
+
+            layout.addWidget(appimage_group)
+
         # ── Search behaviour ──────────────────────────────────────────────────
         search_group = QGroupBox(tr("settings_group_search"))
         search_layout = QVBoxLayout(search_group)
@@ -680,6 +711,33 @@ class SettingsDialog(QDialog):
                 self,
                 tr("restart_required"),
                 tr("restart_message"),
+            )
+
+    def _on_appimage_install_clicked(self) -> None:
+        """
+        Installér (eller genintallér) OpenSAK i programmenuen manuelt
+        (issue #835, §7 punkt 3).
+
+        Nødvendig så "Spørg ikke igen" ved førstegangs-prompten ikke bliver
+        en irreversibel fælde — kalder samme integrate_appimage() som
+        selve prompten.
+        """
+        from opensak import appimage as _appimage_mod
+
+        result = _appimage_mod.integrate_appimage()
+        if result.success:
+            self._appimage_status_lbl.setText(tr("settings_appimage_status_integrated"))
+            self._appimage_install_btn.setText(tr("settings_appimage_reinstall_button"))
+            QMessageBox.information(
+                self,
+                tr("appimage_integrate_success_title"),
+                tr("appimage_integrate_success_msg"),
+            )
+        else:
+            QMessageBox.warning(
+                self,
+                tr("appimage_integrate_error_title"),
+                tr("appimage_integrate_error_msg", error=result.error or ""),
             )
 
     # ── Fane 2: Geocaching.com ────────────────────────────────────────────────

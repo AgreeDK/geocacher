@@ -1166,4 +1166,21 @@ STRINGS: dict[str, str] = {
     "move_caches_done":                        "{count} cache(s) moved successfully.",
     "copy_caches_done":                        "{count} cache(s) copied successfully.",
     "move_caches_error":                       "An error occurred while moving caches:\n{message}",
+
+    # ── AppImage selv-integration (Linux, issue #835) ──────────────────────────
+    "appimage_integrate_title":                "Install OpenSAK in your application menu?",
+    "appimage_integrate_msg":                  "OpenSAK can install itself in your application menu, so you won't need to find and open this file manually next time.",
+    "appimage_integrate_btn_yes":              "Install",
+    "appimage_integrate_btn_no":               "No thanks",
+    "appimage_integrate_btn_dont_ask":         "Don't ask again",
+    "appimage_integrate_success_title":        "Installed",
+    "appimage_integrate_success_msg":          "OpenSAK has been added to your application menu.",
+    "appimage_integrate_error_title":          "Installation failed",
+    "appimage_integrate_error_msg":            "OpenSAK could not be installed in your application menu: {error}",
+    "settings_group_appimage":                 "AppImage",
+    "settings_appimage_status_integrated":     "Installed in your application menu.",
+    "settings_appimage_status_not_integrated": "Not yet installed in your application menu.",
+    "settings_appimage_install_button":        "Install in application menu",
+    "settings_appimage_reinstall_button":      "Reinstall in application menu",
+    "settings_appimage_hint":                  "Copies this AppImage to ~/.local/bin and adds a shortcut to your application menu, so future updates can replace it in place.",
 }

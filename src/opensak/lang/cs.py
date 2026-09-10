@@ -1163,4 +1163,21 @@ STRINGS: dict[str, str] = {
     "move_caches_done":                        "{count} keš(í) úspěšně přesunuto.",
     "copy_caches_done":                        "{count} keš(í) úspěšně zkopírováno.",
     "move_caches_error":                       "Při přesouvání keší došlo k chybě:\n{message}",
+
+    # ── AppImage selv-integration (Linux, issue #835) ──────────────────────────
+    "appimage_integrate_title":                "Nainstalovat OpenSAK do nabídky aplikací?",
+    "appimage_integrate_msg":                  "OpenSAK se může sám nainstalovat do vaší nabídky aplikací, takže tento soubor příště nebudete muset ručně hledat a otevírat.",
+    "appimage_integrate_btn_yes":              "Nainstalovat",
+    "appimage_integrate_btn_no":               "Ne, děkuji",
+    "appimage_integrate_btn_dont_ask":         "Příště se neptat",
+    "appimage_integrate_success_title":        "Nainstalováno",
+    "appimage_integrate_success_msg":          "OpenSAK byl přidán do vaší nabídky aplikací.",
+    "appimage_integrate_error_title":          "Instalace se nezdařila",
+    "appimage_integrate_error_msg":            "OpenSAK se nepodařilo nainstalovat do nabídky aplikací: {error}",
+    "settings_group_appimage":                 "AppImage",
+    "settings_appimage_status_integrated":     "Nainstalováno ve vaší nabídce aplikací.",
+    "settings_appimage_status_not_integrated": "Zatím nenainstalováno ve vaší nabídce aplikací.",
+    "settings_appimage_install_button":        "Nainstalovat do nabídky aplikací",
+    "settings_appimage_reinstall_button":      "Přeinstalovat do nabídky aplikací",
+    "settings_appimage_hint":                  "Zkopíruje tuto AppImage do ~/.local/bin a přidá zástupce do nabídky aplikací, aby ji budoucí aktualizace mohly nahradit na místě.",
 }

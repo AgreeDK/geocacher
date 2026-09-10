@@ -1165,4 +1165,21 @@ STRINGS: dict[str, str] = {
     "move_caches_done":                        "{count} cache(s) succesvol verplaatst.",
     "copy_caches_done":                        "{count} cache(s) succesvol gekopieerd.",
     "move_caches_error":                       "Er is een fout opgetreden bij het verplaatsen:\n{message}",
+
+    # ── AppImage selv-integration (Linux, issue #835) ──────────────────────────
+    "appimage_integrate_title":                "OpenSAK installeren in uw toepassingsmenu?",
+    "appimage_integrate_msg":                  "OpenSAK kan zichzelf installeren in uw toepassingsmenu, zodat u dit bestand de volgende keer niet handmatig hoeft te zoeken en te openen.",
+    "appimage_integrate_btn_yes":              "Installeren",
+    "appimage_integrate_btn_no":               "Nee, bedankt",
+    "appimage_integrate_btn_dont_ask":         "Niet meer vragen",
+    "appimage_integrate_success_title":        "Geïnstalleerd",
+    "appimage_integrate_success_msg":          "OpenSAK is toegevoegd aan uw toepassingsmenu.",
+    "appimage_integrate_error_title":          "Installatie mislukt",
+    "appimage_integrate_error_msg":            "OpenSAK kon niet worden geïnstalleerd in uw toepassingsmenu: {error}",
+    "settings_group_appimage":                 "AppImage",
+    "settings_appimage_status_integrated":     "Geïnstalleerd in uw toepassingsmenu.",
+    "settings_appimage_status_not_integrated": "Nog niet geïnstalleerd in uw toepassingsmenu.",
+    "settings_appimage_install_button":        "Installeren in toepassingsmenu",
+    "settings_appimage_reinstall_button":      "Opnieuw installeren in toepassingsmenu",
+    "settings_appimage_hint":                  "Kopieert deze AppImage naar ~/.local/bin en voegt een snelkoppeling toe aan uw toepassingsmenu, zodat toekomstige updates deze ter plaatse kunnen vervangen.",
 }

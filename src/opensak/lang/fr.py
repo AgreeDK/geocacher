@@ -1168,4 +1168,21 @@ STRINGS: dict[str, str] = {
     "move_caches_done":                        "{count} cache(s) déplacée(s) avec succès.",
     "copy_caches_done":                        "{count} cache(s) copiée(s) avec succès.",
     "move_caches_error":                       "Une erreur est survenue lors du déplacement :\n{message}",
+
+    # ── AppImage selv-integration (Linux, issue #835) ──────────────────────────
+    "appimage_integrate_title":                "Installer OpenSAK dans votre menu des applications ?",
+    "appimage_integrate_msg":                  "OpenSAK peut s'installer lui-même dans votre menu des applications, afin que vous n'ayez plus besoin de retrouver et d'ouvrir ce fichier manuellement.",
+    "appimage_integrate_btn_yes":              "Installer",
+    "appimage_integrate_btn_no":               "Non merci",
+    "appimage_integrate_btn_dont_ask":         "Ne plus demander",
+    "appimage_integrate_success_title":        "Installé",
+    "appimage_integrate_success_msg":          "OpenSAK a été ajouté à votre menu des applications.",
+    "appimage_integrate_error_title":          "Échec de l'installation",
+    "appimage_integrate_error_msg":            "OpenSAK n'a pas pu être installé dans votre menu des applications : {error}",
+    "settings_group_appimage":                 "AppImage",
+    "settings_appimage_status_integrated":     "Installé dans votre menu des applications.",
+    "settings_appimage_status_not_integrated": "Pas encore installé dans votre menu des applications.",
+    "settings_appimage_install_button":        "Installer dans le menu des applications",
+    "settings_appimage_reinstall_button":      "Réinstaller dans le menu des applications",
+    "settings_appimage_hint":                  "Copie cette AppImage vers ~/.local/bin et ajoute un raccourci à votre menu des applications, afin que les futures mises à jour puissent la remplacer sur place.",
 }

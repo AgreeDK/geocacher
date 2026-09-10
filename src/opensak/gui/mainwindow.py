@@ -33,6 +33,7 @@ from opensak.gui.theme import hint_style
 from opensak.utils.types import GcCode
 from opensak.utils.utils import normalize_geocacher_name
 from opensak.updater import UpdateCheckWorker, RELEASES_PAGE
+from opensak.gui.dialogs.appimage_integration_dialog import maybe_prompt_for_integration
 
 if TYPE_CHECKING:
     from opensak.gui.dialogs.trip_dialog import TripPlannerDialog
@@ -237,6 +238,9 @@ class MainWindow(QMainWindow):
         self.setAcceptDrops(True)
         # Load caches after UI is ready
         QTimer.singleShot(500, self._initial_load)
+        # AppImage: engangs-prompt om integration i programmenuen (issue
+        # #835). No-op på Windows/macOS/kildekørsel — se appimage.py.
+        QTimer.singleShot(1000, self._maybe_offer_appimage_integration)
         # Tjek for opdateringer i baggrunden (5 sek forsinkelse — GUI er klar)
         QTimer.singleShot(5000, self._check_update_background)
         QTimer.singleShot(7000, self._check_setup_complete)
@@ -3005,6 +3009,12 @@ class MainWindow(QMainWindow):
             )
             return
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(log_path)))
+
+    # ── AppImage selv-integration (#835) ─────────────────────────────────────
+
+    def _maybe_offer_appimage_integration(self) -> None:
+        """Kald ved opstart — viser AppImage-integrationsprompt hvis relevant."""
+        maybe_prompt_for_integration(self)
 
     # ── Opdateringsstjek ───────────────────────────────────────────────────────
 

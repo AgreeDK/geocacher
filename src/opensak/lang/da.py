@@ -1167,4 +1167,21 @@ STRINGS: dict[str, str] = {
     "move_caches_done":                        "{count} cache(s) flyttet.",
     "copy_caches_done":                        "{count} cache(s) kopieret.",
     "move_caches_error":                       "Der opstod en fejl under flytning af caches:\n{message}",
+
+    # ── AppImage selv-integration (Linux, issue #835) ──────────────────────────
+    "appimage_integrate_title":                "Installer OpenSAK i din programmenu?",
+    "appimage_integrate_msg":                  "OpenSAK kan installere sig selv i din programmenu, så du ikke behøver finde og åbne denne fil manuelt næste gang.",
+    "appimage_integrate_btn_yes":              "Installer",
+    "appimage_integrate_btn_no":               "Nej tak",
+    "appimage_integrate_btn_dont_ask":         "Spørg ikke igen",
+    "appimage_integrate_success_title":        "Installeret",
+    "appimage_integrate_success_msg":          "OpenSAK er blevet tilføjet til din programmenu.",
+    "appimage_integrate_error_title":          "Installation mislykkedes",
+    "appimage_integrate_error_msg":            "OpenSAK kunne ikke installeres i din programmenu: {error}",
+    "settings_group_appimage":                 "AppImage",
+    "settings_appimage_status_integrated":     "Installeret i din programmenu.",
+    "settings_appimage_status_not_integrated": "Endnu ikke installeret i din programmenu.",
+    "settings_appimage_install_button":        "Installer i programmenu",
+    "settings_appimage_reinstall_button":      "Geninstaller i programmenu",
+    "settings_appimage_hint":                  "Kopierer denne AppImage til ~/.local/bin og tilføjer en genvej til din programmenu, så fremtidige opdateringer kan erstatte den på plads.",
 }

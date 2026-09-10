@@ -1167,4 +1167,21 @@ STRINGS: dict[str, str] = {
     "move_caches_done":                        "{count} Cache(s) erfolgreich verschoben.",
     "copy_caches_done":                        "{count} Cache(s) erfolgreich kopiert.",
     "move_caches_error":                       "Beim Verschieben der Caches ist ein Fehler aufgetreten:\n{message}",
+
+    # ── AppImage selv-integration (Linux, issue #835) ──────────────────────────
+    "appimage_integrate_title":                "OpenSAK in Ihrem Anwendungsmenü installieren?",
+    "appimage_integrate_msg":                  "OpenSAK kann sich selbst in Ihrem Anwendungsmenü installieren, sodass Sie diese Datei künftig nicht mehr manuell suchen und öffnen müssen.",
+    "appimage_integrate_btn_yes":              "Installieren",
+    "appimage_integrate_btn_no":               "Nein danke",
+    "appimage_integrate_btn_dont_ask":         "Nicht mehr fragen",
+    "appimage_integrate_success_title":        "Installiert",
+    "appimage_integrate_success_msg":          "OpenSAK wurde zu Ihrem Anwendungsmenü hinzugefügt.",
+    "appimage_integrate_error_title":          "Installation fehlgeschlagen",
+    "appimage_integrate_error_msg":            "OpenSAK konnte nicht in Ihrem Anwendungsmenü installiert werden: {error}",
+    "settings_group_appimage":                 "AppImage",
+    "settings_appimage_status_integrated":     "Im Anwendungsmenü installiert.",
+    "settings_appimage_status_not_integrated": "Noch nicht im Anwendungsmenü installiert.",
+    "settings_appimage_install_button":        "Im Anwendungsmenü installieren",
+    "settings_appimage_reinstall_button":      "Im Anwendungsmenü neu installieren",
+    "settings_appimage_hint":                  "Kopiert dieses AppImage nach ~/.local/bin und fügt eine Verknüpfung zu Ihrem Anwendungsmenü hinzu, damit künftige Updates es an Ort und Stelle ersetzen können.",
 }
