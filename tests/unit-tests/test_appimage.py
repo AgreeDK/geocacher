@@ -1,6 +1,15 @@
 # tests/unit-tests/test_appimage.py — Linux AppImage-detektion og
 # selv-integration (issue #835, Step A i epic #824).
 #
+# POSIX-only (samme mønster som test_msix.py/test_settings_store.py's
+# `posix_only`-markør): AppImage-selv-integration er i sin natur en
+# Linux/POSIX-only feature. os.chmod()'s eksekverbarhedsbits (S_IXUSR
+# m.fl.) har ingen meningsfuld betegnelse på Windows — kaldet fejler ikke,
+# men st_mode afspejler dem aldrig som forventet — så at lade disse tests
+# køre på en Windows CI-runner giver falske fejl, ikke reel dækning.
+# (Opdaget: Windows CI-kørsel af #835, 10. sep 2026 —
+# test_copies_file_and_sets_executable_bit fejlede netop på dette.)
+#
 # Isolation: den autouse _isolated_app_paths-fixture i tests/conftest.py
 # (issue #829) patcher Path.home() globalt til en tmp-mappe og nulstiller
 # settings_store-singletonen før hver test, så disse tests aldrig rører
@@ -17,6 +26,9 @@ import pytest
 
 from opensak import appimage
 from opensak.settings_store import get_store
+
+posix_only = pytest.mark.skipif(os.name == "nt", reason="AppImage is a POSIX-only concept")
+pytestmark = posix_only
 
 
 @pytest.fixture(autouse=True)
