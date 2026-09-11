@@ -253,6 +253,14 @@ class AppSettings:
     def pq_email_username(self, value: str) -> None:
         get_store().set("pq_email.username", value.strip())
 
+    @property
+    def pq_email_delete_after_import(self) -> bool:
+        return bool(get_store().get("pq_email.delete_after_import", False))
+
+    @pq_email_delete_after_import.setter
+    def pq_email_delete_after_import(self, value: bool) -> None:
+        get_store().set("pq_email.delete_after_import", bool(value))
+
     # ── Theme / appearance ────────────────────────────────────────────────────
 
     @property

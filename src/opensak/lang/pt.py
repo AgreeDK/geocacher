@@ -1226,4 +1226,22 @@ STRINGS: dict[str, str] = {
     "pq_email_test_error_other":        "✗ Falha na ligação: {detail}",
     "pq_email_missing_fields":          "Preencha primeiro o servidor e o nome de utilizador.",
     "pq_email_missing_password":        "Introduza uma palavra-passe para testar, ou guarde uma primeiro.",
+
+    # ── Diálogo Verificar e-mail PQ (issue #443, session 2) ────────────────────
+    "action_pq_email_check":            "Verificar e-mail PQ…",
+    "pq_check_dialog_title":            "Verificar e-mail PQ",
+    "pq_check_intro":                   "Verifique a sua caixa de correio configurada em busca de anexos zip de Pocket Query e importe-os para a base de dados correspondente.",
+    "pq_check_delete_cb":               "Apagar o e-mail após uma importação bem-sucedida",
+    "pq_check_btn":                     "Verificar agora",
+    "pq_check_open_settings_btn":       "Configurar conta de e-mail…",
+    "pq_check_not_configured":          "Ainda não está configurada nenhuma conta de e-mail. Clique em \"Configurar conta de e-mail…\" para adicionar uma em Definições → PQ Email.",
+    "pq_check_no_password":             "Ainda não há palavra-passe guardada para esta conta. Abra Definições → PQ Email e use \"Testar ligação\" para guardar uma.",
+    "pq_check_checking":                "A verificar a caixa de correio em busca de e-mails de Pocket Query…",
+    "pq_check_no_new_mail":             "Não foram encontrados anexos zip de Pocket Query.",
+    "pq_check_error_auth":              "✗ Não foi possível iniciar sessão na caixa de correio: {detail}",
+    "pq_check_error_network":           "✗ Não foi possível contactar o servidor de correio: {detail}",
+    "pq_check_error_other":             "✗ Falha ao verificar a caixa de correio: {detail}",
+    "pq_check_entry_success":           "✓ \"{name}\" — {count} cache(s) importada(s) para \"{db}\"",
+    "pq_check_entry_error":             "✗ \"{name}\" — falha na importação: {error}",
+    "pq_check_done":                    "Concluído.",
 }

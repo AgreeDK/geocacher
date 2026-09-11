@@ -1224,4 +1224,22 @@ STRINGS: dict[str, str] = {
     "pq_email_test_error_other":        "✗ Connection failed: {detail}",
     "pq_email_missing_fields":          "Please fill in both the server and username first.",
     "pq_email_missing_password":        "Please enter a password to test, or save one first.",
+
+    # ── Check for PQ Email dialog (issue #443, session 2 — generic zip scan) ──
+    "action_pq_email_check":            "Check for PQ Email…",
+    "pq_check_dialog_title":            "Check for PQ Email",
+    "pq_check_intro":                   "Check your configured mailbox for Pocket Query zip attachments and import them into the matching database.",
+    "pq_check_delete_cb":               "Delete the e-mail after a successful import",
+    "pq_check_btn":                     "Check now",
+    "pq_check_open_settings_btn":       "Set up e-mail account…",
+    "pq_check_not_configured":          "No e-mail account is set up yet. Click \"Set up e-mail account…\" to add one in Settings → PQ Email.",
+    "pq_check_no_password":             "No password is saved for this account yet. Open Settings → PQ Email and use \"Test connection\" to save one.",
+    "pq_check_checking":                "Checking the mailbox for Pocket Query e-mails…",
+    "pq_check_no_new_mail":             "No Pocket Query zip attachments were found.",
+    "pq_check_error_auth":              "✗ Could not log in to the mailbox: {detail}",
+    "pq_check_error_network":           "✗ Could not reach the mail server: {detail}",
+    "pq_check_error_other":             "✗ Checking the mailbox failed: {detail}",
+    "pq_check_entry_success":           "✓ \"{name}\" — imported {count} cache(s) into \"{db}\"",
+    "pq_check_entry_error":             "✗ \"{name}\" — import failed: {error}",
+    "pq_check_done":                    "Done.",
 }

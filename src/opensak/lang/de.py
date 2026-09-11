@@ -1225,4 +1225,22 @@ STRINGS: dict[str, str] = {
     "pq_email_test_error_other":        "✗ Verbindung fehlgeschlagen: {detail}",
     "pq_email_missing_fields":          "Bitte zuerst Server und Benutzernamen ausfüllen.",
     "pq_email_missing_password":        "Bitte ein Passwort zum Testen eingeben oder zuerst eines speichern.",
+
+    # ── Dialog „Nach PQ-E-Mail suchen" (issue #443, session 2) ─────────────────
+    "action_pq_email_check":            "Nach PQ-E-Mail suchen…",
+    "pq_check_dialog_title":            "Nach PQ-E-Mail suchen",
+    "pq_check_intro":                   "Durchsuche dein eingerichtetes Postfach nach Pocket-Query-Zip-Anhängen und importiere sie in die passende Datenbank.",
+    "pq_check_delete_cb":               "E-Mail nach erfolgreichem Import löschen",
+    "pq_check_btn":                     "Jetzt prüfen",
+    "pq_check_open_settings_btn":       "E-Mail-Konto einrichten…",
+    "pq_check_not_configured":          "Es ist noch kein E-Mail-Konto eingerichtet. Klicke auf „E-Mail-Konto einrichten…“, um eines unter Einstellungen → PQ Email hinzuzufügen.",
+    "pq_check_no_password":             "Für dieses Konto ist noch kein Passwort gespeichert. Öffne Einstellungen → PQ Email und nutze „Verbindung testen“, um eines zu speichern.",
+    "pq_check_checking":                "Postfach wird nach Pocket-Query-E-Mails durchsucht…",
+    "pq_check_no_new_mail":             "Es wurden keine Pocket-Query-Zip-Anhänge gefunden.",
+    "pq_check_error_auth":              "✗ Anmeldung am Postfach fehlgeschlagen: {detail}",
+    "pq_check_error_network":           "✗ Mailserver konnte nicht erreicht werden: {detail}",
+    "pq_check_error_other":             "✗ Prüfung des Postfachs fehlgeschlagen: {detail}",
+    "pq_check_entry_success":           "✓ „{name}“ — {count} Cache(s) importiert nach „{db}“",
+    "pq_check_entry_error":             "✗ „{name}“ — Import fehlgeschlagen: {error}",
+    "pq_check_done":                    "Fertig.",
 }

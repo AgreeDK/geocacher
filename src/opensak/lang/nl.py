@@ -1223,4 +1223,22 @@ STRINGS: dict[str, str] = {
     "pq_email_test_error_other":        "✗ Verbinding mislukt: {detail}",
     "pq_email_missing_fields":          "Vul eerst zowel de server als de gebruikersnaam in.",
     "pq_email_missing_password":        "Voer een wachtwoord in om te testen, of sla er eerst één op.",
+
+    # ── Dialoog PQ Email controleren (issue #443, session 2) ───────────────────
+    "action_pq_email_check":            "PQ Email controleren…",
+    "pq_check_dialog_title":            "PQ Email controleren",
+    "pq_check_intro":                   "Controleer je ingestelde mailbox op Pocket Query-zipbijlagen en importeer ze in de bijpassende database.",
+    "pq_check_delete_cb":               "E-mail verwijderen na een geslaagde import",
+    "pq_check_btn":                     "Nu controleren",
+    "pq_check_open_settings_btn":       "E-mailaccount instellen…",
+    "pq_check_not_configured":          "Er is nog geen e-mailaccount ingesteld. Klik op \"E-mailaccount instellen…\" om er een toe te voegen onder Instellingen → PQ Email.",
+    "pq_check_no_password":             "Er is nog geen wachtwoord opgeslagen voor dit account. Open Instellingen → PQ Email en gebruik \"Verbinding testen\" om er een op te slaan.",
+    "pq_check_checking":                "Mailbox wordt gecontroleerd op Pocket Query-e-mails…",
+    "pq_check_no_new_mail":             "Er zijn geen Pocket Query-zipbijlagen gevonden.",
+    "pq_check_error_auth":              "✗ Kon niet inloggen op de mailbox: {detail}",
+    "pq_check_error_network":           "✗ Kon de mailserver niet bereiken: {detail}",
+    "pq_check_error_other":             "✗ Controleren van de mailbox mislukt: {detail}",
+    "pq_check_entry_success":           "✓ \"{name}\" — {count} cache(s) geïmporteerd in \"{db}\"",
+    "pq_check_entry_error":             "✗ \"{name}\" — import mislukt: {error}",
+    "pq_check_done":                    "Klaar.",
 }

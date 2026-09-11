@@ -1226,4 +1226,22 @@ STRINGS: dict[str, str] = {
     "pq_email_test_error_other":        "✗ La connexion a échoué : {detail}",
     "pq_email_missing_fields":          "Veuillez d'abord renseigner le serveur et le nom d'utilisateur.",
     "pq_email_missing_password":        "Veuillez saisir un mot de passe à tester, ou en enregistrer un d'abord.",
+
+    # ── Boîte de dialogue Vérifier les e-mails PQ (issue #443, session 2) ─────
+    "action_pq_email_check":            "Vérifier les e-mails PQ…",
+    "pq_check_dialog_title":            "Vérifier les e-mails PQ",
+    "pq_check_intro":                   "Vérifiez votre boîte mail configurée pour des pièces jointes zip de Pocket Query et importez-les dans la base de données correspondante.",
+    "pq_check_delete_cb":               "Supprimer l'e-mail après un import réussi",
+    "pq_check_btn":                     "Vérifier maintenant",
+    "pq_check_open_settings_btn":       "Configurer le compte e-mail…",
+    "pq_check_not_configured":          "Aucun compte e-mail n'est encore configuré. Cliquez sur \"Configurer le compte e-mail…\" pour en ajouter un dans Paramètres → Email PQ.",
+    "pq_check_no_password":             "Aucun mot de passe n'est encore enregistré pour ce compte. Ouvrez Paramètres → Email PQ et utilisez \"Tester la connexion\" pour en enregistrer un.",
+    "pq_check_checking":                "Vérification de la boîte mail pour les e-mails Pocket Query…",
+    "pq_check_no_new_mail":             "Aucune pièce jointe zip de Pocket Query n'a été trouvée.",
+    "pq_check_error_auth":              "✗ Impossible de se connecter à la boîte mail : {detail}",
+    "pq_check_error_network":           "✗ Impossible de joindre le serveur de messagerie : {detail}",
+    "pq_check_error_other":             "✗ La vérification de la boîte mail a échoué : {detail}",
+    "pq_check_entry_success":           "✓ \"{name}\" — {count} cache(s) importée(s) dans \"{db}\"",
+    "pq_check_entry_error":             "✗ \"{name}\" — échec de l'import : {error}",
+    "pq_check_done":                    "Terminé.",
 }

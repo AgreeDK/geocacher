@@ -1225,4 +1225,22 @@ STRINGS: dict[str, str] = {
     "pq_email_test_error_other":        "✗ Anslutningen misslyckades: {detail}",
     "pq_email_missing_fields":          "Fyll först i både servern och användarnamnet.",
     "pq_email_missing_password":        "Ange ett lösenord att testa, eller spara ett först.",
+
+    # ── Dialogen Kontrollera PQ Email (issue #443, session 2) ──────────────────
+    "action_pq_email_check":            "Kontrollera PQ Email…",
+    "pq_check_dialog_title":            "Kontrollera PQ Email",
+    "pq_check_intro":                   "Kontrollera din inställda brevlåda efter Pocket Query-zipbilagor och importera dem till rätt databas.",
+    "pq_check_delete_cb":               "Ta bort e-posten efter en lyckad import",
+    "pq_check_btn":                     "Kontrollera nu",
+    "pq_check_open_settings_btn":       "Konfigurera e-postkonto…",
+    "pq_check_not_configured":          "Det finns inget e-postkonto konfigurerat ännu. Klicka på \"Konfigurera e-postkonto…\" för att lägga till ett under Inställningar → PQ Email.",
+    "pq_check_no_password":             "Det finns inget sparat lösenord för det här kontot ännu. Öppna Inställningar → PQ Email och använd \"Testa anslutning\" för att spara ett.",
+    "pq_check_checking":                "Kontrollerar brevlådan efter Pocket Query-e-post…",
+    "pq_check_no_new_mail":             "Inga Pocket Query-zipbilagor hittades.",
+    "pq_check_error_auth":              "✗ Kunde inte logga in på brevlådan: {detail}",
+    "pq_check_error_network":           "✗ Kunde inte nå e-postservern: {detail}",
+    "pq_check_error_other":             "✗ Kontroll av brevlådan misslyckades: {detail}",
+    "pq_check_entry_success":           "✓ \"{name}\" — importerade {count} cache(r) till \"{db}\"",
+    "pq_check_entry_error":             "✗ \"{name}\" — importen misslyckades: {error}",
+    "pq_check_done":                    "Klart.",
 }

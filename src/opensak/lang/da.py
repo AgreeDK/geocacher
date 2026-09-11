@@ -1225,4 +1225,22 @@ STRINGS: dict[str, str] = {
     "pq_email_test_error_other":        "✗ Forbindelsen mislykkedes: {detail}",
     "pq_email_missing_fields":          "Udfyld venligst både server og brugernavn først.",
     "pq_email_missing_password":        "Angiv venligst et kodeord for at teste, eller gem et først.",
+
+    # ── Tjek for PQ-mail-dialog (issue #443, session 2 — generisk zip-scan) ───
+    "action_pq_email_check":            "Tjek for PQ Email…",
+    "pq_check_dialog_title":            "Tjek for PQ Email",
+    "pq_check_intro":                   "Tjek den opsatte mailkonto for Pocket Query-zip-vedhæftninger og importér dem til den matchende database.",
+    "pq_check_delete_cb":               "Slet mailen efter en vellykket import",
+    "pq_check_btn":                     "Tjek nu",
+    "pq_check_open_settings_btn":       "Opsæt e-mail-konto…",
+    "pq_check_not_configured":          "Der er ikke sat en e-mail-konto op endnu. Klik på \"Opsæt e-mail-konto…\" for at tilføje en under Indstillinger → PQ Email.",
+    "pq_check_no_password":             "Der er ikke gemt et kodeord for denne konto endnu. Åbn Indstillinger → PQ Email og brug \"Test forbindelse\" for at gemme et.",
+    "pq_check_checking":                "Tjekker mailboksen for Pocket Query-mails…",
+    "pq_check_no_new_mail":             "Der blev ikke fundet nogen Pocket Query-zip-vedhæftninger.",
+    "pq_check_error_auth":              "✗ Kunne ikke logge ind på mailboksen: {detail}",
+    "pq_check_error_network":           "✗ Kunne ikke nå mailserveren: {detail}",
+    "pq_check_error_other":             "✗ Tjek af mailboksen mislykkedes: {detail}",
+    "pq_check_entry_success":           "✓ \"{name}\" — importerede {count} cache(s) til \"{db}\"",
+    "pq_check_entry_error":             "✗ \"{name}\" — import mislykkedes: {error}",
+    "pq_check_done":                    "Færdig.",
 }

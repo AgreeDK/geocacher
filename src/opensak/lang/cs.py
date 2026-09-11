@@ -1221,4 +1221,22 @@ STRINGS: dict[str, str] = {
     "pq_email_test_error_other":        "✗ Připojení selhalo: {detail}",
     "pq_email_missing_fields":          "Nejprve vyplňte server i uživatelské jméno.",
     "pq_email_missing_password":        "Zadejte heslo k otestování, nebo ho nejprve uložte.",
+
+    # ── Dialog Zkontrolovat PQ e-mail (issue #443, session 2) ──────────────────
+    "action_pq_email_check":            "Zkontrolovat PQ e-mail…",
+    "pq_check_dialog_title":            "Zkontrolovat PQ e-mail",
+    "pq_check_intro":                   "Zkontrolujte nastavenou poštovní schránku ohledně zip příloh s Pocket Query a importujte je do odpovídající databáze.",
+    "pq_check_delete_cb":               "Smazat e-mail po úspěšném importu",
+    "pq_check_btn":                     "Zkontrolovat nyní",
+    "pq_check_open_settings_btn":       "Nastavit e-mailový účet…",
+    "pq_check_not_configured":          "Zatím není nastaven žádný e-mailový účet. Klikněte na \"Nastavit e-mailový účet…\" a přidejte ho v Nastavení → PQ Email.",
+    "pq_check_no_password":             "Pro tento účet zatím není uloženo žádné heslo. Otevřete Nastavení → PQ Email a použijte \"Otestovat připojení\" k jeho uložení.",
+    "pq_check_checking":                "Kontroluje se schránka ohledně e-mailů s Pocket Query…",
+    "pq_check_no_new_mail":             "Nebyly nalezeny žádné zip přílohy s Pocket Query.",
+    "pq_check_error_auth":              "✗ Nepodařilo se přihlásit ke schránce: {detail}",
+    "pq_check_error_network":           "✗ Poštovní server se nepodařilo kontaktovat: {detail}",
+    "pq_check_error_other":             "✗ Kontrola schránky selhala: {detail}",
+    "pq_check_entry_success":           "✓ \"{name}\" — importováno {count} cache(í) do \"{db}\"",
+    "pq_check_entry_error":             "✗ \"{name}\" — import selhal: {error}",
+    "pq_check_done":                    "Hotovo.",
 }
