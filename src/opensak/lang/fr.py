@@ -1207,4 +1207,23 @@ STRINGS: dict[str, str] = {
     "appimage_uninstall_error_msg":           "OpenSAK n'a pas pu être complètement désinstallé : {error}",
     "appimage_uninstall_done_title":          "Désinstallé",
     "appimage_uninstall_done_msg":            "OpenSAK a été supprimé. L'application va maintenant se fermer.",
+
+    # ── Onglet Email PQ (issue #443, session 1 — compte IMAP + test) ──────────
+    "settings_tab_pq_email":            "Email PQ",
+    "pq_email_intro":                   "Connectez une boîte mail qui reçoit les e-mails de Pocket Query pour qu'OpenSAK puisse ensuite les récupérer et les importer automatiquement. Seule la connexion IMAP standard est prise en charge ici — Gmail et Outlook.com/Live.com nécessitent OAuth2, suivi séparément sur GitHub.",
+    "pq_email_group_account":           "Compte de messagerie",
+    "pq_email_host_label":              "Serveur (hôte IMAP)",
+    "pq_email_port_label":              "Port",
+    "pq_email_ssl_label":               "Utiliser SSL/TLS",
+    "pq_email_username_label":          "Nom d'utilisateur",
+    "pq_email_password_label":          "Mot de passe",
+    "pq_email_password_saved_hint":     "Un mot de passe est déjà enregistré pour ce compte. Laissez vide pour le conserver.",
+    "pq_email_test_btn":                "Tester la connexion",
+    "pq_email_testing":                 "Test de la connexion en cours…",
+    "pq_email_test_success":            "✓ Connexion réussie.",
+    "pq_email_test_error_auth":         "✗ Échec de la connexion : {detail}",
+    "pq_email_test_error_network":      "✗ Impossible de joindre le serveur : {detail}",
+    "pq_email_test_error_other":        "✗ La connexion a échoué : {detail}",
+    "pq_email_missing_fields":          "Veuillez d'abord renseigner le serveur et le nom d'utilisateur.",
+    "pq_email_missing_password":        "Veuillez saisir un mot de passe à tester, ou en enregistrer un d'abord.",
 }

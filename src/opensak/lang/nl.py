@@ -1204,4 +1204,23 @@ STRINGS: dict[str, str] = {
     "appimage_uninstall_error_msg":           "OpenSAK kon niet volledig worden verwijderd: {error}",
     "appimage_uninstall_done_title":          "Verwijderd",
     "appimage_uninstall_done_msg":            "OpenSAK is verwijderd. De toepassing wordt nu afgesloten.",
+
+    # ── Tabblad PQ Email (issue #443, session 1 — IMAP-account + test) ────────
+    "settings_tab_pq_email":            "PQ Email",
+    "pq_email_intro":                   "Koppel een mailbox die Pocket Query-e-mails ontvangt, zodat OpenSAK deze later automatisch kan ophalen en importeren. Hier wordt alleen gewone IMAP-login ondersteund — Gmail en Outlook.com/Live.com vereisen OAuth2, apart bijgehouden op GitHub.",
+    "pq_email_group_account":           "Mailaccount",
+    "pq_email_host_label":              "Server (IMAP-host)",
+    "pq_email_port_label":              "Poort",
+    "pq_email_ssl_label":               "SSL/TLS gebruiken",
+    "pq_email_username_label":          "Gebruikersnaam",
+    "pq_email_password_label":          "Wachtwoord",
+    "pq_email_password_saved_hint":     "Er is al een wachtwoord opgeslagen voor dit account. Laat leeg om het te behouden.",
+    "pq_email_test_btn":                "Verbinding testen",
+    "pq_email_testing":                 "Verbinding wordt getest…",
+    "pq_email_test_success":            "✓ Verbinding geslaagd.",
+    "pq_email_test_error_auth":         "✗ Aanmelden mislukt: {detail}",
+    "pq_email_test_error_network":      "✗ Kon de server niet bereiken: {detail}",
+    "pq_email_test_error_other":        "✗ Verbinding mislukt: {detail}",
+    "pq_email_missing_fields":          "Vul eerst zowel de server als de gebruikersnaam in.",
+    "pq_email_missing_password":        "Voer een wachtwoord in om te testen, of sla er eerst één op.",
 }

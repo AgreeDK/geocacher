@@ -1206,4 +1206,23 @@ STRINGS: dict[str, str] = {
     "appimage_uninstall_error_msg":           "OpenSAK kunde inte avinstalleras helt: {error}",
     "appimage_uninstall_done_title":          "Avinstallerad",
     "appimage_uninstall_done_msg":            "OpenSAK har tagits bort. Programmet stängs nu.",
+
+    # ── Fliken PQ Email (issue #443, session 1 — IMAP-konto + test) ───────────
+    "settings_tab_pq_email":            "PQ Email",
+    "pq_email_intro":                   "Anslut en brevlåda som tar emot Pocket Query-e-post så att OpenSAK senare kan hämta och importera dem automatiskt. Endast vanlig IMAP-inloggning stöds här — Gmail och Outlook.com/Live.com kräver OAuth2, som följs upp separat på GitHub.",
+    "pq_email_group_account":           "E-postkonto",
+    "pq_email_host_label":              "Server (IMAP-värd)",
+    "pq_email_port_label":              "Port",
+    "pq_email_ssl_label":               "Använd SSL/TLS",
+    "pq_email_username_label":          "Användarnamn",
+    "pq_email_password_label":          "Lösenord",
+    "pq_email_password_saved_hint":     "Ett lösenord är redan sparat för det här kontot. Lämna tomt för att behålla det.",
+    "pq_email_test_btn":                "Testa anslutning",
+    "pq_email_testing":                 "Testar anslutningen…",
+    "pq_email_test_success":            "✓ Anslutningen lyckades.",
+    "pq_email_test_error_auth":         "✗ Inloggningen misslyckades: {detail}",
+    "pq_email_test_error_network":      "✗ Kunde inte nå servern: {detail}",
+    "pq_email_test_error_other":        "✗ Anslutningen misslyckades: {detail}",
+    "pq_email_missing_fields":          "Fyll först i både servern och användarnamnet.",
+    "pq_email_missing_password":        "Ange ett lösenord att testa, eller spara ett först.",
 }

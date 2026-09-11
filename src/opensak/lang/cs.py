@@ -1202,4 +1202,23 @@ STRINGS: dict[str, str] = {
     "appimage_uninstall_error_msg":           "OpenSAK se nepodařilo zcela odinstalovat: {error}",
     "appimage_uninstall_done_title":          "Odinstalováno",
     "appimage_uninstall_done_msg":            "OpenSAK byl odebrán. Aplikace se nyní zavře.",
+
+    # ── Záložka PQ Email (issue #443, session 1 — účet IMAP + test) ───────────
+    "settings_tab_pq_email":            "PQ Email",
+    "pq_email_intro":                   "Připojte poštovní schránku, která přijímá e-maily s Pocket Query, aby je OpenSAK mohl později automaticky stahovat a importovat. Zde je podporováno pouze běžné přihlášení přes IMAP — Gmail a Outlook.com/Live.com vyžadují OAuth2, sledované samostatně na GitHubu.",
+    "pq_email_group_account":           "Poštovní účet",
+    "pq_email_host_label":              "Server (IMAP hostitel)",
+    "pq_email_port_label":              "Port",
+    "pq_email_ssl_label":               "Použít SSL/TLS",
+    "pq_email_username_label":          "Uživatelské jméno",
+    "pq_email_password_label":          "Heslo",
+    "pq_email_password_saved_hint":     "Pro tento účet je již uloženo heslo. Ponechte prázdné, chcete-li ho zachovat.",
+    "pq_email_test_btn":                "Otestovat připojení",
+    "pq_email_testing":                 "Testuje se připojení…",
+    "pq_email_test_success":            "✓ Připojení bylo úspěšné.",
+    "pq_email_test_error_auth":         "✗ Přihlášení selhalo: {detail}",
+    "pq_email_test_error_network":      "✗ Server se nepodařilo kontaktovat: {detail}",
+    "pq_email_test_error_other":        "✗ Připojení selhalo: {detail}",
+    "pq_email_missing_fields":          "Nejprve vyplňte server i uživatelské jméno.",
+    "pq_email_missing_password":        "Zadejte heslo k otestování, nebo ho nejprve uložte.",
 }

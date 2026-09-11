@@ -1207,4 +1207,23 @@ STRINGS: dict[str, str] = {
     "appimage_uninstall_error_msg":           "Não foi possível desinstalar completamente o OpenSAK: {error}",
     "appimage_uninstall_done_title":          "Desinstalado",
     "appimage_uninstall_done_msg":            "O OpenSAK foi removido. A aplicação irá agora fechar.",
+
+    # ── Separador PQ Email (issue #443, session 1 — conta IMAP + teste) ───────
+    "settings_tab_pq_email":            "PQ Email",
+    "pq_email_intro":                   "Ligue uma caixa de correio que recebe e-mails de Pocket Query para que o OpenSAK possa, mais tarde, obtê-los e importá-los automaticamente. Aqui só é suportado o login IMAP simples — Gmail e Outlook.com/Live.com exigem OAuth2, acompanhado separadamente no GitHub.",
+    "pq_email_group_account":           "Conta de e-mail",
+    "pq_email_host_label":              "Servidor (host IMAP)",
+    "pq_email_port_label":              "Porta",
+    "pq_email_ssl_label":               "Usar SSL/TLS",
+    "pq_email_username_label":          "Nome de utilizador",
+    "pq_email_password_label":          "Palavra-passe",
+    "pq_email_password_saved_hint":     "Já existe uma palavra-passe guardada para esta conta. Deixe em branco para a manter.",
+    "pq_email_test_btn":                "Testar ligação",
+    "pq_email_testing":                 "A testar a ligação…",
+    "pq_email_test_success":            "✓ Ligação bem-sucedida.",
+    "pq_email_test_error_auth":         "✗ Falha no login: {detail}",
+    "pq_email_test_error_network":      "✗ Não foi possível contactar o servidor: {detail}",
+    "pq_email_test_error_other":        "✗ Falha na ligação: {detail}",
+    "pq_email_missing_fields":          "Preencha primeiro o servidor e o nome de utilizador.",
+    "pq_email_missing_password":        "Introduza uma palavra-passe para testar, ou guarde uma primeiro.",
 }

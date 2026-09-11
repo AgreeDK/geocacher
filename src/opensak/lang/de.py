@@ -1206,4 +1206,23 @@ STRINGS: dict[str, str] = {
     "appimage_uninstall_error_msg":           "OpenSAK konnte nicht vollständig deinstalliert werden: {error}",
     "appimage_uninstall_done_title":          "Deinstalliert",
     "appimage_uninstall_done_msg":            "OpenSAK wurde entfernt. Die Anwendung wird nun geschlossen.",
+
+    # ── Reiter PQ Email (issue #443, session 1 — IMAP-Konto + Test) ───────────
+    "settings_tab_pq_email":            "PQ Email",
+    "pq_email_intro":                   "Verbinde ein Postfach, das Pocket-Query-E-Mails empfängt, damit OpenSAK sie später automatisch abrufen und importieren kann. Hier wird nur einfacher IMAP-Login unterstützt — Gmail und Outlook.com/Live.com benötigen OAuth2, das separat auf GitHub verfolgt wird.",
+    "pq_email_group_account":           "E-Mail-Konto",
+    "pq_email_host_label":              "Server (IMAP-Host)",
+    "pq_email_port_label":              "Port",
+    "pq_email_ssl_label":               "SSL/TLS verwenden",
+    "pq_email_username_label":          "Benutzername",
+    "pq_email_password_label":          "Passwort",
+    "pq_email_password_saved_hint":     "Für dieses Konto ist bereits ein Passwort gespeichert. Leer lassen, um es beizubehalten.",
+    "pq_email_test_btn":                "Verbindung testen",
+    "pq_email_testing":                 "Verbindung wird getestet…",
+    "pq_email_test_success":            "✓ Verbindung erfolgreich.",
+    "pq_email_test_error_auth":         "✗ Anmeldung fehlgeschlagen: {detail}",
+    "pq_email_test_error_network":      "✗ Server konnte nicht erreicht werden: {detail}",
+    "pq_email_test_error_other":        "✗ Verbindung fehlgeschlagen: {detail}",
+    "pq_email_missing_fields":          "Bitte zuerst Server und Benutzernamen ausfüllen.",
+    "pq_email_missing_password":        "Bitte ein Passwort zum Testen eingeben oder zuerst eines speichern.",
 }

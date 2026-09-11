@@ -18,6 +18,7 @@ dependencies = [
     "certifi>=2024.2.2",
     "shapely>=2.0",
     "pywin32>=306; platform_system == 'Windows'",
+    "keyring>=25.0",
 ]
 
 [project.optional-dependencies]
