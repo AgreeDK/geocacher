@@ -4,6 +4,43 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.19.0-beta.4] — 2026-09-11
+
+### Added
+
+- **Pocket Query e-mail retrieval (#443)** — OpenSAK can now check a
+  configured mailbox for Pocket Query zip attachments and import them
+  automatically, instead of requiring a manual download-and-import
+  every time. Aimed in particular at Danish (and likely other
+  countries') PQ-club/PQ-service setups, where a shared robot mails
+  out a rotating set of PQs that together cover a whole country.
+  - **Settings → PQ Email** — configure a plain IMAP mailbox (host,
+    port, SSL, username, password). The password is stored securely
+    in the OS keyring (Secret Service/KWallet on Linux, Credential
+    Manager on Windows, Keychain on macOS) — never in plaintext
+    config. A "Test connection" button verifies login separately from
+    saving, with distinct messages for a login failure versus a
+    network/server problem. Gmail and Outlook.com/Live.com are not
+    supported yet — both require OAuth2, tracked separately as #697
+    and #698.
+  - **File → "Check for PQ Email…"** — a manual, on-demand check of
+    the configured mailbox. Any e-mail with a `.zip` attachment is
+    treated as a candidate (no assumption about sender or subject —
+    Geocaching.com's own PQ-ready notification hasn't attached the
+    zip directly since around 2014, so this looks for the attachment
+    itself instead). Each zip is matched to a same-named database
+    where one exists, falling back to the currently active database
+    otherwise, and handed to the existing GPX/PQ-zip importer
+    unchanged. An opt-in checkbox deletes the e-mail after a
+    successful import; a failed import always leaves the e-mail in
+    place so it can be retried.
+  - Scheduled/background checking (repeating this automatically
+    without opening the dialog) is tracked separately as #445 and
+    intentionally not part of this first release — real-world
+    feedback on the manual flow first.
+
+---
+
 ## [1.19.0-beta.3] — 2026-09-10
 
 ### Added
